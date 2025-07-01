@@ -1,10 +1,10 @@
-// ========== login/index.js ==========
+// ========== pages/Service/Login/index.js ==========
 import React, { useState } from 'react';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth, AuthProvider } from '../../../context/AuthContext';
 import LoginForm from '../../../components/LoginForm';
 import RegisterForm from '../../../components/RegisterForm';
 
-const LoginPage = () => {
+const LoginPageContent = () => {
   const [isLogin, setIsLogin] = useState(true);
   const { isAuthenticated, loading } = useAuth();
 
@@ -37,6 +37,15 @@ const LoginPage = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// AuthProvider로 감싸서 export
+const LoginPage = () => {
+  return (
+    <AuthProvider>
+      <LoginPageContent />
+    </AuthProvider>
   );
 };
 
