@@ -3,14 +3,14 @@ const express  = require('express');
 const cors     = require('cors');
 const mongoose = require('mongoose');
 
-const authRoutes = require('./routes/authRoutes');
+const authRoutes = require('./routes/authRoutes'); //명세서
 
 const app  = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes); ///api 명세서
 
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser:    true,
