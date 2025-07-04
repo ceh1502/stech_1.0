@@ -1,6 +1,13 @@
 require('dotenv').config();
 const express  = require('express');
 const cors     = require('cors');
+app.use(cors({
+  origin: [
+    'http://localhost:3000',        // 로컬 프론트
+    'https://www.stechpro.ai'       // 실제 배포
+  ],
+  credentials: true
+}));
 const mongoose = require('mongoose');
 
 const authRoutes = require('./routes/authRoutes'); //명세서
