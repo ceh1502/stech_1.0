@@ -3,7 +3,7 @@ export const API_CONFIG = {
   TIMEOUT: 10000,
   ENDPOINTS: {
     LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
+    REGISTER: '/auth/signup',
     USER_INFO: '/auth/me',
     VERIFY_TOKEN: '/auth/verify',
     REFRESH_TOKEN: '/auth/refresh'
