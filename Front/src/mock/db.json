@@ -1,0 +1,51 @@
+{
+  "videos": [
+    {
+      "videoId": "vid_20250703_001",
+      "title": "Week3_OpponentGame_Clip01",
+      "url": "https://api.yourdomain.com/videos/vid_20250703_001.mp4",
+      "durationSec": 45.3,
+      "metadata": {
+        "quarter": 2,
+        "down":3,
+        "yardsToGo": 4,
+        "playType": "Run",           
+        "startYardLine": 35,           
+        "endYardLine": 42,
+        "yardsGained": 7,
+        "significantPlays": [
+          {
+            "label": "First Down",
+            "timestampSec": 12.1,       
+            "description": "Gain 5 yards past first-down marker"
+          },
+          {
+            "label": "Tackle for Loss",
+            "timestampSec": 30.4,
+            "description": "Defender TFL on RB"
+          }
+        ]
+      }
+    },
+    {
+      "videoId": "vid_20250703_002",
+      "title": "Week3_OpponentGame_Clip02",
+      "url": "https://api.yourdomain.com/videos/vid_20250703_002.mp4",
+      "durationSec": 32.0,
+      "metadata": {
+        "quarter": 3,
+        "playType": "Pass",
+        "startYardLine": 50,
+        "endYardLine": 60,
+        "yardsGained": 10,
+        "significantPlays": [
+          {
+            "label": "Touchdown",
+            "timestampSec": 29.5,
+            "description": "QB scramble into end zone"
+          }
+        ]
+      }
+    }
+  ]
+}
