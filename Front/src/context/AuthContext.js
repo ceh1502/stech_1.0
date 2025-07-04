@@ -57,54 +57,61 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
-    try {
-      setError(null);
-      setLoading(true);
-      
-      const response = await authAPI.login(email, password);
-      
-      // 토큰 저장
-      setToken(response.token);
-      if (response.refreshToken) {
-        setRefreshToken(response.refreshToken);
-      }
-      
-      setUser(response.user);
-      
-      return { success: true };
-    } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
-    }
-  };
+  // context/AuthContext.js에서 수정할 부분
 
-  const signup = async (userData) => {
-    try {
-      setError(null);
-      setLoading(true);
-      
-      const response = await authAPI.signup(userData);
-      
-      // 회원가입 후 자동 로그인 여부 결정
-      if (response.token) {
-        setToken(response.token);
-        if (response.refreshToken) {
-          setRefreshToken(response.refreshToken);
-        }
-        setUser(response.user);
-      }
-      
-      return { success: true };
-    } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
+const login = async (email, password) => {
+  try {
+    setError(null);
+    setLoading(true);
+    
+    const response = await authAPI.login(email, password);
+    
+    // 백엔드 응답 구조에 맞춰 수정
+    setToken(response.jwt_token);  // 백엔드에서 jwt_token으로 보내는 경우
+    
+    // 사용자 정보 구조 확인 (백엔드 응답에 따라 조정)
+    setUser({
+      id: response.id || response.userId,
+      email: response.email,
+      nickname: response.nickname,  // 백엔드에서 nickname 사용
+      createdAt: response.createdAt
+    });
+    
+    return { success: true };
+  } catch (error) {
+    setError(error.message);
+    return { success: false, error: error.message };
+  } finally {
+    setLoading(false);
+  }
+};
+
+const signup = async (userData) => {
+  try {
+    setError(null);
+    setLoading(true);
+    
+    const response = await authAPI.signup(userData);
+    
+    // 회원가입 성공 후 자동 로그인 처리
+    if (response.jwt_token) {
+      setToken(response.jwt_token);
+      setUser({
+        id: response.id || response.userId,
+        email: response.email,
+        nickname: response.nickname,
+        createdAt: response.createdAt
+      });
     }
-  };
+    
+    return { success: true };
+  } catch (error) {
+    setError(error.message);
+    return { success: false, error: error.message };
+  } finally {
+    setLoading(false);
+  }
+};
 
   const logout = async () => {
     try {

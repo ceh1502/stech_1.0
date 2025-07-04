@@ -1,4 +1,3 @@
-// api/authAPI.js
 import { API_CONFIG } from '../config/api';
 import { getToken } from '../utils/tokenUtils';
 
