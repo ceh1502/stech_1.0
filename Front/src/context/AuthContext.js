@@ -1,19 +1,7 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from 'react';
+// context/AuthContext.js
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as authAPI from '../api/authAPI';
-import {
-  getToken,
-  setToken,
-  getRefreshToken,
-  setRefreshToken,
-  clearTokens,
-  isTokenExpired,
-} from '../utils/tokenUtils';
+import { getToken, setToken, getRefreshToken, setRefreshToken, clearTokens, isTokenExpired } from '../utils/tokenUtils';
 
 const AuthContext = createContext();
 
@@ -22,46 +10,19 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ 토큰 및 사용자 정보 초기화
-  const clearAuthData = useCallback(() => {
-    clearTokens();
-    setUser(null);
-    setError(null);
-  }, []);
-
-  // ✅ 리프레시 토큰으로 로그인 연장
-  const tryRefreshToken = useCallback(async () => {
-    try {
-      const refreshTokenValue = getRefreshToken();
-      if (!refreshTokenValue) {
-        throw new Error('리프레시 토큰 없음');
-      }
-
-      const response = await authAPI.refreshToken();
-      setToken(response.token);
-
-      if (response.refreshToken) {
-        setRefreshToken(response.refreshToken);
-      }
-
-      const userInfo = await authAPI.getUserInfo();
-      setUser(userInfo);
-    } catch (error) {
-      clearAuthData();
-    }
-  }, [clearAuthData]);
-
-  // ✅ 앱 시작 시 자동 로그인 시도
+  // 앱 시작시 인증 상태 복원
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         const token = getToken();
-
+        
         if (!token || isTokenExpired(token)) {
+          // 토큰이 없거나 만료된 경우 리프레시 시도
           await tryRefreshToken();
           return;
         }
 
+        // 토큰이 유효한 경우 사용자 정보 조회
         const userInfo = await authAPI.getUserInfo();
         setUser(userInfo);
       } catch (error) {
@@ -73,40 +34,61 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-  }, [tryRefreshToken, clearAuthData]); // ✅ 여기에 포함됨
+  }, []);
 
-  // ✅ 로그인
-  const login = async (email, password) => {
+  const tryRefreshToken = async () => {
     try {
-      setError(null);
-      setLoading(true);
+      const refreshTokenValue = getRefreshToken();
+      if (!refreshTokenValue) {
+        throw new Error('리프레시 토큰 없음');
+      }
 
-      const response = await authAPI.login(email, password);
-
+      const response = await authAPI.refreshToken();
       setToken(response.token);
+      
       if (response.refreshToken) {
         setRefreshToken(response.refreshToken);
       }
 
-      setUser(response.user);
+      const userInfo = await authAPI.getUserInfo();
+      setUser(userInfo);
+    } catch (error) {
+      clearAuthData();
+    }
+  };
 
+  const login = async (email, password) => {
+    try {
+      setError(null);
+      setLoading(true);
+      
+      const response = await authAPI.login(email, password);
+      
+      // 토큰 저장
+      setToken(response.token);
+      if (response.refreshToken) {
+        setRefreshToken(response.refreshToken);
+      }
+      
+      setUser(response.user);
+      
       return { success: true };
     } catch (error) {
-      setError(error.message || '로그인 실패');
+      setError(error.message);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ 회원가입
-  const register = async (userData) => {
+  const signup = async (userData) => {
     try {
       setError(null);
       setLoading(true);
-
-      const response = await authAPI.register(userData);
-
+      
+      const response = await authAPI.signup(userData);
+      
+      // 회원가입 후 자동 로그인 여부 결정
       if (response.token) {
         setToken(response.token);
         if (response.refreshToken) {
@@ -114,17 +96,16 @@ export const AuthProvider = ({ children }) => {
         }
         setUser(response.user);
       }
-
+      
       return { success: true };
     } catch (error) {
-      setError(error.message || '회원가입 실패');
+      setError(error.message);
       return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ 로그아웃
   const logout = async () => {
     try {
       await authAPI.logout();
@@ -135,11 +116,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ context로 노출할 값들
+  const clearAuthData = () => {
+    clearTokens();
+    setUser(null);
+    setError(null);
+  };
+
   const value = {
     user,
     login,
-    register,
+    signup,
     logout,
     loading,
     error,

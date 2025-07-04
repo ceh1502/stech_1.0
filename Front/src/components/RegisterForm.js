@@ -1,4 +1,4 @@
-// ========== components/RegisterForm.js ==========
+// components/RegisterForm.js
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
@@ -9,7 +9,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
     password: '',
     confirmPassword: ''
   });
-  const { register, loading, error, clearError } = useAuth();
+  const { signup, loading, error, clearError } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,7 +30,7 @@ const RegisterForm = ({ onSwitchToLogin }) => {
       return;
     }
     
-    const result = await register({
+    const result = await signup({
       name: formData.name,
       email: formData.email,
       password: formData.password

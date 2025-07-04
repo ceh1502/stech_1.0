@@ -1,3 +1,4 @@
+// api/authAPI.js
 import { API_CONFIG } from '../config/api';
 import { getToken } from '../utils/tokenUtils';
 
@@ -45,8 +46,8 @@ export const login = async (email, password) => {
 };
 
 // 회원가입
-export const register = async (userData) => {
-  return request(API_CONFIG.ENDPOINTS.REGISTER, {
+export const signup = async (userData) => {
+  return request(API_CONFIG.ENDPOINTS.SIGNUP, {
     method: 'POST',
     body: JSON.stringify(userData),
     requireAuth: false,
