@@ -1,14 +1,11 @@
-import { Link, Outlet } from 'react-router-dom';
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Sidebar from './Sidebar';
 
 const ServiceLayout = () => {
   return ( 
     <div>
-      <nav>
-        <Link to='/service'>Home</Link>
-        <Link to='/service/clip'>Clip</Link>
-        <Link to='/service/data'>Data</Link>
-        <Link to='/service/login'>Login</Link>
-      </nav>
+      <Sidebar />
       <Outlet />
     </div>
   )
