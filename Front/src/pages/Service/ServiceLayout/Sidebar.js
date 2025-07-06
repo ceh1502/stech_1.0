@@ -1,103 +1,191 @@
 import React, { useState } from 'react';
+import { useNavigate, NavLink, useLocation } from 'react-router-dom';
 import './Sidebar.css'
+import { useAuth } from '../../../context/AuthContext';
+
+import Logo from '../../../assets/images/logos/stech.png';
+import { CiLogin, CiLogout } from "react-icons/ci";
+import { GoHome, GoLightBulb } from "react-icons/go";
+import { BsPlayBtn } from "react-icons/bs";
+import { BiSolidBarChartAlt2 } from "react-icons/bi";
+import { MdOutlineSupportAgent, MdOutlineQuiz } from "react-icons/md";
+import { IoSettingsOutline } from "react-icons/io5";
 
 const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [currentPath, setCurrentPath] = useState('/service');
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Mock 사용자 데이터
-  const user = {
-    nickname: '홍길동',
-    email: 'user@example.com'
-  };
-
-  // 메뉴 아이템들
+  // Menu Items 
   const menuItems = [
     {
       path: '/service',
-      label: '홈',
-      icon: '🏠'
+      label: 'Home',
+      icon: <GoHome />,
+      description: 'Dashboard overview'
     },
     {
       path: '/service/clip',
-      label: '클립',
-      icon: '📎'
+      label: 'Clip',
+      icon: <BsPlayBtn />,
+      description: 'Video analysis'
     },
     {
       path: '/service/data',
-      label: '데이터',
-      icon: '📊'
+      label: 'Data',
+      icon: <BiSolidBarChartAlt2 />,
+      description: 'Performance analytics'
+    },
+    {
+      path: '/service/suggestion',
+      label: 'Stech Suggestion',
+      icon: <GoLightBulb />,
+      description: 'AI recommendations'
     }
   ];
 
-  const handleToggleSidebar = () => {
-    setIsOpen(!isOpen);
+  // Footer Items
+  const footerItems = [
+    {
+      path: '/service/team',
+      label: 'Team Setting',
+      icon: <IoSettingsOutline />,
+      description: 'Configure team'
+    },
+    {
+      path: '/service/support',
+      label: 'Customer Support',
+      icon: <MdOutlineQuiz />,
+      description: 'Get help'
+    },
+    {
+      path: '/service/FAQ',
+      label: 'FAQ',
+      icon: <MdOutlineSupportAgent />,
+      description: 'Common questions'
+    }
+  ];
+
+  // 로그아웃 핸들러 (로딩 효과 추가)
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500)); // 로딩 시뮬레이션
+      logout();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleMenuClick = (path) => {
-    setCurrentPath(path);
-    console.log('Navigate to:', path);
+  // 로그인 핸들러
+  const handleLogin = () => {
+    navigate('/service/login');
   };
 
-  const handleLogout = () => {
-    console.log('로그아웃');
-  };
+  // 메뉴 아이템 렌더링 함수
+  const renderMenuItem = (item, isFooter = false) => (
+    <li 
+      key={item.path} 
+      className="navItem"
+      onMouseEnter={() => setHoveredItem(item.path)}
+      onMouseLeave={() => setHoveredItem(null)}
+    >
+      <NavLink
+        to={item.path}
+        end={item.path==='/service'}
+        className={({ isActive }) => {
+          let className = `navLink ${isActive ? 'navLinkActive' : ''}`;
+          if (hoveredItem === item.path) className += ' navLinkHovered';
+          return className;
+        }}
+        title={item.description}
+      >
+        <span className="navIcon">{item.icon}</span>
+        <span className="navLabel">{item.label}</span>
+        
+        {/* 활성 상태 인디케이터 */}
+        {location.pathname === item.path && (
+          <div className="activeIndicator" />
+        )}
+        
+        {/* 호버 툴팁 */}
+        {hoveredItem === item.path && (
+          <div className="navTooltip">
+            <span>{item.description}</span>
+          </div>
+        )}
+      </NavLink>
+    </li>
+  );
 
   return (
-    <aside className={`sidebar ${isOpen ? 'sidebarOpen' : 'sidebarClosed'}`}>
-      {/* 사이드바 헤더 */}
+    <aside className="sidebar">
+      {/* Sidebar Header */}
       <div className="sidebarHeader">
         <div className="logo">
-          <span className="logoIcon">🚀</span>
-          {isOpen && <span className="logoText">STECH</span>}
+          <img 
+            className="stechLogo" 
+            src={Logo} 
+            alt="STECH Logo"
+            onClick={() => navigate('/service')}
+          />
         </div>
-        <button 
-          onClick={handleToggleSidebar}
-          className="toggleButton"
-        >
-          {isOpen ? '◀' : '▶'}
-        </button>
+        
+        <div className="authSection">
+          {isAuthenticated ? (
+            <button 
+              onClick={handleLogout} 
+              className={`logoutButton ${isLoading ? 'loading' : ''}`}
+              disabled={isLoading}
+            >
+              <div className="logoutIcon">
+                {isLoading ? (
+                  <div className="spinner" />
+                ) : (
+                  <CiLogout />
+                )}
+              </div>
+              <span className="logoutText">
+                {isLoading ? 'Logging out...' : 'Logout'}
+              </span>
+            </button>
+          ) : (
+            <button onClick={handleLogin} className="loginButton">
+              <div className="loginIcon">
+                <CiLogin />
+              </div>
+              <span className="loginText">Login</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* 사용자 정보 */}
-      {isOpen && (
-        <div className="userInfo">
-          <div className="userAvatar">
-            {user.nickname.charAt(0)}
-          </div>
-          <div className="userDetails">
-            <div className="userName">{user.nickname}</div>
-            <div className="userEmail">{user.email}</div>
-          </div>
-        </div>
-      )}
-
-      {/* 네비게이션 메뉴 */}
+      {/* Sidebar Menu */}
       <nav className="sidebarNav">
-        <ul className="navMenu">
-          {menuItems.map((item) => (
-            <li key={item.path} className="navItem">
-              <button
-                onClick={() => handleMenuClick(item.path)}
-                className={`navLink ${currentPath === item.path ? 'navLinkActive' : ''}`}
-              >
-                <span className="navIcon">{item.icon}</span>
-                {isOpen && <span className="navLabel">{item.label}</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
+        <div className="menuSection">
+          <div className="sectionTitle">Main Menu</div>
+          <ul className="navMenu">
+            {menuItems.map(item => renderMenuItem(item))}
+          </ul>
+        </div>
       </nav>
 
-      {/* 로그아웃 버튼 */}
+      {/* Sidebar Footer */}
       <div className="sidebarFooter">
-        <button 
-          onClick={handleLogout}
-          className="logoutButton"
-        >
-          <span className="logoutIcon">🚪</span>
-          {isOpen && <span className="logoutText">로그아웃</span>}
-        </button>
+        <div className="menuSection">
+          <div className="sectionTitle">Support</div>
+          <ul className="navMenu">
+            {footerItems.map(item => renderMenuItem(item, true))}
+          </ul>
+        </div>
+        
+        {/* Status Indicator */}
+        <div className="statusIndicator">
+          <div className="statusDot online"></div>
+          <span className="statusText">System Online</span>
+        </div>
       </div>
     </aside>
   );
