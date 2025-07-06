@@ -31,7 +31,7 @@ POST /auth/signup
 { "message": "Signup success" }
 ```
 
-### 로그인
+### 로그인dzd
 ```
 POST /auth/login
 ```
