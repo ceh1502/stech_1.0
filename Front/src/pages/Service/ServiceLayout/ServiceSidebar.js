@@ -61,7 +61,7 @@ const ServiceSidebar = () => {
       description: 'Get help'
     },
     {
-      path: '/service/FAQ',
+      path: '/service/faq',
       label: 'FAQ',
       icon: <MdOutlineSupportAgent />,
       description: 'Common questions'
