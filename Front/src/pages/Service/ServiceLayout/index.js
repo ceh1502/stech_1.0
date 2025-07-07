@@ -1,13 +1,13 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from './Sidebar';
+import ServiceSidebar from './ServiceSidebar';
 import './index.css';
 
 const ServiceLayout = () => {
   return ( 
     <div className='serviceLayoutContainer'>
       <div>
-        <Sidebar />
+        <ServiceSidebar />
       </div>
       <div>
         <Outlet />

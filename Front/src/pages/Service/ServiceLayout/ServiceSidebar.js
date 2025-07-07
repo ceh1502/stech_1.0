@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, NavLink, useLocation } from 'react-router-dom';
-import './Sidebar.css'
+import './ServiceSidebar.css'
 import { useAuth } from '../../../context/AuthContext';
 
 import Logo from '../../../assets/images/logos/stech.png';
@@ -11,7 +11,7 @@ import { BiSolidBarChartAlt2 } from "react-icons/bi";
 import { MdOutlineSupportAgent, MdOutlineQuiz } from "react-icons/md";
 import { IoSettingsOutline } from "react-icons/io5";
 
-const Sidebar = () => {
+const ServiceSidebar = () => {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -81,7 +81,7 @@ const Sidebar = () => {
 
   // 로그인 핸들러
   const handleLogin = () => {
-    navigate('/auth/login');
+    navigate('/auth');
   };
 
   // 메뉴 아이템 렌더링 함수
@@ -191,4 +191,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default ServiceSidebar;

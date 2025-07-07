@@ -24,8 +24,6 @@
   align-items: center;
   justify-content: center;
   cursor:pointer;
-  min-height:220px;
-  width:100%;
   overflow: hidden;
 }
 
