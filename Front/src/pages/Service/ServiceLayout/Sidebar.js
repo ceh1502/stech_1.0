@@ -81,7 +81,7 @@ const Sidebar = () => {
 
   // 로그인 핸들러
   const handleLogin = () => {
-    navigate('/service/login');
+    navigate('/auth/login');
   };
 
   // 메뉴 아이템 렌더링 함수

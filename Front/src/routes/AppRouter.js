@@ -18,7 +18,6 @@ export default function AppRouter() {
         <Route index element={<ServicePages.ServiceHome />} />
         <Route path="clip" element={<ServicePages.ClipPage />} />
         <Route path="data" element={<ServicePages.DataPage />} />
-        <Route path="login" element={<ServicePages.LoginPage />} />
       </Route>
 
       <Route path='auth' element={<AuthPages.AuthLayout />}>
