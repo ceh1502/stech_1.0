@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth, AuthProvider } from '../../../context/AuthContext';
 import LoginForm from '../../../components/LoginForm';
-import RegisterForm from '../../../components/RegisterForm';
+import SignupForm from '../../../components/SignupForm';
 
 const LoginPageContent = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -11,10 +11,10 @@ const LoginPageContent = () => {
   // 로딩 중일 때
   if (loading) {
     return (
-      <div className="loading-container">
-        <div className="loading-content">
+      <div className="loadingContainer">
+        <div className="loadingContent">
           <div className="spinner"></div>
-          <p className="loading-text">로딩 중...</p>
+          <p className="loadingText">loading...</p>
         </div>
       </div>
     );
@@ -33,7 +33,7 @@ const LoginPageContent = () => {
         {isLogin ? (
           <LoginForm onSwitchToRegister={() => setIsLogin(false)} />
         ) : (
-          <RegisterForm onSwitchToLogin={() => setIsLogin(true)} />
+          <SignupForm onSwitchToLogin={() => setIsLogin(true)} />
         )}
       </div>
     </div>

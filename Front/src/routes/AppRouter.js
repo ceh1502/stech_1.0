@@ -10,7 +10,7 @@ export default function AppRouter() {
   return (
     <Routes>
       {/* Landing Pages */}
-      <Route path="/" element={<LandingPages.LandingHome />} />
+      <Route path="/" element={<LandingPages.LandingLayout />} />
       <Route path="/team" element={<LandingPages.TeamPage />} />
 
       {/* Service Pages */}
