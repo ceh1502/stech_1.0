@@ -1,8 +1,8 @@
 // pages/Service/Login/index.js
 import React, { useState } from 'react';
-import { useAuth, AuthProvider } from '../../../context/AuthContext';
-import LoginForm from '../../../components/LoginForm';
-import RegisterForm from '../../../components/RegisterForm';
+import { useAuth, AuthProvider } from '../../context/AuthContext';
+import LoginForm from '../../components/LoginForm';
+import RegisterForm from '../../components/RegisterForm';
 
 const LoginPageContent = () => {
   const [isLogin, setIsLogin] = useState(true);
