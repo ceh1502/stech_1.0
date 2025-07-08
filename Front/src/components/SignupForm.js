@@ -232,7 +232,7 @@ const SignupForm = ({
         if (onSuccess) {
           onSuccess(result);
         } else if (!autoLoginAfterSignup || !result.autoLogin) {
-          navigate('/auth/login');
+          navigate('/auth');
         }
       }
     } catch (err) {
