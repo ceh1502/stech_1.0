@@ -21,9 +21,9 @@ export default function AppRouter() {
         <Route path='team' element={<ServicePages.TeamPage/> } />
         <Route path='support' element={<ServicePages.SupportPage/> } />
         <Route path='faq' element={<ServicePages.FaqPage/> } />
-
       </Route>
 
+      {/* Auth Pages*/}
       <Route path='auth' element={<AuthPages.AuthLayout />}>
         <Route index element={<AuthPages.LoginPage />} />           
         <Route path="signup" element={<AuthPages.SignupPage />} />

@@ -1,0 +1,629 @@
+/* src/components/Auth/AuthForm.css */
+
+/* ===== 폼 공통 스타일 ===== */
+.loginForm,
+.signupForm {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.formInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.formInput:disabled {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.formInput.error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* ===== 비밀번호 입력 ===== */
+.passwordInputContainer {
+  position: relative;
+}
+
+.passwordToggleButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.passwordToggleButton:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.passwordToggleButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+
+/* ===== 비밀번호 일치 표시 ===== */
+.passwordMatch {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.passwordMatch.match {
+  color: #10b981;
+}
+
+.passwordMatch.mismatch {
+  color: #ef4444;
+}
+
+/* ===== 폼 옵션 ===== */
+.formOptions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.rememberMeLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.rememberCheckbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #4f46e5;
+}
+
+.rememberText {
+  user-select: none;
+}
+
+.forgotPasswordButton {
+  background: none;
+  border: none;
+  color: #4f46e5;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.forgotPasswordButton:hover {
+  color: #3730a3;
+}
+
+.forgotPasswordButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ===== 약관 동의 ===== */
+.agreementSection {
+  margin: 24px 0;
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.agreementTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+}
+
+.agreementItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.agreementItem:last-child {
+  border-bottom: none;
+}
+
+.allAgreement {
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.agreementLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.agreementCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #4f46e5;
+}
+
+.checkmark {
+  /* 커스텀 체크박스 스타일을 원한다면 사용 */
+}
+
+.agreementText {
+  font-size: 14px;
+  color: #374151;
+  user-select: none;
+}
+
+.required {
+  color: #ef4444;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.optional {
+  color: #6b7280;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.viewTermsButton {
+  background: none;
+  border: 1px solid #d1d5db;
+  color: #6b7280;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.viewTermsButton:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+.viewTermsButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.agreementDivider {
+  height: 1px;
+  background-color: #d1d5db;
+  margin: 8px 0;
+}
+
+/* ===== 에러 메시지 ===== */
+.errorMessage {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.errorMessage::before {
+  content: '⚠️';
+  font-size: 16px;
+}
+
+/* ===== 제출 버튼 ===== */
+.submitButton {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.loginButton {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+}
+
+.signupButton {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitButton:disabled,
+.submitButton.disabled {
+  background: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.submitButton.loading {
+  cursor: not-allowed;
+}
+
+.submitButton.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  margin: auto;
+  border: 2px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 768px) {
+  .formOptions {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .agreementSection {
+    padding: 16px;
+  }
+  
+  .agreementItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .viewTermsButton {
+    align-self: flex-end;
+  }
+}
+
+/* ===== 다크모드 지원 ===== */
+@media (prefers-color-scheme: dark) {
+  .formLabel {
+    color: #d1d5db;
+  }
+  
+  .formInput {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  .formInput:focus {
+    border-color: #6366f1;
+  }
+  
+  .agreementSection {
+    background-color: #374151;
+    border-color: #4b5563;
+  }
+  
+  .allAgreement {
+    background-color: #4b5563;
+    border-color: #6b7280;
+  }
+  
+  .agreementText {
+    color: #d1d5db;
+  }
+  
+  .viewTermsButton {
+    background-color: #4b5563;
+    border-color: #6b7280;
+    color: #d1d5db;
+  }
+  
+  .viewTermsButton:hover {
+    background-color: #6b7280;
+    color: #f9fafb;
+  }
+}
+
+.passwordRules {
+  margin-top: 12px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.passwordRules.allValid {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
+.passwordRule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.passwordRule:last-child {
+  margin-bottom: 0;
+}
+
+.passwordRule.valid {
+  color: #155724;
+}
+
+.passwordRule.invalid {
+  color: #721c24;
+}
+
+.ruleIcon {
+  font-size: 14px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.ruleText {
+  font-weight: 500;
+}
+
+/* ===== 비밀번호 일치 표시 개선 ===== */
+.passwordMatch {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.passwordMatch.match {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.passwordMatch.mismatch {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* ===== 약관 동의 섹션 개선 ===== */
+.agreementSection {
+  margin: 24px 0;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.agreementTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.agreementItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.agreementItem:last-child {
+  border-bottom: none;
+}
+
+.allAgreement {
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 2px solid #007bff;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
+}
+
+.agreementLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  flex: 1;
+  user-select: none;
+}
+
+.agreementCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #007bff;
+  cursor: pointer;
+}
+
+.agreementCheckbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.checkmark {
+  /* 커스텀 체크박스 스타일을 원한다면 사용 */
+  position: relative;
+}
+
+.agreementText {
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.4;
+}
+
+.required {
+  color: #dc3545;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.optional {
+  color: #6c757d;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.viewTermsButton {
+  background: none;
+  border: 1px solid #6c757d;
+  color: #6c757d;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.viewTermsButton:hover:not(:disabled) {
+  background-color: #6c757d;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.viewTermsButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.agreementDivider {
+  height: 1px;
+  background-color: #dee2e6;
+  margin: 12px 0;
+}
+
+/* ===== 제출 버튼 개선 ===== */
+.submitButton.signupButton {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.submitButton.signupButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #218838 0%, #1e9960 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.submitButton.signupButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitButton.signupButton.disabled,
+.submitButton.signupButton:disabled {
+  background: #6c757d;
+  color: #adb5bd;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.submitButton.loading {
+  cursor: not-allowed;
+  background: #6c757d;
+}
+
+.submitButton.loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
