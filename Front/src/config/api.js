@@ -7,14 +7,15 @@ export const API_CONFIG = {
     SIGNUP: '/auth/signup',
     USER_INFO: '/auth/me',
     VERIFY_EMAIL: '/auth/verify-email',
-    RESEND_VERIFICATION: '/api/auth/resend-verification',
-    REFRESH_TOKEN: '/api/auth/refresh',
-    LOGOUT: '/api/auth/logout',
-    VERIFY_TOKEN: '/api/auth/verify',
-    UPDATE_USER: '/api/auth/user',
-    CHANGE_PASSWORD: '/api/auth/change-password',
-    FORGOT_PASSWORD: '/api/auth/forgot-password',
-    RESET_PASSWORD: '/api/auth/reset-password',
-    DELETE_ACCOUNT: '/api/auth/delete-account'
+    RESEND_VERIFICATION: '/auth/resend-verification',
+    CHECK_EMAIL: '/auth/check-email',
+    REFRESH_TOKEN: '/auth/refresh',
+    LOGOUT: '/auth/logout',
+    VERIFY_TOKEN: '/auth/verify',
+    UPDATE_USER: '/auth/user',
+    CHANGE_PASSWORD: '/auth/change-password',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
+    DELETE_ACCOUNT: '/auth/delete-account'
   }
 };
