@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-const RegisterForm = ({ onSwitchToLogin }) => {
+const SignupForm = ({ onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -131,4 +131,4 @@ const RegisterForm = ({ onSwitchToLogin }) => {
   );
 };
 
-export default RegisterForm;
+export default SignupForm;

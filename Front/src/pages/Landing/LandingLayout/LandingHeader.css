@@ -1,0 +1,51 @@
+.headerBox {
+  width:100%;
+  height: 108px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 84px;
+
+}
+
+.menu{
+  display:flex;
+  gap: 100px;
+  padding-left: 50px;
+  padding-right:50px;
+  
+}
+.home, .docs, .team{
+  font-size:25px;
+  color:#0F172A;
+  text-decoration: none;
+  font-family:pertendard;
+}
+
+.homeActive, .docsActive, .teamActive{
+  font-size:25px;
+  color:#0F172A;
+  text-decoration: none;
+  font-family:pertendard;
+  padding-bottom: 8px;
+  border-bottom: 3px solid #0f172a;
+}
+
+
+.logoBox {
+  height: 100px;
+  width:300px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 100px;
+} 
+.logoImg{
+  width:400px;
+}
+
+.docs{
+  cursor: pointer;
+}
