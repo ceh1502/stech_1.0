@@ -12,7 +12,22 @@ class APIError extends Error {
   }
 }
 
-// 기본 fetch 래퍼 (개선된 버전)
+// 백엔드 응답 처리 헬퍼 함수
+const handleBackendResponse = (response) => {
+  // 백엔드 응답 구조: { success: boolean, message?: string, data?: any }
+  if (response && typeof response === 'object') {
+    if (response.success === true) {
+      return response.data || response;
+    } else if (response.success === false) {
+      throw new APIError(response.message || 'Request failed', 400);
+    }
+  }
+  
+  // success 필드가 없는 경우 (기존 응답 구조)
+  return response;
+};
+
+// 기본 fetch 래퍼 (백엔드 응답 구조에 맞게 수정)
 const request = async (endpoint, options = {}) => {
   const url = `${API_CONFIG.BASE_URL}${endpoint}`;
   
@@ -52,15 +67,20 @@ const request = async (endpoint, options = {}) => {
     }
 
     if (!response.ok) {
-      // 서버에서 제공하는 에러 메시지 우선 사용
-      const errorMessage = typeof data === 'object' && data.message 
-        ? data.message 
-        : `HTTP ${response.status}: ${response.statusText}`;
-      
-      throw new APIError(errorMessage, response.status, data);
+      // 백엔드 에러 응답 처리
+      if (typeof data === 'object' && data.success === false) {
+        throw new APIError(data.message || 'Request failed', response.status, data);
+      } else {
+        const errorMessage = typeof data === 'object' && data.message 
+          ? data.message 
+          : `HTTP ${response.status}: ${response.statusText}`;
+        
+        throw new APIError(errorMessage, response.status, data);
+      }
     }
 
-    return data;
+    // 백엔드 응답 구조 처리
+    return handleBackendResponse(data);
   } catch (error) {
     clearTimeout(timeoutId);
     
@@ -105,7 +125,7 @@ const requestWithRetry = async (endpoint, options = {}, retries = 1) => {
 
 // ===== 인증 관련 API 함수들 =====
 
-// 로그인
+// 로그인 (백엔드 응답 구조에 맞게 수정)
 export const login = async (email, password) => {
   try {
     const response = await request(API_CONFIG.ENDPOINTS.LOGIN, {
@@ -114,9 +134,14 @@ export const login = async (email, password) => {
       requireAuth: false,
     });
 
-    // 응답 데이터 검증
-    if (!response.jwt_token) {
+    // 백엔드 응답 구조 확인: { token, user } 또는 { jwt_token, user }
+    if (!response.token && !response.jwt_token) {
       throw new APIError('Login response missing token.', 500);
+    }
+
+    // 토큰 키 통일 (백엔드에서 token 또는 jwt_token 사용 가능)
+    if (response.jwt_token && !response.token) {
+      response.token = response.jwt_token;
     }
 
     return response;
@@ -132,12 +157,11 @@ export const login = async (email, password) => {
   }
 };
 
-// 회원가입 - 클라이언트 검증 제거
+// 회원가입 (백엔드 응답 구조에 맞게 수정)
 export const signup = async (userData) => {
   try {
     console.log('🚀 Sending signup request with data:', userData);
 
-    // 서버로 바로 전송 (클라이언트 검증은 폼에서 이미 완료)
     const response = await request(API_CONFIG.ENDPOINTS.SIGNUP, {
       method: 'POST',
       body: JSON.stringify(userData),
@@ -149,7 +173,7 @@ export const signup = async (userData) => {
   } catch (error) {
     console.error('❌ Signup API error:', error);
     
-    // 회원가입 실패 시 구체적인 에러 메시지 (영어)
+    // 회원가입 실패 시 구체적인 에러 메시지
     if (error.status === 409) {
       throw new APIError('Email already exists.', 409);
     }
@@ -173,7 +197,7 @@ export const getUserInfo = async () => {
 
 // 사용자 정보 업데이트
 export const updateUser = async (updateData) => {
-  return request(API_CONFIG.ENDPOINTS.UPDATE_USER || '/auth/user', {
+  return request(API_CONFIG.ENDPOINTS.UPDATE_USER || '/api/auth/user', {
     method: 'PATCH',
     body: JSON.stringify(updateData),
   });
@@ -181,7 +205,7 @@ export const updateUser = async (updateData) => {
 
 // 비밀번호 변경
 export const changePassword = async (currentPassword, newPassword) => {
-  return request(API_CONFIG.ENDPOINTS.CHANGE_PASSWORD || '/auth/change-password', {
+  return request(API_CONFIG.ENDPOINTS.CHANGE_PASSWORD || '/api/auth/change-password', {
     method: 'POST',
     body: JSON.stringify({ currentPassword, newPassword }),
   });
@@ -190,7 +214,7 @@ export const changePassword = async (currentPassword, newPassword) => {
 // 토큰 검증
 export const verifyToken = async () => {
   try {
-    await request(API_CONFIG.ENDPOINTS.VERIFY_TOKEN, {
+    await request(API_CONFIG.ENDPOINTS.VERIFY_TOKEN || '/api/auth/verify', {
       method: 'GET',
     });
     return true;
@@ -209,15 +233,20 @@ export const refreshToken = async () => {
   }
 
   try {
-    const response = await request(API_CONFIG.ENDPOINTS.REFRESH_TOKEN, {
+    const response = await request(API_CONFIG.ENDPOINTS.REFRESH_TOKEN || '/api/auth/refresh', {
       method: 'POST',
       body: JSON.stringify({ refreshToken: refreshTokenValue }),
       requireAuth: false,
     });
 
-    // 응답 검증
-    if (!response.token) {
+    // 응답 검증 (token 또는 jwt_token)
+    if (!response.token && !response.jwt_token) {
       throw new APIError('Invalid token refresh response.', 500);
+    }
+
+    // 토큰 키 통일
+    if (response.jwt_token && !response.token) {
+      response.token = response.jwt_token;
     }
 
     return response;
@@ -232,7 +261,7 @@ export const refreshToken = async () => {
 // 로그아웃 (서버에 알림)
 export const logout = async () => {
   try {
-    await request(API_CONFIG.ENDPOINTS.LOGOUT || '/auth/logout', {
+    await request(API_CONFIG.ENDPOINTS.LOGOUT || '/api/auth/logout', {
       method: 'POST',
     });
   } catch (error) {
@@ -241,25 +270,31 @@ export const logout = async () => {
   }
 };
 
-// 이메일 인증 요청
-export const requestEmailVerification = async () => {
-  return request(API_CONFIG.ENDPOINTS.EMAIL_VERIFICATION || '/auth/verify-email', {
+// 이메일 인증 요청 (재발송)
+export const requestEmailVerification = async (email) => {
+  return request(API_CONFIG.ENDPOINTS.RESEND_VERIFICATION || '/api/auth/resend-verification', {
     method: 'POST',
+    body: JSON.stringify({ email }),
+    requireAuth: false,
   });
 };
 
-// 이메일 인증 확인
-export const verifyEmail = async (token) => {
-  return request(API_CONFIG.ENDPOINTS.VERIFY_EMAIL || '/auth/verify-email/confirm', {
+// 이메일 인증 확인 (수정: token과 email 모두 필요)
+export const verifyEmail = async (token, email) => {
+  if (!token || !email) {
+    throw new APIError('Token and email are required for email verification.', 400);
+  }
+
+  return request(API_CONFIG.ENDPOINTS.VERIFY_EMAIL || '/api/auth/verify-email', {
     method: 'POST',
-    body: JSON.stringify({ token }),
+    body: JSON.stringify({ token, email }),
     requireAuth: false,
   });
 };
 
 // 비밀번호 재설정 요청
 export const requestPasswordReset = async (email) => {
-  return request(API_CONFIG.ENDPOINTS.PASSWORD_RESET || '/auth/forgot-password', {
+  return request(API_CONFIG.ENDPOINTS.FORGOT_PASSWORD || '/api/auth/forgot-password', {
     method: 'POST',
     body: JSON.stringify({ email }),
     requireAuth: false,
@@ -268,7 +303,7 @@ export const requestPasswordReset = async (email) => {
 
 // 비밀번호 재설정 확인
 export const resetPassword = async (token, newPassword) => {
-  return request(API_CONFIG.ENDPOINTS.RESET_PASSWORD || '/auth/reset-password', {
+  return request(API_CONFIG.ENDPOINTS.RESET_PASSWORD || '/api/auth/reset-password', {
     method: 'POST',
     body: JSON.stringify({ token, newPassword }),
     requireAuth: false,
@@ -277,7 +312,7 @@ export const resetPassword = async (token, newPassword) => {
 
 // 계정 삭제
 export const deleteAccount = async (password) => {
-  return request(API_CONFIG.ENDPOINTS.DELETE_ACCOUNT || '/auth/delete-account', {
+  return request(API_CONFIG.ENDPOINTS.DELETE_ACCOUNT || '/api/auth/delete-account', {
     method: 'DELETE',
     body: JSON.stringify({ password }),
   });
