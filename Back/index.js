@@ -12,7 +12,7 @@ app.use(cors({
 }));
 const mongoose = require('mongoose');
 
-const authRoutes = require('./routes/authRoutes'); //명세서
+const authRoutes = require('./routes/auth'); //명세서
 
 const PORT = process.env.PORT || 4000;
 
@@ -23,6 +23,6 @@ mongoose.connect(process.env.MONGODB_URI, {
 })
 .then(() => {
   console.log('✅ MongoDB 연결 성공');
-  app.listen(PORT, () => console.log(`✅ 서버 실행: http://localhost:${PORT}`));
+  app.listen(PORT,'0.0.0.0', () => console.log(`✅ 서버 실행: http://localhost:${PORT}`));
 })
 .catch(err => console.error('MongoDB 연결 실패', err));
