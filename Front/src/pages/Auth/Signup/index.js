@@ -18,8 +18,8 @@ const SignupPage = () => {
             {/* 로그인 링크 */}
             <div className="switchForm">
               <p className="switchText">
-                이미 계정이 있으신가요?{' '}
-                <Link to="/auth" className="switchLink">
+                Already have an account?{' '}
+                <Link to="/auth/login" className="switchLink">
                   Login
                 </Link>
               </p>
