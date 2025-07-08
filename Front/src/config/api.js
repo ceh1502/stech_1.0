@@ -1,5 +1,6 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_API_URL,
+  // BASE_URL: process.env.REACT_APP_API_URL,
+    BASE_URL: 'http://localhost:4000/api',  // 목업 서버 주소
   TIMEOUT: 10000,
   ENDPOINTS: {
     LOGIN: '/auth/login',
