@@ -2,6 +2,7 @@
 import {  Link } from 'react-router-dom';
 import SignupForm from '../../../components/SignupForm';
 import './AuthForm.css';
+import './index.css';
 
 const SignupPage = () => {
   return (
@@ -19,7 +20,7 @@ const SignupPage = () => {
             <div className="switchForm">
               <p className="switchText">
                 Already have an account?{' '}
-                <Link to="/auth/login" className="switchLink">
+                <Link to="/auth" className="switchLink">
                   Login
                 </Link>
               </p>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { PiEye, PiEyeClosed } from "react-icons/pi";
 
 
 const LoginForm = ({ 
@@ -157,7 +158,7 @@ const LoginForm = ({
             tabIndex={-1}
             disabled={isFormLoading}
           >
-            {showPassword ? '🙈' : '👁️'}
+            {showPassword ? <PiEye className='eye'/> : <PiEyeClosed className='eye'/>}
           </button>
         </div>
       </div>

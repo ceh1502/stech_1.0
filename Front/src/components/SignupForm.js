@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import TermsModal from './Auth/TermsModal';
+import { PiEye, PiEyeClosed } from 'react-icons/pi';
 
 const SignupForm = ({ 
   onSuccess, 
@@ -321,7 +322,7 @@ const SignupForm = ({
               tabIndex={-1}
               disabled={isFormLoading}
             >
-              {uiState.showPassword ? '🙈' : '👁️'}
+              {uiState.showPassword ? <PiEye className='eye'/> : <PiEyeClosed className='eye' />}
             </button>
           </div>
           
@@ -365,7 +366,6 @@ const SignupForm = ({
               tabIndex={-1}
               disabled={isFormLoading}
             >
-              {uiState.showConfirmPassword ? '🙈' : '👁️'}
             </button>
           </div>
           
