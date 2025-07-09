@@ -43,11 +43,11 @@ const TermsModal = ({
       
       // 동적 import로 txt 파일 가져오기
       if (termType === 'termsOfService') {
-        const module = await import('../../assets/terms/termsOfService.txt');
+        const module = await import('../../assets/terms/termsOfService.md');
         const response = await fetch(module.default);
         content = await response.text();
       } else if (termType === 'privacyPolicy') {
-        const module = await import('../../assets/terms/privacyPolicy.txt');
+        const module = await import('../../assets/terms/privacyPolicy.md');
         const response = await fetch(module.default);
         content = await response.text();
       } else {
