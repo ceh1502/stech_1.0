@@ -1,0 +1,457 @@
+/* ===== SIDEBAR 기본 구조 ===== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 280px;
+  /* background: linear-gradient(180deg, #1a1d29 0%, #16191f 100%); */
+  background-color: #000000;
+  border-right: 1px solid rgba(79, 70, 229, 0.1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 
+    4px 0 20px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(79, 70, 229, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  user-select: none;
+  animation: sidebarSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes sidebarSlideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ===== HEADER 섹션 ===== */
+.sidebarHeader {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 20px;
+  cursor: pointer;
+  width: 180px;
+}
+
+.stechLogo {
+  width: auto;
+  filter: brightness(1.1);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.stechLogo:hover {
+  filter: brightness(1.3) drop-shadow(0 0 10px rgba(79, 70, 229, 0.3));
+  transform: scale(1.05);
+}
+
+/* ===== 인증 버튼 ===== */
+.authSection {
+  display: flex;
+  justify-content: center;
+}
+
+.logoutButton,
+.loginButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.logoutButton {
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.3);
+  color: #fed7aa;
+}
+
+.loginButton {
+  background: rgba(79, 70, 229, 0.1);
+  border: 1px solid rgba(79, 70, 229, 0.3);
+  color: #a5b4fc;
+}
+
+.logoutButton:hover {
+  background: rgba(249, 115, 22, 0.2);
+  border-color: rgba(249, 115, 22, 0.5);
+  color: #fef3c7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+}
+
+.loginButton:hover {
+  background: rgba(79, 70, 229, 0.2);
+  border-color: rgba(79, 70, 229, 0.5);
+  color: #c7d2fe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
+.logoutIcon,
+.loginIcon {
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+
+.logoutButton:hover .logoutIcon,
+.loginButton:hover .loginIcon {
+  transform: scale(1.1);
+}
+
+/* 로딩 상태 */
+.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.loading:hover {
+  transform: none !important;
+  background: rgba(79, 70, 229, 0.1) !important;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 네비게이션 메뉴 ===== */
+.sidebarNav {
+  flex: 1;
+  padding: 20px 0;
+  overflow-y: auto;
+}
+
+.menuSection {
+  padding-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 16px 8px 32px;
+}
+
+.navMenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.navItem {
+  padding: 0 16px;
+}
+
+/* 메뉴 링크 스타일 */
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  color: #9ca3af;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+  animation: slideInFromLeft 0.5s ease-out both;
+}
+
+/* 진입 애니메이션 지연 */
+.navItem:nth-child(1) .navLink { animation-delay: 0.1s; }
+.navItem:nth-child(2) .navLink { animation-delay: 0.2s; }
+.navItem:nth-child(3) .navLink { animation-delay: 0.3s; }
+.navItem:nth-child(4) .navLink { animation-delay: 0.4s; }
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 호버 효과 */
+.navLink:hover,
+.navLinkHovered {
+  color: #e5e7eb;
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 활성 상태 */
+.navLinkActive {
+  background-color :rgb(100, 100, 100, 0.4);
+  color: #ffffff;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+.navLinkActive:hover {
+  transform: translateX(6px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+
+/* 클릭 효과 */
+.navLink:active {
+  transform: translateX(4px) scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.navLinkActive:active {
+  transform: translateX(6px) scale(0.98);
+}
+
+/* 아이콘 & 라벨 */
+.navIcon {
+  vertical-align: middle;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.navLink:hover .navIcon,
+.navLinkActive .navIcon {
+  transform: scale(1.1);
+}
+
+.navLinkActive .navIcon {
+  color: #f5f5f5;
+}
+
+.navLabel {
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.navLinkActive .navLabel {
+  font-weight: 600;
+  color: #f5f5f5;
+}
+
+/* 활성 상태 인디케이터 */
+.activeIndicator {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 16px;
+  background: linear-gradient(45deg, #10b981, #34d399);
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+/* 호버 툴팁 */
+.navTooltip {
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1001;
+  opacity: 0;
+  animation: tooltipFadeIn 0.2s ease-out forwards;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.navTooltip::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: rgba(0, 0, 0, 0.9);
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* ===== FOOTER 섹션 ===== */
+.sidebarFooter {
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebarFooter .navMenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sidebarFooter .navLink {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.sidebarFooter .navLink:hover {
+  color: #d1d5db;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sidebarFooter .navLinkActive {
+  background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+  color: #f3f4f6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sidebarFooter .navIcon {
+  font-size: 18px;
+}
+
+/* 상태 인디케이터 */
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  margin: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+.statusDot.online {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.statusDot.offline {
+  background: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.statusText {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* ===== 애니메이션 ===== */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(79, 70, 229, 0.5);
+  }
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* ===== 스크롤바 ===== */
+.sidebarNav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebarNav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebarNav::-webkit-scrollbar-thumb {
+  background: rgba(79, 70, 229, 0.3);
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.sidebarNav::-webkit-scrollbar-thumb:hover {
+  background: rgba(79, 70, 229, 0.5);
+}
+
+/* ===== 접근성 ===== */
+.navLink:focus,
+.logoutButton:focus,
+.loginButton:focus {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}

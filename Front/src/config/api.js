@@ -1,9 +1,9 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:3000/api',
+  BASE_URL: process.env.REACT_APP_API_URL,
   TIMEOUT: 10000,
   ENDPOINTS: {
     LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
+    SIGNUP: '/auth/signup',
     USER_INFO: '/auth/me',
     VERIFY_TOKEN: '/auth/verify',
     REFRESH_TOKEN: '/auth/refresh'

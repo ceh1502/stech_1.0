@@ -20,8 +20,6 @@ app.use(express.json());
 app.use('/api/auth', authRoutes); ///api 명세서
 
 mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser:    true,
-  useUnifiedTopology: true,
 })
 .then(() => {
   console.log('✅ MongoDB 연결 성공');

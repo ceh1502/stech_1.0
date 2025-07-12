@@ -1,4 +1,4 @@
-// ========== pages/Service/Login/index.js ==========
+// pages/Service/Login/index.js
 import React, { useState } from 'react';
 import { useAuth, AuthProvider } from '../../../context/AuthContext';
 import LoginForm from '../../../components/LoginForm';

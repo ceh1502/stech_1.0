@@ -1,19 +1,8 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from 'react';
+// context/AuthContext.js
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as authAPI from '../api/authAPI';
-import {
-  getToken,
-  setToken,
-  getRefreshToken,
-  setRefreshToken,
-  clearTokens,
-  isTokenExpired,
-} from '../utils/tokenUtils';
+import { getToken, setToken, getRefreshToken, setRefreshToken, clearTokens, isTokenExpired } from '../utils/tokenUtils';
+
 
 const AuthContext = createContext();
 
@@ -22,46 +11,19 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ 토큰 및 사용자 정보 초기화
-  const clearAuthData = useCallback(() => {
-    clearTokens();
-    setUser(null);
-    setError(null);
-  }, []);
-
-  // ✅ 리프레시 토큰으로 로그인 연장
-  const tryRefreshToken = useCallback(async () => {
-    try {
-      const refreshTokenValue = getRefreshToken();
-      if (!refreshTokenValue) {
-        throw new Error('리프레시 토큰 없음');
-      }
-
-      const response = await authAPI.refreshToken();
-      setToken(response.token);
-
-      if (response.refreshToken) {
-        setRefreshToken(response.refreshToken);
-      }
-
-      const userInfo = await authAPI.getUserInfo();
-      setUser(userInfo);
-    } catch (error) {
-      clearAuthData();
-    }
-  }, [clearAuthData]);
-
-  // ✅ 앱 시작 시 자동 로그인 시도
+  // 앱 시작시 인증 상태 복원
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         const token = getToken();
-
+        
         if (!token || isTokenExpired(token)) {
+          // 토큰이 없거나 만료된 경우 리프레시 시도
           await tryRefreshToken();
           return;
         }
 
+        // 토큰이 유효한 경우 사용자 정보 조회
         const userInfo = await authAPI.getUserInfo();
         setUser(userInfo);
       } catch (error) {
@@ -73,58 +35,85 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-  }, [tryRefreshToken, clearAuthData]); // ✅ 여기에 포함됨
+  }, []);
 
-  // ✅ 로그인
-  const login = async (email, password) => {
+  const tryRefreshToken = async () => {
     try {
-      setError(null);
-      setLoading(true);
+      const refreshTokenValue = getRefreshToken();
+      if (!refreshTokenValue) {
+        throw new Error('리프레시 토큰 없음');
+      }
 
-      const response = await authAPI.login(email, password);
-
+      const response = await authAPI.refreshToken();
       setToken(response.token);
+      
       if (response.refreshToken) {
         setRefreshToken(response.refreshToken);
       }
 
-      setUser(response.user);
-
-      return { success: true };
+      const userInfo = await authAPI.getUserInfo();
+      setUser(userInfo);
     } catch (error) {
-      setError(error.message || '로그인 실패');
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
+      clearAuthData();
     }
   };
 
-  // ✅ 회원가입
-  const register = async (userData) => {
-    try {
-      setError(null);
-      setLoading(true);
+  // context/AuthContext.js에서 수정할 부분
 
-      const response = await authAPI.register(userData);
+const login = async (email, password) => {
+  try {
+    setError(null);
+    setLoading(true);
+    
+    const response = await authAPI.login(email, password);
+    
+    // 백엔드 응답 구조에 맞춰 수정
+    setToken(response.jwt_token);  // 백엔드에서 jwt_token으로 보내는 경우
+    
+    // 사용자 정보 구조 확인 (백엔드 응답에 따라 조정)
+    setUser({
+      id: response.id || response.userId,
+      email: response.email,
+      nickname: response.nickname,  // 백엔드에서 nickname 사용
+      createdAt: response.createdAt
+    });
+    
+    return { success: true };
+  } catch (error) {
+    setError(error.message);
+    return { success: false, error: error.message };
+  } finally {
+    setLoading(false);
+  }
+};
 
-      if (response.token) {
-        setToken(response.token);
-        if (response.refreshToken) {
-          setRefreshToken(response.refreshToken);
-        }
-        setUser(response.user);
-      }
-
-      return { success: true };
-    } catch (error) {
-      setError(error.message || '회원가입 실패');
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
+const signup = async (userData) => {
+  try {
+    setError(null);
+    setLoading(true);
+    
+    const response = await authAPI.signup(userData);
+    
+    // 회원가입 성공 후 자동 로그인 처리
+    if (response.jwt_token) {
+      setToken(response.jwt_token);
+      setUser({
+        id: response.id || response.userId,
+        email: response.email,
+        nickname: response.nickname,
+        createdAt: response.createdAt
+      });
     }
-  };
+    
+    return { success: true };
+  } catch (error) {
+    setError(error.message);
+    return { success: false, error: error.message };
+  } finally {
+    setLoading(false);
+  }
+};
 
-  // ✅ 로그아웃
   const logout = async () => {
     try {
       await authAPI.logout();
@@ -135,11 +124,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ context로 노출할 값들
+  const clearAuthData = () => {
+    clearTokens();
+    setUser(null);
+    setError(null);
+  };
+
   const value = {
     user,
     login,
-    register,
+    signup,
     logout,
     loading,
     error,
