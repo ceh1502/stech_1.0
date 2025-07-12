@@ -6,6 +6,169 @@ const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *         - name
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: 사용자 이메일
+ *         password:
+ *           type: string
+ *           minLength: 6
+ *           description: 사용자 비밀번호
+ *         name:
+ *           type: string
+ *           description: 사용자 이름
+ *     LoginRequest:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *         password:
+ *           type: string
+ *     ApiResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *         message:
+ *           type: string
+ *         data:
+ *           type: object
+ */
+
+/**
+ * @swagger
+ * /api/auth/signup:
+ *   post:
+ *     summary: 회원가입
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/User'
+ *           example:
+ *             email: "user@example.com"
+ *             password: "password123"
+ *             name: "홍길동"
+ *     responses:
+ *       201:
+ *         description: 회원가입 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               message: "회원가입이 완료되었습니다. 이메일을 확인해주세요."
+ *               data:
+ *                 email: "user@example.com"
+ *                 name: "홍길동"
+ *                 emailVerificationRequired: true
+ *       400:
+ *         description: 잘못된 요청
+ */
+
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: 로그인
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *           example:
+ *             email: "user@example.com"
+ *             password: "password123"
+ *     responses:
+ *       200:
+ *         description: 로그인 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *             example:
+ *               success: true
+ *               message: "로그인 성공"
+ *               data:
+ *                 token: "eyJhbGciOiJIUzI1NiIs..."
+ *                 user:
+ *                   id: "64a1b2c3d4e5f6789"
+ *                   email: "user@example.com"
+ *                   name: "홍길동"
+ *       400:
+ *         description: 로그인 실패
+ */
+
+/**
+ * @swagger
+ * /api/auth/verify-email:
+ *   post:
+ *     summary: 이메일 인증
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - email
+ *             properties:
+ *               token:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *           example:
+ *             token: "abc123def456..."
+ *             email: "user@example.com"
+ *     responses:
+ *       200:
+ *         description: 이메일 인증 성공
+ *       400:
+ *         description: 인증 실패
+ */
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *   get:
+ *     summary: 현재 사용자 정보 조회
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: 사용자 정보 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiResponse'
+ *       401:
+ *         description: 인증 필요
+ */
+
 // 회원가입 (이메일 인증 추가)
 router.post('/signup', async (req, res) => {
     try {
