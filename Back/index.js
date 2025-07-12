@@ -26,5 +26,3 @@ mongoose.connect(process.env.MONGODB_URI, {
   app.listen(PORT, () => console.log(`✅ 서버 실행: http://localhost:${PORT}`));
 })
 .catch(err => console.error('MongoDB 연결 실패', err));
-
-qiodbnq jdioqcnno wqoj
