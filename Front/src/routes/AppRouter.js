@@ -28,6 +28,7 @@ export default function AppRouter() {
         <Route index element={<AuthPages.LoginPage />} />           
         <Route path="signup" element={<AuthPages.SignupPage />} />
         <Route path="find" element={<AuthPages.FindPage />} /> 
+        <Route path='verify-email' element={<AuthPages.VerifyEmailPage /> } />
       </Route>
       {/* 404 Not Found */}
       <Route path="*" element={<CommonPages.NotFoundPage />} />
