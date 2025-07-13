@@ -5,6 +5,8 @@ const { generateVerificationToken, sendVerificationEmail } = require('../utils/e
 const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
+const { verifyEmail } = require('../controllers/authController');
+
 
 /**
  * @swagger
@@ -169,13 +171,20 @@ const router = express.Router();
  *         description: 인증 필요
  */
 
+// ✅ 이메일 인증 요청
+router.post('/verify-email', verifyEmail);
+
+
 // 회원가입 (이메일 인증 추가)
 router.post('/signup', async (req, res) => {
     try {
-        const { email, password, name } = req.body;
-        
-        // 입력 검증
-        if (!email || !password || !name) {
+        const { email, password, name, firstName, lastName } = req.body;
+
+        // firstName과 lastName이 있으면 name 생성
+        const fullName = name || `${firstName || ''} ${lastName || ''}`.trim();
+
+        // 검증 로직
+        if (!email || !password || !fullName) {
             return res.status(400).json({
                 success: false,
                 message: '모든 필드를 입력해주세요.'
@@ -199,7 +208,7 @@ router.post('/signup', async (req, res) => {
         const user = new User({
             email,
             password,
-            name,
+            name: fullName,
             emailVerificationToken: verificationToken,
             emailVerificationExpires: verificationExpires
         });

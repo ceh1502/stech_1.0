@@ -22,11 +22,11 @@ const sendVerificationEmail = async (email, token, name) => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: '�� STechPro 회원가입 인증',
+        subject: 'STECH Pro 회원가입 인증',
         html: `
             <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
                 <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px;">
-                    <h1>🏈 STechPro</h1>
+                    <h1>🏈 STECH Pro</h1>
                     <p>미식축구 전문 플랫폼에 오신 것을 환영합니다!</p>
                 </div>
                 
