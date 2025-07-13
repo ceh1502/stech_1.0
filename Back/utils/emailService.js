@@ -17,7 +17,7 @@ const generateVerificationToken = () => {
 
 // 인증 이메일 발송
 const sendVerificationEmail = async (email, token, name) => {
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}&email=${email}`;
+    const verificationUrl = `${process.env.FRONTEND_URL}/auth/verify-email?token=${token}&email=${email}`;
     
     const mailOptions = {
         from: process.env.EMAIL_USER,
