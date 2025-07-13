@@ -209,10 +209,10 @@ const SignupForm = ({
 
     try {
       const signupData = {
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        email: formData.email.trim(),
-        password: formData.password
+          email: formData.email,
+          password: formData.password,
+          name: `${formData.firstName} ${formData.lastName}`,  // 합치기
+          // firstName, lastName 제거
       };
 
       if (showAgreements) {
