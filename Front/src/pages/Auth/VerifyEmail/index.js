@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { verifyEmail } from '../../../api/authAPI';
 import { useEffect, useState } from 'react';
 
@@ -7,8 +7,12 @@ const VerifyEmailPage = () => {
   const [status, setStatus] = useState('loading'); // loading | success | error
   const token = searchParams.get('token');
   const email = searchParams.get('email');
-
+  const navigate =useNavigate();
+  const goToLogin =() => {
+    navigate('/auth');
+  }
   useEffect(() => {
+    
     const verify = async () => {
       try {
         await verifyEmail(token, email);
@@ -26,11 +30,17 @@ const VerifyEmailPage = () => {
   }, [token, email]);
 
   return (
-    <div className="verify-email-page">
-      {status === 'loading' && <p>Verifying your email...</p>}
-      {status === 'success' && <p>Email verification successful ✅</p>}
-      {status === 'error' && <p>Verification failed or link expired ❌</p>}
+    <div className='verifyEmailPageContainer'>
+      <div className="verifyEmailText">
+        {status === 'loading' && <p>Verifying your email...</p>}
+        {status === 'success' && <p>Email verification successful ✅</p>}
+        {status === 'error' && <p>Verification failed or link expired ❌</p>}
+      </div>
+      <div className='toLoginButton'>
+        <button onClick={goToLogin}>Go To Login</button>
+      </div>
     </div>
+
   );
 };
 
