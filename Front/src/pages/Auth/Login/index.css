@@ -1,11 +1,10 @@
 .loginPage {
+    box-sizing: border-box; /* 박스 모델 설정 */
     background: #ffffff; /* 페이지 배경색 */
     align-items: center;
     justify-content: center;
     max-width: 400px !important; /* 최대 너비 설정 */
-    width: 100%;
-    margin: 0 auto; /* 중앙 정렬 */
-    margin-top: 50px; /* 상단 여백 */
+    margin: 50px auto; /* 중앙 정렬 */
     margin-bottom: 50px; /* 하단 여백 */
     padding: 20px; /* 내부 여백 */
     border-radius: 12px; /* 모서리 둥글게 */

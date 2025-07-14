@@ -3,9 +3,10 @@
 /* ===== 폼 공통 스타일 ===== */
 .loginForm,
 .signupForm {
+    max-width: 400px;
+    width: 100%;
     dispaly: block;
     width: 100%;
-    max-width: 400px;
     margin: 0 auto;
 }
 
@@ -259,9 +260,9 @@
 
 /* ===== 제출 버튼 ===== */
 .submitButton {
-    dispaly: block;
+    display: block;
     width: 100%;
-    max-width: 400px;
+    max-width: 100%;
     padding: 14px 20px;
     border: none;
     border-radius: 8px;
@@ -274,6 +275,9 @@
 }
 
 .loginButton {
+    display: block;
+    width: 100%;
+    max-width: 100%;
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
     color: white;
     display: flex;

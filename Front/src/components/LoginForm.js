@@ -173,7 +173,7 @@ const LoginForm = ({ onSuccess, showRememberMe = true, showForgotPassword = true
             </div>
 
             <button type="submit" disabled={isFormLoading} className={`submitButton loginButton ${isFormLoading ? 'loading' : ''}`}>
-                {isFormLoading ? 'loading...' : 'Login in'}
+                {isFormLoading ? 'loading...' : 'Login'}
             </button>
         </form>
     );

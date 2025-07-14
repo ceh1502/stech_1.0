@@ -1,7 +1,6 @@
 /* ===== 폼 공통 스타일 ===== */
 .loginForm,
 .signupForm {
-    max-width: 400px;
     margin: 0 auto;
 }
 
@@ -284,18 +283,25 @@
 
 /* ===== 제출 버튼 ===== */
 .submitButton {
-    padding: 14px 20px;
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 14px 0px;
     border: none;
     border-radius: 8px;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    position: relative;
     overflow: hidden;
 }
 
 .loginButton {
+    display: block;
+    width: 100%;
+    max-width: 100%;
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
     color: white;
     display: flex;
