@@ -1,51 +1,40 @@
-// pages/Service/Login/index.js
-import React, { useState } from 'react';
-import { useAuth, AuthProvider } from '../../../context/AuthContext';
+// src/pages/Auth/Login/index.js
+import { Link } from 'react-router-dom';
 import LoginForm from '../../../components/LoginForm';
-import RegisterForm from '../../../components/RegisterForm';
+import './AuthForm.css';
+import './index.css';
 
-const LoginPageContent = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const { isAuthenticated, loading } = useAuth();
-
-  // 로딩 중일 때
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-content">
-          <div className="spinner"></div>
-          <p className="loading-text">로딩 중...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 이미 로그인된 경우 메인 페이지로 리다이렉트
-  if (isAuthenticated) {
-    // React Router 사용시: navigate('/dashboard')
-    window.location.href = '/dashboard';
-    return null;
-  }
-
-  return (
-    <div className="login-page">
-      <div className="login-page-container">
-        {isLogin ? (
-          <LoginForm onSwitchToRegister={() => setIsLogin(false)} />
-        ) : (
-          <RegisterForm onSwitchToLogin={() => setIsLogin(true)} />
-        )}
-      </div>
-    </div>
-  );
-};
-
-// AuthProvider로 감싸서 export
 const LoginPage = () => {
   return (
-    <AuthProvider>
-      <LoginPageContent />
-    </AuthProvider>
+    <div className="loginPage">
+      <div className="loginPageContainer">
+        <div className="formSection">
+          <div className="formContainer">
+            <div className="formHeader">
+              <h2 className="formTitle">Login</h2>
+            </div>
+
+            <LoginForm />
+
+            {/* 회원가입 링크 */}
+            <div className="switchForm">
+              <p className="switchText">
+                Not a member yet?{' '}
+                <Link to="/auth/signup" className="switchLink">
+                  Sign up
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer className="loginPageFooter">
+        <div className="footerContent">
+          <p>&copy; 2025 STECH. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
   );
 };
 

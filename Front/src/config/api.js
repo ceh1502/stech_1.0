@@ -1,11 +1,21 @@
 export const API_CONFIG = {
   BASE_URL: process.env.REACT_APP_API_URL,
+    // BASE_URL: 'http://localhost:4000/api',  // 목업 서버 주소
   TIMEOUT: 10000,
   ENDPOINTS: {
     LOGIN: '/auth/login',
     SIGNUP: '/auth/signup',
     USER_INFO: '/auth/me',
+    VERIFY_EMAIL: '/auth/verify-email',
+    RESEND_VERIFICATION: '/auth/resend-verification',
+    CHECK_EMAIL: '/auth/check-email',
+    REFRESH_TOKEN: '/auth/refresh',
+    LOGOUT: '/auth/logout',
     VERIFY_TOKEN: '/auth/verify',
-    REFRESH_TOKEN: '/auth/refresh'
+    UPDATE_USER: '/auth/user',
+    CHANGE_PASSWORD: '/auth/change-password',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    RESET_PASSWORD: '/auth/reset-password',
+    DELETE_ACCOUNT: '/auth/delete-account'
   }
 };

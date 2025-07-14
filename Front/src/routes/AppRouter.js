@@ -10,7 +10,7 @@ export default function AppRouter() {
   return (
     <Routes>
       {/* Landing Pages */}
-      <Route path="/" element={<LandingPages.LandingHome />} />
+      <Route path="/" element={<LandingPages.LandingLayout />} />
       <Route path="/team" element={<LandingPages.TeamPage />} />
 
       {/* Service Pages */}
@@ -21,13 +21,14 @@ export default function AppRouter() {
         <Route path='team' element={<ServicePages.TeamPage/> } />
         <Route path='support' element={<ServicePages.SupportPage/> } />
         <Route path='faq' element={<ServicePages.FaqPage/> } />
-
       </Route>
 
+      {/* Auth Pages*/}
       <Route path='auth' element={<AuthPages.AuthLayout />}>
         <Route index element={<AuthPages.LoginPage />} />           
         <Route path="signup" element={<AuthPages.SignupPage />} />
         <Route path="find" element={<AuthPages.FindPage />} /> 
+        <Route path='verify-email' element={<AuthPages.VerifyEmailPage /> } />
       </Route>
       {/* 404 Not Found */}
       <Route path="*" element={<CommonPages.NotFoundPage />} />

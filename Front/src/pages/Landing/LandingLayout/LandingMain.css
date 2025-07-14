@@ -1,0 +1,90 @@
+.mainBox{
+  padding-left: 312px;
+  padding-right:312px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content:space-between;
+}
+
+.sloganBox {
+  color: var(--Neutral-Gray-900, #0F172A);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 72px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 86.4px;
+  letter-spacing:  -2.88px;
+  white-space: pre-wrap;
+
+  padding-bottom: 14.4px;
+}
+
+.etcBox{
+  color: var(--Neutral-Gray-600, #475569);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 21.6px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 31.2px; /* 144.444% */
+
+  padding-top:14.4px;
+  padding-bottom:44.4px;
+}
+
+.link{
+  padding-top:44.4px;
+  padding-bottom:44.4px;
+}
+
+.toServiceButton{
+  display: flex;
+  width: 178.8px;
+  padding: 16.8px 12px;
+  justify-content: center;
+  align-items: center;
+  gap: 7.2px;
+
+  border-radius: 20px;
+  border: 1.2px solid var(--Neutral-Gray-300, #CBD5E1);
+  background: #F77704;
+}
+
+.serviceButton{
+  color: white;
+  text-decoration: none;
+  color: #FFF;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 19.2px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px; /* 125% */
+  letter-spacing: -0.384px;
+}
+
+.imgBox{
+  width:1080px;
+  height:450px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding-top:44.4px;
+  padding-bottom:44.4px;
+  border-radius: 38px 38px 0px 0px;
+  border-top: 10px solid #9B9B9B;
+  background: linear-gradient(127deg, #9B9B9B -21.67%, #000 45.1%);
+
+  box-shadow: 13.247px 13.247px 33.119px 0px rgba(0, 0, 0, 0.25), 52.99px 52.99px 99.356px 0px rgba(0, 0, 0, 0.25);
+
+}
+.groundImg{
+  width:1080px;
+  padding:0px;
+  margin:0px;
+  
+}
