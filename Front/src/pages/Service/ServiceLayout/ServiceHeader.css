@@ -134,6 +134,29 @@
     transform: translateY(0);
 }
 
+/* Date picker 래퍼: 드롭다운 계산용 */
+.datePickerWrap {
+    position: relative;
+}
+
+/* 드롭다운형 date input */
+.dateDropdown {
+    position: absolute;
+    top: calc(100% + 4px); /* 버튼 바로 밑 */
+    left: 0;
+    background: #1c1d21;
+    color: #e5e7eb;
+    border: 1px solid #303136;
+    border-radius: 6px;
+    padding: 6px 8px;
+    z-index: 100;
+}
+
+/* 브라우저 기본 캘린더가 뜨도록 width 지정 */
+.dateDropdown::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
 /* ───────── 디스플레이 크기 줄였을 때 ───────── */
 @media (max-width: 640px) {
     .filterGroup {
