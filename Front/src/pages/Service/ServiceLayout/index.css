@@ -1,4 +1,34 @@
-.serviceLayoutContainer{
-  display: flex;
-  justify-content: end;
+.serviceLayoutContainer {
+    display: flex; /* (사이드바 | 메인) 한 줄 배치 */
+    min-height: 100vh; /* 선택: 화면 꽉 채우기 */
+}
+
+/* 2. 사이드바 ─ 고정 폭, 줄어들지 않음 */
+.serviceLayoutContainer > .serviceSidebar {
+    width: 240px; /* 원하는 폭 */
+    flex-shrink: 0; /* 줄어들지 않게 */
+}
+
+/* 3. 메인 영역 ─ 남은 공간 100 % */
+.serviceLayoutContainer > main {
+    flex: 1; /* 남는 공간 전부 */
+    display: flex;
+    flex-direction: column; /* 헤더 위, 본문 아래 */
+    min-width: 0; /* 긴 제목 등으로 넘침 방지 */
+}
+
+/* 4. 헤더 ─ 메인 영역 안에서 폭 100 % */
+main > .serviceHeader {
+    flex-shrink: 0; /* 높이 고정 */
+    width: 100%;
+    height: 56px; /* 예시 높이 */
+    /* 필요하면 배경·보더 */
+    background: #111214;
+    border-bottom: 1px solid #1f2023;
+}
+
+/* 5. 라우트 영역 ─ 헤더 아래에 자동 확장 */
+main > .routesBody {
+    flex: 1; /* 남은 높이 전부 */
+    overflow-y: auto; /* 스크롤(선택) */
 }
