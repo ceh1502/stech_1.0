@@ -1,6 +1,10 @@
+
+
 const ServiceHome = () => {
   return(
-    <div></div>
+    <div className='serviceHomeContainer'>
+      <div>HI</div>
+    </div>
   )
 }
 

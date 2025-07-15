@@ -1,5 +1,6 @@
 // src/components/UploadVideoModal.jsx
 import { useState } from 'react';
+import {useNavigate} from 'react-router-dom';
 import './UploadVideoModal.css';
 
 const UploadVideoModal = ({ isOpen, onClose, onUploaded }) => {
@@ -8,6 +9,7 @@ const UploadVideoModal = ({ isOpen, onClose, onUploaded }) => {
     const [desc, setDesc] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     if (!isOpen) return null;
 
@@ -58,7 +60,7 @@ const UploadVideoModal = ({ isOpen, onClose, onUploaded }) => {
                     {error && <p className="uvm-error">{error}</p>}
 
                     <div className="uvm-actions">
-                        <button type="button" onClick={onClose}>
+                        <button type="button" onClick={() => navigate(-1)}>
                             Cancel
                         </button>
                         <button type="submit" disabled={loading}>
