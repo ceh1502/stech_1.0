@@ -13,7 +13,7 @@ const SignupPage = () => {
                         <div className="formHeader">
                             <h2 className="formTitle">Sign Up</h2>
                         </div>
-                        <div style={{ padding: '0 0 20px 0', textAlign: 'center' }}>
+                        <div style={{ padding: '0 0 20px 0' }}>
                             <SignupForm />
                         </div>
                         {/* 로그인 링크 */}
