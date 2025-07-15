@@ -361,7 +361,8 @@
 /* ===== 다크모드 지원 ===== */
 @media (prefers-color-scheme: dark) {
     .formLabel {
-        color: #d1d5db;
+        color: #6b7280;
+        /* color: #d1d5db; */
     }
 
     .formInput {
