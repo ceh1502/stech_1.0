@@ -1,5 +1,5 @@
 // src/pages/Service/ServiceLayout/index.js
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 import ServiceSidebar from './ServiceSidebar';
@@ -7,6 +7,7 @@ import SupportModal from '../../../components/SupportModal'; // SupportModal.jsx
 import Home from '../Home'; // 원래 /service 메인 페이지 컴포넌트
 import Clip from '../Clip'; // /service/clip 페이지
 import ServiceHeader from '../../Service/ServiceLayout/ServiceHeader';
+import UploadVideoModal from '../../../components/UploadVideoModal.jsx';
 import './index.css';
 // 필요한 다른 페이지도 여기에 import
 
@@ -15,6 +16,9 @@ const ServiceLayout = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const background = location.state?.background; // Customer Support 눌렀을 때 넣어 둔 값
+
+    /* --- Video state --- */
+    const [showUpload, setShowUpload] = useState(false);
 
     /* ---------- 2. 화면 ---------- */
     return (
@@ -29,7 +33,7 @@ const ServiceLayout = () => {
             background 값이 있으면 그걸, 없으면 현재 주소(location) 그대로 사용
             → 모달을 띄워도 이전 화면이 유지됨
           */}
-                    <ServiceHeader />
+                    <ServiceHeader onNewVideo={() => setShowUpload(true)} />
                     <div className="routesBody">
                         <Routes location={background || location}>
                             <Route path="/" element={<Home />} />
@@ -40,6 +44,8 @@ const ServiceLayout = () => {
                     </div>
                 </main>
             </div>
+            {/* 업로드 모달 */}
+            <UploadVideoModal isOpen={showUpload} onClose={() => setShowUpload(false)} onUploaded={() => console.log('upload ok')} />
 
             {/* ---------- 3. 모달 ---------- */}
             {location.pathname.startsWith('/service/support') && (
