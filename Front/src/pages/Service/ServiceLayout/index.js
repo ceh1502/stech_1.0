@@ -7,6 +7,7 @@ import SupportModal from '../../../components/SupportModal'; // SupportModal.jsx
 import Home from '../Home'; // 원래 /service 메인 페이지 컴포넌트
 import Clip from '../Clip'; // /service/clip 페이지
 import ServiceHeader from '../../Service/ServiceLayout/ServiceHeader';
+import './index.css';
 // 필요한 다른 페이지도 여기에 import
 
 const ServiceLayout = () => {
