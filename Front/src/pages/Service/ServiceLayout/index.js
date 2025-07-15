@@ -6,6 +6,8 @@ import ServiceSidebar from './ServiceSidebar';
 import SupportModal from '../../../components/SupportModal'; // SupportModal.jsx 만든 위치 기준
 import Home from '../Home'; // 원래 /service 메인 페이지 컴포넌트
 import Clip from '../Clip'; // /service/clip 페이지
+import ServiceHeader from '../../Service/ServiceLayout/ServiceHeader';
+import './index.css';
 // 필요한 다른 페이지도 여기에 import
 
 const ServiceLayout = () => {
@@ -19,7 +21,7 @@ const ServiceLayout = () => {
         <>
             {/* 왼쪽: 사이드바 / 오른쪽: 본문 */}
             <div className="serviceLayoutContainer">
-                <ServiceSidebar />
+                <ServiceSidebar className="serviceSidebar" />
 
                 {/* 본문 영역 */}
                 <main className="flex-1">
@@ -27,11 +29,15 @@ const ServiceLayout = () => {
             background 값이 있으면 그걸, 없으면 현재 주소(location) 그대로 사용
             → 모달을 띄워도 이전 화면이 유지됨
           */}
-                    <Routes location={background || location}>
-                        <Route path="/" element={<Home />} />
-                        <Route path="clip" element={<Clip />} />
-                        {/* 나머지 /service/* 페이지들도 여기 추가 */}
-                    </Routes>
+                    <ServiceHeader />
+                    <div className="routesBody">
+                        <Routes location={background || location}>
+                            <Route path="/" element={<Home />} />
+                            <Route path="clip" element={<Clip />} />
+
+                            {/* 나머지 /service/* 페이지들도 여기 추가 */}
+                        </Routes>
+                    </div>
                 </main>
             </div>
 
