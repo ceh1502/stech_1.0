@@ -23,6 +23,9 @@
 .bottomRow {
     display: flex;
     justify-content: space-between;
+    padding: 10px;
+    margin-left: 24px;
+    border-bottom: 1px solid #fff;
 }
 
 .teamLogo {
@@ -83,7 +86,6 @@
 .filterGroup {
     display: flex;
     gap: 8px;
-    margin-left: 24px; /* 로고·팀이름과 간격 */
 }
 
 .filterButton,
@@ -181,6 +183,7 @@
     z-index: 120; /* 헤더보다 위 */
     list-style: none;
 }
+
 .typeItem {
     width: 100%;
     padding: 6px 12px;
