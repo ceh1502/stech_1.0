@@ -157,6 +157,101 @@
     cursor: pointer;
 }
 
+.filterButton.active,
+.typeItem.active,
+.calCell.selected {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: #fff;
+}
+
+/* ───── TYPE 드롭다운 ───── */
+.typePickerWrap {
+    position: relative;
+}
+/* 드롭다운 상자 */
+.typeDropdown {
+    position: absolute;
+    top: calc(100% + 4px); /* 버튼 바로 아래 */
+    left: 0;
+    background: #1c1d21;
+    border: 1px solid #303136;
+    border-radius: 6px;
+    padding: 4px 0;
+    width: 180px;
+    z-index: 120; /* 헤더보다 위 */
+    list-style: none;
+}
+.typeItem {
+    width: 100%;
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    color: #e5e7eb;
+    cursor: pointer;
+}
+
+.typeItem:hover {
+    background: #2a2b30;
+}
+.typeItem.active {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: #fff;
+}
+
+/* ───── OPPS 드롭다운 ───── */
+.oppsPickerWrap {
+    position: relative;
+}
+.oppsDropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 220px;
+    background: #1c1d21;
+    border: 1px solid #303136;
+    border-radius: 6px;
+    padding: 4px 0;
+    z-index: 120;
+    list-style: none;
+}
+.oppsHeader {
+    font-weight: 700;
+    color: #fff;
+    padding: 8px 12px;
+    border-bottom: 1px solid #303136;
+}
+.oppsItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    color: #e5e7eb;
+    cursor: pointer;
+}
+.oppsItem:hover {
+    background: #2a2b30;
+}
+
+/* 이미지 크기 재사용 */
+.oppsItem img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+/* ───── TYPE 드롭다운 항목 ───── */
+.typeItem {
+    width: 100%;
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    color: #e5e7eb;
+    cursor: pointer;
+}
+
 /* ───────── 디스플레이 크기 줄였을 때 ───────── */
 @media (max-width: 640px) {
     .filterGroup {

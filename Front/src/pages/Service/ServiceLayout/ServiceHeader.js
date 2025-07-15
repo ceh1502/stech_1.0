@@ -14,46 +14,71 @@ const TEAMS = [
     { name: '이건, 손현빈, 이건', logo: '/assets/images/logos/Stechlogo.svg' },
 ];
 
-const today = () => new Date().toISOString().split('T')[0]; // 'YYYY‑MM‑DD'
+const TYPES = ['Scrimmage', 'Friendly match', 'Season'];
 
 const HeaderBar = ({ onNewVideo = () => {}, onReset = () => {} }) => {
     /* 선택된 팀 */
-    const [team, setTeam] = useState(null); // null → Choose Team
-    const [openTeam, setOpenTeam] = useState(false); // 드롭다운 열림 여부
+    /* --- 기존 state --- */
+    const [team, setTeam] = useState(null);
+    const [openTeam, setOpenTeam] = useState(false);
+
+    /* --- Date picker state --- */
     const [showDate, setShowDate] = useState(false);
-    const [selectedDate, setSelectedDate] = useState(dayjs());
+    const [selectedDate, setSelectedDate] = useState(dayjs()); // 초기: 오늘
+
+    /* --- Type dropdown state --- */
+    const [showType, setShowType] = useState(false);
+    const [selectedType, setSelectedType] = useState(null);
+
+    /* --- OPPS dropdown state --- */
+    const [showOpps, setShowOpps] = useState(false);
+    const [selectedOpps, setSelectedOpps] = useState(null);
+
+    /* refs */
     const teamWrapRef = useRef(null);
     const dateWrapRef = useRef(null);
+    const typeWrapRef = useRef(null);
+    const oppsWrapRef = useRef(null);
+
+    const resetFilters = () => {
+        setSelectedDate(dayjs()); // Date 라벨을 "Date" 로 되돌림
+        setSelectedType(null); // Type 초기화
+        setSelectedOpps(null); // OPPS 초기화
+        setShowDate(false);
+        setShowType(false);
+        setShowOpps(false);
+
+        onReset(); // 필요하면 부모에게도 알림
+    };
 
     /* 바깥 클릭 → Team/Date 드롭다운 모두 닫기 */
     useEffect(() => {
-        const onClickOut = (e) => {
-            if (openTeam && teamWrapRef.current && !teamWrapRef.current.contains(e.target)) {
-                setOpenTeam(false);
-            }
-            if (showDate && dateWrapRef.current && !dateWrapRef.current.contains(e.target)) {
-                setShowDate(false);
-            }
+        const out = (e) => {
+            const isIn = (ref) => ref.current && ref.current.contains(e.target);
+            if (!isIn(teamWrapRef)) setOpenTeam(false);
+            if (!isIn(dateWrapRef)) setShowDate(false);
+            if (!isIn(typeWrapRef)) setShowType(false);
+            if (!isIn(oppsWrapRef)) setShowOpps(false);
         };
-        document.addEventListener('mousedown', onClickOut);
-        return () => document.removeEventListener('mousedown', onClickOut);
-    }, [openTeam, showDate]);
+        document.addEventListener('mousedown', out);
+        return () => document.removeEventListener('mousedown', out);
+    }, []);
 
     /* 선택 결과: 없으면 기본값 */
-    const logoSrc = team ? team.logo : defaultLogo;
+    const logoSrc = selectedOpps?.logo ?? team?.logo ?? defaultLogo;
     const label = team ? team.name : 'Choose Team';
 
     return (
         <header className="stechHeader">
-            {/* ───── 1줄: 로고 + 팀 픽커 ───── */}
+            {/* ───── 1줄: 로고 + 팀 선택 ───── */}
             <div className="headerRow topRow">
                 <img src={logoSrc} alt={label} className="teamLogo" />
 
+                {/* Team picker */}
                 <div className="teamPickerWrap" ref={teamWrapRef}>
-                    <button className="teamPicker" onClick={() => setOpenTeam((v) => !v)}>
+                    <button className="teamPicker" onClick={() => setOpenTeam(!openTeam)}>
                         {label} <FaChevronDown size={12} />
                     </button>
-
                     {openTeam && (
                         <ul className="teamDropdown">
                             {TEAMS.map((t) => (
@@ -62,6 +87,7 @@ const HeaderBar = ({ onNewVideo = () => {}, onReset = () => {} }) => {
                                         className="teamItem"
                                         onClick={() => {
                                             setTeam(t);
+                                            setSelectedOpps(null); /* OPPS 초기화 */
                                             setOpenTeam(false);
                                         }}
                                     >
@@ -73,34 +99,78 @@ const HeaderBar = ({ onNewVideo = () => {}, onReset = () => {} }) => {
                     )}
                 </div>
             </div>
-            {/* ───── 2줄: 필터 + New Video ───── */}
+
+            {/* ───── 2줄: 필터 + NewVideo ───── */}
             <div className="headerRow bottomRow">
                 <div className="filterGroup">
-                    {/* Date 필터 */}
+                    {/* Date */}
                     <div className="datePickerWrap" ref={dateWrapRef}>
-                        <button className="filterButton" onClick={() => setShowDate((v) => !v)}>
+                        <button className={`filterButton ${showDate ? 'active' : ''}`} onClick={() => setShowDate(!showDate)}>
+                            {' '}
                             {selectedDate.format('YYYY-MM-DD')} <FaChevronDown size={10} />
                         </button>
-
                         {showDate && (
                             <CalendarDropdown
                                 value={selectedDate}
                                 onChange={(d) => {
                                     setSelectedDate(d);
-                                    setShowDate(false); // 날짜 고르면 자동 닫힘
+                                    setShowDate(false);
                                 }}
                             />
                         )}
                     </div>
 
-                    {/* 나머지 필터 */}
-                    {['Type', 'OPPS', 'Game'].map((l) => (
-                        <button key={l} className="filterButton">
-                            {l} <FaChevronDown size={10} />
+                    {/* Type */}
+                    <div className="typePickerWrap" ref={typeWrapRef}>
+                        <button className={`filterButton ${selectedType ? 'active' : ''}`} onClick={() => setShowType(!showType)}>
+                            {selectedType ?? 'Type'} <FaChevronDown size={10} />
                         </button>
-                    ))}
+                        {showType && (
+                            <ul className="typeDropdown">
+                                {TYPES.map((t) => (
+                                    <li key={t}>
+                                        <button
+                                            className={`typeItem ${selectedType === t ? 'active' : ''}`}
+                                            onClick={() => {
+                                                setSelectedType(t);
+                                                setShowType(false);
+                                            }}
+                                        >
+                                            {t}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
 
-                    <button className="resetButton" onClick={onReset}>
+                    {/* OPPS */}
+                    <div className="oppsPickerWrap" ref={oppsWrapRef}>
+                        <button className={`filterButton ${selectedOpps ? 'active' : ''}`} onClick={() => setShowOpps(!showOpps)}>
+                            {selectedOpps ? selectedOpps.name : 'OPPS'} <FaChevronDown size={10} />
+                        </button>
+                        {showOpps && (
+                            <ul className="oppsDropdown">
+                                <li className="oppsHeader">Select Your Opponent</li>
+                                {TEAMS.filter((t) => t.name !== team?.name).map((t) => (
+                                    <li key={t.name}>
+                                        <button
+                                            className="oppsItem"
+                                            onClick={() => {
+                                                setSelectedOpps(t);
+                                                setShowOpps(false);
+                                            }}
+                                        >
+                                            <img src={t.logo} alt={t.name} /> {t.name}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+
+                    {/* Reset */}
+                    <button className="resetButton" onClick={resetFilters}>
                         Reset
                     </button>
                 </div>
