@@ -1,8 +1,8 @@
 /* 다크 배경에 맞춘 헤더 */
 .stechHeader {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 30px;
     padding: 16px 24px;
     background: #111214; /* 거의 검정 */
     border-bottom: 1px solid #1f2023;
@@ -13,14 +13,28 @@
 .headerLeft {
     display: flex;
     align-items: center;
-    gap: 12px;
+}
+
+.topRow {
+    display: flex;
+    flex-direction: row;
+}
+
+.bottomRow {
+    display: flex;
+    justify-content: space-between;
 }
 
 .teamLogo {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    margin-right: 8px;
+}
+
+.teamPickerWrap {
+    position: relative;
 }
 
 .teamPicker {
@@ -30,9 +44,39 @@
     background: transparent;
     border: none;
     color: inherit;
+    font-size: 26px;
     font-weight: 600;
     cursor: pointer;
-    padding: 6px 8px;
+    padding-left: 6px;
+}
+
+/* 드롭다운: absolute → 헤더 높이 변화 없음 */
+.teamDropdown {
+    position: absolute;
+    top: calc(100% + 4px); /* 버튼 바로 아래 */
+    left: 0;
+    background: #1c1d21;
+    border: 1px solid #303136;
+    border-radius: 6px;
+    padding: 6px 0;
+    width: 180px;
+    z-index: 100;
+    list-style: none;
+}
+
+.teamItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    color: #e5e7eb;
+    cursor: pointer;
+}
+.teamItem:hover {
+    background: #2a2b30;
 }
 
 /* ───────── 필터 버튼 그룹 ───────── */
@@ -54,7 +98,6 @@
     align-items: center;
     gap: 4px;
     cursor: pointer;
-    transition: background 0.15s;
 }
 
 .filterButton:hover,
