@@ -1,5 +1,5 @@
 // src/components/Auth/TermsModal.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './TermsModal.css';
 
 const TermsModal = ({ isOpen, onClose, onAgree, termType, currentAgreement = false }) => {
@@ -19,14 +19,7 @@ const TermsModal = ({ isOpen, onClose, onAgree, termType, currentAgreement = fal
         },
     };
 
-    // 약관 내용 로드
-    useEffect(() => {
-        if (isOpen && termType) {
-            loadTermContent();
-        }
-    }, [isOpen, termType]);
-
-    const loadTermContent = async () => {
+    const loadTermContent = useCallback(async () => {
         setLoading(true);
         setError('');
 
@@ -74,7 +67,7 @@ const TermsModal = ({ isOpen, onClose, onAgree, termType, currentAgreement = fal
         } finally {
             setLoading(false);
         }
-    };
+    }, [termType]);
 
     // 동의 핸들러
     const handleAgree = () => {
@@ -83,19 +76,21 @@ const TermsModal = ({ isOpen, onClose, onAgree, termType, currentAgreement = fal
         onClose();
     };
 
+    // 약관 내용 로드
+    useEffect(() => {
+        if (isOpen && termType) loadTermContent();
+    }, [isOpen, termType, loadTermContent]);
+
     // 키보드 이벤트 처리
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (e.key === 'Escape' && isOpen) {
-                onClose();
-            }
+            if (e.key === 'Escape' && isOpen) onClose();
         };
 
         if (isOpen) {
             document.addEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'hidden';
         }
-
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
             document.body.style.overflow = 'unset';
