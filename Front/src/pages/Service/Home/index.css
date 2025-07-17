@@ -1,0 +1,19 @@
+.serviceHomeContainer{
+  background-color: #111214;
+}
+.serviceHomeHeader{
+  display: flex;
+  flex-direction: column;
+  padding-left: 50px;
+  padding-right:50px;
+}
+
+.headerTextsBox{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerTexts{
+  color: white;
+}
