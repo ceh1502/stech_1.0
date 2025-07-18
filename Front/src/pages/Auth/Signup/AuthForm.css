@@ -278,7 +278,7 @@
     display: block;
     width: 100%;
     max-width: 100%;
-    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #f77705 0%, #f79c05 100%);
     color: white;
     display: flex;
     justify-content: center;
@@ -584,7 +584,7 @@
 
 /* ===== 제출 버튼 개선 ===== */
 .submitButton.signupButton {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
     color: white;
     font-size: 16px;
     font-weight: 600;
@@ -599,9 +599,9 @@
 }
 
 .submitButton.signupButton:hover:not(:disabled) {
-    background: linear-gradient(135deg, #218838 0%, #1e9960 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    box-shadow: 0 4px 12px #4f46e5;
 }
 
 .submitButton.signupButton:active:not(:disabled) {
