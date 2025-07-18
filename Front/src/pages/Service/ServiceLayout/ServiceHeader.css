@@ -161,7 +161,7 @@
 .filterButton.active,
 .typeItem.active,
 .calCell.selected {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
     color: #fff;
 }
 
@@ -196,7 +196,7 @@
     background: #2a2b30;
 }
 .typeItem.active {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
     color: #fff;
 }
 
