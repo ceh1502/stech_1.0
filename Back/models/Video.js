@@ -118,8 +118,7 @@ const mongoose = require('mongoose');
   videoSchema.index({ gameId: 1 });           
   videoSchema.index({ playType: 1 });    
   videoSchema.index({ success: 1 });        
-  videoSchema.index({ 'players.playerId': 1 }); // 특정 선수 영상 검색시 
-  빠름
+  videoSchema.index({ 'players.playerId': 1 }); // 특정 선수 영상 검색시 빠름
 
   // 가상 필드: 이 영상이 속한 경기 정보 조회
   videoSchema.virtual('game', {

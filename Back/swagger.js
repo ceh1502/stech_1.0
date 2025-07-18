@@ -15,12 +15,12 @@ const options = {
     },
     servers: [
       {
-        url: 'http://3.34.47.22:4000',
-        description: '프로덕션 서버'
-      },
-      {
         url: 'http://localhost:4000', 
         description: '개발 서버'
+      },
+      {
+        url: 'http://3.34.47.22:4000',
+        description: '프로덕션 서버'
       }
     ],
     components: {
@@ -36,7 +36,7 @@ const options = {
       bearerAuth: []
     }]
   },
-  apis: ['./routes/*.js'] // API 주석이 있는 파일들
+  apis: ['./routes/*.js', './controllers/*.js'] // API 주석이 있는 파일들
 };
 
 const specs = swaggerJSDoc(options);

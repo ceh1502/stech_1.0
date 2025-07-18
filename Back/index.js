@@ -2,6 +2,9 @@ require('dotenv').config();
 const express  = require('express');
 const cors     = require('cors');
 const app  = express();
+const authRoutes = require('./routes/authRoutes'); //명세서
+const teamRoutes = require('./routes/teamRoutes'); // 팀 라우트 추가
+const videoRoutes = require('./routes/videoRoutes');
 
 // Swagger 추가 ← 여기에 추가!
 const { swaggerUi, specs } = require('./swagger');
@@ -15,7 +18,6 @@ app.use(cors({
 }));
 const mongoose = require('mongoose');
 
-const authRoutes = require('./routes/auth'); //명세서
 
 const PORT = process.env.PORT || 4000;
 
@@ -33,12 +35,24 @@ app.get('/', (req, res) => {
             'POST /api/auth/signup',
             'POST /api/auth/login',
             'POST /api/auth/verify-email',
-            'GET /api/auth/me'
+            'GET /api/auth/me',
+            'POST /api/team',           
+            'GET /api/team/my',       
+            'GET /api/team/:teamId',    
+            'PUT /api/team/:teamId',    
+            'DELETE /api/team/:teamId',
+            'POST /api/video/upload',
+            'GET /api/video/:videoId',
+            'DELETE /api/video/:videoId',
+            'GET /api/video/game/:gameId'
+
         ]
     });
 });
 
 app.use('/api/auth', authRoutes); ///api 명세서
+app.use('/api/team', teamRoutes); // 팀 라우트 등록
+app.use('/api/video', videoRoutes); //라우트 등록
 
 mongoose.connect(process.env.MONGODB_URI, {
 })
