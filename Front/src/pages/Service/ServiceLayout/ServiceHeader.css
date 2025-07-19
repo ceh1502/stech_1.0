@@ -238,10 +238,11 @@
 }
 
 /* 이미지 크기 재사용 */
-.oppsItem img {
-    width: 100px;
+.oppsItem img,.teamItem img {
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    overflow: hidden;
+    object-fit: cover;
 }
 
 /* ───── TYPE 드롭다운 항목 ───── */
