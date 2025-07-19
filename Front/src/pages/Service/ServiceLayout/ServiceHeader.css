@@ -239,9 +239,9 @@
 
 /* 이미지 크기 재사용 */
 .oppsItem img {
-    width: 24px;
-    height: 24px;
+    width: 100px;
     border-radius: 50%;
+    overflow: hidden;
 }
 
 /* ───── TYPE 드롭다운 항목 ───── */

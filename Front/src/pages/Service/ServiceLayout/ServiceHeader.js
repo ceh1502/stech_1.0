@@ -8,10 +8,20 @@ import dayjs from 'dayjs';
 
 /* 선택 가능한 팀 목록 (건아 이거 백 연결해둬라)*/
 const TEAMS = [
-    { name: 'Hanyang Lions', logo: '/assets/images/logos/Hanyang%20Lions.svg' },
-    { name: 'SK Wyverns', logo: '/assets/images/logos/Stechlogo.svg' },
-    { name: 'LG Twins', logo: '/assets/images/logos/Stechlogo.svg' },
-    { name: '이건, 손현빈, 이건', logo: '/assets/images/logos/Stechlogo.svg' },
+    { name: 'ChungAng Blue Dragons', logo: '/assets/imgaes/svg/teams/ChungAng Blue Dragons.svg' },
+    { name: 'Dongguk Tuskers', logo: '/assets/images/svg/teams/Dongguk Tuskers.svg' },
+    { name: 'Hanyang Lions', logo: '/assets/images/svg/teams/Hanyang Lions.svg' },
+    { name: 'Hongik Cowboys', logo: '/assets/images/svg/teams/Hongik Cowboys.svg' },
+    { name: 'HUFS Black Knights', logo: '/assets/images/svg/teams/HUFS Black Knights.svg' },
+    { name: 'Konkuk Raging Bulls', logo: '/assets/images/svg/teams/Konkuk Raging Bulls.svg' },
+    { name: 'Korea Univeristy Tigers', logo: '/assets/images/svg/teams/Korea Univeristy Tigers.svg' },
+    { name: 'Kyunghee Commanders', logo: '/assets/images/svg/teams/Kyunghee Commanders.svg' },
+    { name: 'Seoul Vikings', logo: '/assets/images/svg/teams/Seoul Vikings.svg' },
+    { name: 'SNU Green Terrors', logo: '/assets/images/svg/teams/SNU Green Terrors.svg' },
+    { name: 'Sogang Albatross', logo: '/assets/images/svg/teams/Sogang Albatross.svg' },
+    { name: 'Soongsil crusaders', logo: '/assets/images/svg/teams/Soongsil crusaders.svg' },
+    { name: 'UOS City Hawks', logo: '/assets/images/svg/teams/UOS City Hawks.svg' },
+    { name: 'Yonsei Eagles', logo: '/assets/images/svg/teams/Yonsei Eagles.svg' },
 ];
 
 const TYPES = ['Scrimmage', 'Friendly match', 'Season'];
@@ -70,7 +80,6 @@ const HeaderBar = ({ onNewVideo = () => {}, onReset = () => {} }) => {
 
     return (
         <header className="stechHeader">
-            {/* ───── 1줄: 로고 + 팀 선택 ───── */}
             <div className="headerRow topRow">
                 <img src={logoSrc} alt={label} className="teamLogo" />
 
