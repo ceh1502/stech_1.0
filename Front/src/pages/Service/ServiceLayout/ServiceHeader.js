@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 
 /* 선택 가능한 팀 목록 (건아 이거 백 연결해둬라)*/
 const TEAMS = [
-    { name: 'ChungAng Blue Dragons', logo: '/assets/imgaes/svg/teams/ChungAng Blue Dragons.svg' },
+    { name: 'ChungAng Blue Dragons', logo: '/assets/images/svg/teams/ChungAng Blue Dragons.svg' },
     { name: 'Dongguk Tuskers', logo: '/assets/images/svg/teams/Dongguk Tuskers.svg' },
     { name: 'Hanyang Lions', logo: '/assets/images/svg/teams/Hanyang Lions.svg' },
     { name: 'Hongik Cowboys', logo: '/assets/images/svg/teams/Hongik Cowboys.svg' },
