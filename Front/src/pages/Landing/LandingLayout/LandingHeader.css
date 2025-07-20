@@ -49,3 +49,7 @@
 .docs{
   cursor: pointer;
 }
+
+.goToServiceButton {
+  color: black;
+}

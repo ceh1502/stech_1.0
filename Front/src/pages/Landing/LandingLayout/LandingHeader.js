@@ -21,6 +21,9 @@ const LandingHeader = () => {
         <div className="teamButton">
           <NavLink to="/Team"  className={({isActive})=> isActive ? "teamActive" : "team"}>Team</NavLink>
         </div>
+        <div className='serviceButton'> 
+          <NavLink to='/service' className='goToServiceButton' > Go to Service </ NavLink>
+        </div>
       </div>
     </div>
   )
