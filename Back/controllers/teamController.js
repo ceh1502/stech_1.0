@@ -1,6 +1,6 @@
 // 필요한 모델들 가져오기
 const Team = require('../models/Team');
-const Player = require('../models/Player');
+const Player = require('../models/player');
 const { v4: uuidv4 } = require('uuid');
 
 /**
