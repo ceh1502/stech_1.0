@@ -1,9 +1,11 @@
 import React from 'react';
 import './index.css';
+import {useNavigate } from 'react-router-dom';
 
 const ServiceHome = () => {
   const HEADERTEXTS=['Date', 'Game Score', 'Detail', 'Report'];
-  
+  const navigate = useNavigate();
+
   return(
     <div className='serviceHomeContainer'>
       <div className='serviceHomeHeader'>
@@ -15,6 +17,9 @@ const ServiceHome = () => {
           ))
           }
         </div>
+      </div>
+      <div className='gameListBox'>
+        
       </div>
     </div>
   )
