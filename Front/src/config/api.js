@@ -16,6 +16,7 @@ export const API_CONFIG = {
     CHANGE_PASSWORD: '/auth/change-password',
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
-    DELETE_ACCOUNT: '/auth/delete-account'
+    DELETE_ACCOUNT: '/auth/delete-account',
+    UPLOAD_VIDEO: '/video/upload'
   }
 };

@@ -1,6 +1,7 @@
 // src/components/UploadVideoModal.jsx
 import { useState } from 'react';
 import {useNavigate} from 'react-router-dom';
+import { API_CONFIG } from '../config/api';
 import './UploadVideoModal.css';
 
 const UploadVideoModal = ({ isOpen, onClose, onUploaded }) => {
@@ -26,7 +27,7 @@ const UploadVideoModal = ({ isOpen, onClose, onUploaded }) => {
             fd.append('title', title);
             fd.append('description', desc);
 
-            await fetch('/api/videos', { method: 'POST', body: fd }); // ← API 바꿔주세요
+            await fetch(API_CONFIG.ENDPOINTS.UPLOAD_VIDEO, { method: 'POST', body: fd }); 
             onUploaded?.();
             onClose();
         } catch (err) {
