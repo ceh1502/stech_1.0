@@ -17,6 +17,6 @@ export const API_CONFIG = {
     FORGOT_PASSWORD: '/auth/forgot-password',
     RESET_PASSWORD: '/auth/reset-password',
     DELETE_ACCOUNT: '/auth/delete-account',
-    UPLOAD_VIDEO: '/video/upload'
+    UPLOAD_VIDEO: '/video/upload' //<-- 건아 임마를 조져
   }
 };
