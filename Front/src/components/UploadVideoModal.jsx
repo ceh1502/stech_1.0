@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import {useNavigate} from 'react-router-dom';
 import { API_CONFIG } from '../config/api';
+import { getToken } from '../utils/tokenUtils';
 import './UploadVideoModal.css';
 
 const UploadVideoModal = ({ isOpen, onClose, onUploaded }) => {
@@ -15,27 +16,34 @@ const UploadVideoModal = ({ isOpen, onClose, onUploaded }) => {
     if (!isOpen) return null;
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!file) return setError('⚠️ Select a video file first');
+      e.preventDefault();
+      if (!file) return setError('⚠️ Select a video file first');
 
-        setLoading(true);
-        setError('');
-        try {
-            /* --- 예시 FormData 업로드 --- */
-            const fd = new FormData();
-            fd.append('video', file);
-            fd.append('title', title);
-            fd.append('description', desc);
+      setLoading(true);
+      setError('');
+      try {
+          /* --- 예시 FormData 업로드 --- */
+          const fd = new FormData();
+          fd.append('video', file);
+          fd.append('title', title);
+          fd.append('description', desc);
 
-            await fetch(API_CONFIG.ENDPOINTS.UPLOAD_VIDEO, { method: 'POST', body: fd }); 
-            onUploaded?.();
-            onClose();
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+          const token = getToken();
+          await fetch(API_CONFIG.ENDPOINTS.UPLOAD_VIDEO, {
+              method: 'POST',
+              headers: {
+                  'Authorization': `Bearer ${token}`
+              },
+              body: fd
+          });
+          onUploaded?.();
+          onClose();
+      } catch (err) {
+          setError(err.message);
+      } finally {
+          setLoading(false);
+      }
+  };
 
     return (
         <div className="uvm-overlay" onClick={onClose}>
