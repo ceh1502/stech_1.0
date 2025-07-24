@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Video = require('../models/Video');
 const Game = require('../models/Game');
 const Team = require('../models/Team');
@@ -7,7 +8,8 @@ const { v4: uuidv4 } = require('uuid');
 const uploadVideo = async (req, res) => {
   try {
     const { 
-      gameId, 
+      // 프론트랑 비디오 업로드 되는지 확인용을 잠시 비활성화
+      /*gameId, 
       quarter, 
       playType, 
       success, 
@@ -15,9 +17,13 @@ const uploadVideo = async (req, res) => {
       endYard, 
       gainedYard, 
       players, 
-      significantPlays
+      significantPlays*/ 
+      title,
+      description
     } = req.body;
 
+
+    /* 임시로 gameID 체크 제거 (태스트용)
     // 경기 존재 여부 확인
     const game = await Game.findById(gameId);
     if (!game) {
@@ -25,7 +31,7 @@ const uploadVideo = async (req, res) => {
         success: false,
         message: '경기를 찾을 수 없습니다.'
       });
-    }
+    } */
 
     // S3에 파일 업로드
     const uploadResult = await uploadToS3(req.file);
@@ -41,7 +47,7 @@ const uploadVideo = async (req, res) => {
 
     // 새 비디오 객체 생성
     const newVideo = new Video({
-      videoId,
+      /*videoId,
       url: uploadResult.url,
       fileName: req.file.originalname,
       fileSize: req.file.size,
@@ -53,7 +59,30 @@ const uploadVideo = async (req, res) => {
       gainedYard: parseInt(gainedYard),
       players: JSON.parse(players || '[]'),
       significantPlays: JSON.parse(significantPlays || '[]'),
-      gameId
+      gameId*/
+      videoId,
+      url: uploadResult.url,
+      fileName: req.file.originalname,
+      fileSize: req.file.size,
+      title,
+      description,
+      // 올바른 기본값들
+      quarter: "1Q",
+      playType: "Run",  // ✅ enum 값
+      success: true,
+      startYard: {
+        side: "own",     // ✅ required 
+        yard: 0
+      },
+      endYard: {
+        side: "own",     // ✅ required
+        yard: 0
+      },
+      gainedYard: 0,
+      players: [],
+      significantPlays: [],
+      gameId: new mongoose.Types.ObjectId(),
+      
     });
 
     // 데이터베이스에 저장
