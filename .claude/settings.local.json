@@ -5,7 +5,8 @@
       "Bash(npm start)",
       "Bash(ping:*)",
       "Bash(ls:*)",
-      "Bash(ssh:*)"
+      "Bash(ssh:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }
