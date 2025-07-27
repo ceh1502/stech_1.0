@@ -212,7 +212,7 @@ router.post('/signup', async (req, res) => {
         await user.save();
         
         // 인증 이메일 발송
-        const emailSent = await sendVerificationEmail(email, verificationToken, name);
+        const emailSent = await sendVerificationEmail(email, verificationToken, fullName);
         
         if (emailSent) {
             res.status(201).json({
@@ -225,9 +225,15 @@ router.post('/signup', async (req, res) => {
                 }
             });
         } else {
-            res.status(500).json({
-                success: false,
-                message: '이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.'
+            // 이메일 발송 실패해도 회원가입은 성공으로 처리
+            res.status(201).json({
+                success: true,
+                message: '회원가입이 완료되었습니다. 이메일 발송에 문제가 있을 수 있으니 잠시 후 재시도해주세요.',
+                data: {
+                    email: user.email,
+                    name: user.name,
+                    emailVerificationRequired: true
+                }
             });
         }
         
