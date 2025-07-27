@@ -29,7 +29,7 @@ const UploadVideoModal = ({ isOpen, onClose, onUploaded }) => {
           fd.append('description', desc);
 
           const token = getToken();
-          await fetch(API_CONFIG.ENDPOINTS.UPLOAD_VIDEO, {
+          await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.UPLOAD_VIDEO}`, {
               method: 'POST',
               headers: {
                   'Authorization': `Bearer ${token}`
