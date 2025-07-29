@@ -5,12 +5,18 @@ const jwt = require('jsonwebtoken');
 // 회원가입
 exports.signup = async (req, res) => {
   try {
-    const { email, password, nickname } = req.body;
+    const { email, password, name, nickname } = req.body;
+    
+    // name 또는 nickname 중 하나 사용 (name 우선)
+    const fullName = name || nickname;
 
     // 이메일 중복 확인
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: "이미 존재하는 이메일입니다." });
+      return res.status(400).json({ 
+        success: false, 
+        message: "이미 존재하는 이메일입니다." 
+      });
     }
 
     // 비밀번호 해싱
@@ -27,7 +33,7 @@ exports.signup = async (req, res) => {
     const newUser = new User({
       email,
       password: hashedPw,
-      nickname,
+      name: fullName,
       emailVerificationToken: token,
       emailVerificationExpires: expires,
       isEmailVerified: false,
@@ -40,16 +46,22 @@ exports.signup = async (req, res) => {
     await sendVerificationEmail(email, token);
 
     res.status(201).json({
+      success: true,
       message: "회원가입 성공! 인증 메일을 확인하세요.",
-      user: {
-        id: newUser._id,
-        email: newUser.email,
-        nickname: newUser.nickname
+      data: {
+        user: {
+          id: newUser._id,
+          email: newUser.email,
+          name: newUser.name
+        }
       }
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "서버 오류가 발생했습니다." });
+    res.status(500).json({ 
+      success: false, 
+      message: "서버 오류가 발생했습니다." 
+    });
   }
 };
 
@@ -68,7 +80,10 @@ exports.login = async (req, res) => {
 
     if (!user) {
       console.log('❌ 이메일 불일치');
-      return res.status(400).json({ error: '존재하지 않는 이메일입니다.' });
+      return res.status(400).json({ 
+        success: false, 
+        message: '존재하지 않는 이메일입니다.' 
+      });
     }
 
     console.log('DB 저장된 이메일:', user.email);
@@ -80,11 +95,17 @@ exports.login = async (req, res) => {
 
     if (!isMatch) {
       console.log('❌ 비밀번호 불일치');
-      return res.status(401).json({ error: '비밀번호가 틀렸습니다.' });
+      return res.status(401).json({ 
+        success: false, 
+        message: '비밀번호가 틀렸습니다.' 
+      });
     }
 
     if (!user.isEmailVerified) {
-      return res.status(401).json({ error: '이메일 인증이 필요합니다.' });
+      return res.status(401).json({ 
+        success: false, 
+        message: '이메일 인증이 필요합니다.' 
+      });
     }
 
     console.log('JWT_SECRET 확인:', process.env.JWT_SECRET ? '있음' : '없음');
@@ -97,18 +118,24 @@ exports.login = async (req, res) => {
     console.log('✅ 로그인 성공');
 
     res.status(200).json({
+      success: true,
       message: '로그인 성공',
-      token,
-      user: {
-        id: user._id,
-        email: user.email,
-        nickname: user.nickname,
-        isEmailVerified: user.isEmailVerified
-      },
+      data: {
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          isEmailVerified: user.isEmailVerified
+        }
+      }
     });
   } catch (err) {
     console.error('로그인 에러:', err);
-    res.status(500).json({ error: '서버 에러' });
+    res.status(500).json({ 
+      success: false, 
+      message: '서버 에러' 
+    });
   }
 };
 
@@ -121,7 +148,10 @@ exports.verifyEmail = async (req, res) => {
   console.log('받은 토큰:', token);
 
   if (!token || !email) {
-    return res.status(400).json({ error: '토큰과 이메일이 필요합니다.' });
+    return res.status(400).json({ 
+      success: false, 
+      message: '토큰과 이메일이 필요합니다.' 
+    });
   }
 
   try {
@@ -129,12 +159,18 @@ exports.verifyEmail = async (req, res) => {
 
     if (!user) {
       console.log('❌ 이메일에 해당하는 유저 없음');
-      return res.status(404).json({ error: '해당 이메일의 사용자를 찾을 수 없습니다.' });
+      return res.status(404).json({ 
+        success: false, 
+        message: '해당 이메일의 사용자를 찾을 수 없습니다.' 
+      });
     }
 
     if (user.isEmailVerified) {
       console.log('❗ 이미 인증된 계정');
-      return res.status(400).json({ error: '이미 인증된 계정입니다.' });
+      return res.status(400).json({ 
+        success: false, 
+        message: '이미 인증된 계정입니다.' 
+      });
     }
 
     if (
@@ -142,7 +178,10 @@ exports.verifyEmail = async (req, res) => {
       user.emailVerificationExpires < Date.now()
     ) {
       console.log('❌ 토큰 불일치 또는 만료');
-      return res.status(400).json({ error: '유효하지 않거나 만료된 토큰입니다.' });
+      return res.status(400).json({ 
+        success: false, 
+        message: '유효하지 않거나 만료된 토큰입니다.' 
+      });
     }
 
     // 인증 성공 처리
@@ -159,17 +198,23 @@ exports.verifyEmail = async (req, res) => {
     console.log('✅ 이메일 인증 성공');
 
     res.status(200).json({
+      success: true,
       message: '이메일 인증 완료',
-      token: jwtToken,
-      user: {
-        id: user._id,
-        email: user.email,
-        nickname: user.nickname,
-        isEmailVerified: true,
-      },
+      data: {
+        token: jwtToken,
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          isEmailVerified: true,
+        }
+      }
     });
   } catch (err) {
     console.error('이메일 인증 에러:', err);
-    res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+    res.status(500).json({ 
+      success: false, 
+      message: '서버 오류가 발생했습니다.' 
+    });
   }
 };

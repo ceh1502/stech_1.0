@@ -7,12 +7,20 @@
   const s3 = new AWS.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION
+    region: process.env.AWS_REGION || 'ap-northeast-2'
   });
 
   // S3에 파일 업로드하는 함수
   const uploadToS3 = async (file, folder = 'videos') => {
     try {
+      // AWS 설정 확인
+      if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_BUCKET_NAME) {
+        return {
+          success: false,
+          error: 'AWS 설정이 완료되지 않았습니다.'
+        };
+      }
+
       // 고유한 파일명 생성 (UUID + 원본 확장자)
       const fileExtension = path.extname(file.originalname);
       const fileName = `${uuidv4()}${fileExtension}`;

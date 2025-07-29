@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Video = require('../models/Video');
 const Game = require('../models/Game');
 const Team = require('../models/Team');
+const Player = require('../models/player');
 const { uploadToS3, deleteFromS3 } = require('../utils/s3Upload');
 const { v4: uuidv4 } = require('uuid');
 

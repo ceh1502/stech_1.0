@@ -33,7 +33,7 @@ const { v4: uuidv4 } = require('uuid');
 const createTeam = async (req, res) => {
   try {
     const { teamName, logoUrl } = req.body;
-    const ownerId = req.user.id; // 인증된 사용자 ID
+    const ownerId = req.user._id; // 인증된 사용자 ID
 
     // 팀 ID 자동 생성
     const teamId = `team_${uuidv4().substring(0, 8)}`;
@@ -131,7 +131,7 @@ const getTeam = async (req, res) => {
 // 내가 만든 팀들 조회
 const getMyTeams = async (req, res) => {
   try {
-    const ownerId = req.user.id;
+    const ownerId = req.user._id;
 
     const teams = await Team.find({ ownerId }).sort({ createdAt: -1 });
 
@@ -190,7 +190,7 @@ const updateTeam = async (req, res) => {
   try {
     const { teamId } = req.params;
     const { teamName, logoUrl } = req.body;
-    const ownerId = req.user.id;
+    const ownerId = req.user._id;
 
     // 팀 찾기 및 권한 확인
     const team = await Team.findOne({ teamId });
@@ -259,7 +259,7 @@ const updateTeam = async (req, res) => {
 const deleteTeam = async (req, res) => {
   try {
     const { teamId } = req.params;
-    const ownerId = req.user.id;
+    const ownerId = req.user._id;
 
     // 팀 찾기 및 권한 확인
     const team = await Team.findOne({ teamId });
