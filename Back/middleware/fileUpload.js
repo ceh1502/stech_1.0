@@ -4,8 +4,8 @@ const path = require('path');
 
 // 파일 필터링 함수 (어떤 파일을 허용할지 결정)
 const fileFilter = (req, file, cb) => {
-  // 허용되는 동영상 형식들
-  const allowedTypes = process.env.ALLOWED_VIDEO_TYPES.split(',');
+  // 허용되는 동영상 형식들 (기본값 설정)
+  const allowedTypes = (process.env.ALLOWED_VIDEO_TYPES || 'video/mp4,video/avi,video/mov,video/quicktime').split(',');
 
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);  // 파일 허용
