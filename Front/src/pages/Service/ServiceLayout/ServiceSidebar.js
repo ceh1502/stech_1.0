@@ -4,7 +4,7 @@ import './ServiceSidebar.css';
 import { useAuth } from '../../../context/AuthContext';
 import Logo from '../../../assets/images/logos/stech.png';
 import { CiLogin, CiLogout } from 'react-icons/ci';
-import { GoHome, GoLightBulb } from 'react-icons/go';
+import { GoHome, GoLightBulb, GoChevronDown, GoChevronRight } from 'react-icons/go';
 import { BsPlayBtn } from 'react-icons/bs';
 import { BiSolidBarChartAlt2 } from 'react-icons/bi';
 import { MdOutlineSupportAgent, MdOutlineQuiz } from 'react-icons/md';
@@ -16,29 +16,80 @@ const ServiceSidebar = () => {
     const location = useLocation();
     const [hoveredItem, setHoveredItem] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    // Menu Items
-    const menuItems = [
+    const [expandedMenus, setExpandedMenus] = useState({}); // 펼쳐진 메뉴 상태 관리
+
+    // Menu Items (Guest)
+    const menuItems1 = [
         {
-            path: '/service',
-            label: 'Home',
+            path: '/service/guest',
+            label: '홈',
             icon: <GoHome />,
             description: 'Dashboard overview',
         },
         {
-            path: '/service/clip',
-            label: 'Clip',
+            path: '/service/guest/game',
+            label: '경기',
             icon: <BsPlayBtn />,
             description: 'Video analysis',
         },
         {
-            path: '/service/data',
-            label: 'Data',
-            icon: <BiSolidBarChartAlt2 />,
+            path: '/service/guest/clip',
+            label: '경기클립',
+            icon: <BsPlayBtn />,
             description: 'Performance analytics',
         },
         {
+            path: '/service/guest/stat',
+            label: '스탯',
+            icon: <BiSolidBarChartAlt2 />,
+            description: 'AI recommendations',
+        },
+    ];
+
+    // 추가 메뉴 아이템 (member) - 하위 메뉴 포함
+    const menuItems2 = [
+        {
+            path: '/service',
+            label: '홈',
+            icon: <GoHome />,
+            description: 'Dashboard overview',
+        },
+        {
+            path: '/service/game',
+            label: '소속팀 경기',
+            icon: <BsPlayBtn />,
+            description: 'Video analysis',
+        },
+        {
+            path: '/service/stat/team',
+            label: '스탯',
+            icon: <BiSolidBarChartAlt2 />,
+            description: 'Performance analytics',
+            hasSubmenu: true,
+            submenu: [
+                {
+                    path: '/service/stat/team',
+                    label: '리그 팀 순위',
+                    icon: <BiSolidBarChartAlt2 />,
+                    description: 'Team rankings'
+                },
+                {
+                    path: '/service/stat/position',
+                    label: '리그 포지션 순위',
+                    icon: <BiSolidBarChartAlt2 />,
+                    description: 'Position rankings'
+                }
+            ]
+        },
+        {
+            path: '/service/highlight',
+            label: '경기 하이라이트',
+            icon: <BsPlayBtn />,
+            description: 'Video analysis',
+        },
+        {
             path: '/service/suggestion',
-            label: 'Stech Suggestion',
+            label: 'Stech 제안',
             icon: <GoLightBulb />,
             description: 'AI recommendations',
         },
@@ -57,7 +108,7 @@ const ServiceSidebar = () => {
             label: 'Customer Support',
             icon: <MdOutlineQuiz />,
             description: 'Get help',
-            modal: true, // Support modal
+            modal: true,
         },
         {
             path: '/service/faq',
@@ -71,7 +122,7 @@ const ServiceSidebar = () => {
     const handleLogout = async () => {
         setIsLoading(true);
         try {
-            await new Promise((resolve) => setTimeout(resolve, 500)); // 로딩 시뮬레이션
+            await new Promise((resolve) => setTimeout(resolve, 500));
             logout();
         } finally {
             setIsLoading(false);
@@ -82,6 +133,46 @@ const ServiceSidebar = () => {
     const handleLogin = () => {
         navigate('/auth');
     };
+
+    // 스탯 메뉴 클릭 핸들러
+    const handleStatMenuClick = (menuPath) => {
+        // 페이지 이동
+        navigate(menuPath);
+        // 하위 메뉴 펼치기
+        setExpandedMenus(prev => ({
+            ...prev,
+            [menuPath]: true
+        }));
+    };
+
+    // 다른 메뉴 클릭 시 스탯 메뉴 닫기
+    const handleOtherMenuClick = () => {
+        setExpandedMenus({});
+    };
+
+    // 현재 경로가 해당 메뉴의 하위 경로인지 확인
+    const isSubmenuActive = (item) => {
+        if (!item.hasSubmenu) return false;
+        return item.submenu.some(subItem => location.pathname === subItem.path);
+    };
+
+    // 현재 경로가 스탯 관련 경로인지 확인 (메인 스탯 페이지 포함)
+    const isStatMenuActive = (item) => {
+        if (!item.hasSubmenu) return false;
+        return location.pathname === item.path || item.submenu.some(subItem => location.pathname === subItem.path);
+    };
+
+    // 페이지 로드 시 현재 경로에 해당하는 상위 메뉴 자동 확장
+    React.useEffect(() => {
+        menuItems2.forEach(item => {
+            if (item.hasSubmenu && isStatMenuActive(item)) {
+                setExpandedMenus(prev => ({
+                    ...prev,
+                    [item.path]: true
+                }));
+            }
+        });
+    }, [location.pathname]);
 
     // 메뉴 아이템 렌더링 함수
     const renderMenuItem = (item) => {
@@ -97,7 +188,6 @@ const ServiceSidebar = () => {
                         <span className="navIcon">{item.icon}</span>
                         <span className="navLabel">{item.label}</span>
 
-                        {/* 호버 툴팁 */}
                         {hoveredItem === item.path && (
                             <div className="navTooltip">
                                 <span>{item.description}</span>
@@ -108,7 +198,56 @@ const ServiceSidebar = () => {
             );
         }
 
-        // ② 평범한 메뉴 (기존과 동일)
+        // ② 하위 메뉴가 있는 경우
+        if (item.hasSubmenu) {
+            const isExpanded = expandedMenus[item.path];
+            const isActive = location.pathname === item.path || isSubmenuActive(item);
+
+            return (
+                <li key={item.path} className="navItem">
+                    {/* 상위 메뉴 */}
+                    <div
+                        className={`navLink ${isActive ? 'navLinkActive' : ''} ${hoveredItem === item.path ? 'navLinkHovered' : ''} expandableMenu`}
+                        onMouseEnter={() => setHoveredItem(item.path)}
+                        onMouseLeave={() => setHoveredItem(null)}
+                        onClick={()=>navigate(item.path)}
+                        title={item.description}
+                    >
+                        <span className="navIcon">{item.icon}</span>
+                        <span className="navLabel">{item.label}</span>
+                        {isActive && <div className="activeIndicator" />}
+                        {hoveredItem === item.path && (
+                            <div className="navTooltip">
+                                <span>{item.description}</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* 하위 메뉴 */}
+                    {isExpanded && (
+                        <ul className="submenu">
+                            {item.submenu.map(subItem => (
+                                <li key={subItem.path} className="submenuItem">
+                                    <NavLink
+                                        to={subItem.path}
+                                        className={({ isActive }) => 
+                                            `submenuLink ${isActive ? 'submenuLinkActive' : ''}`
+                                        }
+                                        title={subItem.description}
+                                    >
+                                        <span className="submenuIcon">{subItem.icon}</span>
+                                        <span className="submenuLabel">{subItem.label}</span>
+                                        {location.pathname === subItem.path && <div className="activeIndicator" />}
+                                    </NavLink>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </li>
+            );
+        }
+
+        // ③ 평범한 메뉴 (기존과 동일)
         return (
             <li key={item.path} className="navItem" onMouseEnter={() => setHoveredItem(item.path)} onMouseLeave={() => setHoveredItem(null)}>
                 <NavLink
@@ -120,6 +259,7 @@ const ServiceSidebar = () => {
                         return cls;
                     }}
                     title={item.description}
+                    onClick={handleOtherMenuClick} // 다른 메뉴 클릭 시 스탯 메뉴 닫기
                 >
                     <span className="navIcon">{item.icon}</span>
                     <span className="navLabel">{item.label}</span>
@@ -164,7 +304,11 @@ const ServiceSidebar = () => {
             <nav className="sidebarNav">
                 <div className="menuSection">
                     <div className="sectionTitle">Main Menu</div>
-                    <ul className="navMenu">{menuItems.map((item) => renderMenuItem(item))}</ul>
+                    {isAuthenticated ? (
+                        <ul className="navMenu">{menuItems2.map((item) => renderMenuItem(item))}</ul>
+                    ) : (
+                        <ul className="navMenu">{menuItems1.map((item) => renderMenuItem(item))}</ul>  
+                    )}
                 </div>
             </nav>
 

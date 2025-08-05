@@ -2,7 +2,7 @@ import React from 'react';
 import './index.css';
 import {useNavigate } from 'react-router-dom';
 
-const ServiceHome = () => {
+const MemberHomePage = () => {
   const HEADERTEXTS=['Date', 'Game Score', 'Detail', 'Report'];
   const navigate = useNavigate();
 
@@ -25,4 +25,4 @@ const ServiceHome = () => {
   )
 }
 
-export default ServiceHome;
+export default MemberHomePage;
