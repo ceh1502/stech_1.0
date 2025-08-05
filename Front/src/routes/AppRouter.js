@@ -16,10 +16,22 @@ export default function AppRouter() {
             <Route path="/service" element={<ServicePages.ServiceLayout />}>
                 <Route index element={<ServicePages.ServiceHome />} />
                 <Route path="clip" element={<ServicePages.ClipPage />} />
-                <Route path="data" element={<ServicePages.DataPage />} />
-                <Route path="team" element={<ServicePages.TeamPage />} />
+                <Route path="game" element={<ServicePages.GamePage />} />
+                <Route path="stat" element={<ServicePages.StatLayout />} >
+                    <Route index element={<ServicePages.LeagueTeamPage />} />
+                    <Route path="team" element={<ServicePages.LeagueTeamPage />} />
+                    <Route path="position" element={<ServicePages.LeaguePositionPage />} />
+                </Route>
+                <Route path="highlight" element={<ServicePages.HighlightPage />} />
+                <Route path='suggestion' element={<ServicePages.SuggestionPage />} />
                 <Route path="support" element={<ServicePages.SupportPage />} />
-                <Route path="faq" element={<ServicePages.FaqPage />} />
+                <Route path="faq" element={<ServicePages.FAQPage />} />
+                <Route path="guest" element={<ServicePages.GuestLayout />}>
+                    <Route index element={<ServicePages.GuestHomePage />} />
+                    <Route path="game" element={<ServicePages.GuestGamePage />} />
+                    <Route path="clip" element={<ServicePages.GuestClipPage />} />
+                    <Route path="stat" element={<ServicePages.GuestStatPage />} />
+                </Route>
             </Route>
 
             {/* Auth Pages*/}

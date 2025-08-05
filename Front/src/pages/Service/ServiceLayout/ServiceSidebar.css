@@ -463,3 +463,120 @@
         transform: translateX(0);
     }
 }
+
+.expandableMenu {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.expandIcon {
+    margin-left: auto;
+    transition: transform 0.2s ease;
+    color: #888;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.expandableMenu:hover .expandIcon {
+    color: #fff;
+}
+
+/* 하위 메뉴 컨테이너 */
+.submenu {
+    list-style: none;
+    padding: 0;
+    margin-left: 40px;
+    border-left:2px solid #4f46e5;
+    overflow: hidden;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        max-height: 200px;
+        transform: translateY(0);
+    }
+}
+
+/* 하위 메뉴 아이템 */
+.submenuItem {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.submenuItem:last-child {
+    border-bottom: none;
+}
+
+/* 하위 메뉴 링크 */
+.submenuLink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left:15%;
+    text-decoration: none;
+    color: #9ca3af;
+    transition: all 0.3s ease;
+    position: relative;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.submenuIcon {
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.submenuLink:hover .submenuIcon {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.submenuLinkActive .submenuIcon {
+    opacity: 1;
+    color: #ffffff;
+}
+
+.submenuLink:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #e5e7eb;
+    padding-left: 20px;
+    transform: translateX(2px);
+}
+
+.submenuLinkActive {
+    background-color: rgba(79, 70, 229, 0.3) !important;
+    color: #ffffff !important;
+    padding-right:20px;
+    display:flex;
+    font-weight: 500;
+}
+
+.submenuLinkActive:hover {
+    background-color: rgba(79, 70, 229, 0.4) !important;
+}
+
+/* 메인 메뉴 활성 상태 (하위 메뉴 있을 때) */
+.navLinkActive.expandableMenu {
+    background-color: rgba(79, 70, 229, 0.2);
+    color: #fff;
+}
+
+/* 호버 효과 (하위 메뉴 있을 때) */
+.navLinkHovered.expandableMenu {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
