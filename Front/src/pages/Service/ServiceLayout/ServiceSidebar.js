@@ -9,6 +9,8 @@ import { BsPlayBtn } from 'react-icons/bs';
 import { BiSolidBarChartAlt2 } from 'react-icons/bi';
 import { MdOutlineSupportAgent, MdOutlineQuiz } from 'react-icons/md';
 import { IoSettingsOutline } from 'react-icons/io5';
+import { CgProfile } from "react-icons/cg";
+
 
 const ServiceSidebar = () => {
     const { isAuthenticated, logout } = useAuth();
@@ -19,7 +21,7 @@ const ServiceSidebar = () => {
     const [expandedMenus, setExpandedMenus] = useState({}); // 펼쳐진 메뉴 상태 관리
 
     // Menu Items (Guest)
-    const menuItems1 = [
+    const  guestMenuItems = [
         {
             path: '/service/guest',
             label: '홈',
@@ -47,7 +49,7 @@ const ServiceSidebar = () => {
     ];
 
     // 추가 메뉴 아이템 (member) - 하위 메뉴 포함
-    const menuItems2 = [
+    const memberMenuItems = [
         {
             path: '/service',
             label: '홈',
@@ -96,27 +98,43 @@ const ServiceSidebar = () => {
     ];
 
     // Footer Items
-    const footerItems = [
+    const memberFooterItems = [
         {
-            path: '/service/team',
-            label: 'Team Setting',
-            icon: <IoSettingsOutline />,
-            description: 'Configure team',
+            path: '/service/faq',
+            label: 'FAQ',
+            icon: <MdOutlineQuiz />,
+            description: 'Frequently Asked Questions',
         },
         {
             path: '/service/support',
-            label: 'Customer Support',
-            icon: <MdOutlineQuiz />,
+            label: '문의하기',
+            icon: <MdOutlineSupportAgent />,
             description: 'Get help',
             modal: true,
         },
         {
-            path: '/service/faq',
-            label: 'FAQ',
-            icon: <MdOutlineSupportAgent />,
-            description: 'Common questions',
+            path: '/service/profile',
+            label: '내 페이지',
+            icon: <CgProfile />,
+            description: 'Profile Settings',
+        },
+        {
+            path: '/service/settings',
+            label: '시스템 설정',
+            icon: <IoSettingsOutline />,
+            description: 'Settings',
         },
     ];
+    const guestFooterItems = [
+        {
+            path: '/service/support',
+            label: '문의하기',
+            icon: <MdOutlineSupportAgent />,
+            description: 'Get help',
+        },
+    ];
+
+
 
     // 로그아웃 핸들러 (로딩 효과 추가)
     const handleLogout = async () => {
@@ -164,7 +182,7 @@ const ServiceSidebar = () => {
 
     // 페이지 로드 시 현재 경로에 해당하는 상위 메뉴 자동 확장
     React.useEffect(() => {
-        menuItems2.forEach(item => {
+        memberMenuItems.forEach(item => {
             if (item.hasSubmenu && isStatMenuActive(item)) {
                 setExpandedMenus(prev => ({
                     ...prev,
@@ -176,28 +194,6 @@ const ServiceSidebar = () => {
 
     // 메뉴 아이템 렌더링 함수
     const renderMenuItem = (item) => {
-        // ① 모달용 버튼
-        if (item.modal) {
-            return (
-                <li key={item.path} className="navItem" onMouseEnter={() => setHoveredItem(item.path)} onMouseLeave={() => setHoveredItem(null)}>
-                    <button
-                        onClick={() => navigate('/service/support', { state: { background: location } })}
-                        className={`navLink ${hoveredItem === item.path ? 'navLinkHovered' : ''}`}
-                        title={item.description}
-                    >
-                        <span className="navIcon">{item.icon}</span>
-                        <span className="navLabel">{item.label}</span>
-
-                        {hoveredItem === item.path && (
-                            <div className="navTooltip">
-                                <span>{item.description}</span>
-                            </div>
-                        )}
-                    </button>
-                </li>
-            );
-        }
-
         // ② 하위 메뉴가 있는 경우
         if (item.hasSubmenu) {
             const isExpanded = expandedMenus[item.path];
@@ -305,9 +301,9 @@ const ServiceSidebar = () => {
                 <div className="menuSection">
                     <div className="sectionTitle">Main Menu</div>
                     {isAuthenticated ? (
-                        <ul className="navMenu">{menuItems2.map((item) => renderMenuItem(item))}</ul>
+                        <ul className="navMenu">{memberMenuItems.map((item) => renderMenuItem(item))}</ul>
                     ) : (
-                        <ul className="navMenu">{menuItems1.map((item) => renderMenuItem(item))}</ul>  
+                        <ul className="navMenu">{guestMenuItems.map((item) => renderMenuItem(item))}</ul>  
                     )}
                 </div>
             </nav>
@@ -316,8 +312,12 @@ const ServiceSidebar = () => {
             <div className="sidebarFooter">
                 <div className="menuSection">
                     <div className="sectionTitle">Support</div>
-                    <ul className="navMenu">{footerItems.map((item) => renderMenuItem(item, true))}</ul>
-                </div>
+                    {isAuthenticated ? (
+                        <ul className="navMenu">{memberFooterItems.map((item) => renderMenuItem(item))}</ul>
+                    ) : (
+                        <ul className="navMenu">{guestFooterItems.map((item) => renderMenuItem(item))}</ul>  
+                    )}                
+                    </div>
 
                 {/* Status Indicator */}
                 <div className="statusIndicator">
