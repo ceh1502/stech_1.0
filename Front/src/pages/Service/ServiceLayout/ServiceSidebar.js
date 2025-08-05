@@ -131,7 +131,6 @@ const ServiceSidebar = () => {
             label: '문의하기',
             icon: <MdOutlineSupportAgent />,
             description: 'Get help',
-            modal: true,
         },
     ];
 
@@ -195,28 +194,6 @@ const ServiceSidebar = () => {
 
     // 메뉴 아이템 렌더링 함수
     const renderMenuItem = (item) => {
-        // ① 모달용 버튼
-        if (item.modal) {
-            return (
-                <li key={item.path} className="navItem" onMouseEnter={() => setHoveredItem(item.path)} onMouseLeave={() => setHoveredItem(null)}>
-                    <button
-                        onClick={() => navigate('/service/support', { state: { background: location } })}
-                        className={`navLink ${hoveredItem === item.path ? 'navLinkHovered' : ''}`}
-                        title={item.description}
-                    >
-                        <span className="navIcon">{item.icon}</span>
-                        <span className="navLabel">{item.label}</span>
-
-                        {hoveredItem === item.path && (
-                            <div className="navTooltip">
-                                <span>{item.description}</span>
-                            </div>
-                        )}
-                    </button>
-                </li>
-            );
-        }
-
         // ② 하위 메뉴가 있는 경우
         if (item.hasSubmenu) {
             const isExpanded = expandedMenus[item.path];
