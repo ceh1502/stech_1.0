@@ -7,7 +7,11 @@
       "Bash(ls:*)",
       "Bash(ssh:*)",
       "Bash(npm run build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npm test)",
+      "Bash(node:*)",
+      "Bash(npm install)",
+      "Bash(pkill:*)"
     ],
     "deny": []
   }

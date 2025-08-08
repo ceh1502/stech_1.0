@@ -11,7 +11,9 @@ const { swaggerUi, specs } = require('./swagger');
 
 app.use(cors({
   origin: [
-    'http://localhost:3000',        // 로컬 프론트
+    'http://localhost:3000',        // 기존 로컬 프론트
+    'http://localhost:3001',        // 클론 프로젝트 로컬 프론트
+    'http://3.34.47.22:3001',       // 클론 프로젝트 서버 프론트
     'https://www.stechpro.ai'       // 실제 배포
   ],
   credentials: true
@@ -19,7 +21,7 @@ app.use(cors({
 const mongoose = require('mongoose');
 
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4001; // 클론 프로젝트용 기본 포트
 
 app.use(express.json({ limit: '150mb' }));
 app.use(express.urlencoded({ limit: '150mb', extended: true }));
