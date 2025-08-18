@@ -11,7 +11,19 @@
       "Bash(npm test)",
       "Bash(node:*)",
       "Bash(npm install)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(mv:*)",
+      "Bash(npx @nestjs/cli new:*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir:*)",
+      "Bash(brew services:*)",
+      "Bash(mongosh:*)",
+      "Bash(npm run start:dev:*)",
+      "Bash(npm run start:*)",
+      "Bash(npx tsc:*)",
+      "Bash(rm:*)",
+      "Bash(git rm:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
