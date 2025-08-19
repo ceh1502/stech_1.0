@@ -5,7 +5,7 @@ import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // TE 스탯 인터페이스 정의 (리턴 스탯 없음)
-interface TeStats {
+export interface TeStats {
   games: number;
   target: number;
   reception: number;

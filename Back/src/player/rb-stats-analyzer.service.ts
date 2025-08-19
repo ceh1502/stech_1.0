@@ -5,7 +5,7 @@ import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // RB 스탯 인터페이스 정의
-interface RbStats {
+export interface RbStats {
   games: number;
   rushingAttempted: number;
   rushingYards: number;

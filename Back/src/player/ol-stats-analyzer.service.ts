@@ -5,7 +5,7 @@ import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // Offensive Lineman 스탯 인터페이스 정의
-interface OLStats {
+export interface OLStats {
   games: number;
   offensiveSnapsPlayed: number;
   penalties: number;

@@ -4,14 +4,18 @@
 echo "🏈 STECH Pro 3-Tier Stats System Integration Test"
 echo "=================================================="
 
-# Test data
+# Test data (올바른 NewClipDto 형식)
 TEST_DATA='{
   "clips": [
     {
-      "clipKey": "TEST_3TIER_001", 
-      "car": { "num": 10, "pos": "QB" },
-      "tkl": { "num": 34, "pos": "WR" },
+      "clipKey": "TEST_3TIER_001",
+      "start": {"side": "OWN", "yard": 20},
+      "end": {"side": "OWN", "yard": 35}, 
       "gainYard": 15,
+      "car": {"num": 10, "pos": "QB"},
+      "car2": {"num": null, "pos": null},
+      "tkl": {"num": 34, "pos": "WR"},
+      "tkl2": {"num": null, "pos": null},
       "significantPlays": ["FIRST_DOWN", null, null, null]
     }
   ]

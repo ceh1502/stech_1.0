@@ -5,7 +5,7 @@ import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // Kicker 스탯 인터페이스 정의
-interface KickerStats {
+export interface KickerStats {
   games: number;
   extraPointAttempted: number;
   extraPointMade: number;

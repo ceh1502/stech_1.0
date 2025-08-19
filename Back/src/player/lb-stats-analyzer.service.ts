@@ -5,7 +5,7 @@ import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // Linebacker 스탯 인터페이스 정의 (DL과 동일)
-interface LBStats {
+export interface LBStats {
   games: number;
   tackles: number;
   sacks: number;

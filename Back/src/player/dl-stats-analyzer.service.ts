@@ -5,7 +5,7 @@ import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // Defensive Lineman 스탯 인터페이스 정의
-interface DLStats {
+export interface DLStats {
   games: number;
   tackles: number;
   sacks: number;

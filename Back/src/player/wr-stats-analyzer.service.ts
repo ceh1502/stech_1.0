@@ -5,7 +5,7 @@ import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // WR 스탯 인터페이스 정의
-interface WrStats {
+export interface WrStats {
   games: number;
   target: number;
   reception: number;

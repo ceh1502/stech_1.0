@@ -5,7 +5,7 @@ import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // Defensive Back 스탯 인터페이스 정의 (DL, LB와 동일)
-interface DBStats {
+export interface DBStats {
   games: number;
   tackles: number;
   sacks: number;

@@ -5,7 +5,7 @@ import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // Punter 스탯 인터페이스 정의
-interface PunterStats {
+export interface PunterStats {
   games: number;
   punts: number;
   averagePuntYards: number;

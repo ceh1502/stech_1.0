@@ -5,7 +5,7 @@ import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // QB 스탯 인터페이스 정의
-interface QbStats {
+export interface QbStats {
   games: number;
   passAttempted: number;
   passCompletion: number;
