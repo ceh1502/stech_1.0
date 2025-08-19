@@ -139,7 +139,7 @@ export class PlayerController {
   async analyzeQbStatsOnly(
     @Param('playerId') playerId: string,
     @Body() analyzeClipsDto: AnalyzeClipsDto
-  ) {
+  ): Promise<any> {
     return this.playerService.analyzeQbStatsOnly(playerId, analyzeClipsDto.clips);
   }
 

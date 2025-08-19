@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
+import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // QB 스탯 인터페이스 정의
 interface QbStats {
@@ -19,30 +20,6 @@ interface QbStats {
   yardsPerCarry: number;
   rushingTouchdown: number;
   longestRushing: number;
-}
-
-// 클립 데이터 인터페이스 정의
-interface ClipData {
-  ClipKey?: string;
-  Gamekey?: string;
-  PlayType: string;
-  StartYard?: {
-    side: string;
-    yard: number;
-  };
-  EndYard?: {
-    side: string;
-    yard: number;
-  };
-  Carrier?: Array<{
-    playercode: string | number;
-    position: string;
-    action: string;
-  }>;
-  SignificantPlays?: Array<{
-    key: string;
-    label?: string;
-  }>;
 }
 
 @Injectable()
@@ -241,6 +218,7 @@ export class QbStatsAnalyzerService {
   async generateSampleQbStats(playerId: string = 'QB001'): Promise<QbStats> {
     const sampleClips = [
       {
+        ClipKey: 'SAMPLE_QB_001',
         Gamekey: 'KMHY241110',
         PlayType: 'Pass',
         StartYard: { side: 'own', yard: 35 },
@@ -249,6 +227,7 @@ export class QbStatsAnalyzerService {
         SignificantPlays: []
       },
       {
+        ClipKey: 'SAMPLE_QB_002',
         Gamekey: 'KMHY241110',
         PlayType: 'Pass',
         StartYard: { side: 'opp', yard: 25 },
@@ -257,18 +236,21 @@ export class QbStatsAnalyzerService {
         SignificantPlays: [{ key: 'TOUCHDOWN', label: 'Touchdown' }]
       },
       {
+        ClipKey: 'SAMPLE_QB_003',
         Gamekey: 'KMHY241110',
         PlayType: 'NoPass',
         Carrier: [{ playercode: 'QB001', position: 'QB', action: 'Pass' }],
         SignificantPlays: []
       },
       {
+        ClipKey: 'SAMPLE_QB_004',
         Gamekey: 'KMHY241110',
         PlayType: 'Pass',
         Carrier: [{ playercode: 'QB001', position: 'QB', action: 'Pass' }],
         SignificantPlays: [{ key: 'INTERCEPTION', label: 'Interception' }]
       },
       {
+        ClipKey: 'SAMPLE_QB_005',
         Gamekey: 'KMHY241110',
         PlayType: 'Run',
         StartYard: { side: 'own', yard: 30 },
@@ -277,12 +259,14 @@ export class QbStatsAnalyzerService {
         SignificantPlays: []
       },
       {
+        ClipKey: 'SAMPLE_QB_006',
         Gamekey: 'KMHY241117',
         PlayType: 'Pass',
         Carrier: [{ playercode: 'QB001', position: 'QB', action: 'Sack' }],
         SignificantPlays: []
       },
       {
+        ClipKey: 'SAMPLE_QB_007',
         Gamekey: 'KMHY241117',
         PlayType: 'Run',
         StartYard: { side: 'opp', yard: 20 },

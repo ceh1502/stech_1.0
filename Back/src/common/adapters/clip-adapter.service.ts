@@ -1,40 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { NewClipDto } from '../dto/new-clip.dto';
-
-// 기존 클립 데이터 인터페이스 (호환용)
-interface LegacyClipData {
-  ClipKey?: string;
-  ClipUrl?: string;
-  Quarter?: string;
-  OffensiveTeam?: string;
-  PlayType: string;
-  SpecialTeam?: boolean;
-  Down?: number;
-  RemainYard?: number;
-  StartYard?: {
-    side: string;
-    yard: number;
-  };
-  EndYard?: {
-    side: string;
-    yard: number;
-  };
-  Carrier?: Array<{
-    playercode: string | number;
-    backnumber?: number;
-    team?: string;
-    position: string;
-    action: string;
-  }>;
-  SignificantPlays?: Array<{
-    key: string;
-    label?: string;
-  }>;
-  StartScore?: {
-    Home: number;
-    Away: number;
-  };
-}
+import { LegacyClipData, ClipData } from '../interfaces/clip-data.interface';
 
 @Injectable()
 export class ClipAdapterService {
@@ -138,6 +104,24 @@ export class ClipAdapterService {
     });
 
     return allLegacyClips;
+  }
+
+  /**
+   * LegacyClipData를 ClipData로 변환
+   * ClipKey를 필수로 만들고 기본값 제공
+   */
+  convertLegacyToClipData(legacyClip: LegacyClipData): ClipData {
+    return {
+      ...legacyClip,
+      ClipKey: legacyClip.ClipKey || 'UNKNOWN_' + Date.now()
+    };
+  }
+
+  /**
+   * LegacyClipData 배열을 ClipData 배열로 변환
+   */
+  convertLegacyArrayToClipData(legacyClips: LegacyClipData[]): ClipData[] {
+    return legacyClips.map(clip => this.convertLegacyToClipData(clip));
   }
 
   /**

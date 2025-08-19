@@ -15,31 +15,9 @@ import { DLStatsAnalyzerService } from './dl-stats-analyzer.service';
 import { LBStatsAnalyzerService } from './lb-stats-analyzer.service';
 import { DBStatsAnalyzerService } from './db-stats-analyzer.service';
 import { ClipAdapterService } from '../common/adapters/clip-adapter.service';
+import { StatsManagementService } from '../common/services/stats-management.service';
 import { NewClipDto } from '../common/dto/new-clip.dto';
-
-// 클립 데이터 인터페이스 정의
-interface ClipData {
-  ClipKey?: string;
-  Gamekey?: string;
-  PlayType: string;
-  StartYard?: {
-    side: string;
-    yard: number;
-  };
-  EndYard?: {
-    side: string;
-    yard: number;
-  };
-  Carrier?: Array<{
-    playercode: string | number;
-    position: string;
-    action: string;
-  }>;
-  SignificantPlays?: Array<{
-    key: string;
-    label?: string;
-  }>;
-}
+import { ClipData, LegacyClipData } from '../common/interfaces/clip-data.interface';
 
 @Injectable()
 export class PlayerService {
@@ -57,6 +35,7 @@ export class PlayerService {
     private lbStatsAnalyzer: LBStatsAnalyzerService,
     private dbStatsAnalyzer: DBStatsAnalyzerService,
     private clipAdapter: ClipAdapterService,
+    private statsManagement: StatsManagementService,
   ) {}
 
   // PlayerCode로 선수 생성
@@ -1190,12 +1169,15 @@ export class PlayerService {
     const legacyClips = this.clipAdapter.convertNewClipsToLegacy(newClips);
     
     // 해당 선수의 클립만 필터링
-    const playerClips = legacyClips.filter(clip => 
+    const filteredLegacyClips = legacyClips.filter(clip => 
       clip.Carrier?.some(c => 
         c.backnumber === playerNumber || 
         c.playercode === playerNumber.toString()
       )
     );
+
+    // LegacyClipData를 ClipData로 변환
+    const playerClips = this.clipAdapter.convertLegacyArrayToClipData(filteredLegacyClips);
 
     if (playerClips.length === 0) {
       return {
@@ -1244,16 +1226,43 @@ export class PlayerService {
         throw new Error(`지원하지 않는 포지션입니다: ${position}`);
     }
 
-    // 스탯 업데이트
+    // 🏈 3단계 스탯 시스템 업데이트
+    // 1. 기존 player.stats 업데이트 (호환성)
     player.stats = { ...player.stats, ...analyzedStats };
     await player.save();
 
+    // 2. 새로운 3단계 시스템 업데이트
+    // gameKey 생성 (클립의 첫 번째 clipKey 또는 현재 타임스탬프 사용)
+    const gameKey = newClips.length > 0 && newClips[0].clipKey 
+      ? `GAME_${newClips[0].clipKey}` 
+      : `GAME_${Date.now()}`;
+    
+    const gameDate = new Date();
+    const homeTeam = '홈팀'; // TODO: 실제 게임 정보에서 가져와야 함
+    const awayTeam = '어웨이팀'; // TODO: 실제 게임 정보에서 가져와야 함
+
+    // StatsManagement 서비스를 통해 3단계 스탯 업데이트
+    const gameStatsResult = await this.statsManagement.updateGameStats(
+      playerNumber,
+      gameKey,
+      gameDate,
+      homeTeam,
+      awayTeam,
+      analyzedStats
+    );
+
     return {
       success: true,
-      message: `등번호 ${playerNumber}번 ${position} 선수의 스탯이 새로운 클립 데이터로부터 업데이트되었습니다.`,
+      message: `등번호 ${playerNumber}번 ${position} 선수의 스탯이 3단계 시스템에 업데이트되었습니다.`,
       data: player,
       analyzedStats: analyzedStats,
-      processedClips: playerClips.length
+      processedClips: playerClips.length,
+      gameStatsCreated: !!gameStatsResult,
+      tierSystemUpdate: {
+        gameKey: gameKey,
+        gameDate: gameDate,
+        autoAggregated: true
+      }
     };
   }
 

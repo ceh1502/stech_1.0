@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
+import { ClipData } from '../common/interfaces/clip-data.interface';
 
 // TE 스탯 인터페이스 정의 (리턴 스탯 없음)
 interface TeStats {
@@ -22,40 +23,6 @@ interface TeStats {
   longestRushing: number;
 }
 
-// 클립 데이터 인터페이스 정의
-interface ClipData {
-  ClipKey: string;
-  ClipUrl: string;
-  Quarter: string;
-  OffensiveTeam: string;
-  PlayType: string;
-  SpecialTeam: boolean;
-  Down: number;
-  RemainYard: number;
-  StartYard: {
-    side: string;
-    yard: number;
-  };
-  EndYard: {
-    side: string;
-    yard: number;
-  };
-  Carrier: Array<{
-    playercode: string | number;
-    backnumber: number;
-    team: string;
-    position: string;
-    action: string;
-  }>;
-  SignificantPlays: Array<{
-    key: string;
-    label?: string;
-  }>;
-  StartScore: {
-    Home: number;
-    Away: number;
-  };
-}
 
 @Injectable()
 export class TeStatsAnalyzerService {

@@ -14,8 +14,18 @@ async function bootstrap() {
     credentials: true,
   }));
 
-  // 보안 미들웨어
-  app.use(helmet());
+  // 보안 미들웨어 (Swagger UI를 위한 설정 추가)
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        fontSrc: ["'self'", "https:", "data:"],
+      },
+    },
+  }));
 
   // 글로벌 파이프 설정
   app.useGlobalPipes(new ValidationPipe({
@@ -76,7 +86,8 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
   
   const document = SwaggerModule.createDocument(app, config);
   
-  SwaggerModule.setup('api/docs', app, document, {
+  // 두 경로 모두에서 Swagger 접근 가능하도록 설정
+  SwaggerModule.setup('api', app, document, {
     customSiteTitle: 'STECH Pro API 문서',
     customfavIcon: '🏈',
     customCss: `
@@ -99,6 +110,6 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
   const port = process.env.PORT || 3001;
   await app.listen(port);
   console.log(`🚀 NestJS 서버가 http://localhost:${port}에서 실행 중입니다.`);
-  console.log(`📚 Swagger 문서: http://localhost:${port}/api/docs`);
+  console.log(`📚 Swagger 문서: http://localhost:${port}/api`);
 }
 bootstrap();
