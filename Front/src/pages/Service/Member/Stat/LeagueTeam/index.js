@@ -1,8 +1,10 @@
+import StatTeam from '../../../../../components/Stat/StatTeam';
+import { TEAMS } from '../../../../../data/TEAMS';
 
 const LeagueTeamPage = () => {
   return (
     <div>
-      Stat
+      <StatTeam teams={TEAMS}/>
     </div>
   );
 }

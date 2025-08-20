@@ -44,7 +44,7 @@
 .table-row1 {
   width: 28rem;
   display: grid;
-  grid-template-columns: 5rem 7rem 3.75rem 1fr;
+  grid-template-columns: 5rem  3.75rem 1fr;
   align-items: center;
 }
 
