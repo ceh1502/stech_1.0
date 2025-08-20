@@ -1,0 +1,75 @@
+{
+  "id": "1234567890",
+  "email": "test@example.com",
+  "nickname": "kenlee",
+  "team": {
+    "teamId": "team123",
+    "teamName": "Lions",
+    "logoUrl": "/images/lions.png",
+    "players": [
+      { "playerId": "p1", "name": "John Doe", "jerseyNumber": 10, "position": "WR" },
+      { "playerId": "p2", "name": "Alex Kim", "jerseyNumber": 22, "position": "QB" }
+    ]
+  },
+  "games": [
+    {
+      "gameId": "game001",
+      "date": "2025-07-04",
+      "opponent": "Eagles",
+      "type": "League",
+      "clips": [
+        {
+          "videoId": "vid001",
+          "url": "https://example.com/videos/vid001.mp4",
+          "quarter": "1Q",
+          "playType": "Run",
+          "success": true,
+          "startYard": { "side": "own", "yard": 20 },
+          "endYard": { "side": "opp", "yard": 45 },
+          "gainedYard": 25,
+          "players": [
+            { "playerId": "p1", "name": "John Doe", "number": 10, "position": "WR", "role": "receiver" }
+          ],
+          "significantPlays": [
+            { "label": "Touchdown", "timestamp": 12.3 }
+          ]
+        }
+      ]
+    },
+    {
+      "gameId": "game002",
+      "date": "2025-07-05",
+      "opponent": "Tigers",
+      "type": "Practice",
+      "videos": [
+        {
+          "videoId": "vid002",
+          "url": "https://example.com/videos/vid002.mp4",
+          "quarter": "3Q",
+          "playType": "Pass",
+          "success": false,
+          "startYard": { "side": "own", "yard": 35 },
+          "endYard": { "side": "own", "yard": 40 },
+          "gainedYard": 5,
+          "players": [],
+          "significantPlays": []
+        },
+        {
+          "videoId": "vid003",
+          "url": "https://example.com/videos/vid003.mp4",
+          "quarter": "4Q",
+          "playType": "Run",
+          "success": true,
+          "startYard": { "side": "opp", "yard": 30 },
+          "endYard": { "side": "opp", "yard": 10 },
+          "gainedYard": 20,
+          "players": [],
+          "significantPlays": [
+            { "label": "Interception", "timestamp": 7.0 }
+          ]
+        }
+      ]
+    }
+  ],
+  "createdAt": "2025-07-04T09:00:00.000Z"
+}

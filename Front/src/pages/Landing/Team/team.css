@@ -1,0 +1,241 @@
+
+.mainContainer {
+    width: 100%;
+    background: linear-gradient(
+        to bottom,
+        rgba(5, 9, 214, 0.7) 50px,
+        transparent 100px
+    );
+}
+
+.memberContainer {
+    font-family: Pretendard;
+    width: 100%;
+}
+
+.memberContainer img {
+    width: 15rem;
+    height: 15rem;
+}
+
+.T1,
+.T2,
+.T3,
+.T4,
+.T5,
+.T6,
+.T7 {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+}
+
+.crewName {
+    font-size: 28px;
+    color: #2563eb;
+    border-radius: 50px;
+    border: 2px solid #2563eb;
+    width: 180px;
+    cursor: pointer;
+}
+
+.crewName:hover {
+    background-color: #2563eb;
+    color: white;
+}
+
+.crewPosition {
+    font-size: 24px;
+    color: #000;
+}
+
+.firstRow,
+.secondRow {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0 140px 140px 140px;
+}
+
+.secondLow {
+    display: flex;
+    justify-content: space-between;
+    margin-left: 280px;
+    margin-right: 280px;
+}
+
+.overviewContainer {
+    padding-bottom: 50px !important;
+}
+
+.overview {
+    width: 85%;
+    margin: 0 auto;
+    display: flex;
+    gap: 66px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.teamOverview {
+    width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+.team1 {
+    color: #000;
+    font-family: Pretendard;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: 6px;
+
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.team2 {
+    color: #000;
+    font-family: Pretendard;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 3.2px;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.teamIntro {
+    min-width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+.intro1 {
+    color: #000;
+    font-family: Pretendard;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    letter-spacing: 1.2px;
+    margin-top: 20px;
+}
+
+.intro2 {
+    color: #000;
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 30px;
+}
+
+.historyContainer {
+  display: flex;
+  justify-content: center;
+  gap: 150px;
+}
+
+.firstColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+.firstColumn img {
+  width: 400px;
+  height: auto;
+  border-radius: 10px;
+}
+
+.secondColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #1A58E0;
+}
+
+.secondColumn tt {
+  font-weight: bold;
+  font-size: 25px;
+  margin: 80px 0 0 0;
+}
+
+.secondColumn td {
+    font-size: 20px;
+}
+
+@media (max-width: 1024px) {
+    .firstRow {
+        padding: 0 20px;
+        margin-bottom: 60px;
+    }
+
+    .crewName {
+        width: 120px;
+        font-size: 20px;
+    }
+
+    .crewPosition {
+        font-size: 18px;
+    }
+
+    .team1 {
+        font-size: 32px;
+    }
+
+    .team2 {
+        font-size: 24px;
+    }
+
+    .intro1 {
+        font-size: 18px;
+    }
+
+    .intro2 {
+        font-size: 16px;
+    }
+
+    .overview {
+        flex-direction: column;
+        align-items: center;
+    }
+    .teamOverview {
+        width: 100%;
+        align-items: center;
+    }
+    .teamIntro {
+        width: 100%;
+        align-items: center;
+    }
+    .overviewContainer {
+        padding-bottom: 100px;
+    }
+    .overview {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        padding: 0 20px;
+    }
+    .secondLow {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    .memberContainer img {
+        width: 12rem;
+        height: 12rem;
+    }
+}
+

@@ -1,0 +1,162 @@
+.find-page-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #444444;
+    color: #f5f5f5;
+    font-family: sans-serif;
+    padding: 2rem;
+    border-radius: 20px;
+    border: 2px solid #ffffff;
+}
+
+.find-title {
+    flex: 1;
+    padding: 5px;
+    background-color: transparent;
+    border: none;
+    font-size: 20px;
+    font-weight: 500;
+    color: #ffffff;
+    margin: 0px auto !important;
+}
+
+.find-description {
+  text-align: center;
+  color: #aaaaaa;
+    font-size: 14px;
+    margin-top: 0px !important;
+}
+
+.find-input-group {
+  position: relative;
+  margin-top: 15px;
+  margin-bottom: 20px;
+}
+
+.find-input-group label {
+    display: block;
+    color: #ffffff;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.find-input-group input {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #444444;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-bottom: 5px;
+    padding-right: 150px;
+}
+
+.find-input-group input:focus {
+    outline: none;
+    border-color: #f77705;
+}
+
+.find-code-button {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #f77705 0%, #f79c05 100%);
+    color: white;
+    margin-top: 20px;
+}
+
+.find-code-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(247, 119, 5, 0.3);
+}
+
+.find-links-group {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.find-links-group p {
+    margin: 0px;
+  font-size: 16px !important;
+  color:#aaaaaa;
+}
+
+.find-link {
+  color: #63b3ed;
+  text-decoration: none;
+}
+
+.find-link:hover {
+    color: #4299e1;
+    text-decoration: underline;
+}
+
+.find-divider {
+    flex: 1;
+    height: 1px;
+    background-color: #ffffff;
+    margin: 15px auto;
+}
+
+.find-help-section p {
+    margin: 0px;
+  font-size: 13px !important;
+  color:#aaaaaa;
+}
+
+.find-help-section a {
+  color: #63b3ed;
+  text-decoration: none;
+}
+
+.find-help-section a:hover{
+    color: #4299e1;
+    text-decoration: underline;
+}
+
+.find-input-group a{
+  margin-top: 10px;
+}
+
+.resend-link {
+  color: #63b3ed;
+  text-decoration: none;
+  margin-top: 50px;
+}
+
+.resend-link:hover {
+    color: #4299e1;
+    text-decoration: underline;
+}
+
+.password-toggle-button {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-5%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.find-page-card h2 {
+  text-align: center;
+  font-size: 23px;
+  font-weight: bold;
+}
+
+.find-page-card p {
+  font-size: 14px;
+  color: white;
+}

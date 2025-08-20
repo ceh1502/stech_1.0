@@ -1,0 +1,392 @@
+/* src/components/Auth/TermsModal.css */
+
+/* ===== 모달 오버레이 ===== */
+.termsModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ===== 모달 콘텐츠 ===== */
+.termsModalContent {
+    background: white;
+    border-radius: 16px;
+    max-width: 800px;
+    max-height: 90vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ===== 모달 헤더 ===== */
+.termsModalHeader {
+    padding: 24px 24px 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 0;
+}
+
+.termsModalTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.requiredBadge {
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.termsModalCloseButton {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.termsModalCloseButton:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* ===== 모달 바디 ===== */
+.termsModalBody {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    min-height: 400px;
+}
+
+/* ===== 로딩 상태 ===== */
+.termsModalLoading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    gap: 16px;
+}
+
+.loadingSpinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== 에러 상태 ===== */
+.termsModalError {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+    color: #dc2626;
+}
+
+.retryButton {
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+    font-size: 14px;
+}
+
+.retryButton:hover {
+    background: #2563eb;
+}
+
+/* ===== 약관 내용 ===== */
+.termsContent {
+    line-height: 1.7;
+    color: #374151;
+}
+
+.termsContent h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 24px 0;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.termsContent h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 32px 0 16px 0;
+}
+
+.termsContent h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 24px 0 12px 0;
+}
+
+.termsContent p {
+    margin: 0 0 16px 0;
+}
+
+.termsContent li {
+    margin: 8px 0;
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+.termsContent strong {
+    font-weight: 600;
+    color: #111827;
+}
+
+.termsContent em {
+    font-style: italic;
+    color: #6b7280;
+}
+
+/* ===== 모달 푸터 ===== */
+.termsModalFooter {
+    padding: 24px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+    border-radius: 0 0 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.currentAgreementStatus {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.agreedStatus {
+    color: #059669;
+}
+
+.notAgreedStatus {
+    color: #dc2626;
+}
+
+.termsModalActions {
+    display: flex;
+    gap: 12px;
+}
+
+.termsModalCancelButton,
+.termsModalAgreeButton {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.termsModalCancelButton {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.termsModalCancelButton:hover {
+    background: #e5e7eb;
+}
+
+.termsModalAgreeButton {
+    background: #3b82f6;
+    color: white;
+}
+
+.termsModalAgreeButton:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.termsModalAgreeButton:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 768px) {
+    .termsModalOverlay {
+        padding: 10px;
+    }
+
+    .termsModalContent {
+        max-height: 95vh;
+        border-radius: 12px;
+    }
+
+    .termsModalHeader {
+        padding: 20px 20px 0 20px;
+    }
+
+    .termsModalTitle {
+        font-size: 1.25rem;
+    }
+
+    .termsModalBody {
+        padding: 20px;
+    }
+
+    .termsModalFooter {
+        padding: 20px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .currentAgreementStatus {
+        text-align: center;
+    }
+
+    .termsModalActions {
+        justify-content: center;
+    }
+
+    .termsContent h1 {
+        font-size: 1.5rem;
+    }
+
+    .termsContent h2 {
+        font-size: 1.1rem;
+    }
+}
+
+/* ===== 스크롤바 스타일링 ===== */
+.termsModalBody::-webkit-scrollbar {
+    width: 6px;
+}
+
+.termsModalBody::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.termsModalBody::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.termsModalBody::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ===== 다크모드 지원 ===== */
+@media (prefers-color-scheme: dark) {
+    .termsModalContent {
+        background: #1f2937;
+        color: #f9fafb;
+    }
+
+    .termsModalHeader {
+        border-bottom-color: #374151;
+    }
+
+    .termsModalTitle {
+        color: #f9fafb;
+    }
+
+    .termsModalCloseButton {
+        color: #9ca3af;
+    }
+
+    .termsModalCloseButton:hover {
+        background: #374151;
+        color: #f3f4f6;
+    }
+
+    .termsContent {
+        color: #d1d5db;
+    }
+
+    .termsContent h1,
+    .termsContent h2 {
+        color: #f9fafb;
+    }
+
+    .termsContent h1 {
+        border-bottom-color: #374151;
+    }
+
+    .termsModalFooter {
+        background: #111827;
+        border-top-color: #374151;
+    }
+
+    .termsModalCancelButton {
+        background: #374151;
+        color: #f9fafb;
+    }
+
+    .termsModalCancelButton:hover {
+        background: #4b5563;
+    }
+}

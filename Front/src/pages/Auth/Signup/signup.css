@@ -1,0 +1,11 @@
+.signupPage {
+    box-sizing: border-box;
+    background-color: rgb(255, 255, 255);
+    align-items: center;
+    justify-content: center;
+    max-width: 400px;
+    margin: 50px auto;
+    margin-bottom: 50px;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px #555555;
+}

@@ -1,0 +1,52 @@
+.uvm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+.uvm-card {
+    background: #1c1d21;
+    color: #e5e7eb;
+    padding: 24px;
+    border-radius: 8px;
+    width: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.uvm-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+}
+.uvm-label input,
+.uvm-label textarea {
+    background: #111214;
+    border: 1px solid #303136;
+    color: #e5e7eb;
+    padding: 6px 8px;
+    border-radius: 4px;
+}
+.uvm-error {
+    color: #f87171;
+    font-size: 13px;
+}
+.uvm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+.uvm-actions button {
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+}
+.uvm-actions button:last-child {
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    color: #fff;
+}
