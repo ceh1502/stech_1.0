@@ -10,11 +10,13 @@
   justify-content: center;
   align-items: center;
   font-family: Noto Sans KR;
-  font-size: 40px; /*추후 변경 -> 2.5rem;*/
+  font-size: 2rem; /*추후 변경 -> 2.5rem;*/
   font-weight: 600;
   line-height: normal;
   letter-spacing: 0.375rem;
+  gap: 30px;
 }
+
 
 .serviceHomeLogo {
   width:16rem;
