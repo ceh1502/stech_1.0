@@ -38,6 +38,9 @@
   align-items: center;
     font-weight: 700;
 }
+.table-rows.is-division2{
+  background: rgba(110, 110, 110, 0.20);
+}
 .table-row1 {
   width: 28rem;
   display: grid;

@@ -1,7 +1,7 @@
 import React, {useMemo, useState, useEffect, useRef} from "react";
 import {RxTriangleDown} from "react-icons/rx";
 import {FaChevronDown} from "react-icons/fa";
-import "./StatPosition.css";
+import "./StatTeam.css";
 
 function Dropdown({value, options, onChange, label, placeholder}) {
   const [open, setOpen] = useState(false);
@@ -376,7 +376,7 @@ const statColumns = {
     ],
   },
 };
-export default function StatPosition({data, teams = []}) {
+export default function StatTeam({data, teams = []}) {
   const [league, setLeague] = useState("서울");
   const [division, setDivision] = useState("1부");
   const [position, setPosition] = useState("QB");
@@ -601,11 +601,8 @@ const rankedPlayers = useMemo(() => {
           <tbody className="table-body">
             {rankedPlayers.map((row, idx) => {
               const teamInfo = teams.find((t) => t.name === row.team);
-              const rowClass = `table-rows ${division === '2부' ? 'is-division2' : ''}`;
-
-              
               return (
-                <tr key={row.id || row.name} className={`table-rows ${rowClass}`}>
+                <tr key={row.id || row.name} className="table-rows">
                   <div className="table-row1">
                     <td className="table-cell">{row.__rank}위</td>
                     <td className="table-cell player-name clickable">
