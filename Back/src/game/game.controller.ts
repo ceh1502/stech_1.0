@@ -136,9 +136,18 @@ export class GameController {
       // 2. JSON 파싱
       let gameData;
       try {
-        const jsonContent = file.buffer.toString('utf-8');
+        // BOM 제거 및 UTF-8 처리
+        let jsonContent = file.buffer.toString('utf-8');
+        // BOM 제거 (UTF-8 BOM: EF BB BF)
+        if (jsonContent.charCodeAt(0) === 0xFEFF) {
+          jsonContent = jsonContent.slice(1);
+        }
+        console.log('🔍 JSON 내용 첫 200자:', jsonContent.substring(0, 200));
         gameData = JSON.parse(jsonContent);
+        console.log('✅ JSON 파싱 성공');
       } catch (parseError) {
+        console.error('❌ JSON 파싱 에러:', parseError.message);
+        console.error('🔍 파일 내용:', file.buffer.toString('utf-8').substring(0, 500));
         throw new HttpException({
           success: false,
           message: '올바른 JSON 형식이 아닙니다',

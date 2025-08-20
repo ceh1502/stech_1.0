@@ -2,81 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { TeamStatsResultDto } from '../../team/dto/team-stats.dto';
 
 /**
- * 게임 업로드 성공 응답 DTO
+ * 최종 스코어 DTO
  */
-export class GameUploadSuccessDto {
-  @ApiProperty({ example: true, description: '업로드 성공 여부' })
-  success: boolean;
+export class FinalScoreDto {
+  @ApiProperty({ example: 0, description: '홈팀 점수' })
+  home: number;
 
-  @ApiProperty({ 
-    example: '게임 데이터 업로드 및 분석이 완료되었습니다',
-    description: '응답 메시지' 
-  })
-  message: string;
-
-  @ApiProperty({ type: GameUploadDataDto, description: '업로드 결과 데이터' })
-  data: GameUploadDataDto;
-
-  @ApiProperty({ 
-    example: '2024-12-26T10:30:00.000Z',
-    description: '처리 완료 시간' 
-  })
-  timestamp: string;
-}
-
-/**
- * 게임 업로드 실패 응답 DTO
- */
-export class GameUploadErrorDto {
-  @ApiProperty({ example: false, description: '업로드 성공 여부' })
-  success: boolean;
-
-  @ApiProperty({ 
-    example: '파일이 업로드되지 않았습니다',
-    description: '에러 메시지' 
-  })
-  message: string;
-
-  @ApiProperty({ 
-    example: 'NO_FILE_UPLOADED',
-    description: '에러 코드',
-    required: false 
-  })
-  code?: string;
-
-  @ApiProperty({ 
-    example: 'Invalid file format',
-    description: '에러 상세 정보',
-    required: false 
-  })
-  details?: string;
-}
-
-/**
- * 게임 업로드 데이터 DTO
- */
-export class GameUploadDataDto {
-  @ApiProperty({ type: GameInfoDto, description: '게임 기본 정보' })
-  gameInfo: GameInfoDto;
-
-  @ApiProperty({ 
-    type: [PlayerResultDto], 
-    description: '선수별 분석 결과' 
-  })
-  playerResults: PlayerResultDto[];
-
-  @ApiProperty({ type: AnalysisSummaryDto, description: '분석 결과 요약' })
-  summary: AnalysisSummaryDto;
-
-  @ApiProperty({ type: ErrorDetailsDto, description: '에러 상세 정보' })
-  errors: ErrorDetailsDto;
-
-  @ApiProperty({ 
-    type: TeamStatsResultDto, 
-    description: '팀 스탯 결과 (자동 계산)',
-    required: false
-  })
-  teamStats?: TeamStatsResultDto;
+  @ApiProperty({ example: 36, description: '어웨이팀 점수' })
+  away: number;
 }
 
 /**
@@ -133,17 +66,6 @@ export class GameInfoDto {
     description: '처리 완료 시간' 
   })
   processedAt: string;
-}
-
-/**
- * 최종 스코어 DTO
- */
-export class FinalScoreDto {
-  @ApiProperty({ example: 0, description: '홈팀 점수' })
-  home: number;
-
-  @ApiProperty({ example: 36, description: '어웨이팀 점수' })
-  away: number;
 }
 
 /**
@@ -221,23 +143,6 @@ export class AnalysisSummaryDto {
 }
 
 /**
- * 에러 상세 정보 DTO
- */
-export class ErrorDetailsDto {
-  @ApiProperty({ 
-    type: [InvalidClipDto],
-    description: '유효하지 않은 클립 목록' 
-  })
-  invalidClips: InvalidClipDto[];
-
-  @ApiProperty({ 
-    type: [FailedPlayerDto],
-    description: '분석 실패한 선수 목록' 
-  })
-  failedPlayers: FailedPlayerDto[];
-}
-
-/**
  * 유효하지 않은 클립 DTO
  */
 export class InvalidClipDto {
@@ -267,6 +172,102 @@ export class FailedPlayerDto {
   })
   error: string;
 }
+
+/**
+ * 에러 상세 정보 DTO
+ */
+export class ErrorDetailsDto {
+  @ApiProperty({ 
+    type: [InvalidClipDto],
+    description: '유효하지 않은 클립 목록' 
+  })
+  invalidClips: InvalidClipDto[];
+
+  @ApiProperty({ 
+    type: [FailedPlayerDto],
+    description: '분석 실패한 선수 목록' 
+  })
+  failedPlayers: FailedPlayerDto[];
+}
+
+/**
+ * 게임 업로드 데이터 DTO
+ */
+export class GameUploadDataDto {
+  @ApiProperty({ type: GameInfoDto, description: '게임 기본 정보' })
+  gameInfo: GameInfoDto;
+
+  @ApiProperty({ 
+    type: [PlayerResultDto], 
+    description: '선수별 분석 결과' 
+  })
+  playerResults: PlayerResultDto[];
+
+  @ApiProperty({ type: AnalysisSummaryDto, description: '분석 결과 요약' })
+  summary: AnalysisSummaryDto;
+
+  @ApiProperty({ type: ErrorDetailsDto, description: '에러 상세 정보' })
+  errors: ErrorDetailsDto;
+
+  @ApiProperty({ 
+    type: TeamStatsResultDto, 
+    description: '팀 스탯 결과 (자동 계산)',
+    required: false
+  })
+  teamStats?: TeamStatsResultDto;
+}
+
+/**
+ * 게임 업로드 성공 응답 DTO
+ */
+export class GameUploadSuccessDto {
+  @ApiProperty({ example: true, description: '업로드 성공 여부' })
+  success: boolean;
+
+  @ApiProperty({ 
+    example: '게임 데이터 업로드 및 분석이 완료되었습니다',
+    description: '응답 메시지' 
+  })
+  message: string;
+
+  @ApiProperty({ type: GameUploadDataDto, description: '업로드 결과 데이터' })
+  data: GameUploadDataDto;
+
+  @ApiProperty({ 
+    example: '2024-12-26T10:30:00.000Z',
+    description: '처리 완료 시간' 
+  })
+  timestamp: string;
+}
+
+/**
+ * 게임 업로드 실패 응답 DTO
+ */
+export class GameUploadErrorDto {
+  @ApiProperty({ example: false, description: '업로드 성공 여부' })
+  success: boolean;
+
+  @ApiProperty({ 
+    example: '파일이 업로드되지 않았습니다',
+    description: '에러 메시지' 
+  })
+  message: string;
+
+  @ApiProperty({ 
+    example: 'NO_FILE_UPLOADED',
+    description: '에러 코드',
+    required: false 
+  })
+  code?: string;
+
+  @ApiProperty({ 
+    example: 'Invalid file format',
+    description: '에러 상세 정보',
+    required: false 
+  })
+  details?: string;
+}
+
 
 /**
  * 파일 업로드 요청 DTO (Swagger용)

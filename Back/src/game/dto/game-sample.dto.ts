@@ -1,68 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * 샘플 JSON 구조 - Swagger 문서용
- */
-export class SampleGameDataDto {
-  @ApiProperty({
-    example: 'DGKM240908',
-    description: '게임 고유 식별자'
-  })
-  gameKey: string;
-
-  @ApiProperty({
-    example: '2024-09-08(일) 16:00',
-    description: '경기 날짜 및 시간'
-  })
-  date: string;
-
-  @ApiProperty({
-    example: 'League',
-    description: '경기 타입'
-  })
-  type: string;
-
-  @ApiProperty({
-    example: { home: 0, away: 36 },
-    description: '최종 점수'
-  })
-  score: {
-    home: number;
-    away: number;
-  };
-
-  @ApiProperty({
-    example: 'Seoul',
-    description: '경기 지역'
-  })
-  region: string;
-
-  @ApiProperty({
-    example: '서울대학교 종합운동장',
-    description: '경기 장소'
-  })
-  location: string;
-
-  @ApiProperty({
-    example: 'DGTuskers',
-    description: '홈팀 이름'
-  })
-  homeTeam: string;
-
-  @ApiProperty({
-    example: 'KMRazorbacks',
-    description: '어웨이팀 이름'
-  })
-  awayTeam: string;
-
-  @ApiProperty({
-    type: [SampleClipDto],
-    description: '경기 클립 데이터 배열'
-  })
-  Clips: SampleClipDto[];
-}
-
-/**
  * 샘플 클립 구조 - Swagger 문서용
  */
 export class SampleClipDto {
@@ -179,6 +117,68 @@ export class SampleClipDto {
     maxItems: 4
   })
   significantPlays: (string | null)[];
+}
+
+/**
+ * 샘플 JSON 구조 - Swagger 문서용
+ */
+export class SampleGameDataDto {
+  @ApiProperty({
+    example: 'DGKM240908',
+    description: '게임 고유 식별자'
+  })
+  gameKey: string;
+
+  @ApiProperty({
+    example: '2024-09-08(일) 16:00',
+    description: '경기 날짜 및 시간'
+  })
+  date: string;
+
+  @ApiProperty({
+    example: 'League',
+    description: '경기 타입'
+  })
+  type: string;
+
+  @ApiProperty({
+    example: { home: 0, away: 36 },
+    description: '최종 점수'
+  })
+  score: {
+    home: number;
+    away: number;
+  };
+
+  @ApiProperty({
+    example: 'Seoul',
+    description: '경기 지역'
+  })
+  region: string;
+
+  @ApiProperty({
+    example: '서울대학교 종합운동장',
+    description: '경기 장소'
+  })
+  location: string;
+
+  @ApiProperty({
+    example: 'DGTuskers',
+    description: '홈팀 이름'
+  })
+  homeTeam: string;
+
+  @ApiProperty({
+    example: 'KMRazorbacks',
+    description: '어웨이팀 이름'
+  })
+  awayTeam: string;
+
+  @ApiProperty({
+    type: [SampleClipDto],
+    description: '경기 클립 데이터 배열'
+  })
+  Clips: SampleClipDto[];
 }
 
 /**
