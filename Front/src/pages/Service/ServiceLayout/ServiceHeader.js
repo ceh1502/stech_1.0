@@ -1,9 +1,10 @@
-// src/components/HeaderBar.jsx
+// src/.../ServiceHeader.jsx
 import {useState, useRef, useEffect, useMemo} from "react";
 import {FaChevronDown} from "react-icons/fa";
 import defaultLogo from "../../../assets/images/logos/Stechlogo.svg";
 import "./ServiceHeader.css";
 import CalendarDropdown from "../../../components/Calendar.jsx";
+import UploadVideoModal from "../../../components/UploadVideoModal"; // 경로 맞춰줘
 import dayjs from "dayjs";
 
 const TYPES = ["Scrimmage", "Friendly match", "Season"];
@@ -64,10 +65,7 @@ const TEAM_TO_LEAGUE = {
   "인천 라이노스": "사회인",
 };
 
-const HeaderBar = ({
-  onNewVideo = () => {},
-  onReset = () => {},
-  onOpponentChange = () => {},
+const ServiceHeader = ({
   teams = [],
   myTeamName,
   myTeam,
@@ -76,19 +74,22 @@ const HeaderBar = ({
   const selfTeam = useMemo(() => {
     if (myTeam) return myTeam;
     if (myTeamName) return teams.find((t) => t.name === myTeamName) || null;
-    return teams[0] || null; // 둘 다 없으면 첫 팀
+    return teams[0] || null;
   }, [teams, myTeamName, myTeam]);
 
-  /* ── Date / Type / Opponent state ── */
+  /* ── Date / Type ── */
   const [showDate, setShowDate] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null); // 기본 라벨 "날짜"
   const [showType, setShowType] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
 
-  // 상대팀 2단 드롭다운
+  /* ── 상대팀 2단 드롭다운 ── */
   const [showOpps, setShowOpps] = useState(false);
   const [selectedOpps, setSelectedOpps] = useState(null);
-  const [activeLeague, setActiveLeague] = useState(null); // 왼쪽에서 호버 중 리그
+  const [activeLeague, setActiveLeague] = useState(null); // 왼쪽 리그 hover 상태
+
+  /* ── 업로드 모달(헤더 내부에 내장) ── */
+  const [showUpload, setShowUpload] = useState(false);
 
   /* ── refs & 바깥클릭 닫기 ── */
   const dateWrapRef = useRef(null);
@@ -106,7 +107,7 @@ const HeaderBar = ({
     return () => document.removeEventListener("mousedown", out);
   }, []);
 
-  /* ── 표시 라벨/로고 ── */
+  /* ── 로고/라벨 ── */
   const logoSrc = selfTeam?.logo || defaultLogo;
   const label = selfTeam?.name || "Choose Team";
 
@@ -129,7 +130,7 @@ const HeaderBar = ({
     return [...base.filter((k) => keys.includes(k)), ...extras];
   }, [teamsByLeague]);
 
-  // 드롭다운 열릴 때 기본 활성 리그
+  /* 드롭다운 열릴 때 기본 활성 리그 */
   useEffect(() => {
     if (showOpps) {
       setActiveLeague((cur) =>
@@ -138,7 +139,7 @@ const HeaderBar = ({
     }
   }, [showOpps, leaguesList, teamsByLeague]);
 
-  /* ── 초기화 ── */
+  /* 초기화 */
   const resetFilters = () => {
     setSelectedDate(null);
     setSelectedType(null);
@@ -146,33 +147,33 @@ const HeaderBar = ({
     setShowDate(false);
     setShowType(false);
     setShowOpps(false);
-    onReset();
+
   };
 
   return (
     <header className="stechHeader">
       <div className="headerContainer">
+        {/* 왼쪽: 내 팀 고정 표기 */}
         <div className="header-team-box">
           <div className="header-team-logo-box">
             <img
               src={logoSrc}
               alt={label}
               className={`header-team-logo-img ${
-                logoSrc.endsWith(".svg") ? "svg-logo" : "png-logo"
+                logoSrc?.endsWith(".svg") ? "svg-logo" : "png-logo"
               }`}
             />
           </div>
           <span className="header-team-name">{label}</span>
         </div>
 
+        {/* 오른쪽: 필터 + 업로드 버튼 */}
         <div className="headerRow bottomRow">
           <div className="filterGroup">
             {/* 날짜 */}
             <div className="datePickerWrap" ref={dateWrapRef}>
               <button
-                className={`filterButton ${
-                  showDate || selectedDate ? "active" : ""
-                }`}
+                className={`filterButton ${showDate || selectedDate ? "active" : ""}`}
                 onClick={() => setShowDate(!showDate)}
               >
                 {selectedDate ? selectedDate.format("YYYY-MM-DD") : "날짜"}{" "}
@@ -202,9 +203,7 @@ const HeaderBar = ({
                   {TYPES.map((t) => (
                     <li key={t}>
                       <button
-                        className={`typeItem ${
-                          selectedType === t ? "active" : ""
-                        }`}
+                        className={`typeItem ${selectedType === t ? "active" : ""}`}
                         onClick={() => {
                           setSelectedType(t);
                           setShowType(false);
@@ -218,14 +217,13 @@ const HeaderBar = ({
               )}
             </div>
 
-            {/* 상대 (2단 드롭다운) */}
+            {/* 상대 (2단 드롭다운: 리그 -> 팀) */}
             <div className="oppsPickerWrap" ref={oppsWrapRef}>
               <button
                 className={`filterButton ${selectedOpps ? "active" : ""}`}
                 onClick={() => setShowOpps((v) => !v)}
               >
-                {selectedOpps ? selectedOpps.name : "상대"}{" "}
-                <FaChevronDown size={10} />
+                {selectedOpps ? selectedOpps.name : "상대"} <FaChevronDown size={10} />
               </button>
 
               {showOpps && (
@@ -236,9 +234,7 @@ const HeaderBar = ({
                       <li key={lg}>
                         <button
                           type="button"
-                          className={`leagueItem ${
-                            activeLeague === lg ? "active" : ""
-                          }`}
+                          className={`leagueItem ${activeLeague === lg ? "active" : ""}`}
                           onMouseEnter={() => setActiveLeague(lg)}
                           onFocus={() => setActiveLeague(lg)}
                           onClick={() => setActiveLeague(lg)}
@@ -259,27 +255,22 @@ const HeaderBar = ({
                           onClick={() => {
                             setSelectedOpps(t);
                             setShowOpps(false);
-                            onOpponentChange(t);
                           }}
                         >
                           {t.logo && (
-                            <div className='opps-team-logo-img-box'>
-                            <img
-                              src={t.logo}
-                              alt={t.name}
-                              className={`opps-team-logo-img ${
-                                t.logo.endsWith(".svg")
-                                  ? "svg-logo"
-                                  : "png-logo"
-                              }`}
-                            /></div>
-                          )}{" "}
+                            <div className="opps-team-logo-img-box">
+                              <img
+                                src={t.logo}
+                                alt={t.name}
+                                className={`opps-team-logo-img ${t.logo.endsWith(".svg") ? "svg-logo" : "png-logo"}`}
+                              />
+                            </div>
+                          )}
                           {t.name}
                         </button>
                       </li>
                     ))}
-                    {(!activeLeague ||
-                      (teamsByLeague[activeLeague] || []).length === 0) && (
+                    {(!activeLeague || (teamsByLeague[activeLeague] || []).length === 0) && (
                       <li className="oppsEmpty">해당 리그 팀이 없습니다</li>
                     )}
                   </ul>
@@ -288,18 +279,27 @@ const HeaderBar = ({
             </div>
 
             {/* 초기화 */}
-            <button className="resetButton" onClick={resetFilters}>
-              초기화
-            </button>
+            <button className="resetButton" onClick={resetFilters}>초기화</button>
           </div>
 
-          <button className="newVideoButton" onClick={onNewVideo}>
+          {/* 업로드 모달 여는 버튼 (prop 없이 내부 상태로 제어) */}
+          <button className="newVideoButton" onClick={() => setShowUpload(true)}>
             경기 업로드
           </button>
         </div>
       </div>
+
+      {/* ===== 업로드 모달을 헤더 내부에 "박아넣음" ===== */}
+      <UploadVideoModal
+        isOpen={showUpload}
+        onClose={() => setShowUpload(false)}
+        onUploaded={() => {
+          setShowUpload(false);
+          // 업로드 후 목록 갱신 등 필요하면 여기서 처리
+        }}
+      />
     </header>
   );
 };
 
-export default HeaderBar;
+export default ServiceHeader;

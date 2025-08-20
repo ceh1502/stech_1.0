@@ -369,7 +369,7 @@ const ServiceSidebar = () => {
       <div className="sidebarFooter">
         <div className="menuSection">
           <div className="sectionTitle">Support</div>
-          {isAuthenticated ? (
+          {!isAuthenticated ? (
             <ul className="navMenu">
               {memberFooterItems.map((item) => renderMenuItem(item))}
             </ul>

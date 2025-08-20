@@ -25,7 +25,7 @@ export const TEAMS = [
   { name: "경북대학교 오렌지파이터스",logo:'/assets/images/svg/teams/KNU.png'},
   { name: "경일대학교 블랙베어스",logo:'/assets/images/svg/teams/KIU.png'},
   { name: "계명대학교 슈퍼라이온스",logo:'/assets/images/svg/teams/Keimyung.png'},
-  { name: "금오공과대학교 레이븐스",logo:'/assets/images/svg/teams/Kumoh.png'},
+  { name: "금오공과대학교 레이븐스",logo:'/assets/images/svg/teams/Kumho.png'},
   { name: "대구가톨릭대학교 스커드엔젤스",logo:'/assets/images/svg/teams/DaeguCatholic.png'},
   { name: "대구대학교 플라잉타이거스",logo:'/assets/images/svg/teams/Daegu.png'},
   { name: "대구한의대학교 라이노스",logo:'/assets/images/svg/teams/DaeguHaany.png'},
