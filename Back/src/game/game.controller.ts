@@ -2,6 +2,7 @@ import { Controller, Post, UseInterceptors, UploadedFile, HttpException, HttpSta
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiConsumes, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { PlayerService } from '../player/player.service';
+import { TeamStatsAnalyzerService } from '../team/team-stats-analyzer.service';
 import { 
   GameUploadSuccessDto, 
   GameUploadErrorDto, 
@@ -15,6 +16,8 @@ export class GameController {
   constructor(
     @Inject(forwardRef(() => PlayerService))
     private readonly playerService: PlayerService,
+    @Inject(forwardRef(() => TeamStatsAnalyzerService))
+    private readonly teamStatsService: TeamStatsAnalyzerService,
   ) {}
 
   @Post('upload-json')
@@ -31,8 +34,9 @@ export class GameController {
     1. **파일 검증**: JSON 형식 및 크기 확인 (최대 10MB)
     2. **데이터 파싱**: 게임 정보 및 클립 데이터 추출
     3. **선수 추출**: 모든 클립에서 참여 선수 자동 탐지
-    4. **통계 분석**: 포지션별 전용 분석기로 개별 선수 분석
-    5. **3-Tier 저장**: Game/Season/Career 통계 자동 업데이트
+    4. **선수 통계 분석**: 포지션별 전용 분석기로 개별 선수 분석
+    5. **팀 통계 분석**: 홈팀/어웨이팀 스탯 자동 계산 ✨
+    6. **3-Tier 저장**: Game/Season/Career 통계 자동 업데이트
 
     ### 📊 지원하는 JSON 구조
     \`\`\`json
@@ -53,7 +57,8 @@ export class GameController {
     \`\`\`
 
     ### ⚡ 자동 분석 범위
-    - **9개 포지션**: QB, RB, WR, TE, K, P, OL, DL, LB, DB
+    - **개별 선수 (9개 포지션)**: QB, RB, WR, TE, K, P, OL, DL, LB, DB
+    - **팀 통계**: 총야드, 패싱야드, 러싱야드, 리턴야드, 턴오버 ✨
     - **모든 통계**: 패싱, 러싱, 리시빙, 수비, 스페셜팀
     - **3-Tier 시스템**: 게임별 → 시즌별 → 커리어 자동 집계
     `
@@ -152,15 +157,25 @@ export class GameController {
 
       console.log(`📊 게임 데이터 검증 완료: ${gameData.Clips.length}개 클립`);
 
-      // 4. 게임 데이터 처리
-      const results = await this.processGameData(gameData);
+      // 4. 선수 데이터 처리
+      const playerResults = await this.processGameData(gameData);
 
-      console.log('✅ 게임 데이터 처리 완료');
+      // 5. 팀 스탯 자동 계산
+      console.log('📊 팀 스탯 계산 시작...');
+      const teamStatsResult = await this.teamStatsService.analyzeTeamStats(gameData);
+      
+      // 6. 팀 스탯 데이터베이스 저장
+      await this.teamStatsService.saveTeamStats(gameData.gameKey, teamStatsResult);
+
+      console.log('✅ 게임 데이터 및 팀 스탯 처리 완료');
 
       return {
         success: true,
-        message: '게임 데이터 업로드 및 분석이 완료되었습니다',
-        data: results,
+        message: '게임 데이터 및 팀 스탯 업로드 분석이 완료되었습니다',
+        data: {
+          ...playerResults,
+          teamStats: teamStatsResult,
+        },
         timestamp: new Date().toISOString()
       };
 

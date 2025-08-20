@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { TeamStatsResultDto } from '../../team/dto/team-stats.dto';
 
 /**
  * 게임 업로드 성공 응답 DTO
@@ -69,6 +70,13 @@ export class GameUploadDataDto {
 
   @ApiProperty({ type: ErrorDetailsDto, description: '에러 상세 정보' })
   errors: ErrorDetailsDto;
+
+  @ApiProperty({ 
+    type: TeamStatsResultDto, 
+    description: '팀 스탯 결과 (자동 계산)',
+    required: false
+  })
+  teamStats?: TeamStatsResultDto;
 }
 
 /**
