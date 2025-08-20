@@ -3,6 +3,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { GameController } from './game.controller';
 import { GameDocsController } from './game-docs.controller';
 import { PlayerModule } from '../player/player.module';
+import { TeamModule } from '../team/team.module';
 
 @Module({
   imports: [
@@ -23,6 +24,8 @@ import { PlayerModule } from '../player/player.module';
     }),
     // PlayerModule을 import하여 PlayerService 사용
     forwardRef(() => PlayerModule),
+    // TeamModule을 import하여 TeamStatsAnalyzerService 사용
+    forwardRef(() => TeamModule),
   ],
   controllers: [GameController, GameDocsController],
   providers: [],
