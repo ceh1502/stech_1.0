@@ -107,58 +107,18 @@ export class WrStatsAnalyzerService {
         c.position === 'WR'
       );
       
-      if (!carrier) {
+      // NewClipDto 구조 지원 - car, car2에서 찾기
+      const isOffender = this.isPlayerInOffense(clip, playerId);
+      
+      if (!carrier && !isOffender) {
         continue; // 이 클립은 해당 WR 플레이가 아님
       }
 
-      // 야드 계산
-      const yards = this.calculateYards(
-        clip.StartYard.yard,
-        clip.StartYard.side,
-        clip.EndYard.yard,
-        clip.EndYard.side
-      );
+      // SignificantPlays 기반 스탯 분석
+      this.analyzeSignificantPlaysNew(clip, wrStats, playerId);
 
-      // 터치다운 체크
-      const hasTouchdown = clip.SignificantPlays?.some(play => 
-        play.key === 'TOUCHDOWN'
-      );
-
-      // 펌블 체크
-      const hasFumble = clip.SignificantPlays?.some(play => 
-        play.key === 'FUMBLE'
-      );
-
-      // WR 액션별 스탯 집계
-      if (carrier.action.toLowerCase() === 'fumble_lost') {
-        wrStats.fumblesLost++;
-      }
-
-      // 플레이 타입별 스탯 집계
-      switch (clip.PlayType) {
-        case 'Pass':
-          this.analyzeReceivingPlay(clip, wrStats, yards, hasTouchdown);
-          break;
-        case 'NoPass':
-          // 타겟되었지만 캐치 실패
-          wrStats.target++;
-          break;
-        case 'Run':
-          // WR이 러싱하는 경우
-          this.analyzeRushingPlay(clip, wrStats, yards, hasTouchdown);
-          break;
-        case 'Kickoff':
-          this.analyzeKickReturnPlay(clip, wrStats, yards, hasTouchdown);
-          break;
-        case 'Punt':
-          this.analyzePuntReturnPlay(clip, wrStats, yards, hasTouchdown);
-          break;
-      }
-
-      // 펌블 카운트 (SignificantPlays에서)
-      if (hasFumble) {
-        wrStats.fumbles++;
-      }
+      // 기본 공격 플레이 분석
+      this.analyzeBasicOffensivePlay(clip, wrStats, playerId);
     }
 
     // 계산된 스탯 업데이트
@@ -236,6 +196,141 @@ export class WrStatsAnalyzerService {
     // 리턴 터치다운 체크
     if (hasTouchdown) {
       stats.returnTouchdown++;
+    }
+  }
+
+  // NewClipDto에서 해당 선수가 공격에 참여했는지 확인
+  private isPlayerInOffense(clip: any, playerId: string): boolean {
+    // car, car2에서 해당 선수 찾기
+    const playerNum = parseInt(playerId);
+    
+    return (clip.car?.num === playerNum && clip.car?.pos === 'WR') ||
+           (clip.car2?.num === playerNum && clip.car2?.pos === 'WR');
+  }
+
+  // 새로운 SignificantPlays 기반 스탯 분석
+  private analyzeSignificantPlaysNew(clip: any, stats: WrStats, playerId: string): void {
+    if (!clip.significantPlays) return;
+
+    const playerNum = parseInt(playerId);
+    const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'WR') ||
+                                (clip.car2?.num === playerNum && clip.car2?.pos === 'WR');
+
+    if (!isThisPlayerCarrier) return;
+
+    clip.significantPlays.forEach((play: string | null) => {
+      if (!play) return;
+
+      switch (play) {
+        case 'TOUCHDOWN':
+          // 플레이 타입에 따라 리시빙 TD 또는 러싱 TD
+          if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+            stats.receivingTouchdown += 1;
+            stats.target += 1;
+            stats.reception += 1;
+            if (clip.gainYard && clip.gainYard >= 0) {
+              stats.receivingYards += clip.gainYard;
+              if (clip.gainYard > stats.longestReception) {
+                stats.longestReception = clip.gainYard;
+              }
+            }
+          } else if (clip.playType === 'Run' || clip.playType === 'RUSH') {
+            stats.rushingTouchdown += 1;
+            stats.rushingAttempted += 1;
+            if (clip.gainYard && clip.gainYard >= 0) {
+              stats.rushingYards += clip.gainYard;
+              if (clip.gainYard > stats.longestRushing) {
+                stats.longestRushing = clip.gainYard;
+              }
+            }
+          } else if (clip.playType === 'Kickoff' || clip.playType === 'Punt') {
+            stats.returnTouchdown += 1;
+            if (clip.playType === 'Kickoff') {
+              stats.kickReturn += 1;
+              if (clip.gainYard && clip.gainYard >= 0) {
+                stats.kickReturnYards += clip.gainYard;
+              }
+            } else {
+              stats.puntReturn += 1;
+              if (clip.gainYard && clip.gainYard >= 0) {
+                stats.puntReturnYards += clip.gainYard;
+              }
+            }
+          }
+          break;
+
+        case 'FUMBLE':
+          // WR이 펌블한 경우
+          stats.fumbles += 1;
+          break;
+
+        case 'FUMBLELOSOFF':
+          // WR이 펌블 lost한 경우
+          stats.fumbles += 1;
+          stats.fumblesLost += 1;
+          break;
+
+        case 'FIRST_DOWN':
+          // 퍼스트 다운 획득 (리시빙에만 적용)
+          if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+            stats.receivingFirstDowns += 1;
+          }
+          break;
+      }
+    });
+  }
+
+  // 기본 공격 플레이 분석 (일반적인 Pass/Run 상황)
+  private analyzeBasicOffensivePlay(clip: any, stats: WrStats, playerId: string): void {
+    const playerNum = parseInt(playerId);
+    const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'WR') ||
+                                (clip.car2?.num === playerNum && clip.car2?.pos === 'WR');
+
+    if (!isThisPlayerCarrier) return;
+
+    // SignificantPlays에서 이미 처리된 경우가 아니라면 기본 스탯 추가
+    const hasSpecialPlay = clip.significantPlays?.some((play: string | null) => 
+      play === 'TOUCHDOWN' || play === 'FUMBLE' || play === 'FUMBLELOSOFF'
+    );
+
+    if (!hasSpecialPlay) {
+      // 일반적인 Pass 상황 (타겟 및 리셉션) - WR의 주요 플레이
+      if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+        stats.target += 1;
+        
+        // 완성된 패스인지 확인 (gainYard가 0보다 크면 완성)
+        if (clip.gainYard && clip.gainYard > 0) {
+          stats.reception += 1;
+          stats.receivingYards += clip.gainYard;
+          if (clip.gainYard > stats.longestReception) {
+            stats.longestReception = clip.gainYard;
+          }
+        }
+      }
+      
+      // 일반적인 Rush 상황 (WR 러싱 - 리버스 플레이 등)
+      else if (clip.playType === 'Run' || clip.playType === 'RUSH') {
+        stats.rushingAttempted += 1;
+        if (clip.gainYard && clip.gainYard >= 0) {
+          stats.rushingYards += clip.gainYard;
+          if (clip.gainYard > stats.longestRushing) {
+            stats.longestRushing = clip.gainYard;
+          }
+        }
+      }
+
+      // 킥오프/펀트 리턴
+      else if (clip.playType === 'Kickoff') {
+        stats.kickReturn += 1;
+        if (clip.gainYard && clip.gainYard >= 0) {
+          stats.kickReturnYards += clip.gainYard;
+        }
+      } else if (clip.playType === 'Punt') {
+        stats.puntReturn += 1;
+        if (clip.gainYard && clip.gainYard >= 0) {
+          stats.puntReturnYards += clip.gainYard;
+        }
+      }
     }
   }
 

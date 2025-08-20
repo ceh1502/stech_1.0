@@ -20,6 +20,7 @@ export interface QbStats {
   yardsPerCarry: number;
   rushingTouchdown: number;
   longestRushing: number;
+  fumbles: number; // 펌블 추가
 }
 
 @Injectable()
@@ -49,7 +50,7 @@ export class QbStatsAnalyzerService {
 
   // 클립 데이터에서 QB 스탯 추출
   async analyzeQbStats(clips: ClipData[], playerId: string): Promise<QbStats> {
-    const qbStats = {
+    const qbStats: QbStats = {
       games: 0,
       passAttempted: 0,
       passCompletion: 0,
@@ -63,7 +64,8 @@ export class QbStatsAnalyzerService {
       rushingYards: 0,
       yardsPerCarry: 0,
       rushingTouchdown: 0,
-      longestRushing: 0
+      longestRushing: 0,
+      fumbles: 0
     };
 
     const gameIds = new Set(); // 경기 수 계산용
@@ -81,41 +83,29 @@ export class QbStatsAnalyzerService {
     }
 
     for (const clip of clips) {
-      // 게임 ID 추가 (경기 수 계산) - ClipKey나 Gamekey 사용
-      const gameId = clip.ClipKey || clip.Gamekey || 'unknown';
-      gameIds.add(gameId);
+      // 게임 ID 추가 (경기 수 계산)
+      if (clip.ClipKey) {
+        gameIds.add(clip.ClipKey);
+      }
 
-      // 이 클립에서 해당 QB가 Carrier에 있는지 확인 (playercode로 매칭)
-      const carrier = clip.Carrier?.find(c => 
-        c.playercode == playerId || c.playercode === parseInt(playerId)
+      // 이 클립에서 해당 QB가 car 또는 car2에 있는지 확인 (공격수)
+      const isCarrier1 = clip.Carrier?.find(c => 
+        (c.playercode == playerId || c.playercode === parseInt(playerId)) &&
+        c.position === 'QB'
       );
       
-      if (!carrier) {
+      // NewClipDto 구조 지원 - car, car2에서 찾기
+      const isOffender = this.isPlayerInOffense(clip, playerId);
+      
+      if (!isCarrier1 && !isOffender) {
         continue; // 이 클립은 해당 QB 플레이가 아님
       }
 
-      // QB 액션별 스탯 집계
-      if (carrier.action) {
-        switch (carrier.action.toLowerCase()) {
-          case 'sack':
-            qbStats.sack++;
-            break;
-          case 'rush':
-            this.analyzeRushingPlay(clip, qbStats);
-            break;
-        }
-      }
+      // SignificantPlays 기반 스탯 분석
+      this.analyzeSignificantPlaysNew(clip, qbStats, playerId);
 
-      // 플레이 타입별 스탯 집계 (러싱은 이미 처리했으므로 제외)
-      if (carrier.action?.toLowerCase() !== 'rush') {
-        switch (clip.PlayType) {
-          case 'Pass':
-          case 'NoPass':
-            this.analyzePassingPlay(clip, qbStats);
-            break;
-          // Kick은 QB 스탯에 포함 안함
-        }
-      }
+      // 기본 공격 플레이 분석
+      this.analyzeBasicOffensivePlay(clip, qbStats, playerId);
     }
 
     // 계산된 스탯 업데이트
@@ -130,87 +120,110 @@ export class QbStatsAnalyzerService {
     return qbStats;
   }
 
-  // 패싱 플레이 분석
-  private analyzePassingPlay(clip: ClipData, stats: QbStats): void {
-    // Pass, NoPass 둘 다 시도 횟수에 포함
-    stats.passAttempted++;
+  // NewClipDto에서 해당 선수가 공격에 참여했는지 확인
+  private isPlayerInOffense(clip: any, playerId: string): boolean {
+    // car, car2에서 해당 선수 찾기
+    const playerNum = parseInt(playerId);
     
-    // Pass만 성공으로 카운트
-    if (clip.PlayType === 'Pass') {
-      stats.passCompletion++;
-      
-      // 필드 포지션 기반 야드 계산
-      let yards = 0;
-      if (clip.StartYard && clip.EndYard) {
-        yards = this.calculateYards(
-          clip.StartYard.yard, 
-          clip.StartYard.side, 
-          clip.EndYard.yard, 
-          clip.EndYard.side
-        );
-      } else {
-        // fallback - 계산 불가능한 경우
-        yards = 0;
-      }
-      
-      stats.passingYards += yards;
-      
-      // 최장 패스 기록 업데이트 (Pass일 때만)
-      if (yards > stats.longestPass) {
-        stats.longestPass = yards;
-      }
-
-      // 터치다운 체크 (Pass일 때만)
-      const hasTouchdown = clip.SignificantPlays?.some(play => 
-        play.key === 'TOUCHDOWN'
-      );
-      if (hasTouchdown) {
-        stats.passingTouchdown++;
-      }
-    }
-
-    // 인터셉션 체크 (Pass일 때만)
-    if (clip.PlayType === 'Pass') {
-      const hasInterception = clip.SignificantPlays?.some(play => 
-        play.key === 'INTERCEPTION'
-      );
-      if (hasInterception) {
-        stats.interception++;
-      }
-    }
+    return (clip.car?.num === playerNum && clip.car?.pos === 'QB') ||
+           (clip.car2?.num === playerNum && clip.car2?.pos === 'QB');
   }
 
-  // 러싱 플레이 분석 (QB가 직접 뛴 경우)
-  private analyzeRushingPlay(clip: ClipData, stats: QbStats): void {
-    stats.rushingAttempted++;
-    
-    // 필드 포지션 기반 야드 계산
-    let yards = 0;
-    if (clip.StartYard && clip.EndYard) {
-      yards = this.calculateYards(
-        clip.StartYard.yard, 
-        clip.StartYard.side, 
-        clip.EndYard.yard, 
-        clip.EndYard.side
-      );
-    } else {
-      // fallback - 계산 불가능한 경우
-      yards = 0;
-    }
-    
-    stats.rushingYards += yards;
+  // 새로운 SignificantPlays 기반 스탯 분석
+  private analyzeSignificantPlaysNew(clip: any, stats: QbStats, playerId: string): void {
+    if (!clip.significantPlays) return;
 
-    // 최장 러싱 기록 업데이트
-    if (yards > stats.longestRushing) {
-      stats.longestRushing = yards;
-    }
+    const playerNum = parseInt(playerId);
+    const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'QB') ||
+                                (clip.car2?.num === playerNum && clip.car2?.pos === 'QB');
 
-    // 러싱 터치다운 체크 (이미 carrier.action이 rush일 때만 이 함수가 호출됨)
-    const hasTouchdown = clip.SignificantPlays?.some(play => 
-      play.key === 'TOUCHDOWN'
+    if (!isThisPlayerCarrier) return;
+
+    clip.significantPlays.forEach((play: string | null) => {
+      if (!play) return;
+
+      switch (play) {
+        case 'TOUCHDOWN':
+          // 플레이 타입에 따라 패싱 TD 또는 러싱 TD
+          if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+            stats.passingTouchdown += 1;
+            stats.passAttempted += 1;
+            stats.passCompletion += 1;
+            if (clip.gainYard && clip.gainYard > 0) {
+              stats.passingYards += clip.gainYard;
+              if (clip.gainYard > stats.longestPass) {
+                stats.longestPass = clip.gainYard;
+              }
+            }
+          } else if (clip.playType === 'Run' || clip.playType === 'RUSH') {
+            stats.rushingTouchdown += 1;
+            stats.rushingAttempted += 1;
+            if (clip.gainYard && clip.gainYard > 0) {
+              stats.rushingYards += clip.gainYard;
+              if (clip.gainYard > stats.longestRushing) {
+                stats.longestRushing = clip.gainYard;
+              }
+            }
+          }
+          break;
+
+        case 'SACK':
+          // QB가 sack 당한 경우
+          stats.sack += 1;
+          break;
+
+        case 'INTERCEPT':
+          // QB가 인터셉션 당한 경우
+          stats.interception += 1;
+          stats.passAttempted += 1;
+          break;
+
+        case 'FUMBLE':
+          // QB가 펌블한 경우
+          stats.fumbles += 1;
+          break;
+      }
+    });
+  }
+
+  // 기본 공격 플레이 분석 (일반적인 Pass/Run 상황)
+  private analyzeBasicOffensivePlay(clip: any, stats: QbStats, playerId: string): void {
+    const playerNum = parseInt(playerId);
+    const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'QB') ||
+                                (clip.car2?.num === playerNum && clip.car2?.pos === 'QB');
+
+    if (!isThisPlayerCarrier) return;
+
+    // SignificantPlays에서 이미 처리된 경우가 아니라면 기본 스탯 추가
+    const hasSpecialPlay = clip.significantPlays?.some((play: string | null) => 
+      play === 'TOUCHDOWN' || play === 'SACK' || play === 'INTERCEPT' || play === 'FUMBLE'
     );
-    if (hasTouchdown) {
-      stats.rushingTouchdown++;
+
+    if (!hasSpecialPlay) {
+      // 일반적인 Pass 상황
+      if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+        stats.passAttempted += 1;
+        
+        // 완성된 패스인지 확인 (gainYard가 0보다 크면 완성)
+        if (clip.gainYard && clip.gainYard > 0) {
+          stats.passCompletion += 1;
+          stats.passingYards += clip.gainYard;
+          if (clip.gainYard > stats.longestPass) {
+            stats.longestPass = clip.gainYard;
+          }
+        }
+      }
+      
+      // 일반적인 Run 상황 (QB 스크램블 등)
+      else if (clip.playType === 'Run' || clip.playType === 'RUSH') {
+        stats.rushingAttempted += 1;
+        if (clip.gainYard && clip.gainYard >= 0) {
+          stats.rushingYards += clip.gainYard;
+          if (clip.gainYard > stats.longestRushing) {
+            stats.longestRushing = clip.gainYard;
+          }
+        }
+      }
     }
   }
 

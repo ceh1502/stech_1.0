@@ -28,6 +28,7 @@ export default function AppRouter() {
                 <Route path="faq" element={<ServicePages.FAQPage />} />
                 <Route path="profile" element={<ServicePages.ProfilePage />} />
                 <Route path="settings" element={<ServicePages.SettingsPage />} />
+                <Route path="upload-game" element={<ServicePages.GameUploadPage />} />
                 <Route path="guest" element={<ServicePages.GuestLayout />}>
                     <Route index element={<ServicePages.GuestHomePage />} />
                     <Route path="game" element={<ServicePages.GuestGamePage />} />

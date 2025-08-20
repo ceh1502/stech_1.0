@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { TeamModule } from './team/team.module';
 import { VideoModule } from './video/video.module';
 import { PlayerModule } from './player/player.module';
+import { GameModule } from './game/game.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PlayerModule } from './player/player.module';
     TeamModule,
     VideoModule,
     PlayerModule,
+    GameModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -10,6 +10,7 @@ import { BiSolidBarChartAlt2 } from 'react-icons/bi';
 import { MdOutlineSupportAgent, MdOutlineQuiz } from 'react-icons/md';
 import { IoSettingsOutline } from 'react-icons/io5';
 import { CgProfile } from "react-icons/cg";
+import { HiOutlineUpload } from "react-icons/hi";
 
 
 const ServiceSidebar = () => {
@@ -123,6 +124,13 @@ const ServiceSidebar = () => {
             label: '시스템 설정',
             icon: <IoSettingsOutline />,
             description: 'Settings',
+        },
+        {
+            path: '/service/upload-game',
+            label: '게임 데이터 업로드',
+            icon: <HiOutlineUpload />,
+            description: 'Upload game JSON data',
+            adminOnly: true,
         },
     ];
     const guestFooterItems = [

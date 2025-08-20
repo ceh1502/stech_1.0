@@ -107,101 +107,55 @@ export class LBStatsAnalyzerService {
     return lbStats;
   }
 
-  // NewClipDto에서 해당 선수가 수비에 참여했는지 확인
-  private isPlayerInDefense(clip: any, playerId: string): boolean {
-    // tkl, tkl2에서 해당 선수 찾기
-    const playerNum = parseInt(playerId);
-    
-    return (clip.tkl?.num === playerNum && clip.tkl?.pos === 'LB') ||
-           (clip.tkl2?.num === playerNum && clip.tkl2?.pos === 'LB');
+  // 수비 액션 분석
+  private analyzeDefensiveAction(clip: ClipData, carrier: any, stats: LBStats): void {
+    switch (carrier.action.toLowerCase()) {
+      case 'tackle':
+        stats.tackles++;
+        break;
+      case 'fumble_recovery':
+        stats.fumbleRecovery++;
+        // 펌블 리커버리 야드 계산
+        const recoveryYards = this.calculateYards(
+          clip.StartYard.yard,
+          clip.StartYard.side,
+          clip.EndYard.yard,
+          clip.EndYard.side
+        );
+        stats.fumbleRecoveredYards += recoveryYards;
+        break;
+      case 'pass_defended':
+        stats.passDefended++;
+        break;
+      case 'interception':
+        stats.interception++;
+        // 인터셉션 리턴 야드 계산
+        const interceptionYards = this.calculateYards(
+          clip.StartYard.yard,
+          clip.StartYard.side,
+          clip.EndYard.yard,
+          clip.EndYard.side
+        );
+        stats.interceptionYards += interceptionYards;
+        break;
+    }
   }
 
-  // 새로운 SignificantPlays 기반 스탯 분석
-  private analyzeSignificantPlaysNew(clip: any, stats: LBStats, playerId: string): void {
-    if (!clip.significantPlays) return;
-
-    const playerNum = parseInt(playerId);
-    const isThisPlayerTackler = (clip.tkl?.num === playerNum && clip.tkl?.pos === 'LB') ||
-                                (clip.tkl2?.num === playerNum && clip.tkl2?.pos === 'LB');
-
-    clip.significantPlays.forEach((play: string | null) => {
-      if (!play || !isThisPlayerTackler) return;
-
-      switch (play) {
-        case 'SACK':
-          // Sack할 때는 sacks, tackles, tacklesForLoss 모두 증가
-          stats.sacks += 1;
-          stats.tackles += 1;
-          stats.tacklesForLoss += 1;
+  // SignificantPlays 분석
+  private analyzeSignificantPlays(clip: ClipData, stats: LBStats): void {
+    clip.SignificantPlays?.forEach(play => {
+      switch (play.key) {
+        case 'FORCED_FUMBLE':
+          stats.forcedFumbles++;
           break;
-
-        case 'TFL':
-          // TFL (Tackle For Loss)
-          stats.tacklesForLoss += 1;
-          stats.tackles += 1;
-          break;
-
-        case 'FUMBLE':
-          // 펌블을 유발한 경우
-          stats.forcedFumbles += 1;
-          stats.tackles += 1; // 펌블 상황에서도 tackle 증가
-          break;
-
-        case 'FUMBLERECDEF':
-          // 수비가 펌블을 리커버한 경우
-          stats.fumbleRecovery += 1;
-          stats.tackles += 1;
-          // 펌블 리커버 야드 계산
-          if (clip.gainYard && clip.gainYard > 0) {
-            stats.fumbleRecoveredYards += clip.gainYard;
+        case 'INTERCEPTION':
+          // 액션에서 이미 처리되지 않은 경우를 위해
+          if (!clip.Carrier?.some(c => c.action.toLowerCase() === 'interception')) {
+            stats.interception++;
           }
-          break;
-
-        case 'INTERCEPT':
-          // 인터셉션한 경우
-          stats.interception += 1;
-          // 인터셉션 리턴 야드 계산
-          if (clip.gainYard && clip.gainYard > 0) {
-            stats.interceptionYards += clip.gainYard;
-          }
-          break;
-
-        case 'TOUCHDOWN':
-          // 수비 터치다운 (인터셉션 리턴 TD, 펌블 리커버 TD 등)
-          stats.touchdown += 1;
           break;
       }
     });
-  }
-
-  // 기본 디펜시브 플레이 분석 (일반적인 Run/Pass 상황에서의 tackle)
-  private analyzeBasicDefensivePlay(clip: any, stats: LBStats, playerId: string): void {
-    const playerNum = parseInt(playerId);
-    const isThisPlayerTackler = (clip.tkl?.num === playerNum && clip.tkl?.pos === 'LB') ||
-                                (clip.tkl2?.num === playerNum && clip.tkl2?.pos === 'LB');
-
-    if (!isThisPlayerTackler) return;
-
-    // SignificantPlays에서 이미 처리된 경우가 아니라면 기본 tackle 추가
-    const hasSpecialPlay = clip.significantPlays?.some((play: string | null) => 
-      play === 'SACK' || play === 'TFL' || play === 'FUMBLE' || play === 'FUMBLERECDEF' || play === 'INTERCEPT'
-    );
-
-    if (!hasSpecialPlay) {
-      // 일반적인 Run/Pass 상황에서의 tackle
-      if (clip.playType === 'Run' || clip.playType === 'Pass' || clip.playType === 'RUSH' || clip.playType === 'PASS') {
-        stats.tackles += 1;
-      }
-    }
-
-    // Pass Defended 체크 (Incomplete Pass에서)
-    if (clip.playType === 'Pass' || clip.playType === 'PASS') {
-      const isIncomplete = clip.significantPlays?.includes('INCOMPLETE') || 
-                          clip.gainYard === 0;
-      if (isIncomplete && isThisPlayerTackler) {
-        stats.passDefended += 1;
-      }
-    }
   }
 
   // 샘플 클립 데이터로 테스트

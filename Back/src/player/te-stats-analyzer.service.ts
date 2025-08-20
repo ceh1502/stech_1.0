@@ -93,53 +93,18 @@ export class TeStatsAnalyzerService {
         c.position === 'TE'
       );
       
-      if (!carrier) {
+      // NewClipDto 구조 지원 - car, car2에서 찾기
+      const isOffender = this.isPlayerInOffense(clip, playerId);
+      
+      if (!carrier && !isOffender) {
         continue; // 이 클립은 해당 TE 플레이가 아님
       }
 
-      // 야드 계산
-      const yards = this.calculateYards(
-        clip.StartYard.yard,
-        clip.StartYard.side,
-        clip.EndYard.yard,
-        clip.EndYard.side
-      );
+      // SignificantPlays 기반 스탯 분석
+      this.analyzeSignificantPlaysNew(clip, teStats, playerId);
 
-      // 터치다운 체크
-      const hasTouchdown = clip.SignificantPlays?.some(play => 
-        play.key === 'TOUCHDOWN'
-      );
-
-      // 펌블 체크
-      const hasFumble = clip.SignificantPlays?.some(play => 
-        play.key === 'FUMBLE'
-      );
-
-      // TE 액션별 스탯 집계
-      if (carrier.action.toLowerCase() === 'fumble_lost') {
-        teStats.fumblesLost++;
-      }
-
-      // 플레이 타입별 스탯 집계 (리턴 제외)
-      switch (clip.PlayType) {
-        case 'Pass':
-          this.analyzeReceivingPlay(clip, teStats, yards, hasTouchdown);
-          break;
-        case 'NoPass':
-          // 타겟되었지만 캐치 실패
-          teStats.target++;
-          break;
-        case 'Run':
-          // TE가 러싱하는 경우
-          this.analyzeRushingPlay(clip, teStats, yards, hasTouchdown);
-          break;
-        // TE는 리턴을 하지 않으므로 Kickoff, Punt 케이스 없음
-      }
-
-      // 펌블 카운트 (SignificantPlays에서)
-      if (hasFumble) {
-        teStats.fumbles++;
-      }
+      // 기본 공격 플레이 분석
+      this.analyzeBasicOffensivePlay(clip, teStats, playerId);
     }
 
     // 계산된 스탯 업데이트
@@ -189,6 +154,116 @@ export class TeStatsAnalyzerService {
     // 러싱 터치다운 체크
     if (hasTouchdown) {
       stats.rushingTouchdown++;
+    }
+  }
+
+  // NewClipDto에서 해당 선수가 공격에 참여했는지 확인
+  private isPlayerInOffense(clip: any, playerId: string): boolean {
+    // car, car2에서 해당 선수 찾기
+    const playerNum = parseInt(playerId);
+    
+    return (clip.car?.num === playerNum && clip.car?.pos === 'TE') ||
+           (clip.car2?.num === playerNum && clip.car2?.pos === 'TE');
+  }
+
+  // 새로운 SignificantPlays 기반 스탯 분석
+  private analyzeSignificantPlaysNew(clip: any, stats: TeStats, playerId: string): void {
+    if (!clip.significantPlays) return;
+
+    const playerNum = parseInt(playerId);
+    const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'TE') ||
+                                (clip.car2?.num === playerNum && clip.car2?.pos === 'TE');
+
+    if (!isThisPlayerCarrier) return;
+
+    clip.significantPlays.forEach((play: string | null) => {
+      if (!play) return;
+
+      switch (play) {
+        case 'TOUCHDOWN':
+          // 플레이 타입에 따라 리시빙 TD 또는 러싱 TD
+          if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+            stats.receivingTouchdown += 1;
+            stats.target += 1;
+            stats.reception += 1;
+            if (clip.gainYard && clip.gainYard >= 0) {
+              stats.receivingYards += clip.gainYard;
+              if (clip.gainYard > stats.longestReception) {
+                stats.longestReception = clip.gainYard;
+              }
+            }
+          } else if (clip.playType === 'Run' || clip.playType === 'RUSH') {
+            stats.rushingTouchdown += 1;
+            stats.rushingAttempted += 1;
+            if (clip.gainYard && clip.gainYard >= 0) {
+              stats.rushingYards += clip.gainYard;
+              if (clip.gainYard > stats.longestRushing) {
+                stats.longestRushing = clip.gainYard;
+              }
+            }
+          }
+          break;
+
+        case 'FUMBLE':
+          // TE가 펌블한 경우
+          stats.fumbles += 1;
+          break;
+
+        case 'FUMBLELOSOFF':
+          // TE가 펌블 lost한 경우
+          stats.fumbles += 1;
+          stats.fumblesLost += 1;
+          break;
+
+        case 'FIRST_DOWN':
+          // 퍼스트 다운 획득 (리시빙에만 적용)
+          if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+            stats.receivingFirstDowns += 1;
+          }
+          break;
+      }
+    });
+  }
+
+  // 기본 공격 플레이 분석 (일반적인 Pass/Run 상황)
+  private analyzeBasicOffensivePlay(clip: any, stats: TeStats, playerId: string): void {
+    const playerNum = parseInt(playerId);
+    const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'TE') ||
+                                (clip.car2?.num === playerNum && clip.car2?.pos === 'TE');
+
+    if (!isThisPlayerCarrier) return;
+
+    // SignificantPlays에서 이미 처리된 경우가 아니라면 기본 스탯 추가
+    const hasSpecialPlay = clip.significantPlays?.some((play: string | null) => 
+      play === 'TOUCHDOWN' || play === 'FUMBLE' || play === 'FUMBLELOSOFF'
+    );
+
+    if (!hasSpecialPlay) {
+      // 일반적인 Pass 상황 (타겟 및 리셉션) - TE의 주요 플레이
+      if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+        stats.target += 1;
+        
+        // 완성된 패스인지 확인 (gainYard가 0보다 크면 완성)
+        if (clip.gainYard && clip.gainYard > 0) {
+          stats.reception += 1;
+          stats.receivingYards += clip.gainYard;
+          if (clip.gainYard > stats.longestReception) {
+            stats.longestReception = clip.gainYard;
+          }
+        }
+      }
+      
+      // 일반적인 Rush 상황 (TE 러싱 - 트릭 플레이 등)
+      else if (clip.playType === 'Run' || clip.playType === 'RUSH') {
+        stats.rushingAttempted += 1;
+        if (clip.gainYard && clip.gainYard >= 0) {
+          stats.rushingYards += clip.gainYard;
+          if (clip.gainYard > stats.longestRushing) {
+            stats.longestRushing = clip.gainYard;
+          }
+        }
+      }
+      // TE는 일반적으로 킥오프/펀트 리턴을 하지 않으므로 해당 케이스 없음
     }
   }
 

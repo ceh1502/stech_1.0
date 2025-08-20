@@ -1,0 +1,560 @@
+/* 게임 업로드 페이지 스타일 */
+.game-upload-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.upload-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.upload-header h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 28px;
+}
+
+.upload-header p {
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+}
+
+/* 드롭 존 스타일 */
+.drop-zone {
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 20px 0;
+  background-color: #fafafa;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-zone:hover {
+  border-color: #007bff;
+  background-color: #f0f8ff;
+  transform: translateY(-2px);
+}
+
+.drop-zone.has-file {
+  border-color: #28a745;
+  background-color: #f8fff9;
+}
+
+.drop-zone.uploading {
+  border-color: #ffc107;
+  background-color: #fffbf0;
+  cursor: not-allowed;
+}
+
+.drop-label {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+}
+
+.drop-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.drop-icon {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.primary-text {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.secondary-text {
+  font-size: 14px;
+  color: #666;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.file-icon {
+  font-size: 32px;
+}
+
+.file-details {
+  text-align: left;
+}
+
+.file-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.file-size {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 에러 메시지 */
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #f5c6cb;
+  margin: 15px 0;
+}
+
+.error-icon {
+  font-size: 18px;
+}
+
+/* 액션 버튼들 */
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.upload-button {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.upload-button:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.reset-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.reset-button:hover {
+  background-color: #545b62;
+}
+
+/* 진행 상황 */
+.upload-progress {
+  background-color: #f8f9fa;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.upload-progress h3 {
+  color: #495057;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 24px;
+  background-color: #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 20px 0;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #007bff, #28a745);
+  transition: width 0.3s ease;
+  border-radius: 12px;
+}
+
+.progress-steps {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 20px 0;
+}
+
+.step {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #6c757d;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.step.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* 성공 결과 */
+.success-result {
+  background-color: #f8fff9;
+  border: 1px solid #d4edda;
+  border-radius: 12px;
+  padding: 25px;
+  margin: 20px 0;
+}
+
+.success-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #d4edda;
+}
+
+.success-header h3 {
+  color: #155724;
+  margin: 0;
+  font-size: 24px;
+}
+
+.new-upload-button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.new-upload-button:hover {
+  background-color: #218838;
+}
+
+/* 게임 정보 */
+.game-info {
+  margin-bottom: 25px;
+}
+
+.game-info h4 {
+  color: #155724;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 15px;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.info-item .label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.info-item .value {
+  color: #155724;
+  font-weight: 500;
+}
+
+/* 분석 요약 */
+.analysis-summary {
+  margin-bottom: 25px;
+}
+
+.analysis-summary h4 {
+  color: #155724;
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.summary-item {
+  text-align: center;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.summary-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 5px;
+}
+
+.summary-label {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* 선수 결과 */
+.player-results {
+  margin-bottom: 20px;
+}
+
+.player-results h4 {
+  color: #155724;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.player-section {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.section-title.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.section-title.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.player-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  border-radius: 6px;
+  background-color: white;
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s ease;
+}
+
+.player-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.player-item.success {
+  border-left: 4px solid #28a745;
+}
+
+.player-item.failed {
+  border-left: 4px solid #dc3545;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player-number {
+  font-weight: bold;
+  color: #495057;
+  font-size: 16px;
+}
+
+.player-position {
+  color: #007bff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.error-msg {
+  color: #721c24;
+  font-size: 12px;
+  max-width: 200px;
+  word-wrap: break-word;
+}
+
+.player-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-clips {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.status-icon {
+  font-size: 16px;
+}
+
+/* 처리 정보 */
+.processing-info {
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e9ecef;
+}
+
+.processing-info small {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+/* 에러 결과 */
+.error-result {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #f5c6cb;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.error-result h3 {
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.retry-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 15px;
+  transition: background-color 0.3s;
+}
+
+.retry-button:hover {
+  background-color: #c82333;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .game-upload-container {
+    padding: 15px;
+  }
+  
+  .drop-zone {
+    padding: 25px 15px;
+    min-height: 100px;
+  }
+  
+  .drop-icon {
+    font-size: 36px;
+  }
+  
+  .primary-text {
+    font-size: 16px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .upload-button,
+  .reset-button {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .progress-steps {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .success-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .info-grid,
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .player-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .upload-header h2 {
+    font-size: 24px;
+  }
+  
+  .drop-zone {
+    padding: 20px 10px;
+  }
+  
+  .file-info {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .summary-number {
+    font-size: 28px;
+  }
+}

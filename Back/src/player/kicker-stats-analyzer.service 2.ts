@@ -93,14 +93,23 @@ export class KickerStatsAnalyzerService {
         continue; // 이 클립은 해당 Kicker 플레이가 아님
       }
 
-      // SignificantPlays 기반 스탯 분석 (신규 방식)
-      const fgYards = this.analyzeSignificantPlaysNew(clip, kickerStats, playerId);
-      
-      // 기본 특수팀 플레이 분석 (레거시 방식)  
-      const fgYards2 = this.analyzeBasicKickingPlay(clip, kickerStats);
-      
-      // 필드골 야드 누적 (평균 계산용)
-      totalFieldGoalYards += fgYards + fgYards2;
+      // 플레이 타입별 스탯 집계
+      switch (clip.PlayType) {
+        case 'PAT':
+          this.analyzePATPlay(clip, kickerStats, true); // 성공한 PAT
+          break;
+        case 'NoPAT':
+          this.analyzePATPlay(clip, kickerStats, false); // 실패한 PAT
+          break;
+        case 'FieldGoal':
+          this.analyzeFieldGoalPlay(clip, kickerStats, true); // 성공한 필드골
+          totalFieldGoalYards += this.calculateFieldGoalDistance(clip.RemainYard);
+          break;
+        case 'NoFieldGoal':
+          this.analyzeFieldGoalPlay(clip, kickerStats, false); // 실패한 필드골
+          totalFieldGoalYards += this.calculateFieldGoalDistance(clip.RemainYard);
+          break;
+      }
     }
 
     // 계산된 스탯 업데이트
@@ -127,143 +136,6 @@ export class KickerStatsAnalyzerService {
   private analyzeFieldGoalPlay(clip: ClipData, stats: KickerStats, isSuccessful: boolean): void {
     const distance = this.calculateFieldGoalDistance(clip.RemainYard);
     
-    stats.fieldGoalAttempted++;
-    if (isSuccessful) {
-      stats.fieldGoalMade++;
-      
-      // 최장 필드골 기록 업데이트
-      if (distance > stats.longestFieldGoalMade) {
-        stats.longestFieldGoalMade = distance;
-      }
-    }
-
-    // 거리별 필드골 통계
-    if (distance >= 1 && distance <= 19) {
-      stats.fg1to19Attempted++;
-      if (isSuccessful) stats.fg1to19Made++;
-    } else if (distance >= 20 && distance <= 29) {
-      stats.fg20to29Attempted++;
-      if (isSuccessful) stats.fg20to29Made++;
-    } else if (distance >= 30 && distance <= 39) {
-      stats.fg30to39Attempted++;
-      if (isSuccessful) stats.fg30to39Made++;
-    } else if (distance >= 40 && distance <= 49) {
-      stats.fg40to49Attempted++;
-      if (isSuccessful) stats.fg40to49Made++;
-    } else if (distance >= 50) {
-      stats.fg50plusAttempted++;
-      if (isSuccessful) stats.fg50plusMade++;
-    }
-  }
-
-  // NewClipDto에서 해당 선수가 킥커인지 확인
-  private isPlayerKicker(clip: any, playerId: string): boolean {
-    // car, car2에서 해당 선수 찾기 (킥커는 보통 car에만 있음)
-    const playerNum = parseInt(playerId);
-    
-    return (clip.car?.num === playerNum && clip.car?.pos === 'Kicker') ||
-           (clip.car2?.num === playerNum && clip.car2?.pos === 'Kicker');
-  }
-
-  // 새로운 SignificantPlays 기반 스탯 분석
-  private analyzeSignificantPlaysNew(clip: any, stats: KickerStats, playerId: string): number {
-    if (!clip.significantPlays) return 0;
-
-    const playerNum = parseInt(playerId);
-    const isThisPlayerKicker = (clip.car?.num === playerNum && clip.car?.pos === 'Kicker') ||
-                               (clip.car2?.num === playerNum && clip.car2?.pos === 'Kicker');
-
-    if (!isThisPlayerKicker) return 0;
-
-    let totalFgYards = 0;
-
-    clip.significantPlays.forEach((play: string | null) => {
-      if (!play) return;
-
-      switch (play) {
-        case 'FIELDGOAL':
-          // 필드골 성공
-          const fgDistance = clip.remainYard ? this.calculateFieldGoalDistance(clip.remainYard) : 0;
-          if (fgDistance > 0) {
-            this.updateFieldGoalStats(stats, fgDistance, true);
-            totalFgYards += fgDistance;
-          }
-          break;
-
-        case 'FIELDGOALMISS':
-          // 필드골 실패  
-          const fgMissDistance = clip.remainYard ? this.calculateFieldGoalDistance(clip.remainYard) : 0;
-          if (fgMissDistance > 0) {
-            this.updateFieldGoalStats(stats, fgMissDistance, false);
-            totalFgYards += fgMissDistance;
-          }
-          break;
-
-        case 'EXTRAPOINT':
-          // 추가점 성공
-          stats.extraPointAttempted += 1;
-          stats.extraPointMade += 1;
-          break;
-
-        case 'EXTRAPOINTMISS':
-          // 추가점 실패
-          stats.extraPointAttempted += 1;
-          break;
-      }
-    });
-
-    return totalFgYards;
-  }
-
-  // 기본 특수팀 플레이 분석 (레거시 PlayType 방식)
-  private analyzeBasicKickingPlay(clip: any, stats: KickerStats): number {
-    const playerNum = parseInt(clip.playerId || '0');
-    const isThisPlayerKicker = (clip.car?.num === playerNum && clip.car?.pos === 'Kicker') ||
-                               (clip.car2?.num === playerNum && clip.car2?.pos === 'Kicker');
-
-    if (!isThisPlayerKicker) return 0;
-
-    // SignificantPlays에서 이미 처리된 경우가 아니라면 레거시 방식 적용
-    const hasSpecialPlay = clip.significantPlays?.some((play: string | null) => 
-      play === 'FIELDGOAL' || play === 'FIELDGOALMISS' || play === 'EXTRAPOINT' || play === 'EXTRAPOINTMISS'
-    );
-
-    if (!hasSpecialPlay) {
-      let totalFgYards = 0;
-
-      // 레거시 PlayType 방식
-      switch (clip.playType) {
-        case 'PAT':
-          stats.extraPointAttempted += 1;
-          stats.extraPointMade += 1;
-          break;
-        case 'NoPAT':
-          stats.extraPointAttempted += 1;
-          break;
-        case 'FieldGoal':
-          const fgDistance = clip.remainYard ? this.calculateFieldGoalDistance(clip.remainYard) : 0;
-          if (fgDistance > 0) {
-            this.updateFieldGoalStats(stats, fgDistance, true);
-            totalFgYards += fgDistance;
-          }
-          break;
-        case 'NoFieldGoal':
-          const fgMissDistance = clip.remainYard ? this.calculateFieldGoalDistance(clip.remainYard) : 0;
-          if (fgMissDistance > 0) {
-            this.updateFieldGoalStats(stats, fgMissDistance, false);
-            totalFgYards += fgMissDistance;
-          }
-          break;
-      }
-
-      return totalFgYards;
-    }
-
-    return 0;
-  }
-
-  // 필드골 스탯 업데이트 헬퍼 메소드
-  private updateFieldGoalStats(stats: KickerStats, distance: number, isSuccessful: boolean): void {
     stats.fieldGoalAttempted++;
     if (isSuccessful) {
       stats.fieldGoalMade++;
