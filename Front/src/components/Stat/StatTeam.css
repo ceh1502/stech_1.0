@@ -20,7 +20,7 @@
   padding-bottom: 0.5rem;
 }
 
-.table-row {
+.team-table-row {
   display: grid;
   grid-template-columns: 28rem 1fr;
   align-items: stretch;
@@ -28,7 +28,7 @@
   color: #a5a5a5;
   font-weight: 700;
 }
-.table-rows {
+.team-table-rows {
   height: 3.75rem;
   border-radius: 0.5rem;
   border: 0.236px solid #6e6e6e;
@@ -41,7 +41,7 @@
 .table-rows.is-division2{
   background: rgba(110, 110, 110, 0.20);
 }
-.table-row1 {
+.team-table-row1 {
   width: 28rem;
   display: grid;
   grid-template-columns: 5rem  3.75rem 1fr;

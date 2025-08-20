@@ -381,9 +381,9 @@ export default function StatTeam({data, teams = []}) {
               return (
                 <tr
                   key={row.id || row.team}
-                  className={`table-rows ${isSecondDiv ? "is-division2" : ""}`}
+                  className={`team-table-rows ${isSecondDiv ? "is-division2" : ""}`}
                 >
-                  <div className="table-row1">
+                  <div className="team-table-row1">
                     <td className="table-cell">{row.__rank}위</td>
                     <td className="table-cell team-logo-cell">
                       {teamInfo?.logo && (
@@ -403,7 +403,7 @@ export default function StatTeam({data, teams = []}) {
                     <td className="table-cell team-name">{row.team}</td>
                   </div>
                   <div
-                    className="table-row2"
+                    className="team-table-row2"
                     style={{"--cols": currentColumns.length}}
                   >
                     {currentColumns.map((col) => {
