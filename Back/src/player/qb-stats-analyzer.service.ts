@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
+import { PLAY_TYPE, SIGNIFICANT_PLAY, PlayAnalysisHelper } from './constants/play-types.constants';
 
 // QB 스탯 인터페이스 정의
 export interface QbStats {
@@ -129,61 +130,107 @@ export class QbStatsAnalyzerService {
            (clip.car2?.num === playerNum && clip.car2?.pos === 'QB');
   }
 
-  // 새로운 SignificantPlays 기반 스탯 분석
+  // 새로운 특수 케이스 분석 로직
   private analyzeSignificantPlaysNew(clip: any, stats: QbStats, playerId: string): void {
     if (!clip.significantPlays) return;
 
     const playerNum = parseInt(playerId);
-    const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'QB') ||
-                                (clip.car2?.num === playerNum && clip.car2?.pos === 'QB');
+    const isQB = (clip.car?.num === playerNum && clip.car?.pos === 'QB') ||
+                 (clip.car2?.num === playerNum && clip.car2?.pos === 'QB');
 
-    if (!isThisPlayerCarrier) return;
+    if (!isQB) return;
 
-    clip.significantPlays.forEach((play: string | null) => {
-      if (!play) return;
+    const significantPlays = clip.significantPlays;
+    const playType = clip.playType;
+    const gainYard = clip.gainYard || 0;
 
-      switch (play) {
-        case 'TOUCHDOWN':
-          // 플레이 타입에 따라 패싱 TD 또는 러싱 TD
-          if (clip.playType === 'Pass' || clip.playType === 'PASS') {
-            stats.passingTouchdown += 1;
-            stats.passAttempted += 1;
-            stats.passCompletion += 1;
-            if (clip.gainYard && clip.gainYard > 0) {
-              stats.passingYards += clip.gainYard;
-              if (clip.gainYard > stats.longestPass) {
-                stats.longestPass = clip.gainYard;
-              }
-            }
-          } else if (clip.playType === 'Run' || clip.playType === 'RUSH') {
-            stats.rushingTouchdown += 1;
-            stats.rushingAttempted += 1;
-            if (clip.gainYard && clip.gainYard > 0) {
-              stats.rushingYards += clip.gainYard;
-              if (clip.gainYard > stats.longestRushing) {
-                stats.longestRushing = clip.gainYard;
-              }
-            }
-          }
-          break;
-
-        case 'SACK':
-          // QB가 sack 당한 경우
-          stats.sack += 1;
-          break;
-
-        case 'INTERCEPT':
-          // QB가 인터셉션 당한 경우
-          stats.interception += 1;
-          stats.passAttempted += 1;
-          break;
-
-        case 'FUMBLE':
-          // QB가 펌블한 경우
-          stats.fumbles += 1;
-          break;
+    // Passing Touchdown
+    if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.TOUCHDOWN) && 
+        (playType === PLAY_TYPE.PASS || playType === 'PassComplete')) {
+      stats.passingTouchdown += 1;
+      stats.passAttempted += 1;
+      stats.passCompletion += 1;
+      stats.passingYards += gainYard;
+      if (gainYard > stats.longestPass) {
+        stats.longestPass = gainYard;
       }
-    });
+    }
+
+    // Rushing Touchdown (QB Scramble/Designed Run)
+    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.TOUCHDOWN) && 
+             playType === PLAY_TYPE.RUN) {
+      stats.rushingTouchdown += 1;
+      stats.rushingAttempted += 1;
+      stats.rushingYards += gainYard;
+      if (gainYard > stats.longestRushing) {
+        stats.longestRushing = gainYard;
+      }
+    }
+
+    // Sack
+    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.SACK)) {
+      stats.sack += 1;
+    }
+
+    // Interception
+    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.INTERCEPT)) {
+      stats.interception += 1;
+      stats.passAttempted += 1;
+    }
+
+    // Fumble (Pass)
+    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLE) && 
+             (playType === PLAY_TYPE.PASS || playType === 'PassComplete')) {
+      stats.fumbles += 1;
+      stats.passAttempted += 1;
+      stats.passCompletion += 1;
+      stats.passingYards += gainYard;
+    }
+
+    // Fumble (Run) - 스크리미지 라인 뒤에서 펌블
+    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLE) && 
+             playType === PLAY_TYPE.RUN) {
+      stats.fumbles += 1;
+      stats.rushingAttempted += 1;
+      
+      // 스크리미지 라인 기준으로 야드 계산
+      if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLERECOFF)) {
+        // 오펜스 리커버리 시
+        const startYard = clip.start?.yard || 0;
+        const endYard = clip.end?.yard || 0;
+        const actualGain = gainYard < 0 ? gainYard : Math.min(gainYard, endYard - startYard);
+        stats.rushingYards += actualGain;
+      } else {
+        // 디펜스 리커버리 시
+        stats.rushingYards += gainYard;
+      }
+    }
+
+    // Pass Complete (일반)
+    else if (playType === PLAY_TYPE.PASS || playType === 'PassComplete') {
+      stats.passAttempted += 1;
+      if (gainYard > 0) {
+        stats.passCompletion += 1;
+        stats.passingYards += gainYard;
+        if (gainYard > stats.longestPass) {
+          stats.longestPass = gainYard;
+        }
+      }
+    }
+
+    // Pass Incomplete
+    else if (playType === PLAY_TYPE.NOPASS || playType === 'PassIncomplete') {
+      stats.passAttempted += 1;
+    }
+
+    // Run (일반)
+    else if (playType === PLAY_TYPE.RUN) {
+      stats.rushingAttempted += 1;
+      stats.rushingYards += gainYard;
+      if (gainYard > stats.longestRushing) {
+        stats.longestRushing = gainYard;
+      }
+    }
   }
 
   // 기본 공격 플레이 분석 (일반적인 Pass/Run 상황)

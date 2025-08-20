@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
 import { ClipData } from '../common/interfaces/clip-data.interface';
+import { PLAY_TYPE, SIGNIFICANT_PLAY, PlayAnalysisHelper } from './constants/play-types.constants';
 
 // Kicker 스탯 인터페이스 정의
 export interface KickerStats {
@@ -165,52 +166,52 @@ export class KickerStatsAnalyzerService {
            (clip.car2?.num === playerNum && clip.car2?.pos === 'Kicker');
   }
 
-  // 새로운 SignificantPlays 기반 스탯 분석
+  // 새로운 특수 케이스 분석 로직
   private analyzeSignificantPlaysNew(clip: any, stats: KickerStats, playerId: string): number {
     if (!clip.significantPlays) return 0;
 
     const playerNum = parseInt(playerId);
-    const isThisPlayerKicker = (clip.car?.num === playerNum && clip.car?.pos === 'Kicker') ||
-                               (clip.car2?.num === playerNum && clip.car2?.pos === 'Kicker');
+    const isKicker = (clip.car?.num === playerNum && clip.car?.pos === 'K') ||
+                     (clip.car2?.num === playerNum && clip.car2?.pos === 'K');
 
-    if (!isThisPlayerKicker) return 0;
+    if (!isKicker) return 0;
 
+    const significantPlays = clip.significantPlays;
+    const playType = clip.playType;
     let totalFgYards = 0;
 
-    clip.significantPlays.forEach((play: string | null) => {
-      if (!play) return;
+    // PAT(Good)
+    if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.PAT.GOOD) && 
+        playType === PLAY_TYPE.PAT) {
+      stats.extraPointAttempted += 1;
+      stats.extraPointMade += 1;
+    }
 
-      switch (play) {
-        case 'FIELDGOAL':
-          // 필드골 성공
-          const fgDistance = clip.remainYard ? this.calculateFieldGoalDistance(clip.remainYard) : 0;
-          if (fgDistance > 0) {
-            this.updateFieldGoalStats(stats, fgDistance, true);
-            totalFgYards += fgDistance;
-          }
-          break;
+    // PAT(No Good)
+    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.PAT.NOGOOD) && 
+             playType === PLAY_TYPE.PAT) {
+      stats.extraPointAttempted += 1;
+    }
 
-        case 'FIELDGOALMISS':
-          // 필드골 실패  
-          const fgMissDistance = clip.remainYard ? this.calculateFieldGoalDistance(clip.remainYard) : 0;
-          if (fgMissDistance > 0) {
-            this.updateFieldGoalStats(stats, fgMissDistance, false);
-            totalFgYards += fgMissDistance;
-          }
-          break;
-
-        case 'EXTRAPOINT':
-          // 추가점 성공
-          stats.extraPointAttempted += 1;
-          stats.extraPointMade += 1;
-          break;
-
-        case 'EXTRAPOINTMISS':
-          // 추가점 실패
-          stats.extraPointAttempted += 1;
-          break;
+    // Field Goal(Good)
+    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FIELDGOAL.GOOD) && 
+             playType === PLAY_TYPE.FG) {
+      const distance = PlayAnalysisHelper.calculateFieldGoalDistance(clip.start?.side || '', clip.start?.yard || 0);
+      if (distance > 0) {
+        this.updateFieldGoalStats(stats, distance, true);
+        totalFgYards += distance;
       }
-    });
+    }
+
+    // Field Goal(No Good)
+    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FIELDGOAL.NOGOOD) && 
+             playType === PLAY_TYPE.FG) {
+      const distance = PlayAnalysisHelper.calculateFieldGoalDistance(clip.start?.side || '', clip.start?.yard || 0);
+      if (distance > 0) {
+        this.updateFieldGoalStats(stats, distance, false);
+        totalFgYards += distance;
+      }
+    }
 
     return totalFgYards;
   }
