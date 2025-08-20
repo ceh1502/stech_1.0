@@ -458,6 +458,7 @@ export default function StatPosition({data, teams = []}) {
       return true;
     });
 
+
     if (sortChain.length === 0) return rows;
 
     const cmp = (a, b) => {
@@ -475,6 +476,26 @@ export default function StatPosition({data, teams = []}) {
 
     return [...rows].sort(cmp);
   }, [data, league, division, position, sortChain]);
+
+const rankedPlayers = useMemo(() => {
+  if (!sortedPlayers.length) return [];
+
+  const keyOf = (r) => sortChain.map(({ key }) => r[key] ?? 0).join('|');
+
+  let lastKey = null;
+  let currentRank = 0;
+  let seen = 0;
+
+  return sortedPlayers.map((r) => {
+    seen += 1;
+    const k = keyOf(r);
+    if (k !== lastKey) currentRank = seen; // 새 값이면 순위 갱신
+    lastKey = k;
+    return { ...r, __rank: currentRank };
+  });
+}, [sortedPlayers, sortChain]);
+
+
 
   return (
     <div className="stat-position">
@@ -578,12 +599,12 @@ export default function StatPosition({data, teams = []}) {
           </thead>
 
           <tbody className="table-body">
-            {sortedPlayers.map((row, idx) => {
+            {rankedPlayers.map((row, idx) => {
               const teamInfo = teams.find((t) => t.name === row.team);
               return (
                 <tr key={row.id || row.name} className="table-rows">
                   <div className="table-row1">
-                    <td className="table-cell">{row.rank || idx + 1}위</td>
+                    <td className="table-cell">{row.__rank}위</td>
                     <td className="table-cell player-name clickable">
                       {row.name}
                     </td>
