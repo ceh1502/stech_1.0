@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './ProfileMain.css';
+import './ProfileModify.css';
 import ChungAng from '../../assets/images/png/TeamLogosPng/ChungAng-Blue-Dragons.png';
 import Dongguk from '../../assets/images/png/TeamLogosPng/Dongguk-Tuskers.png';
 import Hanyang from '../../assets/images/png/TeamLogosPng/Hanyang-Lions.png';
@@ -94,10 +94,10 @@ const ProfileMain = () => {
     return (
         <div className="profile-main>">
             <div className="profile-buttons-top">
-                <a href="./profile/teamplayer" type="button" className="profile-button">팀 선수 스탯</a>
-                <a href="./profile/modify" type="button" className="profile-button">프로필 수정</a>
-                <a href="./profile/clip" type="button" className="profile-button">메모 클립 영상</a>
-                <a href="./profile/manage" type="button" className="profile-button">구단 관리</a>
+                <a href="./teamplayer" type="button" className="profile-button">팀 선수 스탯</a>
+                <a href="./modify" type="button" className="profile-button active">프로필 수정</a>
+                <a href="./clip" type="button" className="profile-button">메모 클립 영상</a>
+                <a href="./manage" type="button" className="profile-button">구단 관리</a>
             </div>
 
             <div className="profile-container">
