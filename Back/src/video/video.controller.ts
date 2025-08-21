@@ -29,7 +29,7 @@ export class VideoController {
     @Body() body: { title?: string; description?: string }
   ) {
     // S3 업로드 로직은 나중에 구현
-    const uploadResult = { success: true, url: `http://localhost:3000/uploads/${file.filename}` };
+    const uploadResult = { success: true, url: `http://localhost:4000/uploads/${file.filename}` };
     
     return this.videoService.uploadVideo(file, uploadResult, body.title, body.description);
   }

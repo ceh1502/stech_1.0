@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
-import { ClipData } from '../common/interfaces/clip-data.interface';
-import { PLAY_TYPE, SIGNIFICANT_PLAY, PlayAnalysisHelper } from './constants/play-types.constants';
+import { NewClipDto } from '../common/dto/new-clip.dto';
 
 // WR 스탯 인터페이스 정의
 export interface WrStats {
@@ -58,7 +57,7 @@ export class WrStatsAnalyzerService {
   }
 
   // 클립 데이터에서 WR 스탯 추출
-  async analyzeWrStats(clips: ClipData[], playerId: string): Promise<WrStats> {
+  async analyzeWrStats(clips: NewClipDto[], playerId: string): Promise<WrStats> {
     const wrStats: WrStats = {
       games: 0,
       target: 0,
@@ -86,32 +85,24 @@ export class WrStatsAnalyzerService {
 
     const gameIds = new Set(); // 경기 수 계산용
 
-    // Player DB에서 해당 선수 정보 미리 조회 (playercode 또는 playerId로 검색)
+    // Player DB에서 해당 선수 정보 미리 조회 (jerseyNumber로 검색)
     const player = await this.playerModel.findOne({ 
-      $or: [
-        { playerId: playerId },
-        { playercode: playerId },
-        { playercode: parseInt(playerId) }
-      ]
+      jerseyNumber: parseInt(playerId)
     });
-    if (!player || player.position !== 'WR') {
-      throw new Error('해당 선수는 WR이 아니거나 존재하지 않습니다.');
+    if (!player) {
+      throw new Error(`등번호 ${playerId}번 선수를 찾을 수 없습니다.`);
     }
 
     for (const clip of clips) {
       // 게임 ID 추가 (경기 수 계산)
-      gameIds.add(clip.ClipKey);
+      if (clip.clipKey) {
+        gameIds.add(clip.clipKey);
+      }
 
-      // 이 클립에서 해당 WR이 Carrier에 있는지 확인
-      const carrier = clip.Carrier?.find(c => 
-        (c.playercode == playerId || c.playercode === parseInt(playerId)) &&
-        c.position === 'WR'
-      );
-      
       // NewClipDto 구조 지원 - car, car2에서 찾기
       const isOffender = this.isPlayerInOffense(clip, playerId);
       
-      if (!carrier && !isOffender) {
+      if (!isOffender) {
         continue; // 이 클립은 해당 WR 플레이가 아님
       }
 
@@ -141,7 +132,7 @@ export class WrStatsAnalyzerService {
   }
 
   // 리시빙 플레이 분석
-  private analyzeReceivingPlay(clip: ClipData, stats: WrStats, yards: number, hasTouchdown: boolean): void {
+  private analyzeReceivingPlay(clip: NewClipDto, stats: WrStats, yards: number, hasTouchdown: boolean): void {
     stats.target++; // 타겟된 횟수
     stats.reception++; // 성공한 리셉션
     stats.receivingYards += yards;
@@ -157,13 +148,13 @@ export class WrStatsAnalyzerService {
     }
 
     // 퍼스트 다운 체크 (획득 야드가 필요 야드 이상이면)
-    if (yards >= clip.RemainYard) {
+    if (yards >= (clip.toGoYard || 0)) {
       stats.receivingFirstDowns++;
     }
   }
 
   // 러싱 플레이 분석 (WR이 러싱하는 경우)
-  private analyzeRushingPlay(clip: ClipData, stats: WrStats, yards: number, hasTouchdown: boolean): void {
+  private analyzeRushingPlay(clip: NewClipDto, stats: WrStats, yards: number, hasTouchdown: boolean): void {
     stats.rushingAttempted++;
     stats.rushingYards += yards;
 
@@ -179,7 +170,7 @@ export class WrStatsAnalyzerService {
   }
 
   // 킥 리턴 플레이 분석
-  private analyzeKickReturnPlay(clip: ClipData, stats: WrStats, yards: number, hasTouchdown: boolean): void {
+  private analyzeKickReturnPlay(clip: NewClipDto, stats: WrStats, yards: number, hasTouchdown: boolean): void {
     stats.kickReturn++;
     stats.kickReturnYards += yards;
 
@@ -190,7 +181,7 @@ export class WrStatsAnalyzerService {
   }
 
   // 펀트 리턴 플레이 분석
-  private analyzePuntReturnPlay(clip: ClipData, stats: WrStats, yards: number, hasTouchdown: boolean): void {
+  private analyzePuntReturnPlay(clip: NewClipDto, stats: WrStats, yards: number, hasTouchdown: boolean): void {
     stats.puntReturn++;
     stats.puntReturnYards += yards;
 
@@ -225,7 +216,7 @@ export class WrStatsAnalyzerService {
       switch (play) {
         case 'TOUCHDOWN':
           // 플레이 타입에 따라 리시빙 TD 또는 러싱 TD
-          if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+          if (clip.playType === 'PASS' || clip.playType === 'PassComplete') {
             stats.receivingTouchdown += 1;
             stats.target += 1;
             stats.reception += 1;
@@ -235,7 +226,7 @@ export class WrStatsAnalyzerService {
                 stats.longestReception = clip.gainYard;
               }
             }
-          } else if (clip.playType === 'Run' || clip.playType === 'RUSH') {
+          } else if (clip.playType === 'RUN') {
             stats.rushingTouchdown += 1;
             stats.rushingAttempted += 1;
             if (clip.gainYard && clip.gainYard >= 0) {
@@ -273,7 +264,7 @@ export class WrStatsAnalyzerService {
 
         case 'FIRST_DOWN':
           // 퍼스트 다운 획득 (리시빙에만 적용)
-          if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+          if (clip.playType === 'PASS' || clip.playType === 'PassComplete') {
             stats.receivingFirstDowns += 1;
           }
           break;
@@ -296,7 +287,7 @@ export class WrStatsAnalyzerService {
 
     if (!hasSpecialPlay) {
       // 일반적인 Pass 상황 (타겟 및 리셉션) - WR의 주요 플레이
-      if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+      if (clip.playType === 'PASS' || clip.playType === 'PassComplete') {
         stats.target += 1;
         
         // 완성된 패스인지 확인 (gainYard가 0보다 크면 완성)
@@ -310,7 +301,7 @@ export class WrStatsAnalyzerService {
       }
       
       // 일반적인 Rush 상황 (WR 러싱 - 리버스 플레이 등)
-      else if (clip.playType === 'Run' || clip.playType === 'RUSH') {
+      else if (clip.playType === 'RUN') {
         stats.rushingAttempted += 1;
         if (clip.gainYard && clip.gainYard >= 0) {
           stats.rushingYards += clip.gainYard;
@@ -337,48 +328,40 @@ export class WrStatsAnalyzerService {
 
   // 샘플 클립 데이터로 테스트
   async generateSampleWrStats(playerId: string = 'WR001'): Promise<WrStats> {
-    const sampleClips: ClipData[] = [
+    const sampleClips: NewClipDto[] = [
       {
-        ClipKey: 'SAMPLE_GAME_1',
-        ClipUrl: 'https://example.com/clip1.mp4',
-        Quarter: '1',
-        OffensiveTeam: 'Away',
-        PlayType: 'Pass',
-        SpecialTeam: false,
-        Down: 1,
-        RemainYard: 10,
-        StartYard: { side: 'own', yard: 30 },
-        EndYard: { side: 'own', yard: 45 },
-        Carrier: [{ 
-          playercode: playerId, 
-          backnumber: 88, 
-          team: 'Away', 
-          position: 'WR', 
-          action: 'Catch' 
-        }],
-        SignificantPlays: [{ key: 'TOUCHDOWN', label: 'Touchdown' }],
-        StartScore: { Home: 0, Away: 0 }
+        clipKey: 'SAMPLE_GAME_1',
+        offensiveTeam: 'Away',
+        quarter: 1,
+        down: '1',
+        toGoYard: 10,
+        playType: 'PASS',
+        specialTeam: false,
+        start: { side: 'OWN', yard: 30 },
+        end: { side: 'OWN', yard: 45 },
+        gainYard: 15,
+        car: { num: parseInt(playerId), pos: 'WR' },
+        car2: { num: null, pos: null },
+        tkl: { num: null, pos: null },
+        tkl2: { num: null, pos: null },
+        significantPlays: ['TOUCHDOWN', null, null, null]
       },
       {
-        ClipKey: 'SAMPLE_GAME_1',
-        ClipUrl: 'https://example.com/clip2.mp4',
-        Quarter: '2',
-        OffensiveTeam: 'Away',
-        PlayType: 'Run',
-        SpecialTeam: false,
-        Down: 2,
-        RemainYard: 5,
-        StartYard: { side: 'own', yard: 45 },
-        EndYard: { side: 'opp', yard: 40 },
-        Carrier: [{ 
-          playercode: playerId, 
-          backnumber: 88, 
-          team: 'Away', 
-          position: 'WR', 
-          action: 'Rush' 
-        }],
-        SignificantPlays: [],
-        StartScore: { Home: 0, Away: 7 }
+        clipKey: 'SAMPLE_GAME_1',
+        offensiveTeam: 'Away',
+        quarter: 2,
+        down: '2',
+        toGoYard: 5,
+        playType: 'RUN',
+        specialTeam: false,
+        start: { side: 'OWN', yard: 45 },
+        end: { side: 'OPP', yard: 40 },
+        gainYard: 15,
+        car: { num: parseInt(playerId), pos: 'WR' },
+        car2: { num: null, pos: null },
+        tkl: { num: null, pos: null },
+        tkl2: { num: null, pos: null },
+        significantPlays: [null, null, null, null]
       }
     ];
 
