@@ -1,0 +1,90 @@
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 50px 80px 50px 80px;
+    width: 100%;
+    margin: 0 auto;
+    border-top: 1px solid #333;
+    flex-wrap: wrap;
+    gap: 20px;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.6) 100%), #000000; /* Footer 배경색 */
+}
+
+.menu2 {
+    display: flex;
+    gap: 30px;
+    padding: 0px !important;
+}
+
+.homeButton2,
+.docs2,
+.teamButton2,
+.deckButton2,
+.contactButton2,
+.serviceButton2 {
+    display: flex;
+    align-items: flex-start;
+    height: 20px;
+    font-size: 16px;
+    color: #fff7f7 !important;
+    text-decoration: none;
+}
+
+.homeActive2,
+.docsActive2,
+.teamActive2,
+.deckActive2,
+.contactActive2 {
+    display: flex;
+    align-items: flex-start;
+    height: 50px;
+    font-size: 16px !important;
+    color: #f77705 !important;
+    text-decoration: none;
+    font-weight: bold !important;
+}
+
+
+a {
+    cursor: default;
+    color: inherit;
+    text-decoration: none;
+}
+
+a:hover {
+    cursor: pointer;
+}
+
+
+.information {
+    display: flex;
+    color: #8b8b8b;
+    text-align: left;
+    font-family: Poppins;
+    font-size: 15px;
+    width: 100%;
+}
+.footer-socials {
+    flex-grow: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 5px;
+}
+
+
+.FinishLine {
+    width: 100%;
+    height: 1px;
+    background: #71777d;
+    margin-bottom: 5px;
+}
+
+.copyright {
+    color: #8b8b8b;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 15px;
+    width: 100%;
+}

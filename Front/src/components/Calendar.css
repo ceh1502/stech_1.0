@@ -1,0 +1,64 @@
+.calendarBox {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 250px;
+    padding: 8px;
+    background: #1c1d21;
+    border: 1px solid #303136;
+    border-radius: 8px;
+    z-index: 120;
+    color: #e5e7eb;
+    font-size: 14px;
+}
+
+.calHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.calHeader button {
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.calWeekRow,
+.calGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.calWeekCell {
+    text-align: center;
+    padding: 4px 0;
+    font-weight: 600;
+}
+
+.calCell {
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.calCell.dim {
+    color: #555;
+}
+.calCell.today {
+    border-bottom: 2px solid #3b82f6;
+}
+.calCell.selected {
+    background: #3b82f620;
+    border-radius: 6px;
+}
+.calCell:hover {
+    background: #2a2b30;
+}

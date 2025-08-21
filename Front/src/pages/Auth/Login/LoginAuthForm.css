@@ -1,0 +1,247 @@
+.login-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #1a1a1a;
+    color: #f5f5f5;
+    font-family: sans-serif;
+    padding: 1rem;
+}
+
+.login-container {
+    max-width: 400px;
+    width: 100%;
+}
+
+.loginForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background-color: #444444;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 2px solid #ffffff;
+}
+
+.tab-container {
+    display: flex;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.loginTitle {
+    flex: 1;
+    padding: 5px;
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid #f77705;
+    font-size: 20px;
+    font-weight: 600;
+    color: #f77705;
+}
+
+.loginTitleTosignup {
+    flex: 1;
+    padding: 5px;
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid #ffffff;
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    text-align: center;
+}
+
+.formGroup {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.LoginformLabel {
+    display: block;
+    color: #ffffff;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.password-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.forgotPasswordLink {
+    color: #63b3ed;
+    font-size: 0.875rem;
+    transition: color 0.3s;
+    margin-left: 190px;
+}
+
+.forgotPasswordLink:hover {
+    color: #4299e1;
+    text-decoration: underline;
+}
+
+.LoginformInput {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #444444;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.LoginformInput:focus {
+    outline: none;
+    border-color: #f77705;
+}
+
+.passwordInputContainer {
+    position: relative;
+}
+
+.LoginpasswordToggleButton {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-45%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+
+.formOptions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.LoginrememberMeLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ffffff;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transform: translateY(-40%);
+}
+
+.LoginrememberCheckbox {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #f77705;
+}
+
+.errorMessage {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.LoginsubmitButton {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #f77705 0%, #f79c05 100%);
+    color: white;
+}
+
+.LoginsubmitButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(247, 119, 5, 0.3);
+}
+
+.LoginsubmitButton:disabled {
+    background: #6b6b6b;
+    color: #aaa;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.LoginsubmitButton.loading {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.divider-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 1.5rem 0;
+}
+
+.divider {
+    flex: 1;
+    height: 1px;
+    background-color: #ffffff;
+}
+
+.divider-text {
+    margin: 0 1rem;
+    color: #ffffff;
+    font-size: 15px;
+}
+
+.social-buttons-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.socialButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.socialButton.google-button {
+    background-color: #eee;
+    color: #333;
+}
+
+.socialButton.google-button:hover {
+    background-color: #ddd;
+}
+
+.socialButton.kakao-button {
+    background-color: #fcdc00;
+    color: #3b1e1e;
+}
+
+.socialButton.kakao-button:hover {
+    background-color: #e5c900;
+}
+
+.socialicon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 10px;
+}

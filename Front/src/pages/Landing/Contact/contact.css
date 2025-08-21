@@ -1,0 +1,276 @@
+.contactContainer {
+    width: 100%;
+    background: linear-gradient(
+        to bottom,
+        rgba(5, 9, 214, 0.7) 50px,
+        transparent 100px
+    );
+}
+
+.contactSection {
+    padding: 20px 20px;
+    text-align: center;
+}
+
+.contactHeader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.contactHeader h1 {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 0 10px;
+}
+
+.contactLogo {
+    width: 200px;
+    height: auto;
+}
+
+.contactLinks {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+.contacticon {
+    width: 20px;
+    height: auto;
+}
+
+.contactLink {
+    background-color: #0711D9;
+    color: #fff;
+    padding: 12px 12px;
+    border-radius: 15px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.contactForm {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.ContactformGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.inputRow {
+    display: flex;
+    gap: 20px;
+}
+
+.inputWrapper {
+    flex: 1;
+    text-align: left;
+    background-color: #333;
+    padding: 10px 20px;
+    border-radius: 20px;
+}
+
+.inputWrapper label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+    color: #fff;
+}
+
+.inputWrapper input {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    width: 100%;
+    padding: 11px 0;
+    border-bottom: 2px solid #555;
+    box-sizing: border-box;
+}
+
+.inputWrapper textarea {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    width: 100%;
+    padding: 10px 0;
+    box-sizing: border-box;
+    height: 150px;
+    padding-bottom: 10px; 
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 15px;
+}
+
+
+
+.inputWrapper input::placeholder,
+.inputWrapper textarea::placeholder {
+    color: #b1b1b1;
+}
+
+.contactsubmitButton {
+    background-color: #0711D9;
+    color: #fff;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    margin-top: 50px;
+}
+
+.faqContent {
+    background-image: url('../../../assets/images/png/ContactPng/FAQheader.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    position: relative;
+    padding: 50px 20px;
+    
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.faqContent::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(2, 14, 177, 0.397);
+    z-index: 1;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.faqContent h2 {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    margin: 5px;
+}
+
+.faqContent p {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    font-size: 1.0em;
+    margin: 0px;
+}
+
+.faqGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    margin-bottom: 50px;
+    background-color: #333;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.faqNumber {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-right: 15px;
+    color: #fff;
+    padding: 15px;
+    transition: color 0.3s ease;
+}
+
+.faqHeader.expanded .faqNumber {
+    color: #F77705;
+}
+
+.faqHeader h4 {
+    margin: 0;
+    flex-grow: 1;
+    text-align: left;
+    color: #fff;
+    transition: color 0.3s ease;
+}
+
+.faqHeader.expanded h4 {
+    color: #F77705;
+}
+
+.faqHeader:hover .faqNumber,
+.faqHeader:hover h4 {
+    color: #F77705;
+}
+
+.toggleIcon {
+    font-size: 2em;
+    line-height: 1;
+    color: #fff;
+    font-weight: 300;
+    transition: transform 0.3s ease;
+}
+
+.faqHeader.expanded .toggleIcon {
+    transform: rotate(45deg);
+}
+
+.faqItem {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.faqItem.expanded {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.faqHeader {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    cursor: pointer;
+    position: relative;
+}
+
+.faqBody {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+    padding-left: 85px;
+    font-size: 10px;
+}
+
+.faqBody.expanded {
+    max-height: 200px;
+    padding-bottom: 20px;
+    padding-top: 0px;
+}
+
+.faqBody p {
+    text-align: left;
+    color: #ffffff;
+    margin: 0;
+    font-size: 1.6em;
+}
+
+@media (max-width: 768px) {
+    .inputRow {
+        flex-direction: column;
+    }
+
+    .faqGrid {
+        grid-template-columns: 1fr;
+    }
+}

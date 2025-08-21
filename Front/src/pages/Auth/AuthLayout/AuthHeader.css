@@ -1,0 +1,22 @@
+.authHeader{
+  background-color: #141414;
+}
+.authLogoBox{
+  display: felx;
+  align-items: center;
+  justify-content:center;
+  width: 180px;
+  cursor : pointer;
+}
+
+.authLogoBox .img {
+  width: auto;
+  filter: brightness(1.1);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.authLogoBox:hover {
+  filter: brightness(1.3) drop-shadow(0 0 10px rgba(79, 70, 229, 0.3));
+  transform: scale(1.05);
+}

@@ -1,0 +1,53 @@
+:root {
+    --sidebar-width: 300px;
+} /* 한 줄만 바꾸면 폭 수정 가능 */
+
+/* ------ 사이드바 ------ */
+.serviceSidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: #0f1012;
+    overflow-y: auto; /* 내부 스크롤(선택) */
+    z-index: 100; /* 필요하면 조정 */
+}
+
+/* ------ 레이아웃 컨테이너 ------ */
+.serviceLayoutContainer {
+    padding-left: var(--sidebar-width); /* ← 사이드바만큼 밀기 */
+    min-height: 100vh;
+    display: flex; /* 세로로 header/본문 쌓기용 */
+    flex-direction: column;
+}
+
+/* ------ main 내부(헤더·본문) ------ */
+.serviceLayoutContainer > main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* 헤더 ─ 메인 영역 안에서 폭 100 % */
+main > .serviceHeader {
+    flex-shrink: 0; /* 높이 고정 */
+    width: 100%;
+    height: 56px; /* 예시 높이 */
+    /* 필요하면 배경·보더 */
+    background: #111214;
+    border-bottom: 1px solid #1f2023;
+}
+
+/* 라우트 영역 ─ 헤더 아래에 자동 확장 */
+main > .routesBody {
+    flex: 1; /* 남은 높이 전부 */
+    overflow-y: auto; /* 스크롤(선택) */
+}
+
+
+.flex-1 {
+    flex: 1; /* 남은 공간 전부 차지 */
+  background-color: #111214;
+}

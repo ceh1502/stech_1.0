@@ -1,0 +1,636 @@
+.statTeamContainer{
+  color: #FFFFFF;
+  width: 100%;
+  padding-left:3.75rem;
+  padding-right:3.75rem;
+}
+
+.tournament-header {
+  display: flex;
+  align-items: center;
+  padding-top:4.063rem;
+}
+.dropdown-group {
+  display: flex;
+  gap: 1.875rem;
+}
+
+.dropdown-container {
+  display:flex;
+  align-items: center;
+  justify-content: center;  
+  color: #C2C2C2;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dropdown-trigger{
+  width: 4.375rem;
+  height: 1.25rem;
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0.75rem;
+  border-radius:0.5rem;
+  border: 1px solid var(--Gray-100, #E4E7E9);
+  background: rgba(110, 110, 110, 0.20);
+}
+
+.dropdown-arrow{
+  width: 1rem;
+  height: 1rem;
+  color: #C2C2C2;
+}
+
+
+.groups-container {
+  display:flex;
+  justify-content: space-between;;
+  gap:1.25rem;
+  padding-top: 3.125rem;
+
+}
+.group-section{
+  width:45.625rem;
+}
+.no-group-img{
+  width: 100%;
+}
+
+
+.group-header, .playoffs-header, .final-header, .promotion-header {
+  display: flex;
+  align-items: center;
+  font-size:1.25rem;
+  border-bottom: 1px solid #FFFFFF;
+  padding-bottom: 1rem;
+  color:#f5f5f5;
+  font-weight: 700;
+}
+
+
+.group-standings {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap:1.25rem;
+}
+
+/* 헤더 행 */
+.standings-header {
+  display: grid;
+  grid-template-columns: 3.75rem 3.75rem 1fr 3.75rem 3.75rem 3.75rem 5rem 3.75rem 3.75rem;
+  font-weight: bold;
+  color: #A5A5A5;
+  padding-top: 0.5rem;
+}
+
+/* 데이터 행 */
+.standings-row {
+  display: grid;
+  grid-template-columns: 3.75rem 3.75rem 1fr 3.75rem 3.75rem 3.75rem 5rem 3.75rem 3.75rem;
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.40);
+  transition: background-color 0.2s;
+}
+
+.standings-row.rank-1st {
+  border: 3px solid #D5A11E;
+}
+
+.standings-row.rank-2nd {
+  border: 3px solid #FFF;
+}
+
+.standings-row.rank-3rd {
+  border: 3px solid #CD7F32;
+}
+
+
+/* 각 셀 공통 스타일 */
+.standings-cell {
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #A5A5A5;
+}
+
+/* 순위 셀 */
+.rank-cell {
+  font-weight: bold;
+  font-size: 18px;
+  color:#ffffff;
+}
+
+/* 로고 셀 */
+.logo-cell {
+  padding: 0.5rem;
+}
+
+
+.team-logo {
+  width: 1.563rem; /* 25px */
+  height: 1.563rem;
+  overflow: hidden; 
+  display:flex;
+  align-items: center;
+  justify-content: center;
+}
+.team-logo-img.svg-logo{
+  width: 4rem;
+  height: 4rem;             
+  object-fit: cover;       
+  object-position: center;   
+}
+.team-logo-img.png-logo{
+width:100%;
+height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+/* 팀명 셀 */
+.team-cell {
+  text-align: left;
+  justify-content: flex-start;
+  font-weight: 500;
+  padding-left: 0.75rem;
+  color:#ffffff;
+}
+.team-cell.title {
+  color:#a5a5a5;
+}
+
+/* 통계 셀 */
+.stat-cell {
+  font-weight: 500;
+    color:#ffffff;
+
+}
+
+.match-row, .match-header {
+  display:grid;
+  grid-template-columns: 12.5rem 2fr 1.5fr 10rem;
+}
+
+.match-header div, .match-row div{
+  text-align:center;
+  vertical-align: middle;
+}
+
+.match-teams {
+  display:flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.team-vs {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  align-items: center;
+  column-gap: 1.25rem;
+
+}
+
+.match-score{
+  justify-self: center;  /* 그리드 셀에서 가운데 */
+  width:3.75rem;
+  height:1.375rem;
+  flex-shrink: 0;
+  background: #363636;
+  font-size:0.875rem;
+  font-weight: 600;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.match-row{
+  width: 100%;
+  height: 3.75rem;
+  border-radius: 0.5rem;
+  border: 0.015rem solid #6E6E6E;
+  background: rgba(255, 255, 255, 0.40);
+  color: #FFF;
+
+  font-family: Inter;
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
+
+
+.match-list{
+  display:flex;
+  flex-direction: column;
+  gap:1.25rem;
+}
+
+.matches-container,.promotion-matches-container{
+  padding-top:6.25rem;
+}
+
+.match-header{
+  padding: 0.75rem 0;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  color: #A5A5A5;
+}
+.match-round, .match-location, .match-date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-team {
+  display: flex;
+  gap:0.625rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.away-team{
+  display:flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap:0.625rem;
+}
+
+
+.promotion-matches-container  .match-row, .match-row.minor, .standings-row.minor{
+  background: rgba(110, 110, 110, 0.20);
+}
+.promotion-matches-container {
+  padding-bottom:6.25rem;
+}
+
+.dropdown-group {
+  display: flex;
+  gap: 1.875rem;
+}
+
+.dropdown-container {
+  width: 8.125rem;
+  height: 3.438rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;  
+  color: #C2C2C2;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dropdown-trigger {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #E4E7E9;
+  background: rgba(110, 110, 110, 0.20);
+  color: #C2C2C2;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dropdown-trigger:hover:not(.disabled) {
+  background: rgba(110, 110, 110, 0.35);
+}
+
+.dropdown-trigger.open {
+  background: rgba(110, 110, 110, 0.35);
+}
+
+.dropdown-trigger.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dropdown-text {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-arrow {
+  width: 1rem;
+  height: 1rem;
+  color: #C2C2C2;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin-top: 0.25rem;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+}
+
+.dropdown-option {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  color: #C2C2C2;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.dropdown-option:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-option.selected {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.dropdown-option.selected:hover {
+  background-color: #2563eb;
+}
+
+.selected-values {
+  background-color: #333;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.selected-values p {
+  margin: 0.25rem 0;
+}
+
+/* 스크롤바 스타일링 */
+
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: #666;
+  border-radius: 3px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+
+/* 접근성 개선 */
+.dropdown-trigger:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.dropdown-option:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+/* 애니메이션 */
+.dropdown-menu {
+  animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.bracket-container{
+  padding-top: 3.75rem;
+  display: flex;
+  justify-content: space-between;
+  height: 31rem;
+  width:100%;
+}
+
+
+.knockout-team-container{
+  width: 15.25rem;
+  height: 6.25rem;
+  display:flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.knockout-team-header{
+  display:flex;
+  font-size: 0.563rem;
+  font-weight: 700;
+}
+.knockout-team{
+  display: flex;
+  gap: 0.5rem;
+}
+.knockout-team-name-section{
+  padding-left: 1rem;
+  display: flex;
+  gap: 0.8rem;
+  width: 12.5rem;
+  height: 2.25rem;
+  align-items: center;
+  background-color: #6e6e6e;
+  color:#f5f5f5;
+  font-size: 0.8rem;
+}
+.knockout-team-score{
+  width: 2.25rem;
+  height: 2.25rem;
+  background-color: #f5f5f5;
+  justify-self: center;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+}
+.QF-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.938rem;
+
+}
+.line{
+  height: 11.875rem;
+  width: 15.25rem;
+  display: flex;
+}
+.padding-section{
+  height: 6.688rem;
+  width: 7rem;
+}
+.right-section{
+  width: 7.5rem;
+  border-left: 2px solid #fff;
+  display:flex;
+  flex-direction: column;
+}
+.up-section{
+  border-bottom: 0.5px solid #fff;
+  height: 5.938rem;
+  width: 100%;
+
+}
+
+.down-section{
+  border-top: 0.5px solid #fff;
+  height: 5.938rem;
+  width: 100%;
+}
+
+.SF-container{
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom:1rem;
+}
+.line-container{
+  width: 6.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.trophy-img-box{
+
+  height: 6.25rem;
+  width: 6.25rem;
+  overflow: hidden;
+}
+.trophyImg{
+  height: 100%;
+  width:100%;
+}
+.F-container{
+  height:100%;
+  display:flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+.final-row{
+  display:flex;
+  flex-direction: column;
+  gap: 4.25rem;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.bracket-container2{
+  padding-top: 3.75rem;
+  padding-left:18.75rem;
+  padding-right: 18.75rem;
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  align-content:flex-end;
+  height: 31rem;
+  width:100%;
+}
+
+.row1{
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+.row2{
+  display:flex;
+  justify-content: flex-end;
+}
+.row3{
+  display:flex;
+  justify-content: flex-start;
+}
+
+.line-container{
+  width:  18.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 3.438rem;
+  padding-right: 3.438rem;
+
+}
+.empty-space{
+  width:9.375rem;
+}
+.trophy-img-box2{
+  justify-self: baseline;
+  height:11.25rem;
+  width: 11.25rem;
+}
+
+.upper{
+  height: 3.125rem;
+  display:flex;
+}
+.upper-left{
+  width:9.375rem;
+  height: 100%;
+  border-right:0.5px solid #fff;
+}
+.upper-right{
+  width:9.375rem;
+  height:100%;
+  border-left:0.5px solid #fff;
+}
+.down{
+  height: 3.125rem;
+  width:100%;
+  border-top: 2px solid #fff;
+} 
+
+.knockout-team-name-section.s1st {
+  border: 2px solid #D5A11E;
+}
+
+.knockout-team-name-section.s2nd {
+  border: 2px solid #FFF;
+}
+
+.knockout-team-name-section.s3rd {
+  border: 2px solid #CD7F32;
+}

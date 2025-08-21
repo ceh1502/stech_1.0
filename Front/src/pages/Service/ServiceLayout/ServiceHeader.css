@@ -1,0 +1,320 @@
+/* 다크 배경에 맞춘 헤더 */
+.stechHeader {
+  padding: 3.75rem 3.75rem 0 3.75rem;
+  background: #111214; /* 거의 검정 */
+  color: #e5e7eb; /* 연한 회색 텍스트 */
+}
+
+.headerContainer {
+  height: 7.194rem;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  padding-bottom: 3.75rem;
+  border-bottom: 1px solid #fff;
+}
+
+.header-team-box {
+  height: 3.444rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+.header-team-name {
+  color: #fff;
+  font-weight: 600;
+  font-size: 2rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.header-team-logo-box {
+  height: 3.444rem;
+  width: 3.444rem;
+  flex: 0 0 3.444rem;
+}
+.header-team-logo-img.svg-logo {
+  width: 3.444rem;
+  height: 3.44rem;
+  object-fit: cover;
+  object-position: center;
+}
+.header-team-logo-img.png-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.bottomRow {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ───────── 필터 버튼 그룹 ───────── */
+.filterGroup {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.filterButton,
+.resetButton {
+  width: 8.125rem;
+  height: 3.444rem;
+  font-size: 1.125rem;
+  border-radius: 0.5rem;
+  border: 1.287px solid var(--Gray-100, #e4e7e9);
+  background: rgba(110, 110, 110, 0.2);
+  color: #c2c2c2;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  cursor: pointer;
+}
+
+
+.resetButton {
+  width: 6.25rem;
+  border-color:#1A58E0;
+background: #1A58E0;
+}
+
+/* ───────── New Video 버튼 ───────── */
+.newVideoButton {
+border-radius: 1.25rem;
+background: #1A58E0;
+width:8.438rem;
+height:3.444rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fff;
+  border: none;
+
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+}
+
+.newVideoButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45);
+}
+
+.newVideoButton:active {
+  transform: translateY(0);
+}
+
+/* Date picker 래퍼: 드롭다운 계산용 */
+.datePickerWrap {
+  position: relative;
+}
+
+/* 드롭다운형 date input */
+.dateDropdown {
+  position: absolute;
+  top: calc(100% + 4px); /* 버튼 바로 밑 */
+  left: 0;
+  background: #1c1d21;
+  color: #e5e7eb;
+  border: 1px solid #303136;
+  border-radius: 6px;
+  padding: 6px 8px;
+  z-index: 100;
+}
+
+/* 브라우저 기본 캘린더가 뜨도록 width 지정 */
+.dateDropdown::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+
+/* ───── TYPE 드롭다운 ───── */
+.typePickerWrap {
+  position: relative;
+}
+/* 드롭다운 상자 */
+.typeDropdown {
+  position: absolute;
+  top: calc(100% + 4px); /* 버튼 바로 아래 */
+  left: 0;
+  background: #1c1d21;
+  border: 1px solid #303136;
+  border-radius: 6px;
+  padding: 4px 0;
+  width: 180px;
+  z-index: 120; /* 헤더보다 위 */
+  list-style: none;
+}
+
+.typeItem {
+  width: 100%;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+.typeItem:hover {
+  background: #2a2b30;
+}
+
+
+/* ───── OPPS 드롭다운 ───── */
+.oppsPickerWrap {
+  position: relative;
+}
+.oppsDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 220px;
+  background: #1c1d21;
+  border: 1px solid #303136;
+  border-radius: 6px;
+  padding: 4px 0;
+  z-index: 120;
+  list-style: none;
+}
+.oppsHeader {
+  font-weight: 700;
+  color: #fff;
+  padding: 8px 12px;
+  border-bottom: 1px solid #303136;
+}
+.oppsItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  cursor: pointer;
+}
+.oppsItem:hover {
+  background: #2a2b30;
+}
+
+/* 이미지 크기 재사용 */
+.oppsItem img,
+.teamItem img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ───── TYPE 드롭다운 항목 ───── */
+.typeItem {
+  width: 100%;
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+/* ───────── 디스플레이 크기 줄였을 때 ───────── */
+@media (max-width: 640px) {
+  .filterGroup {
+    display: none; /* 모바일에선 필터 숨김(선택) */
+  }
+}
+
+.oppsPickerWrap {
+  position: relative;
+}
+
+.oppsMega {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  display: flex;
+  background: #1f1f23;
+  border: 1px solid #2b2b31;
+  border-radius: 10px;
+  min-width: 520px;
+  overflow: hidden;
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.oppsLeagues,
+.oppsTeams {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0;
+  max-height: 280px;
+  overflow: auto;
+}
+
+.oppsLeagues {
+  width: 170px;
+  border-right: 1px solid #2b2b31;
+}
+
+.leagueItem {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  background: transparent;
+  border: 0;
+  color: #eaeaea;
+  cursor: pointer;
+  font-size: 14px;
+}
+.leagueItem:hover,
+
+
+.oppsTeams {
+  width: 350px;
+}
+
+.oppsItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+.oppsItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.opps-team-logo-img-box{
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 2.5rem;          /* 줄바꿈/수축 방지용(선택) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;     
+}
+
+.opps-team-logo-img.svg-logo {
+
+  object-fit: contain;
+  object-position: center;
+}
+.opps-team-logo-img.png-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  object-position: center;
+}
+
+
+
+.oppsEmpty {
+  padding: 12px 14px;
+  opacity: 0.7;
+  color: #cfcfcf;
+}
