@@ -61,6 +61,7 @@ export default function AppRouter() {
                 <Route path="verify-email" element={<AuthPages.VerifyEmailPage />} />
             </Route>
             {/* 404 Not Found */}
+            <Route path="json" element={<CommonPages.JsonEx />} />
             <Route path="*" element={<CommonPages.NotFoundPage />} />
         </Routes>
     );
