@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import axios from "axios";
+import { API_CONFIG } from '../../../config/api';
 
 /**
  * JSON 전체 게임 데이터를 업로드하는 컴포넌트
@@ -158,15 +159,13 @@ export default function JsonEx() {
         // 4) axios 호출 (업로드 진행률 콜백은 FormData일 때 유효. 여기선 전체 JSON POST이므로 서버 처리시간 기준)
         abortRef.current = new AbortController();
         const response = await axios.post(
-          "/api/game/upload-complete-game",
-          payload,
-          {
-            signal: abortRef.current.signal,
-            // onUploadProgress: (evt) => {
-            //   // JSON 본문은 브라우저에서 프로그레스 계산이 어려운 경우가 많음 (주석으로 참고만)
-            // },
-          }
-        );
+   `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.JSON_EX}`,
+  payload,
+  {
+    timeout: API_CONFIG.TIMEOUT,
+    signal: abortRef.current.signal,
+   }
+);
 
         // 5) 성공 처리
         stopSimulateProcessing();
