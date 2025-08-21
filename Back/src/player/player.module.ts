@@ -14,7 +14,6 @@ import { OLStatsAnalyzerService } from './ol-stats-analyzer.service';
 import { DLStatsAnalyzerService } from './dl-stats-analyzer.service';
 import { LBStatsAnalyzerService } from './lb-stats-analyzer.service';
 import { DBStatsAnalyzerService } from './db-stats-analyzer.service';
-import { ClipAdapterService } from '../common/adapters/clip-adapter.service';
 import { StatsManagementService } from '../common/services/stats-management.service';
 import { Player, PlayerSchema } from '../schemas/player.schema';
 import { PlayerNew, PlayerNewSchema } from '../schemas/player-new.schema';
@@ -48,7 +47,6 @@ import { CareerStats, CareerStatsSchema } from '../schemas/career-stats.schema';
     DLStatsAnalyzerService,
     LBStatsAnalyzerService,
     DBStatsAnalyzerService,
-    ClipAdapterService,
     StatsManagementService
   ],
   exports: [PlayerService, PlayerNewService],

@@ -68,16 +68,12 @@ export class PunterStatsAnalyzerService {
     let touchbacks = 0; // 터치백 횟수
     let puntsInside20 = 0; // 20야드 안쪽 펀트 횟수
 
-    // Player DB에서 해당 선수 정보 미리 조회 (playercode 또는 playerId로 검색)
+    // Player DB에서 해당 선수 정보 미리 조회 (jerseyNumber로 검색)
     const player = await this.playerModel.findOne({ 
-      $or: [
-        { playerId: playerId },
-        { playercode: playerId },
-        { playercode: parseInt(playerId) }
-      ]
+      jerseyNumber: parseInt(playerId)
     });
-    if (!player || player.position !== 'Punter') {
-      throw new Error('해당 선수는 Punter가 아니거나 존재하지 않습니다.');
+    if (!player) {
+      throw new Error(`등번호 ${playerId}번 선수를 찾을 수 없습니다.`);
     }
 
     for (const clip of clips) {

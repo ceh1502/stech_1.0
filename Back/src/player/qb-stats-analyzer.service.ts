@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
-import { ClipData } from '../common/interfaces/clip-data.interface';
-import { PLAY_TYPE, SIGNIFICANT_PLAY, PlayAnalysisHelper } from './constants/play-types.constants';
+import { NewClipDto } from '../common/dto/new-clip.dto';
 
 // QB 스탯 인터페이스 정의
 export interface QbStats {
@@ -32,17 +31,21 @@ export class QbStatsAnalyzerService {
   
   // 필드 포지션 기반 야드 계산
   private calculateYards(startYard: number, startSide: string, endYard: number, endSide: string): number {
+    // 대소문자 통일 (OWN/OPP)
+    const normalizedStartSide = startSide.toUpperCase();
+    const normalizedEndSide = endSide.toUpperCase();
+    
     // 시작과 끝이 같은 사이드인 경우
-    if (startSide === endSide) {
-      if (startSide === 'own') {
+    if (normalizedStartSide === normalizedEndSide) {
+      if (normalizedStartSide === 'OWN') {
         return endYard - startYard; // own side에서는 야드가 클수록 전진
       } else {
         return startYard - endYard; // opp side에서는 야드가 작을수록 전진
       }
     }
     
-    // 사이드를 넘나든 경우 (own -> opp 또는 opp -> own)
-    if (startSide === 'own' && endSide === 'opp') {
+    // 사이드를 넘나든 경우 (OWN -> OPP 또는 OPP -> OWN)
+    if (normalizedStartSide === 'OWN' && normalizedEndSide === 'OPP') {
       return (50 - startYard) + (50 - endYard); // own에서 50까지 + opp에서 50까지
     } else {
       return (50 - startYard) + (50 - endYard); // 반대의 경우도 동일한 계산
@@ -50,7 +53,9 @@ export class QbStatsAnalyzerService {
   }
 
   // 클립 데이터에서 QB 스탯 추출
-  async analyzeQbStats(clips: ClipData[], playerId: string): Promise<QbStats> {
+  async analyzeQbStats(clips: NewClipDto[], playerId: string): Promise<QbStats> {
+    console.log(`🏈 QB 스탯 분석 시작 - 선수 ID: ${playerId}, 클립 수: ${clips.length}`);
+    
     const qbStats: QbStats = {
       games: 0,
       passAttempted: 0,
@@ -71,34 +76,31 @@ export class QbStatsAnalyzerService {
 
     const gameIds = new Set(); // 경기 수 계산용
 
-    // Player DB에서 해당 선수 정보 미리 조회 (playercode 또는 playerId로 검색)
+    // Player DB에서 해당 선수 정보 미리 조회 (jerseyNumber로 검색)
     const player = await this.playerModel.findOne({ 
-      $or: [
-        { playerId: playerId },
-        { playercode: playerId },
-        { playercode: parseInt(playerId) }  // 숫자형 playercode 지원
-      ]
+      jerseyNumber: parseInt(playerId)
     });
-    if (!player || player.position !== 'QB') {
-      throw new Error('해당 선수는 QB가 아니거나 존재하지 않습니다.');
+    if (!player) {
+      throw new Error(`등번호 ${playerId}번 선수를 찾을 수 없습니다.`);
     }
 
     for (const clip of clips) {
+      console.log(`📎 클립 분석 중 - PlayType: ${(clip as any).PlayType}, playType: ${(clip as any).playType}, car: ${JSON.stringify((clip as any).car)}, car2: ${JSON.stringify((clip as any).car2)}`);
+      
       // 게임 ID 추가 (경기 수 계산)
-      if (clip.ClipKey) {
-        gameIds.add(clip.ClipKey);
+      if ((clip as any).clipKey) {
+        gameIds.add((clip as any).clipKey);
       }
 
-      // 이 클립에서 해당 QB가 car 또는 car2에 있는지 확인 (공격수)
-      const isCarrier1 = clip.Carrier?.find(c => 
-        (c.playercode == playerId || c.playercode === parseInt(playerId)) &&
-        c.position === 'QB'
-      );
+      // 이 클립에서 해당 QB가 car 또는 car2에 있는지 확인 (공격수) - 레거시 제거
       
       // NewClipDto 구조 지원 - car, car2에서 찾기
       const isOffender = this.isPlayerInOffense(clip, playerId);
       
-      if (!isCarrier1 && !isOffender) {
+      console.log(`🔍 선수 ${playerId} 찾기 결과 - isOffender: ${isOffender}`);
+      
+      if (!isOffender) {
+        console.log(`⏭️ 이 클립은 선수 ${playerId}의 플레이가 아님 - 스킵`);
         continue; // 이 클립은 해당 QB 플레이가 아님
       }
 
@@ -126,13 +128,20 @@ export class QbStatsAnalyzerService {
     // car, car2에서 해당 선수 찾기
     const playerNum = parseInt(playerId);
     
-    return (clip.car?.num === playerNum && clip.car?.pos === 'QB') ||
-           (clip.car2?.num === playerNum && clip.car2?.pos === 'QB');
+    console.log(`🔍 선수 검색 - playerNum: ${playerNum}, clip.car: ${JSON.stringify(clip.car)}, clip.car2: ${JSON.stringify(clip.car2)}`);
+    
+    // QB인지 확인 (포지션 상관없이 등번호만 먼저 확인)
+    const isPlayerInCar = clip.car?.num === playerNum;
+    const isPlayerInCar2 = clip.car2?.num === playerNum;
+    
+    console.log(`🔍 등번호 매칭 - isPlayerInCar: ${isPlayerInCar}, isPlayerInCar2: ${isPlayerInCar2}`);
+    
+    return isPlayerInCar || isPlayerInCar2;
   }
 
   // 새로운 특수 케이스 분석 로직
   private analyzeSignificantPlaysNew(clip: any, stats: QbStats, playerId: string): void {
-    if (!clip.significantPlays) return;
+    if (!clip.significantPlays || !Array.isArray(clip.significantPlays)) return;
 
     const playerNum = parseInt(playerId);
     const isQB = (clip.car?.num === playerNum && clip.car?.pos === 'QB') ||
@@ -145,8 +154,8 @@ export class QbStatsAnalyzerService {
     const gainYard = clip.gainYard || 0;
 
     // Passing Touchdown
-    if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.TOUCHDOWN) && 
-        (playType === PLAY_TYPE.PASS || playType === 'PassComplete')) {
+    if (significantPlays.includes('TOUCHDOWN') && 
+        (playType === 'PASS' || playType === 'PassComplete')) {
       stats.passingTouchdown += 1;
       stats.passAttempted += 1;
       stats.passCompletion += 1;
@@ -157,8 +166,8 @@ export class QbStatsAnalyzerService {
     }
 
     // Rushing Touchdown (QB Scramble/Designed Run)
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.TOUCHDOWN) && 
-             playType === PLAY_TYPE.RUN) {
+    else if (significantPlays.includes('TOUCHDOWN') && 
+             playType === 'RUN') {
       stats.rushingTouchdown += 1;
       stats.rushingAttempted += 1;
       stats.rushingYards += gainYard;
@@ -168,19 +177,19 @@ export class QbStatsAnalyzerService {
     }
 
     // Sack
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.SACK)) {
+    else if (significantPlays.includes('SACK')) {
       stats.sack += 1;
     }
 
     // Interception
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.INTERCEPT)) {
+    else if (significantPlays.includes('INTERCEPT') || significantPlays.includes('INTERCEPTION')) {
       stats.interception += 1;
       stats.passAttempted += 1;
     }
 
     // Fumble (Pass)
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLE) && 
-             (playType === PLAY_TYPE.PASS || playType === 'PassComplete')) {
+    else if (significantPlays.includes('FUMBLE') && 
+             (playType === 'PASS' || playType === 'PassComplete')) {
       stats.fumbles += 1;
       stats.passAttempted += 1;
       stats.passCompletion += 1;
@@ -188,13 +197,13 @@ export class QbStatsAnalyzerService {
     }
 
     // Fumble (Run) - 스크리미지 라인 뒤에서 펌블
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLE) && 
-             playType === PLAY_TYPE.RUN) {
+    else if (significantPlays.includes('FUMBLE') && 
+             playType === 'RUN') {
       stats.fumbles += 1;
       stats.rushingAttempted += 1;
       
       // 스크리미지 라인 기준으로 야드 계산
-      if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLERECOFF)) {
+      if (significantPlays.includes('FUMBLERECOFF')) {
         // 오펜스 리커버리 시
         const startYard = clip.start?.yard || 0;
         const endYard = clip.end?.yard || 0;
@@ -207,7 +216,7 @@ export class QbStatsAnalyzerService {
     }
 
     // Pass Complete (일반)
-    else if (playType === PLAY_TYPE.PASS || playType === 'PassComplete') {
+    else if (playType === 'PASS' || playType === 'PassComplete') {
       stats.passAttempted += 1;
       if (gainYard > 0) {
         stats.passCompletion += 1;
@@ -219,12 +228,12 @@ export class QbStatsAnalyzerService {
     }
 
     // Pass Incomplete
-    else if (playType === PLAY_TYPE.NOPASS || playType === 'PassIncomplete') {
+    else if (playType === 'NOPASS' || playType === 'PassIncomplete') {
       stats.passAttempted += 1;
     }
 
     // Run (일반)
-    else if (playType === PLAY_TYPE.RUN) {
+    else if (playType === 'RUN') {
       stats.rushingAttempted += 1;
       stats.rushingYards += gainYard;
       if (gainYard > stats.longestRushing) {
@@ -239,22 +248,28 @@ export class QbStatsAnalyzerService {
     const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'QB') ||
                                 (clip.car2?.num === playerNum && clip.car2?.pos === 'QB');
 
+    console.log(`🏈 QB 기본 플레이 분석 - 선수: ${playerId}, 클립 playType: ${clip.playType}, isCarrier: ${isThisPlayerCarrier}`);
+
     if (!isThisPlayerCarrier) return;
 
     // SignificantPlays에서 이미 처리된 경우가 아니라면 기본 스탯 추가
-    const hasSpecialPlay = clip.significantPlays?.some((play: string | null) => 
-      play === 'TOUCHDOWN' || play === 'SACK' || play === 'INTERCEPT' || play === 'FUMBLE'
+    const hasSpecialPlay = Array.isArray(clip.significantPlays) && clip.significantPlays.some((play: string | null) => 
+      play === 'TOUCHDOWN' || play === 'SACK' || play === 'INTERCEPT' || play === 'INTERCEPTION' || play === 'FUMBLE'
     );
+
+    console.log(`🏈 특수 플레이 여부: ${hasSpecialPlay}, significantPlays: ${JSON.stringify(clip.significantPlays)}`);
 
     if (!hasSpecialPlay) {
       // 일반적인 Pass 상황
-      if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+      if (clip.playType === 'PASS') {
         stats.passAttempted += 1;
+        console.log(`✅ 패스 시도 추가! 총 ${stats.passAttempted}회`);
         
         // 완성된 패스인지 확인 (gainYard가 0보다 크면 완성)
         if (clip.gainYard && clip.gainYard > 0) {
           stats.passCompletion += 1;
           stats.passingYards += clip.gainYard;
+          console.log(`✅ 패스 완성! ${clip.gainYard}야드 추가, 총 ${stats.passingYards}야드`);
           if (clip.gainYard > stats.longestPass) {
             stats.longestPass = clip.gainYard;
           }
@@ -262,81 +277,20 @@ export class QbStatsAnalyzerService {
       }
       
       // 일반적인 Run 상황 (QB 스크램블 등)
-      else if (clip.playType === 'Run' || clip.playType === 'RUSH') {
+      else if (clip.playType === 'RUN') {
         stats.rushingAttempted += 1;
+        console.log(`✅ 러시 시도 추가! 총 ${stats.rushingAttempted}회`);
         if (clip.gainYard && clip.gainYard >= 0) {
           stats.rushingYards += clip.gainYard;
+          console.log(`✅ 러시 야드 추가! ${clip.gainYard}야드, 총 ${stats.rushingYards}야드`);
           if (clip.gainYard > stats.longestRushing) {
             stats.longestRushing = clip.gainYard;
           }
         }
+      } else {
+        console.log(`❌ 매칭되지 않는 playType: ${clip.playType}`);
       }
     }
   }
 
-  // 샘플 클립 데이터로 테스트 (실제 구조)
-  async generateSampleQbStats(playerId: string = 'QB001'): Promise<QbStats> {
-    const sampleClips = [
-      {
-        ClipKey: 'SAMPLE_QB_001',
-        Gamekey: 'KMHY241110',
-        PlayType: 'Pass',
-        StartYard: { side: 'own', yard: 35 },
-        EndYard: { side: 'opp', yard: 15 },
-        Carrier: [{ playercode: 'QB001', position: 'QB', action: 'Pass' }],
-        SignificantPlays: []
-      },
-      {
-        ClipKey: 'SAMPLE_QB_002',
-        Gamekey: 'KMHY241110',
-        PlayType: 'Pass',
-        StartYard: { side: 'opp', yard: 25 },
-        EndYard: { side: 'opp', yard: 0 },
-        Carrier: [{ playercode: 'QB001', position: 'QB', action: 'Pass' }],
-        SignificantPlays: [{ key: 'TOUCHDOWN', label: 'Touchdown' }]
-      },
-      {
-        ClipKey: 'SAMPLE_QB_003',
-        Gamekey: 'KMHY241110',
-        PlayType: 'NoPass',
-        Carrier: [{ playercode: 'QB001', position: 'QB', action: 'Pass' }],
-        SignificantPlays: []
-      },
-      {
-        ClipKey: 'SAMPLE_QB_004',
-        Gamekey: 'KMHY241110',
-        PlayType: 'Pass',
-        Carrier: [{ playercode: 'QB001', position: 'QB', action: 'Pass' }],
-        SignificantPlays: [{ key: 'INTERCEPTION', label: 'Interception' }]
-      },
-      {
-        ClipKey: 'SAMPLE_QB_005',
-        Gamekey: 'KMHY241110',
-        PlayType: 'Run',
-        StartYard: { side: 'own', yard: 30 },
-        EndYard: { side: 'own', yard: 38 },
-        Carrier: [{ playercode: 'QB001', position: 'QB', action: 'Rush' }],
-        SignificantPlays: []
-      },
-      {
-        ClipKey: 'SAMPLE_QB_006',
-        Gamekey: 'KMHY241117',
-        PlayType: 'Pass',
-        Carrier: [{ playercode: 'QB001', position: 'QB', action: 'Sack' }],
-        SignificantPlays: []
-      },
-      {
-        ClipKey: 'SAMPLE_QB_007',
-        Gamekey: 'KMHY241117',
-        PlayType: 'Run',
-        StartYard: { side: 'opp', yard: 20 },
-        EndYard: { side: 'opp', yard: 0 },
-        Carrier: [{ playercode: 'QB001', position: 'QB', action: 'Rush' }],
-        SignificantPlays: [{ key: 'TOUCHDOWN', label: 'Touchdown' }]
-      }
-    ];
-
-    const result = await this.analyzeQbStats(sampleClips, playerId);
-    return result;
-  }
 }

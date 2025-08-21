@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
-import { ClipData } from '../common/interfaces/clip-data.interface';
-import { PLAY_TYPE, SIGNIFICANT_PLAY, PlayAnalysisHelper } from './constants/play-types.constants';
+import { NewClipDto } from '../common/dto/new-clip.dto';
 
 // Kicker 스탯 인터페이스 정의
 export interface KickerStats {
@@ -39,8 +38,18 @@ export class KickerStatsAnalyzerService {
     return remainYard + 17;
   }
 
+  // 필드 포지션에서 필드골 거리 계산
+  private calculateFieldGoalDistanceFromPosition(side: string, yard: number): number {
+    const normalizedSide = side.toUpperCase();
+    if (normalizedSide === 'OPP') {
+      return yard + 17; // 상대편 진영에서 골대선까지 거리 + 17야드
+    } else {
+      return 50 + yard + 17; // 자진영에서 50야드 + 상대편 진영 + 17야드
+    }
+  }
+
   // 클립 데이터에서 Kicker 스탯 추출
-  async analyzeKickerStats(clips: ClipData[], playerId: string): Promise<KickerStats> {
+  async analyzeKickerStats(clips: NewClipDto[], playerId: string): Promise<KickerStats> {
     const kickerStats: KickerStats = {
       games: 0,
       extraPointAttempted: 0,
@@ -65,32 +74,24 @@ export class KickerStatsAnalyzerService {
     const gameIds = new Set(); // 경기 수 계산용
     let totalFieldGoalYards = 0; // 평균 계산용
 
-    // Player DB에서 해당 선수 정보 미리 조회 (playercode 또는 playerId로 검색)
+    // Player DB에서 해당 선수 정보 미리 조회 (jerseyNumber로 검색)
     const player = await this.playerModel.findOne({ 
-      $or: [
-        { playerId: playerId },
-        { playercode: playerId },
-        { playercode: parseInt(playerId) }
-      ]
+      jerseyNumber: parseInt(playerId)
     });
-    if (!player || player.position !== 'Kicker') {
-      throw new Error('해당 선수는 Kicker가 아니거나 존재하지 않습니다.');
+    if (!player) {
+      throw new Error(`등번호 ${playerId}번 선수를 찾을 수 없습니다.`);
     }
 
     for (const clip of clips) {
       // 게임 ID 추가 (경기 수 계산)
-      gameIds.add(clip.ClipKey);
+      if (clip.clipKey) {
+        gameIds.add(clip.clipKey);
+      }
 
-      // 이 클립에서 해당 Kicker가 Carrier에 있는지 확인
-      const carrier = clip.Carrier?.find(c => 
-        (c.playercode == playerId || c.playercode === parseInt(playerId)) &&
-        c.position === 'Kicker'
-      );
-      
       // NewClipDto 구조 지원 - car, car2에서 찾기
       const isKicker = this.isPlayerKicker(clip, playerId);
       
-      if (!carrier && !isKicker) {
+      if (!isKicker) {
         continue; // 이 클립은 해당 Kicker 플레이가 아님
       }
 
@@ -117,7 +118,7 @@ export class KickerStatsAnalyzerService {
   }
 
   // PAT 플레이 분석
-  private analyzePATPlay(clip: ClipData, stats: KickerStats, isSuccessful: boolean): void {
+  private analyzePATPlay(clip: NewClipDto, stats: KickerStats, isSuccessful: boolean): void {
     stats.extraPointAttempted++;
     if (isSuccessful) {
       stats.extraPointMade++;
@@ -125,8 +126,8 @@ export class KickerStatsAnalyzerService {
   }
 
   // 필드골 플레이 분석
-  private analyzeFieldGoalPlay(clip: ClipData, stats: KickerStats, isSuccessful: boolean): void {
-    const distance = this.calculateFieldGoalDistance(clip.RemainYard);
+  private analyzeFieldGoalPlay(clip: NewClipDto, stats: KickerStats, isSuccessful: boolean): void {
+    const distance = this.calculateFieldGoalDistance(clip.toGoYard || 0);
     
     stats.fieldGoalAttempted++;
     if (isSuccessful) {
@@ -162,8 +163,8 @@ export class KickerStatsAnalyzerService {
     // car, car2에서 해당 선수 찾기 (킥커는 보통 car에만 있음)
     const playerNum = parseInt(playerId);
     
-    return (clip.car?.num === playerNum && clip.car?.pos === 'Kicker') ||
-           (clip.car2?.num === playerNum && clip.car2?.pos === 'Kicker');
+    return (clip.car?.num === playerNum && (clip.car?.pos === 'Kicker' || clip.car?.pos === 'K')) ||
+           (clip.car2?.num === playerNum && (clip.car2?.pos === 'Kicker' || clip.car2?.pos === 'K'));
   }
 
   // 새로운 특수 케이스 분석 로직
@@ -171,8 +172,8 @@ export class KickerStatsAnalyzerService {
     if (!clip.significantPlays) return 0;
 
     const playerNum = parseInt(playerId);
-    const isKicker = (clip.car?.num === playerNum && clip.car?.pos === 'K') ||
-                     (clip.car2?.num === playerNum && clip.car2?.pos === 'K');
+    const isKicker = (clip.car?.num === playerNum && (clip.car?.pos === 'K' || clip.car?.pos === 'Kicker')) ||
+                     (clip.car2?.num === playerNum && (clip.car2?.pos === 'K' || clip.car2?.pos === 'Kicker'));
 
     if (!isKicker) return 0;
 
@@ -181,22 +182,19 @@ export class KickerStatsAnalyzerService {
     let totalFgYards = 0;
 
     // PAT(Good)
-    if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.PAT.GOOD) && 
-        playType === PLAY_TYPE.PAT) {
+    if (significantPlays.includes('EXTRAPOINT') && playType === 'PAT') {
       stats.extraPointAttempted += 1;
       stats.extraPointMade += 1;
     }
 
     // PAT(No Good)
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.PAT.NOGOOD) && 
-             playType === PLAY_TYPE.PAT) {
+    else if (significantPlays.includes('EXTRAPOINTMISS') && playType === 'PAT') {
       stats.extraPointAttempted += 1;
     }
 
     // Field Goal(Good)
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FIELDGOAL.GOOD) && 
-             playType === PLAY_TYPE.FG) {
-      const distance = PlayAnalysisHelper.calculateFieldGoalDistance(clip.start?.side || '', clip.start?.yard || 0);
+    else if (significantPlays.includes('FIELDGOAL') && playType === 'FieldGoal') {
+      const distance = this.calculateFieldGoalDistanceFromPosition(clip.start?.side || '', clip.start?.yard || 0);
       if (distance > 0) {
         this.updateFieldGoalStats(stats, distance, true);
         totalFgYards += distance;
@@ -204,9 +202,8 @@ export class KickerStatsAnalyzerService {
     }
 
     // Field Goal(No Good)
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FIELDGOAL.NOGOOD) && 
-             playType === PLAY_TYPE.FG) {
-      const distance = PlayAnalysisHelper.calculateFieldGoalDistance(clip.start?.side || '', clip.start?.yard || 0);
+    else if (significantPlays.includes('FIELDGOALMISS') && playType === 'FieldGoal') {
+      const distance = this.calculateFieldGoalDistanceFromPosition(clip.start?.side || '', clip.start?.yard || 0);
       if (distance > 0) {
         this.updateFieldGoalStats(stats, distance, false);
         totalFgYards += distance;
@@ -219,8 +216,8 @@ export class KickerStatsAnalyzerService {
   // 기본 특수팀 플레이 분석 (레거시 PlayType 방식)
   private analyzeBasicKickingPlay(clip: any, stats: KickerStats): number {
     const playerNum = parseInt(clip.playerId || '0');
-    const isThisPlayerKicker = (clip.car?.num === playerNum && clip.car?.pos === 'Kicker') ||
-                               (clip.car2?.num === playerNum && clip.car2?.pos === 'Kicker');
+    const isThisPlayerKicker = (clip.car?.num === playerNum && (clip.car?.pos === 'Kicker' || clip.car?.pos === 'K')) ||
+                               (clip.car2?.num === playerNum && (clip.car2?.pos === 'Kicker' || clip.car2?.pos === 'K'));
 
     if (!isThisPlayerKicker) return 0;
 
@@ -242,14 +239,14 @@ export class KickerStatsAnalyzerService {
           stats.extraPointAttempted += 1;
           break;
         case 'FieldGoal':
-          const fgDistance = clip.remainYard ? this.calculateFieldGoalDistance(clip.remainYard) : 0;
+          const fgDistance = clip.toGoYard ? this.calculateFieldGoalDistance(clip.toGoYard) : 0;
           if (fgDistance > 0) {
             this.updateFieldGoalStats(stats, fgDistance, true);
             totalFgYards += fgDistance;
           }
           break;
         case 'NoFieldGoal':
-          const fgMissDistance = clip.remainYard ? this.calculateFieldGoalDistance(clip.remainYard) : 0;
+          const fgMissDistance = clip.toGoYard ? this.calculateFieldGoalDistance(clip.toGoYard) : 0;
           if (fgMissDistance > 0) {
             this.updateFieldGoalStats(stats, fgMissDistance, false);
             totalFgYards += fgMissDistance;
@@ -296,48 +293,40 @@ export class KickerStatsAnalyzerService {
 
   // 샘플 클립 데이터로 테스트
   async generateSampleKickerStats(playerId: string = 'K001'): Promise<KickerStats> {
-    const sampleClips: ClipData[] = [
+    const sampleClips: NewClipDto[] = [
       {
-        ClipKey: 'SAMPLE_GAME_1',
-        ClipUrl: 'https://example.com/clip1.mp4',
-        Quarter: '1',
-        OffensiveTeam: 'Away',
-        PlayType: 'PAT',
-        SpecialTeam: true,
-        Down: 0,
-        RemainYard: 2,
-        StartYard: { side: 'opp', yard: 2 },
-        EndYard: { side: 'opp', yard: 0 },
-        Carrier: [{ 
-          playercode: playerId, 
-          backnumber: 5, 
-          team: 'Away', 
-          position: 'Kicker', 
-          action: 'Kick' 
-        }],
-        SignificantPlays: [],
-        StartScore: { Home: 0, Away: 6 }
+        clipKey: 'SAMPLE_GAME_1',
+        offensiveTeam: 'Away',
+        quarter: 1,
+        down: '0',
+        toGoYard: 2,
+        playType: 'PAT',
+        specialTeam: true,
+        start: { side: 'OPP', yard: 2 },
+        end: { side: 'OPP', yard: 0 },
+        gainYard: 0,
+        car: { num: parseInt(playerId), pos: 'K' },
+        car2: { num: null, pos: null },
+        tkl: { num: null, pos: null },
+        tkl2: { num: null, pos: null },
+        significantPlays: [null, null, null, null]
       },
       {
-        ClipKey: 'SAMPLE_GAME_1',
-        ClipUrl: 'https://example.com/clip2.mp4',
-        Quarter: '2',
-        OffensiveTeam: 'Away',
-        PlayType: 'FieldGoal',
-        SpecialTeam: true,
-        Down: 4,
-        RemainYard: 25,
-        StartYard: { side: 'opp', yard: 25 },
-        EndYard: { side: 'opp', yard: 0 },
-        Carrier: [{ 
-          playercode: playerId, 
-          backnumber: 5, 
-          team: 'Away', 
-          position: 'Kicker', 
-          action: 'Kick' 
-        }],
-        SignificantPlays: [],
-        StartScore: { Home: 0, Away: 7 }
+        clipKey: 'SAMPLE_GAME_1',
+        offensiveTeam: 'Away',
+        quarter: 2,
+        down: '4',
+        toGoYard: 25,
+        playType: 'FieldGoal',
+        specialTeam: true,
+        start: { side: 'OPP', yard: 25 },
+        end: { side: 'OPP', yard: 0 },
+        gainYard: 0,
+        car: { num: parseInt(playerId), pos: 'K' },
+        car2: { num: null, pos: null },
+        tkl: { num: null, pos: null },
+        tkl2: { num: null, pos: null },
+        significantPlays: [null, null, null, null]
       }
     ];
 

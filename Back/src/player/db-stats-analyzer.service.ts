@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
-import { ClipData } from '../common/interfaces/clip-data.interface';
-import { PLAY_TYPE, SIGNIFICANT_PLAY, PlayAnalysisHelper } from './constants/play-types.constants';
+import { NewClipDto } from '../common/dto/new-clip.dto';
 
 // Defensive Back 스탯 인터페이스 정의 (DL, LB와 동일)
 export interface DBStats {
@@ -47,7 +46,7 @@ export class DBStatsAnalyzerService {
   }
 
   // 클립 데이터에서 DB 스탯 추출
-  async analyzeDBStats(clips: ClipData[], playerId: string): Promise<DBStats> {
+  async analyzeDBStats(clips: NewClipDto[], playerId: string): Promise<DBStats> {
     const dbStats: DBStats = {
       games: 0,
       tackles: 0,
@@ -64,35 +63,26 @@ export class DBStatsAnalyzerService {
 
     const gameIds = new Set(); // 경기 수 계산용
 
-    // Player DB에서 해당 선수 정보 미리 조회 (playercode 또는 playerId로 검색)
+    // Player DB에서 해당 선수 정보 미리 조회 (jerseyNumber로 검색)
     const player = await this.playerModel.findOne({ 
-      $or: [
-        { playerId: playerId },
-        { playercode: playerId },
-        { playercode: parseInt(playerId) }
-      ]
+      jerseyNumber: parseInt(playerId)
     });
-    if (!player || player.position !== 'DB') {
-      throw new Error('해당 선수는 DB가 아니거나 존재하지 않습니다.');
+    if (!player) {
+      throw new Error(`등번호 ${playerId}번 선수를 찾을 수 없습니다.`);
     }
 
     for (const clip of clips) {
       // 게임 ID 추가 (경기 수 계산)
-      if (clip.ClipKey) {
-        gameIds.add(clip.ClipKey);
+      if (clip.clipKey) {
+        gameIds.add(clip.clipKey);
       }
 
       // 이 클립에서 해당 DB가 tkl 또는 tkl2에 있는지 확인 (수비수)
-      const isTackler1 = clip.Carrier?.find(c => 
-        (c.playercode == playerId || c.playercode === parseInt(playerId)) &&
-        c.position === 'DB'
-      );
-      
       // NewClipDto 구조 지원 - tkl, tkl2에서 찾기
       const isDefender = this.isPlayerInDefense(clip, playerId);
       
-      if (!isTackler1 && !isDefender) {
-        continue; // 이 클립은 해당 DB 플레이가 아님
+      if (!isDefender) {
+        continue; // 이 클립은 해당 DB 플래이가 아님
       }
 
       // SignificantPlays 기반 스탯 분석
@@ -190,13 +180,13 @@ export class DBStatsAnalyzerService {
 
     if (!hasSpecialPlay) {
       // 일반적인 Run/Pass 상황에서의 tackle
-      if (clip.playType === 'Run' || clip.playType === 'Pass' || clip.playType === 'RUSH' || clip.playType === 'PASS') {
+      if (clip.playType === 'RUN' || clip.playType === 'PASS') {
         stats.tackles += 1;
       }
     }
 
     // Pass Defended 체크 (Incomplete Pass에서)
-    if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+    if (clip.playType === 'PASS') {
       const isIncomplete = clip.significantPlays?.includes('INCOMPLETE') || 
                           clip.gainYard === 0;
       if (isIncomplete && isThisPlayerTackler) {
@@ -207,72 +197,57 @@ export class DBStatsAnalyzerService {
 
   // 샘플 클립 데이터로 테스트
   async generateSampleDBStats(playerId: string = 'DB001'): Promise<DBStats> {
-    const sampleClips: ClipData[] = [
+    const sampleClips: NewClipDto[] = [
       {
-        ClipKey: 'SAMPLE_GAME_1',
-        ClipUrl: 'https://example.com/clip1.mp4',
-        Quarter: '1',
-        OffensiveTeam: 'Home',
-        PlayType: 'Pass',
-        SpecialTeam: false,
-        Down: 1,
-        RemainYard: 10,
-        StartYard: { side: 'own', yard: 25 },
-        EndYard: { side: 'own', yard: 35 },
-        Carrier: [{ 
-          playercode: playerId, 
-          backnumber: 21, 
-          team: 'Away', 
-          position: 'DB', 
-          action: 'pass_defended' 
-        }],
-        SignificantPlays: [],
-        StartScore: { Home: 0, Away: 0 }
+        clipKey: 'SAMPLE_GAME_1',
+        offensiveTeam: 'Home',
+        quarter: 1,
+        down: '1',
+        toGoYard: 10,
+        playType: 'PASS',
+        specialTeam: false,
+        start: { side: 'OWN', yard: 25 },
+        end: { side: 'OWN', yard: 35 },
+        gainYard: 0, // Incomplete pass
+        car: { num: null, pos: null },
+        car2: { num: null, pos: null },
+        tkl: { num: parseInt(playerId), pos: 'DB' },
+        tkl2: { num: null, pos: null },
+        significantPlays: ['INCOMPLETE', null, null, null]
       },
       {
-        ClipKey: 'SAMPLE_GAME_1',
-        ClipUrl: 'https://example.com/clip2.mp4',
-        Quarter: '2',
-        OffensiveTeam: 'Home',
-        PlayType: 'Pass',
-        SpecialTeam: false,
-        Down: 2,
-        RemainYard: 5,
-        StartYard: { side: 'own', yard: 35 },
-        EndYard: { side: 'opp', yard: 25 },
-        Carrier: [{ 
-          playercode: playerId, 
-          backnumber: 21, 
-          team: 'Away', 
-          position: 'DB', 
-          action: 'interception' 
-        }],
-        SignificantPlays: [
-          { key: 'INTERCEPTION', label: 'Interception' },
-          { key: 'TOUCHDOWN', label: 'Touchdown' }
-        ],
-        StartScore: { Home: 0, Away: 0 }
+        clipKey: 'SAMPLE_GAME_1',
+        offensiveTeam: 'Home',
+        quarter: 2,
+        down: '2',
+        toGoYard: 5,
+        playType: 'PASS',
+        specialTeam: false,
+        start: { side: 'OWN', yard: 35 },
+        end: { side: 'OPP', yard: 25 },
+        gainYard: 40,
+        car: { num: null, pos: null },
+        car2: { num: null, pos: null },
+        tkl: { num: parseInt(playerId), pos: 'DB' },
+        tkl2: { num: null, pos: null },
+        significantPlays: ['INTERCEPT', 'TOUCHDOWN', null, null]
       },
       {
-        ClipKey: 'SAMPLE_GAME_1',
-        ClipUrl: 'https://example.com/clip3.mp4',
-        Quarter: '3',
-        OffensiveTeam: 'Home',
-        PlayType: 'Run',
-        SpecialTeam: false,
-        Down: 1,
-        RemainYard: 10,
-        StartYard: { side: 'own', yard: 30 },
-        EndYard: { side: 'own', yard: 32 },
-        Carrier: [{ 
-          playercode: playerId, 
-          backnumber: 21, 
-          team: 'Away', 
-          position: 'DB', 
-          action: 'tackle' 
-        }],
-        SignificantPlays: [{ key: 'FORCED_FUMBLE', label: 'Forced Fumble' }],
-        StartScore: { Home: 0, Away: 7 }
+        clipKey: 'SAMPLE_GAME_1',
+        offensiveTeam: 'Home',
+        quarter: 3,
+        down: '1',
+        toGoYard: 10,
+        playType: 'RUN',
+        specialTeam: false,
+        start: { side: 'OWN', yard: 30 },
+        end: { side: 'OWN', yard: 32 },
+        gainYard: 2,
+        car: { num: null, pos: null },
+        car2: { num: null, pos: null },
+        tkl: { num: parseInt(playerId), pos: 'DB' },
+        tkl2: { num: null, pos: null },
+        significantPlays: ['FUMBLE', null, null, null]
       }
     ];
 

@@ -80,7 +80,7 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
     .addTag('Player', '선수 관련 API')
     .addTag('Team', '팀 관련 API')
     .addTag('Video', '비디오 관련 API')
-    .addServer('http://localhost:3001', '개발 서버')
+    .addServer('http://localhost:4000', '개발 서버')
     .addServer('https://api.stech.pro', '운영 서버')
     .build();
   

@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
-import { ClipData } from '../common/interfaces/clip-data.interface';
-import { PLAY_TYPE, SIGNIFICANT_PLAY, PlayAnalysisHelper } from './constants/play-types.constants';
+import { NewClipDto } from '../common/dto/new-clip.dto';
 
 // RB 스탯 인터페이스 정의
 export interface RbStats {
@@ -57,7 +56,7 @@ export class RbStatsAnalyzerService {
   }
 
   // 클립 데이터에서 RB 스탯 추출
-  async analyzeRbStats(clips: ClipData[], playerId: string): Promise<RbStats> {
+  async analyzeRbStats(clips: NewClipDto[], playerId: string): Promise<RbStats> {
     const rbStats: RbStats = {
       games: 0,
       rushingAttempted: 0,
@@ -85,32 +84,24 @@ export class RbStatsAnalyzerService {
 
     const gameIds = new Set(); // 경기 수 계산용
 
-    // Player DB에서 해당 선수 정보 미리 조회 (playercode 또는 playerId로 검색)
+    // Player DB에서 해당 선수 정보 미리 조회 (jerseyNumber로 검색)
     const player = await this.playerModel.findOne({ 
-      $or: [
-        { playerId: playerId },
-        { playercode: playerId },
-        { playercode: parseInt(playerId) }
-      ]
+      jerseyNumber: parseInt(playerId)
     });
-    if (!player || player.position !== 'RB') {
-      throw new Error('해당 선수는 RB가 아니거나 존재하지 않습니다.');
+    if (!player) {
+      throw new Error(`등번호 ${playerId}번 선수를 찾을 수 없습니다.`);
     }
 
     for (const clip of clips) {
       // 게임 ID 추가 (경기 수 계산)
-      gameIds.add(clip.ClipKey);
+      if (clip.clipKey) {
+        gameIds.add(clip.clipKey);
+      }
 
-      // 이 클립에서 해당 RB가 Carrier에 있는지 확인 (playercode로 매칭)
-      const carrier = clip.Carrier?.find(c => 
-        (c.playercode == playerId || c.playercode === parseInt(playerId)) &&
-        c.team === clip.OffensiveTeam // 공격팀일 때만
-      );
-      
       // NewClipDto 구조 지원 - car, car2에서 찾기
       const isOffender = this.isPlayerInOffense(clip, playerId);
       
-      if (!carrier && !isOffender) {
+      if (!isOffender) {
         continue; // 이 클립은 해당 RB 플레이가 아님
       }
 
@@ -140,7 +131,7 @@ export class RbStatsAnalyzerService {
   }
 
   // 러싱 플레이 분석
-  private analyzeRushingPlay(clip: ClipData, stats: RbStats, yards: number, hasTouchdown: boolean): void {
+  private analyzeRushingPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
     stats.rushingAttempted++;
     stats.rushingYards += yards;
 
@@ -156,7 +147,7 @@ export class RbStatsAnalyzerService {
   }
 
   // 리시빙 플레이 분석
-  private analyzeReceivingPlay(clip: ClipData, stats: RbStats, yards: number, hasTouchdown: boolean): void {
+  private analyzeReceivingPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
     stats.target++; // 타겟된 횟수
     stats.reception++; // 성공한 리셉션
     stats.receivingYards += yards;
@@ -172,13 +163,13 @@ export class RbStatsAnalyzerService {
     }
 
     // 퍼스트 다운 체크 (획득 야드가 필요 야드 이상이면)
-    if (yards >= clip.RemainYard) {
+    if (yards >= (clip.toGoYard || 0)) {
       stats.receivingFirstDowns++;
     }
   }
 
   // 킥 리턴 플레이 분석
-  private analyzeKickReturnPlay(clip: ClipData, stats: RbStats, yards: number, hasTouchdown: boolean): void {
+  private analyzeKickReturnPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
     stats.kickReturn++;
     stats.kickReturnYards += yards;
 
@@ -189,7 +180,7 @@ export class RbStatsAnalyzerService {
   }
 
   // 펀트 리턴 플레이 분석
-  private analyzePuntReturnPlay(clip: ClipData, stats: RbStats, yards: number, hasTouchdown: boolean): void {
+  private analyzePuntReturnPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
     stats.puntReturn++;
     stats.puntReturnYards += yards;
 
@@ -223,8 +214,7 @@ export class RbStatsAnalyzerService {
     const gainYard = clip.gainYard || 0;
 
     // Rushing Touchdown
-    if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.TOUCHDOWN) && 
-        playType === PLAY_TYPE.RUN) {
+    if (significantPlays.includes('TOUCHDOWN') && playType === 'RUN') {
       stats.rushingTouchdown += 1;
       stats.rushingAttempted += 1;
       stats.rushingYards += gainYard;
@@ -234,8 +224,8 @@ export class RbStatsAnalyzerService {
     }
 
     // Receiving Touchdown (Pass로 받은 경우)
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.TOUCHDOWN) && 
-             (playType === PLAY_TYPE.PASS || playType === 'PassComplete')) {
+    else if (significantPlays.includes('TOUCHDOWN') && 
+             (playType === 'PASS' || playType === 'PassComplete')) {
       stats.receivingTouchdown += 1;
       stats.target += 1;
       stats.reception += 1;
@@ -246,62 +236,58 @@ export class RbStatsAnalyzerService {
     }
 
     // Kickoff Return Touchdown
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.TOUCHDOWN) && 
-             playType === PLAY_TYPE.KICKOFF) {
+    else if (significantPlays.includes('TOUCHDOWN') && playType === 'Kickoff') {
       stats.returnTouchdown += 1;
       stats.kickReturn += 1;
       stats.kickReturnYards += gainYard;
     }
 
     // Punt Return Touchdown
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.TOUCHDOWN) && 
-             playType === PLAY_TYPE.PUNT) {
+    else if (significantPlays.includes('TOUCHDOWN') && playType === 'Punt') {
       stats.returnTouchdown += 1;
       stats.puntReturn += 1;
       stats.puntReturnYards += gainYard;
     }
 
-    // Fumble (Run, Off Recovery, 스크리미지 라인 뒤에서)
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLE) && 
-             playType === PLAY_TYPE.RUN) {
+    // Fumble (Run)
+    else if (significantPlays.includes('FUMBLE') && playType === 'RUN') {
       stats.fumbles += 1;
       stats.rushingAttempted += 1;
       
-      if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLERECOFF)) {
+      if (significantPlays.includes('FUMBLERECOFF')) {
         // 오펜스 리커버리 시 - 스크리미지 라인 기준 야드 계산
         const startYard = clip.start?.yard || 0;
         const endYard = clip.end?.yard || 0;
         const actualGain = gainYard < 0 ? gainYard : Math.min(gainYard, endYard - startYard);
         stats.rushingYards += actualGain;
-      } else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLERECDEF)) {
+      } else if (significantPlays.includes('FUMBLERECDEF')) {
         // 디펜스 리커버리 시 
         stats.rushingYards += gainYard;
         stats.fumblesLost += 1;
       }
     }
 
-    // Fumble (Pass, Off Recovery)
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLE) && 
-             (playType === PLAY_TYPE.PASS || playType === 'PassComplete')) {
+    // Fumble (Pass)
+    else if (significantPlays.includes('FUMBLE') && 
+             (playType === 'PASS' || playType === 'PassComplete')) {
       stats.fumbles += 1;
       stats.target += 1;
       stats.reception += 1;
       stats.receivingYards += gainYard;
       
-      if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLERECDEF)) {
+      if (significantPlays.includes('FUMBLERECDEF')) {
         stats.fumblesLost += 1;
       }
     }
 
     // TFL (Tackle for Loss)
-    else if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.TFL) && 
-             playType === PLAY_TYPE.RUN) {
+    else if (significantPlays.includes('TFL') && playType === 'RUN') {
       stats.rushingAttempted += 1;
       stats.rushingYards += gainYard; // 음수 야드
     }
 
     // Pass Complete (일반)
-    else if (playType === PLAY_TYPE.PASS || playType === 'PassComplete') {
+    else if (playType === 'PASS' || playType === 'PassComplete') {
       stats.target += 1;
       if (gainYard > 0) {
         stats.reception += 1;
@@ -313,12 +299,12 @@ export class RbStatsAnalyzerService {
     }
 
     // Pass Incomplete
-    else if (playType === PLAY_TYPE.NOPASS || playType === 'PassIncomplete') {
+    else if (playType === 'NOPASS' || playType === 'PassIncomplete') {
       stats.target += 1;
     }
 
     // Run (일반)
-    else if (playType === PLAY_TYPE.RUN) {
+    else if (playType === 'RUN') {
       stats.rushingAttempted += 1;
       stats.rushingYards += gainYard;
       if (gainYard > stats.longestRushing) {
@@ -327,13 +313,13 @@ export class RbStatsAnalyzerService {
     }
 
     // Kickoff Return (일반)
-    else if (playType === PLAY_TYPE.KICKOFF) {
+    else if (playType === 'Kickoff') {
       stats.kickReturn += 1;
       stats.kickReturnYards += gainYard;
     }
 
     // Punt Return (일반)
-    else if (playType === PLAY_TYPE.PUNT) {
+    else if (playType === 'Punt') {
       stats.puntReturn += 1;
       stats.puntReturnYards += gainYard;
     }
@@ -354,7 +340,7 @@ export class RbStatsAnalyzerService {
 
     if (!hasSpecialPlay) {
       // 일반적인 Rush 상황
-      if (clip.playType === 'Run' || clip.playType === 'RUSH') {
+      if (clip.playType === 'RUN') {
         stats.rushingAttempted += 1;
         if (clip.gainYard && clip.gainYard >= 0) {
           stats.rushingYards += clip.gainYard;
@@ -365,7 +351,7 @@ export class RbStatsAnalyzerService {
       }
       
       // 일반적인 Pass 상황 (타겟 및 리셉션)
-      else if (clip.playType === 'Pass' || clip.playType === 'PASS') {
+      else if (clip.playType === 'PASS' || clip.playType === 'PassComplete') {
         stats.target += 1;
         
         // 완성된 패스인지 확인 (gainYard가 0보다 크면 완성)
@@ -395,48 +381,40 @@ export class RbStatsAnalyzerService {
 
   // 샘플 클립 데이터로 테스트
   async generateSampleRbStats(playerId: string = 'RB001'): Promise<RbStats> {
-    const sampleClips: ClipData[] = [
+    const sampleClips: NewClipDto[] = [
       {
-        ClipKey: 'SAMPLE_GAME_1',
-        ClipUrl: 'https://example.com/clip1.mp4',
-        Quarter: '1',
-        OffensiveTeam: 'Away',
-        PlayType: 'Run',
-        SpecialTeam: false,
-        Down: 1,
-        RemainYard: 10,
-        StartYard: { side: 'own', yard: 30 },
-        EndYard: { side: 'own', yard: 38 },
-        Carrier: [{ 
-          playercode: playerId, 
-          backnumber: 21, 
-          team: 'Away', 
-          position: 'RB', 
-          action: 'Rush' 
-        }],
-        SignificantPlays: [],
-        StartScore: { Home: 0, Away: 0 }
+        clipKey: 'SAMPLE_GAME_1',
+        offensiveTeam: 'Away',
+        quarter: 1,
+        down: '1',
+        toGoYard: 10,
+        playType: 'RUN',
+        specialTeam: false,
+        start: { side: 'OWN', yard: 30 },
+        end: { side: 'OWN', yard: 38 },
+        gainYard: 8,
+        car: { num: parseInt(playerId), pos: 'RB' },
+        car2: { num: null, pos: null },
+        tkl: { num: null, pos: null },
+        tkl2: { num: null, pos: null },
+        significantPlays: [null, null, null, null]
       },
       {
-        ClipKey: 'SAMPLE_GAME_1',
-        ClipUrl: 'https://example.com/clip2.mp4',
-        Quarter: '1',
-        OffensiveTeam: 'Away',
-        PlayType: 'Pass',
-        SpecialTeam: false,
-        Down: 2,
-        RemainYard: 5,
-        StartYard: { side: 'own', yard: 38 },
-        EndYard: { side: 'opp', yard: 47 },
-        Carrier: [{ 
-          playercode: playerId, 
-          backnumber: 21, 
-          team: 'Away', 
-          position: 'RB', 
-          action: 'Catch' 
-        }],
-        SignificantPlays: [{ key: 'TOUCHDOWN', label: 'Touchdown' }],
-        StartScore: { Home: 0, Away: 0 }
+        clipKey: 'SAMPLE_GAME_1',
+        offensiveTeam: 'Away',
+        quarter: 1,
+        down: '2',
+        toGoYard: 5,
+        playType: 'PASS',
+        specialTeam: false,
+        start: { side: 'OWN', yard: 38 },
+        end: { side: 'OPP', yard: 47 },
+        gainYard: 25,
+        car: { num: parseInt(playerId), pos: 'RB' },
+        car2: { num: null, pos: null },
+        tkl: { num: null, pos: null },
+        tkl2: { num: null, pos: null },
+        significantPlays: ['TOUCHDOWN', null, null, null]
       }
     ];
 
