@@ -1,0 +1,91 @@
+/* FootballFilter.css (추가/보완) */
+.ff-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.ff-reset {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #2463ff;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ff-dropdown {
+  position: relative;
+}
+
+.ff-dd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #3a3a3a;
+  background: transparent;
+  color: #e5e5e5;
+  cursor: pointer;
+}
+.ff-dd-btn.open {
+  border-color: #6b6b6b;
+  background: rgba(255,255,255,0.04);
+}
+.ff-dd-label { font-weight: 500; }
+.ff-dd-icon { font-size: 12px; opacity: 0.8; }
+
+.ff-dd-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 50;
+  background: #2b2b2b;
+  border: 1px solid #3a3a3a;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+
+.ff-dd-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  color: #e6e6e6;
+  cursor: pointer;
+}
+.ff-dd-item:hover { background: rgba(255,255,255,0.06); }
+.ff-dd-item.selected { background: rgba(36, 99, 255, 0.25); }
+
+.ff-dd-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  max-height: 280px;
+  overflow: auto;
+}
+
+.ff-dd-actions {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #3a3a3a;
+  margin-top: 8px;
+}
+.ff-dd-clear,
+.ff-dd-close {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #3a3a3a;
+  background: transparent;
+  color: #e5e5e5;
+  cursor: pointer;
+}
+.ff-dd-clear:hover,
+.ff-dd-close:hover { background: rgba(255,255,255,0.06); }
