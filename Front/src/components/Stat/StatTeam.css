@@ -48,7 +48,7 @@
   align-items: center;
 }
 
-.table-row2 {
+.team-table-row2 {
   display: grid;
   grid-template-columns: repeat(var(--cols, 1), 1fr);
   align-items: center;
