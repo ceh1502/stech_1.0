@@ -1,9 +1,9 @@
-// pages/ClipPage.jsx
+// pages/Service/Game/ClipPage.jsx
 import React, { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import FootballFilter from '../../../../../components/FootballFilter/FootballFilter';
 import { useFootballFilter } from '../../../../../hooks/useFootballFilter';
-import { TEAMS } from '../../../../../data/TEAMS'; // name, logo 등 포함
+import { TEAMS } from '../../../../../data/TEAMS';
 
 // TEAMS에서 이름/코드로 팀 찾기(느슨한 매칭)
 const findTeamMeta = (raw) => {
@@ -19,24 +19,42 @@ const findTeamMeta = (raw) => {
   );
 };
 
-const ClipPage = ({ game }) => {
-  // 라우터에서 gameKey를 받을 수도 있음
-  const { gameKey: gameKeyFromUrl } = useParams();
-  const key = game?.gameKey || gameKeyFromUrl || 'default';
+export default function ClipPage() {
+  const { gameKey } = useParams();
+  const location = useLocation();
 
+  // 1) GamePage에서 넘어온 상태(가장 빠름)
+  const gameFromState = location.state?.game || null;
+
+  // 2) 새로고침 대비: gameKey로 다시 조회
+  const [game, setGame] = useState(gameFromState);
+  useEffect(() => {
+    if (game) return;
+    if (!gameKey) return;
+    // TODO: 실제 API 호출로 대체
+    // 예: api.get(`/games/${gameKey}`).then(res => setGame(res.data))
+    // 임시 목업:
+    setGame({
+      gameKey,
+      homeTeam: 'Hanyang Lions',
+      awayTeam: 'Yonsei Eagles',
+      date: '2024-10-01',
+    });
+  }, [game, gameKey]);
+
+  const persistKey = `clipFilters:${game?.gameKey || gameKey || 'default'}`;
   const {
     filters, handleFilterChange, removeFilter, clearAllFilters,
     activeFilters, filterData,
-  } = useFootballFilter(`clipFilters:${key}`);
+  } = useFootballFilter(persistKey);
 
-  // 홈/원정 메타 → 팀 드롭다운 옵션으로
+  // 홈/원정 → 팀 드롭다운 옵션
   const teamOptions = useMemo(() => {
     const home = findTeamMeta(game?.homeTeam);
     const away = findTeamMeta(game?.awayTeam);
     const arr = [];
     if (home?.name) arr.push({ value: home.name, label: home.name, logo: home.logo });
     if (away?.name) arr.push({ value: away.name, label: away.name, logo: away.logo });
-    // 중복 제거
     return arr.filter((v, i, a) => a.findIndex((x) => x.value === v.value) === i);
   }, [game?.homeTeam, game?.awayTeam]);
 
@@ -50,7 +68,7 @@ const ClipPage = ({ game }) => {
   // 예시 데이터(실제 데이터로 교체)
   const [rawClips, setRawClips] = useState([]);
   useEffect(() => {
-    // offensiveTeam 값이 teamOptions의 value(= 팀 이름)과 같아야 필터가 맞습니다.
+    if (!teamOptions.length) return;
     setRawClips([
       { id: 'p1', quarter: 1, playType: '런',  significantPlay: ['터치다운'], offensiveTeam: teamOptions[0]?.value },
       { id: 'p2', quarter: 2, playType: '패스', significantPlay: ['2PT 성공'], offensiveTeam: teamOptions[1]?.value },
@@ -67,10 +85,9 @@ const ClipPage = ({ game }) => {
         removeFilter={removeFilter}
         activeFilters={activeFilters}
         onReset={clearAllFilters}
-        teamOptions={teamOptions}   // ← 여기!
+        teamOptions={teamOptions}
       />
 
-      {/* 이하 클립 렌더링 */}
       <div className="clip-list">
         {clips.map((c) => (
           <div key={c.id} className="clip-row">
@@ -81,9 +98,8 @@ const ClipPage = ({ game }) => {
             <div>{c.offensiveTeam}</div>
           </div>
         ))}
+        {clips.length === 0 && <div className="empty">일치하는 플레이가 없습니다.</div>}
       </div>
     </div>
   );
-};
-
-export default ClipPage;
+}

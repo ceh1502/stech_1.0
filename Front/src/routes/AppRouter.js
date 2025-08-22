@@ -20,7 +20,7 @@ export default function AppRouter() {
                 <Route index element={<ServicePages.ServiceHome />} />
                 <Route path="game" element={<ServicePages.GameLayout />} >
                     <Route index element={<ServicePages.GamePage />} />
-                    <Route path="clip" element={<ServicePages.ClipPage />} />
+                    <Route path=":gameKey/clip" element={<ServicePages.ClipPage />} />
                 </Route>
                 <Route path="stat" element={<ServicePages.StatLayout />} >
                     <Route index element={<ServicePages.LeaguePage />} />
