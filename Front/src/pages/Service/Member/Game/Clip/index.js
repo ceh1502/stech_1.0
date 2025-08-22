@@ -1,8 +1,8 @@
 // pages/Service/Game/ClipPage.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import FootballFilter from '../../../../../components/FootballFilter/FootballFilter';
-import { useFootballFilter } from '../../../../../hooks/useFootballFilter';
+import FootballFilter from '../../../../../components/FootballFilter/ClipFilter';
+import { useFootballFilter } from '../../../../../hooks/useClipFilter';
 import { TEAMS } from '../../../../../data/TEAMS';
 
 // TEAMS에서 이름/코드로 팀 찾기(느슨한 매칭)

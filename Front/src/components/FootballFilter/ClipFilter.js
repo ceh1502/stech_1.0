@@ -1,6 +1,6 @@
 // components/FootballFilter/FootballFilter.js
 import React from 'react';
-import './FootballFilter.css';
+import './ClipFilter.css';
 import { IoMdClose } from 'react-icons/io';
 import { FaChevronDown } from 'react-icons/fa';
 
