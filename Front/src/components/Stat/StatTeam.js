@@ -5,7 +5,7 @@ import {FaChevronDown} from "react-icons/fa";
 import "./StatTeam.css";
 
 /* ─────────────────────────  공통 드롭다운  ───────────────────────── */
-function Dropdown({value, options, onChange, label, placeholder}) {
+function Dropdown({value, options, onChange, label, placeholder, onTouch}) {
   const [open, setOpen] = useState(false);
   const [touched, setTouched] = useState(false);
   const ref = useRef(null);
@@ -25,7 +25,10 @@ function Dropdown({value, options, onChange, label, placeholder}) {
         className={`dropdown-trigger ${open ? "open" : ""} ${
           !touched ? "placeholder" : ""
         }`}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setOpen((o) => !o);
+          if (onTouch) onTouch(); // 터치 콜백 호출
+        }}
       >
         <span className="dropdown-text">
           {touched ? value : placeholder ?? value}
@@ -121,7 +124,6 @@ const TEAM_TO_LEAGUE = {
 };
 
 const LEAGUE_OPTIONS = [
-  "전체",
   ...Array.from(new Set(Object.values(TEAM_TO_LEAGUE))),
 ];
 const DIVISION_OPTIONS = ["1부", "2부"];
@@ -205,38 +207,35 @@ const TEAM_COLUMNS = {
 export default function StatTeam({data, teams = []}) {
   const [league, setLeague] = useState("서울");
   const [division, setDivision] = useState("1부");
-  const [playType, setPlayType] = useState("종합");
+  const [playType, setPlayType] = useState("득점/경기");
+  const [leagueSelected, setLeagueSelected] = useState(false); // 리그 선택 여부 추적
 
-  const showDivision = league !== "사회인";
+  const showDivision = league !== "사회인" && leagueSelected;
   const currentColumns = TEAM_COLUMNS[playType] || [];
 
-  // 정렬 체인
-  const [sortChain, setSortChain] = useState(() =>
-    PRIMARY_TEAM_METRIC[playType]
-      ? [{key: PRIMARY_TEAM_METRIC[playType], direction: "desc"}]
-      : []
-  );
+  // 단일 정렬 상태: {key, direction} | null
+  const [currentSort, setCurrentSort] = useState(null);
 
   // 유형 바뀌면 기본 정렬 리셋
   useEffect(() => {
     const baseKey = PRIMARY_TEAM_METRIC[playType];
-    setSortChain(baseKey ? [{key: baseKey, direction: "desc"}] : []);
+    if (baseKey) {
+      setCurrentSort({key: baseKey, direction: "desc"});
+    } else {
+      setCurrentSort(null);
+    }
   }, [playType]);
 
-  // 헤더 클릭 → none → desc → asc → none
+  // 헤더 클릭 → 다른 컬럼이면 새로 desc 적용, 같은 컬럼이면 desc ↔ asc 토글
   const toggleSort = (key) => {
-    setSortChain((prev) => {
-      const idx = prev.findIndex((s) => s.key === key);
-      if (idx === -1) return [...prev, {key, direction: "desc"}];
-      const cur = prev[idx];
-      if (cur.direction === "desc") {
-        const next = [...prev];
-        next[idx] = {key, direction: "asc"};
-        return next;
+    setCurrentSort((prev) => {
+      if (!prev || prev.key !== key) {
+        // 새로운 컬럼 클릭
+        return {key, direction: "desc"};
       }
-      const next = [...prev];
-      next.splice(idx, 1);
-      return next;
+      
+      // 같은 컬럼 클릭 - desc와 asc 사이에서 토글
+      return {key, direction: prev.direction === "desc" ? "asc" : "desc"};
     });
   };
 
@@ -245,47 +244,45 @@ export default function StatTeam({data, teams = []}) {
     const source = Array.isArray(data) ? data : []; // ✅ safety guard
 
     const rows = source.filter((d) => {
-      if (league !== "전체") {
-        const teamLeague = TEAM_TO_LEAGUE[d.team] || "";
-        if (teamLeague !== league) return false;
-      }
+      // 리그 필터 (TEAM_TO_LEAGUE로 팀-리그 매칭)
+      const teamLeague = TEAM_TO_LEAGUE[d.team] || "";
+      if (teamLeague !== league) return false;
+      
       if (league !== "사회인" && d.division !== division) return false;
       return true;
     });
 
-    if (sortChain.length === 0) return rows;
+    if (!currentSort) return rows;
 
-    const cmp = (a, b) => {
-      for (const {key, direction} of sortChain) {
-        const av = a[key] ?? 0;
-        const bv = b[key] ?? 0;
-        const base = av < bv ? -1 : av > bv ? 1 : 0;
-        const sign = direction === "asc" ? 1 : -1;
-        const lowBetter = LOWER_IS_BETTER.has(key) ? -1 : 1;
-        const out = base * sign * lowBetter;
-        if (out !== 0) return out;
-      }
-      return 0;
-    };
-
-    return [...rows].sort(cmp);
-  }, [data, league, division, sortChain]);
+    const {key, direction} = currentSort;
+    
+    return [...rows].sort((a, b) => {
+      const av = a[key] ?? 0;
+      const bv = b[key] ?? 0;
+      const base = av < bv ? -1 : av > bv ? 1 : 0;
+      const sign = direction === "asc" ? 1 : -1;
+      const lowBetter = LOWER_IS_BETTER.has(key) ? -1 : 1;
+      return base * sign * lowBetter;
+    });
+  }, [data, league, division, currentSort]);
 
   // 동순위 처리
   const rankedTeams = useMemo(() => {
-    if (!sortedTeams.length) return [];
-    const keyOf = (r) => sortChain.map(({key}) => r[key] ?? 0).join("|");
-    let lastKey = null;
+    if (!sortedTeams.length || !currentSort) return sortedTeams.map((r, i) => ({...r, __rank: i + 1}));
+
+    const {key} = currentSort;
+    let lastValue = null;
     let currentRank = 0;
     let seen = 0;
+
     return sortedTeams.map((r) => {
       seen += 1;
-      const k = keyOf(r);
-      if (k !== lastKey) currentRank = seen;
-      lastKey = k;
+      const currentValue = r[key] ?? 0;
+      if (currentValue !== lastValue) currentRank = seen;
+      lastValue = currentValue;
       return {...r, __rank: currentRank};
     });
-  }, [sortedTeams, sortChain]);
+  }, [sortedTeams, currentSort]);
 
   return (
     <div className="stat-position">
@@ -298,6 +295,7 @@ export default function StatTeam({data, teams = []}) {
             value={league}
             options={LEAGUE_OPTIONS}
             onChange={setLeague}
+            onTouch={() => setLeagueSelected(true)} // 리그 드롭다운을 터치하면 디비전 표시
           />
           {showDivision && (
             <Dropdown
@@ -336,31 +334,31 @@ export default function StatTeam({data, teams = []}) {
                 style={{"--cols": currentColumns.length}}
               >
                 {currentColumns.map((col) => {
-                  const active = sortChain.find((s) => s.key === col.key);
-                  const order = active ? active.direction : null;
+                  const isActive = currentSort && currentSort.key === col.key;
+                  const direction = isActive ? currentSort.direction : null;
                   const isPrimary = PRIMARY_TEAM_METRIC[playType] === col.key;
                   return (
                     <th
                       key={col.key}
                       className={`table-header-cell stat-column sortable
-                        ${active ? "active-blue" : ""}
-                        ${isPrimary && !active ? "primary-orange" : ""}`}
+                        ${isActive ? "active-blue" : ""}
+                        ${isPrimary && !isActive ? "primary-orange" : ""}`}
                     >
                       <button
                         type="button"
-                        className={`sort-toggle one ${order ?? "none"}`}
+                        className={`sort-toggle one ${direction ?? "none"}`}
                         onClick={() => toggleSort(col.key)}
                         title={
-                          order
+                          direction
                             ? `정렬: ${
-                                order === "desc" ? "내림차순" : "오름차순"
+                                direction === "desc" ? "내림차순" : "오름차순"
                               }`
                             : "정렬 적용"
                         }
                       >
                         <span className="column-label">{col.label}</span>
                         <RxTriangleDown
-                          className={`chev ${order === "asc" ? "asc" : ""}`}
+                          className={`chev ${direction === "asc" ? "asc" : ""}`}
                           size={30}
                         />
                       </button>
