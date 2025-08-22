@@ -143,17 +143,15 @@ export default function JsonEx() {
         // "분석 중" 시뮬
         startSimulateProcessing(uniquePlayers);
 
-        // 3) 백엔드 호출 준비
+        // 3) 백엔드 호출 준비 (백엔드가 기대하는 형식에 맞춤)
         const payload = {
-          gameInfo: {
-            gameKey: gameData.gameKey,
-            date: gameData.date,
-            homeTeam: gameData.homeTeam,
-            awayTeam: gameData.awayTeam,
-            location: gameData.location,
-            finalScore: gameData.score,
-          },
-          clips: Array.isArray(gameData.Clips) ? gameData.Clips : [],
+          gameKey: gameData.gameKey,
+          date: gameData.date,
+          homeTeam: gameData.homeTeam,
+          awayTeam: gameData.awayTeam,
+          location: gameData.location,
+          score: gameData.score,
+          Clips: Array.isArray(gameData.Clips) ? gameData.Clips : [],
         };
 
         // 4) axios 호출 (업로드 진행률 콜백은 FormData일 때 유효. 여기선 전체 JSON POST이므로 서버 처리시간 기준)

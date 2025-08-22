@@ -17,6 +17,6 @@ export const API_CONFIG = {
     RESET_PASSWORD: '/auth/reset-password',
     DELETE_ACCOUNT: '/auth/delete-account',
     UPLOAD_VIDEO: '/video/upload', //<-- 건아 임마를 조져
-    JSON_EX: '/service/upload-game',
+    JSON_EX: '/player/update-game-stats',
   }
 };

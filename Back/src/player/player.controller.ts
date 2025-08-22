@@ -162,9 +162,10 @@ export class PlayerController {
   })
   @ApiResponse({ status: 200, description: '게임 스탯 업데이트 성공' })
   async updateGameStats(
-    @Body() gameData: { Clips: AnalyzeNewClipsDto }
+    @Body() gameData: any
   ) {
-    return this.playerService.updateGameStats({ Clips: gameData.Clips.clips });
+    console.log('받은 데이터 구조:', JSON.stringify(gameData, null, 2));
+    return this.playerService.updateGameStats(gameData);
   }
 
   // === 3단계 스탯 관리 시스템 엔드포인트 ===
