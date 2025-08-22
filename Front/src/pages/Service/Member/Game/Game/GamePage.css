@@ -1,4 +1,4 @@
-.game-list{
+.game-container{
   display: flex;
   flex-direction: column;
 padding-left: 3.75rem;
@@ -15,11 +15,18 @@ border: 0.236px solid #6E6E6E;
 background: rgba(110, 110, 110, 0.20);
 color: white;
 display: grid;
-grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-
-
+grid-template-columns: 10rem 40rem 30rem 1fr 1fr;
+align-items: center;
 }
-.game-teams{
+.game-card>div{
+  justify-self:center;
+}
+.game-list{
+  display:flex;
+  flex-direction: column;
+  gap:1.25rem;
+}
+.game-results{
   display:flex;
 }
 .game-team.left{
@@ -27,4 +34,64 @@ grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
 }
 .game-team.right{
   display:flex;
+}
+.reportY{
+  color:#1A58E0;
+}
+.reportN{
+  color:#ff2b6e;
+}
+
+.game-header{
+  width: 100%;
+  height: 5rem;
+  display: grid;
+  grid-template-columns: 10rem 40rem 30rem 1fr  1fr;
+  color: white;
+  align-items: center;
+  justify-content: center;
+}
+.game-header-cell{
+  justify-self: center;
+}
+
+.game-team-logo {
+  width: 1.563rem; /* 25px */
+  height: 1.563rem;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.game-team-logo-img.svg-logo {
+  width: 4rem;
+  height: 4rem;
+  object-fit: cover;
+  object-position: center;
+}
+.game-team-logo-img.png-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.game-results {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  align-items: center;
+  column-gap: 1.25rem;
+}
+
+.game-score{
+  justify-self: center;  /* 그리드 셀에서 가운데 */
+  width:3.75rem;
+  height:1.375rem;
+  flex-shrink: 0;
+  background: #363636;
+  font-size:0.875rem;
+  font-weight: 600;
+  display:flex;
+  align-items: center;
+  justify-content: center;
 }
