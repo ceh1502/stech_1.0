@@ -1,0 +1,30 @@
+.game-list{
+  display: flex;
+  flex-direction: column;
+padding-left: 3.75rem;
+padding-right: 3.75rem;
+}
+
+.game-card{
+  width: 100%;
+  height: 3.75rem;
+  border-radius: 0.5rem;
+border: 0.236px solid #6E6E6E;
+
+
+background: rgba(110, 110, 110, 0.20);
+color: white;
+display: grid;
+grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+
+
+}
+.game-teams{
+  display:flex;
+}
+.game-team.left{
+  display:flex;
+}
+.game-team.right{
+  display:flex;
+}
