@@ -110,8 +110,31 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
   });
 
   const port = process.env.PORT || 3001;
-  await app.listen(port);
-  console.log(`🚀 NestJS 서버가 http://localhost:${port}에서 실행 중입니다.`);
-  console.log(`📚 Swagger 문서: http://localhost:${port}/api`);
+  
+  // Vercel에서는 serverless function으로 실행되므로 포트 바인딩이 다름
+  if (process.env.NODE_ENV === 'production') {
+    await app.init();
+    console.log('🚀 NestJS 서버가 Vercel에서 실행 준비 완료');
+    return app;
+  } else {
+    await app.listen(port);
+    console.log(`🚀 NestJS 서버가 http://localhost:${port}에서 실행 중입니다.`);
+    console.log(`📚 Swagger 문서: http://localhost:${port}/api`);
+    return app;
+  }
 }
-bootstrap();
+
+let app: any;
+
+export default async function handler(req: any, res: any) {
+  if (!app) {
+    app = await bootstrap();
+  }
+  
+  return app.getHttpAdapter().getInstance()(req, res);
+}
+
+// 로컬 개발 환경에서는 바로 실행
+if (process.env.NODE_ENV !== 'production') {
+  bootstrap();
+}
