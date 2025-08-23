@@ -398,7 +398,6 @@ export default function StatTeam({data, teams = []}) {
             <tr className="table-row">
               <div className="table-row1">
                 <th className="table-header-cell rank-column">순위</th>
-                <th className="table-header-cell team-logo"></th>
                 <th className="table-header-cell team-column">팀</th>
               </div>
               <div
@@ -455,8 +454,8 @@ export default function StatTeam({data, teams = []}) {
                 >
                   <div className="team-table-row1">
                     <td className="table-cell">{row.__rank}위</td>
-                    <td className="table-cell team-logo-cell">
-                      {teamInfo?.logo && (
+     
+                    <td className="table-cell team-name">{teamInfo?.logo && (
                         <div className="team-logo">
                           <img
                             src={teamInfo.logo}
@@ -468,9 +467,7 @@ export default function StatTeam({data, teams = []}) {
                             }`}
                           />
                         </div>
-                      )}
-                    </td>
-                    <td className="table-cell team-name">{row.team}</td>
+                      )}<span>{row.team}</span></td>
                   </div>
                   <div
                     className="team-table-row2"
