@@ -1,8 +1,11 @@
+import SettingModal from '../../../../components/SettingModal';
+import {useNavigate} from 'react-router-dom';
+
 const SettingsPage = () => {
-    return (
+  const navigate = useNavigate();  
+  return (
         <div>
-            <h1>Settings Page</h1>
-            {/* Settings content goes here */}
+            <SettingModal onClose={() => navigate(-1)}/>
         </div>
     );
 }   
