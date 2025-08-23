@@ -113,7 +113,7 @@
 
 /* 주황(기본 지표), 파랑(활성 정렬) */
 
-.table-header-cell.sortable.active-blue .column-label {
+.team-table-header-cell.sortable.active-blue .column-label {
   color: #3b82f6;
   font-weight: 700;
 }
