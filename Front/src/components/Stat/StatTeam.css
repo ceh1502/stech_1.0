@@ -13,7 +13,6 @@
 
 .table-header {
   padding-top: 3.75rem;
-
   border-bottom: 1px solid #fff;
   color: #f5f5f5;
   font-size: 1.25rem;
@@ -36,7 +35,7 @@
   display: grid;
   grid-template-columns: 28rem 1fr;
   align-items: center;
-    font-weight: 700;
+  font-weight: 700;
 }
 .table-rows.is-division2{
   background: rgba(110, 110, 110, 0.20);
@@ -44,7 +43,7 @@
 .team-table-row1 {
   width: 28rem;
   display: grid;
-  grid-template-columns: 5rem  3.75rem 1fr;
+  grid-template-columns: 5rem  1fr;
   align-items: center;
 }
 
@@ -170,4 +169,11 @@
   table-layout: fixed;   /* 라벨+아이콘 줄바꿈/몫 흔들림 방지 */
   border-collapse: separate;
   border-spacing: 0;
+}
+
+.team-name{
+    display: grid;
+  align-items: center;
+  grid-template-columns: minmax(0,1fr) auto;
+gap: 0.625rem;
 }

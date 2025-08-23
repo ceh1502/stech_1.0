@@ -67,53 +67,53 @@ function Dropdown({value, options, onChange, label, placeholder, onTouch}) {
 
 const TEAM_TO_LEAGUE = {
   // 서울
-  "연세대학교 이글스": "서울",
-  "서울대학교 그린테러스": "서울",
-  "한양대학교 라이온스": "서울",
+  "연세대 이글스": "서울",
+  "서울대 그린테러스": "서울",
+  "한양대 라이온스": "서울",
   "한양대 라이온즈": "서울",
-  "국민대학교 레이저백스": "서울",
-  "서울시립대학교 시티혹스": "서울",
-  "한국외국어대학교 블랙나이츠": "서울",
+  "국민대 레이저백스": "서울",
+  "서울시립대 시티혹스": "서울",
+  "한국외국어대 블랙나이츠": "서울",
   "한국외대 블랙나이츠": "서울",
-  "건국대학교 레이징불스": "서울",
-  "홍익대학교 카우보이스": "서울",
-  "동국대학교 터스커스": "서울",
-  "고려대학교 타이거스": "서울",
-  "중앙대학교 블루드래곤스": "서울",
-  "숭실대학교 크루세이더스": "서울",
-  "서강대학교 알바트로스": "서울",
-  "경희대학교 커맨더스": "서울",
+  "건국대 레이징불스": "서울",
+  "홍익대 카우보이스": "서울",
+  "동국대 터스커스": "서울",
+  "고려대 타이거스": "서울",
+  "중앙대 블루드래곤스": "서울",
+  "숭실대 크루세이더스": "서울",
+  "서강대 알바트로스": "서울",
+  "경희대 커맨더스": "서울",
 
-  "강원대학교 카프라스": "경기강원",
-  "단국대학교 코디악베어스": "경기강원",
-  "성균관대학교 로얄스": "경기강원",
-  "용인대학교 화이트타이거스": "경기강원",
-  "인하대학교 틸 드래곤스": "경기강원",
-  "한림대학교 피닉스": "경기강원",
-  "한신대학교 킬러웨일스": "경기강원",
+  "강원대 카프라스": "경기강원",
+  "단국대 코디악베어스": "경기강원",
+  "성균관대 로얄스": "경기강원",
+  "용인대 화이트타이거스": "경기강원",
+  "인하대 틸 드래곤스": "경기강원",
+  "한림대 피닉스": "경기강원",
+  "한신대 킬러웨일스": "경기강원",
 
   // 대구경북
-  "경북대학교 오렌지파이터스": "대구경북",
-  "경일대학교 블랙베어스": "대구경북",
-  "계명대학교 슈퍼라이온스": "대구경북",
-  "금오공과대학교 레이븐스": "대구경북",
-  "대구가톨릭대학교 스커드엔젤스": "대구경북",
-  "대구대학교 플라잉타이거스": "대구경북",
-  "대구한의대학교 라이노스": "대구경북",
-  "동국대학교 화이트엘리펀츠": "대구경북",
-  "영남대학교 페가수스": "대구경북",
-  "한동대학교 홀리램스": "대구경북",
+  "경북대 오렌지파이터스": "대구경북",
+  "경일대 블랙베어스": "대구경북",
+  "계명대 슈퍼라이온스": "대구경북",
+  "금오공과대 레이븐스": "대구경북",
+  "대구가톨릭대 스커드엔젤스": "대구경북",
+  "대구대 플라잉타이거스": "대구경북",
+  "대구한의대 라이노스": "대구경북",
+  "동국대 화이트엘리펀츠": "대구경북",
+  "영남대 페가수스": "대구경북",
+  "한동대 홀리램스": "대구경북",
 
   // 부산경남(부울경)
-  "경성대학교 드래곤스": "부산경남",
-  "동서대학교 블루돌핀스": "부산경남",
-  "동아대학교 레오파즈": "부산경남",
-  "동의대학교 터틀파이터스": "부산경남",
-  "부산대학교 이글스": "부산경남",
-  "부산외국어대학교 토네이도": "부산경남",
-  "신라대학교 데빌스": "부산경남",
-  "울산대학교 유니콘스": "부산경남",
-  "한국해양대학교 바이킹스": "부산경남",
+  "경성대 드래곤스": "부산경남",
+  "동서대 블루돌핀스": "부산경남",
+  "동아대 레오파즈": "부산경남",
+  "동의대 터틀파이터스": "부산경남",
+  "부산대 이글스": "부산경남",
+  "부산외국어대 토네이도": "부산경남",
+  "신라대 데빌스": "부산경남",
+  "울산대 유니콘스": "부산경남",
+  "한국해양대 바이킹스": "부산경남",
 
   //"사회인
   "군위 피닉스": "사회인",
@@ -126,23 +126,21 @@ const TEAM_TO_LEAGUE = {
 };
 
 const BACKEND_TO_FRONTEND_TEAM = {
-  "KKRagingBulls": "건국대학교 레이징불스",
-  "KHCommanders": "경희대학교 커맨더스",
-  "SNGreenTerrors": "서울대학교 그린테러스",
-  "USCityhawks": "서울시립대학교 시티혹스",
-  "DGTuskers": "동국대학교 터스커스",
-  "KMRazorbacks": "국민대학교 레이저백스",
-  "YSEagles": "연세대학교 이글스",
-  "KUTigers": "고려대학교 타이거스",
-  "HICowboys": "홍익대학교 카우보이스",
-  "SSCrusaders": "숭실대학교 크루세이더스",
-  "HYLions": "한양대학교 라이온스",
-  "HFBlackKnights": "한국외국어대학교 블랙나이츠",
+  KKRagingBulls: "건국대 레이징불스",
+  KHCommanders: "경희대 커맨더스",
+  SNGreenTerrors: "서울대 그린테러스",
+  USCityhawks: "서울시립대 시티혹스",
+  DGTuskers: "동국대 터스커스",
+  KMRazorbacks: "국민대 레이저백스",
+  YSEagles: "연세대 이글스",
+  KUTigers: "고려대 타이거스",
+  HICowboys: "홍익대 카우보이스",
+  SSCrusaders: "숭실대 크루세이더스",
+  HYLions: "한양대 라이온스",
+  HFBlackKnights: "한국외국어대 블랙나이츠",
 };
 
-const LEAGUE_OPTIONS = [
-  ...Array.from(new Set(Object.values(TEAM_TO_LEAGUE))),
-];
+const LEAGUE_OPTIONS = [...Array.from(new Set(Object.values(TEAM_TO_LEAGUE)))];
 
 const DIVISION_OPTIONS = ["1부", "2부"];
 const POSITION_OPTIONS = [
@@ -172,15 +170,23 @@ const LOWER_IS_BETTER = new Set([
 // 포지션/카테고리별 기본(주황) 정렬 컬럼
 const PRIMARY_METRIC = {
   QB: {pass: "passing_yards", run: "rushing_yards"},
-  RB: {run: "rushing_yards", pass: "receiving_yards", "스페셜팀": "kick_return_yards"},
-  WR: {pass: "receiving_yards", run: "rushing_yards", "스페셜팀": "kick_return_yards"},
+  RB: {
+    run: "rushing_yards",
+    pass: "receiving_yards",
+    스페셜팀: "kick_return_yards",
+  },
+  WR: {
+    pass: "receiving_yards",
+    run: "rushing_yards",
+    스페셜팀: "kick_return_yards",
+  },
   TE: {pass: "receiving_yards", run: "rushing_yards"},
-  K: {"스페셜팀": "field_goal_percentage"},
-  P: {"스페셜팀": "average_punt_yards"},
+  K: {스페셜팀: "field_goal_percentage"},
+  P: {스페셜팀: "average_punt_yards"},
   OL: {default: "offensive_snaps_played"},
   DL: {default: "sacks"},
   LB: {default: "tackles"},
-  DB: {defense: "interceptions", "스페셜팀": "kick_return_yards"},
+  DB: {defense: "interceptions", 스페셜팀: "kick_return_yards"},
 };
 const POSITION_CATEGORIES = {
   QB: ["pass", "run"],
@@ -240,7 +246,7 @@ const statColumns = {
       {key: "fumbles", label: "펌블 수"},
       {key: "fumbles_lost", label: "펌블 턴오버 수"},
     ],
-    "스페셜팀": [
+    스페셜팀: [
       {key: "games", label: "경기 수"},
       {key: "kick_returns", label: "킥 리턴 시도 수"},
       {key: "kick_return_yards", label: "킥 리턴 야드"},
@@ -274,7 +280,7 @@ const statColumns = {
       {key: "fumbles", label: "펌블 수"},
       {key: "fumbles_lost", label: "펌블 턴오버 수"},
     ],
-    "스페셜팀": [
+    스페셜팀: [
       {key: "games", label: "경기 수"},
       {key: "kick_returns", label: "킥 리턴 시도 수"},
       {key: "kick_return_yards", label: "킥 리턴 야드"},
@@ -309,30 +315,30 @@ const statColumns = {
     ],
   },
   K: {
-    "스페셜팀": [
+    스페셜팀: [
       {key: "games", label: "경기 수"},
       {key: "extra_point_attempts", label: "PAT 시도 수"},
       {key: "extra_point_made", label: "PAT 성공 수"},
       {key: "field_goal", label: "필드골 성공-필드골 시도"},
       {key: "field_goal_percentage", label: "필드골 성공률"},
-      {key: "field_goal_1_19", label: "1-19 야드 사이 성공"},
-      {key: "field_goal_20_29", label: "20-29 야드 사이 성공"},
-      {key: "field_goal_30_39", label: "30-39 야드 사이 성공"},
-      {key: "field_goal_40_49", label: "40-49 야드 사이 성공"},
-      {key: "field_goal_50_plus", label: "50 야드 이상 성공"},
+      {key: "field_goal_1_19", label: "1-19"},
+      {key: "field_goal_20_29", label: "20-29"},
+      {key: "field_goal_30_39", label: "30-39"},
+      {key: "field_goal_40_49", label: "40-49"},
+      {key: "field_goal_50_plus", label: "50+"},
       {key: "average_field_goal_length", label: "평균 필드골 거리"},
       {key: "longest_field_goal", label: "가장 긴 필드골 거리"},
     ],
   },
   P: {
-    "스페셜팀": [
+    스페셜팀: [
       {key: "games", label: "경기 수"},
       {key: "punts", label: "펀트 수"},
       {key: "average_punt_yards", label: "평균 펀트 거리"},
       {key: "longest_punt", label: "가장 긴 펀트"},
       {key: "punt_yards", label: "펀트 야드"},
-      {key: "touchback_percentage", label: "터치백 퍼센티지"},
-      {key: "punts_inside_20", label: "20 야드 안쪽 펀트 퍼센티지"},
+      {key: "touchback_percentage", label: "터치백 %"},
+      {key: "punts_inside_20", label: "20 야드 안쪽 펀트 %"},
     ],
   },
   OL: {
@@ -383,7 +389,7 @@ const statColumns = {
       {key: "interception_yards", label: "인터셉션 야드"},
       {key: "touchdowns", label: "수비 터치다운"},
     ],
-    "스페셜팀": [
+    스페셜팀: [
       {key: "games", label: "경기 수"},
       {key: "kick_returns", label: "킥 리턴 시도 수"},
       {key: "kick_return_yards", label: "킥 리턴 야드"},
@@ -403,7 +409,7 @@ export default function StatPosition({data, teams = []}) {
   const [category, setCategory] = useState("pass");
   const [leagueSelected, setLeagueSelected] = useState(false); // 리그 선택 여부 추적
   const categories = useMemo(
-    () => POSITION_CATEGORIES[position] || ['default'],
+    () => POSITION_CATEGORIES[position] || ["default"],
     [position]
   );
 
@@ -459,7 +465,7 @@ export default function StatPosition({data, teams = []}) {
       ...d,
       team: BACKEND_TO_FRONTEND_TEAM[d.team] || d.team,
     }));
-    
+
     // 2. 변환된 데이터를 필터링
     const rows = mappedData.filter((d) => {
       if (d.position !== position) return false;
@@ -475,7 +481,7 @@ export default function StatPosition({data, teams = []}) {
     if (!currentSort) return rows;
 
     const {key, direction} = currentSort;
-    
+
     return [...rows].sort((a, b) => {
       const av = a[key] ?? 0;
       const bv = b[key] ?? 0;
@@ -487,7 +493,8 @@ export default function StatPosition({data, teams = []}) {
   }, [data, league, division, position, currentSort]);
 
   const rankedPlayers = useMemo(() => {
-    if (!sortedPlayers.length || !currentSort) return sortedPlayers.map((r, i) => ({...r, __rank: i + 1}));
+    if (!sortedPlayers.length || !currentSort)
+      return sortedPlayers.map((r, i) => ({...r, __rank: i + 1}));
 
     const {key} = currentSort;
     let lastValue = null;
@@ -499,7 +506,7 @@ export default function StatPosition({data, teams = []}) {
       const currentValue = r[key] ?? 0;
       if (currentValue !== lastValue) currentRank = seen;
       lastValue = currentValue;
-      return { ...r, __rank: currentRank };
+      return {...r, __rank: currentRank};
     });
   }, [sortedPlayers, currentSort]);
 
@@ -558,7 +565,6 @@ export default function StatPosition({data, teams = []}) {
               <div className="table-row1">
                 <th className="table-header-cell rank-column">순위</th>
                 <th className="table-header-cell player-column">선수 이름</th>
-                <th className="table-header-cell team-logo"></th>
                 <th className="table-header-cell team-column">소속팀</th>
               </div>
               <div
@@ -575,9 +581,9 @@ export default function StatPosition({data, teams = []}) {
                     <th
                       key={col.key}
                       className={`table-header-cell stat-column sortable
-            ${isActive ? "active-blue" : ""}
-            ${isPrimary && !isActive ? "primary-orange" : ""}
-          `}
+                      ${isActive ? "active-blue" : ""}
+                      ${isPrimary && !isActive ? "primary-orange" : ""}
+                    `}
                     >
                       <button
                         type="button"
@@ -593,7 +599,9 @@ export default function StatPosition({data, teams = []}) {
                       >
                         <span className="column-label">{col.label}</span>
                         <RxTriangleDown
-                          className={`chev ${direction === "asc" ? "asc" : ""} ${isActive ? "active-blue" : ""}`}
+                          className={`chev ${
+                            direction === "asc" ? "asc" : ""
+                          } ${isActive ? "active-blue" : ""}`}
                           size={30}
                         />
                       </button>
@@ -607,31 +615,37 @@ export default function StatPosition({data, teams = []}) {
           <tbody className="table-body">
             {rankedPlayers.map((row, idx) => {
               const teamInfo = teams.find((t) => t.name === row.team);
-              const rowClass = `table-rows ${division === '2부' ? 'is-division2' : ''}`;
+              const rowClass = `table-rows ${
+                division === "2부" ? "is-division2" : ""
+              }`;
 
               return (
-                <tr key={row.id || row.name} className={`table-rows ${rowClass}`}>
+                <tr
+                  key={row.id || row.name}
+                  className={`table-rows ${rowClass}`}
+                >
                   <div className="table-row1">
                     <td className="table-cell">{row.__rank}위</td>
                     <td className="table-cell player-name clickable">
                       {row.name}
                     </td>
-                    <td className="table-cell team-logo-cell">
+
+                    <td className="table-cell team-name">
                       {teamInfo?.logo && (
-                        <div className="team-logo">
-                          <img
-                            src={teamInfo.logo}
-                            alt={`${row.team} 로고`}
-                            className={`team-logo-img ${
-                              teamInfo.logo.endsWith(".svg")
-                                ? "svg-logo"
-                                : "png-logo"
-                            }`}
-                          />
+                        <div className='team-logo'>
+                        <img
+                          src={teamInfo.logo}
+                          alt={`${row.team} 로고`}
+                          className={`team-logo-img ${
+                            teamInfo.logo.endsWith(".svg")
+                              ? "svg-logo"
+                              : "png-logo"
+                          }`}
+                        />
                         </div>
                       )}
+                      <span>{row.team}</span>
                     </td>
-                    <td className="table-cell team-name">{row.team}</td>
                   </div>
                   <div
                     className="table-row2"
