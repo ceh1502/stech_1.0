@@ -19,6 +19,7 @@ import {
   PlayersListResponseDto 
 } from '../common/dto/player.dto';
 import { AnalyzeNewClipsDto } from '../common/dto/new-clip.dto';
+import { GameDataDto } from '../common/dto/game-data.dto';
 import { StatsManagementService } from '../common/services/stats-management.service';
 import { TeamSeasonStatsAnalyzerService } from '../team/team-season-stats-analyzer.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -146,9 +147,19 @@ export class PlayerController {
         const gameKey = analyzeNewClipsDto.clips[0]?.clipKey || 'unknown';
         const season = '2024'; // 현재 시즌
         
-        // 더미 데이터로 한양대 vs 외대 설정
-        const homeTeam = '한양대';
-        const awayTeam = '외대';
+        // JSON 전체에서 게임 정보 추출 (homeTeam, awayTeam은 게임 레벨에 있음)
+        // AnalyzeNewClipsDto에 게임 정보가 없으므로 임시로 클립에서 추정
+        let homeTeam = '한양대'; // 기본값
+        let awayTeam = '외대'; // 기본값
+        
+        // 실제 JSON에는 게임 레벨에 homeTeam, awayTeam이 있지만, 
+        // 현재 DTO에는 clips만 있으므로 하드코딩된 매핑 사용
+        // TODO: DTO를 수정해서 게임 정보도 포함하도록 개선 필요
+        if (analyzeNewClipsDto.clips.length > 0) {
+          // 임시 매핑: 실제 JSON의 팀명을 DTO 팀명으로 변환
+          homeTeam = 'HFBlackKnights'; // 한국외대 블랙나이츠
+          awayTeam = 'HYLions'; // 한양대 라이온즈
+        }
         
         await this.teamSeasonStatsService.analyzeAndUpdateTeamStats(
           analyzeNewClipsDto.clips, 
@@ -164,6 +175,127 @@ export class PlayerController {
     }
     
     return result;
+  }
+
+  @Post('/analyze-game-data')
+  @ApiOperation({ 
+    summary: '전체 게임 데이터 분석 및 팀/선수 스탯 업데이트',
+    description: '게임의 전체 JSON 데이터를 받아서 홈팀/어웨이팀 정보를 자동으로 추출하고 모든 선수 및 팀 스탯을 업데이트합니다.'
+  })
+  @ApiResponse({ status: 200, description: '게임 데이터 분석 및 스탯 업데이트 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 게임 데이터 형식' })
+  async analyzeGameData(@Body() gameData: GameDataDto) {
+    console.log('게임 데이터 분석 시작:', gameData.gameKey);
+    console.log('홈팀:', gameData.homeTeam, '어웨이팀:', gameData.awayTeam);
+    console.log('클립 개수:', gameData.Clips?.length);
+    
+    const results = {
+      gameKey: gameData.gameKey,
+      homeTeam: gameData.homeTeam,
+      awayTeam: gameData.awayTeam,
+      clipsProcessed: gameData.Clips?.length || 0,
+      playerStatsUpdated: 0,
+      teamStatsUpdated: false,
+      errors: [] as string[]
+    };
+
+    try {
+      // 모든 클립의 모든 선수 스탯 업데이트
+      if (gameData.Clips && gameData.Clips.length > 0) {
+        const allPlayers = new Set<number>();
+        
+        // 모든 클립에서 관련된 선수들의 저지 번호 수집
+        gameData.Clips.forEach(clip => {
+          if (clip.car?.num) allPlayers.add(clip.car.num);
+          if (clip.car2?.num) allPlayers.add(clip.car2.num);
+          if (clip.tkl?.num) allPlayers.add(clip.tkl.num);
+          if (clip.tkl2?.num) allPlayers.add(clip.tkl2.num);
+        });
+
+        console.log('관련된 선수들:', Array.from(allPlayers));
+
+        // 홈팀과 어웨이팀 선수들을 분리해서 처리
+        const homePlayerNumbers = new Set<number>();
+        const awayPlayerNumbers = new Set<number>();
+        
+        // 클립별로 홈팀/어웨이팀 선수들 분류
+        gameData.Clips.forEach(clip => {
+          if (clip.offensiveTeam === 'Home') {
+            if (clip.car?.num) homePlayerNumbers.add(clip.car.num);
+            if (clip.car2?.num) homePlayerNumbers.add(clip.car2.num);
+          } else if (clip.offensiveTeam === 'Away') {
+            if (clip.car?.num) awayPlayerNumbers.add(clip.car.num);
+            if (clip.car2?.num) awayPlayerNumbers.add(clip.car2.num);
+          }
+          
+          // 수비 선수들은 상대팀 공격 시 나타남
+          if (clip.offensiveTeam === 'Home') {
+            if (clip.tkl?.num) awayPlayerNumbers.add(clip.tkl.num);
+            if (clip.tkl2?.num) awayPlayerNumbers.add(clip.tkl2.num);
+          } else if (clip.offensiveTeam === 'Away') {
+            if (clip.tkl?.num) homePlayerNumbers.add(clip.tkl.num);
+            if (clip.tkl2?.num) homePlayerNumbers.add(clip.tkl2.num);
+          }
+        });
+
+        console.log(`홈팀(${gameData.homeTeam}) 선수들:`, Array.from(homePlayerNumbers));
+        console.log(`어웨이팀(${gameData.awayTeam}) 선수들:`, Array.from(awayPlayerNumbers));
+
+        // 홈팀 선수들 스탯 업데이트
+        for (const jerseyNumber of homePlayerNumbers) {
+          try {
+            const result = await this.playerService.updatePlayerStatsFromNewClips(jerseyNumber, gameData.Clips, gameData.homeTeam);
+            if (result.success !== false) {
+              results.playerStatsUpdated++;
+            }
+          } catch (error) {
+            console.error(`홈팀 선수 ${jerseyNumber} 스탯 업데이트 실패:`, error);
+            results.errors.push(`홈팀 선수 ${jerseyNumber}: ${error.message}`);
+          }
+        }
+
+        // 어웨이팀 선수들 스탯 업데이트  
+        for (const jerseyNumber of awayPlayerNumbers) {
+          try {
+            const result = await this.playerService.updatePlayerStatsFromNewClips(jerseyNumber, gameData.Clips, gameData.awayTeam);
+            if (result.success !== false) {
+              results.playerStatsUpdated++;
+            }
+          } catch (error) {
+            console.error(`어웨이팀 선수 ${jerseyNumber} 스탯 업데이트 실패:`, error);
+            results.errors.push(`어웨이팀 선수 ${jerseyNumber}: ${error.message}`);
+          }
+        }
+      }
+
+      // 팀 스탯 업데이트 (자동으로 추출된 팀명 사용)
+      try {
+        if (gameData.Clips && gameData.Clips.length > 0) {
+          await this.teamSeasonStatsService.analyzeAndUpdateTeamStats(
+            gameData.Clips,
+            gameData.gameKey,
+            gameData.homeTeam, // 자동 추출된 홈팀명
+            gameData.awayTeam,  // 자동 추출된 어웨이팀명
+            '2024' // 현재 시즌
+          );
+          results.teamStatsUpdated = true;
+          console.log('팀 스탯 업데이트 완료');
+        }
+      } catch (error) {
+        console.error('팀 스탯 업데이트 중 오류:', error);
+        results.errors.push(`팀 스탯: ${error.message}`);
+      }
+
+    } catch (error) {
+      console.error('게임 데이터 분석 중 전체 오류:', error);
+      results.errors.push(`전체 분석: ${error.message}`);
+    }
+
+    return {
+      success: results.errors.length === 0,
+      message: `게임 ${gameData.gameKey} 분석 완료`,
+      data: results
+    };
   }
 
   @Post('jersey/:jerseyNumber/analyze-new-clips-only')

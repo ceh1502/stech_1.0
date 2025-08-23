@@ -218,16 +218,36 @@ export class PlayerService {
   // === 새로운 클립 구조 처리 메서드들 ===
 
   /**
-   * 새로운 클립 구조로 선수 스탯 업데이트 (등번호 기반)
+   * 새로운 클립 구조로 선수 스탯 업데이트 (팀명 + 등번호 기반)
    */
-  async updatePlayerStatsFromNewClips(playerNumber: number, newClips: NewClipDto[]) {
-    // 등번호로 선수 찾기
-    const player = await this.playerModel.findOne({ 
-      jerseyNumber: playerNumber 
-    });
+  async updatePlayerStatsFromNewClips(playerNumber: number, newClips: NewClipDto[], teamName?: string) {
+    let player;
     
-    if (!player) {
-      throw new NotFoundException(`등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`);
+    if (teamName) {
+      // 팀명 + 등번호로 선수 찾기
+      player = await this.playerModel.findOne({ 
+        jerseyNumber: playerNumber,
+        teamName: teamName
+      });
+      
+      if (!player) {
+        console.log(`팀 ${teamName}의 등번호 ${playerNumber}번 선수를 찾을 수 없습니다. 선수를 생성하거나 확인이 필요합니다.`);
+        return { 
+          success: false, 
+          message: `팀 ${teamName}의 등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`,
+          playerNumber,
+          teamName
+        };
+      }
+    } else {
+      // 기존 방식: 등번호로만 찾기 (하위 호환성)
+      player = await this.playerModel.findOne({ 
+        jerseyNumber: playerNumber 
+      });
+      
+      if (!player) {
+        throw new NotFoundException(`등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`);
+      }
     }
 
     // 해당 선수가 참여한 클립들만 필터링 (새 구조에서 직접)

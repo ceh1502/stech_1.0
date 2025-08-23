@@ -125,6 +125,21 @@ const TEAM_TO_LEAGUE = {
   "인천 라이노스": "사회인",
 };
 
+const BACKEND_TO_FRONTEND_TEAM = {
+  "KKRagingBulls": "건국대학교 레이징불스",
+  "KHCommanders": "경희대학교 커맨더스",
+  "SNGreenTerrors": "서울대학교 그린테러스",
+  "USCityhawks": "서울시립대학교 시티혹스",
+  "DGTuskers": "동국대학교 터스커스",
+  "KMRazorbacks": "국민대학교 레이저백스",
+  "YSEagles": "연세대학교 이글스",
+  "KUTigers": "고려대학교 타이거스",
+  "HICowboys": "홍익대학교 카우보이스",
+  "SSCrusaders": "숭실대학교 크루세이더스",
+  "HYLions": "한양대학교 라이온스",
+  "HFBlackKnights": "한국외국어대학교 블랙나이츠",
+};
+
 const LEAGUE_OPTIONS = [
   ...Array.from(new Set(Object.values(TEAM_TO_LEAGUE))),
 ];
@@ -151,7 +166,7 @@ const LOWER_IS_BETTER = new Set([
   "fumbles_lost",
   "penalties",
   "sacks_allowed",
-  "touchback_percentage", // 필요시
+  "touchback_percentage",
 ]);
 
 // 포지션/카테고리별 기본(주황) 정렬 컬럼
@@ -388,16 +403,13 @@ export default function StatPosition({data, teams = []}) {
   const [category, setCategory] = useState("pass");
   const [leagueSelected, setLeagueSelected] = useState(false); // 리그 선택 여부 추적
   const categories = useMemo(
-    ()=> POSITION_CATEGORIES[position] || ['default'],
+    () => POSITION_CATEGORIES[position] || ['default'],
     [position]
   );
 
   const showDivision = league !== "사회인" && leagueSelected;
-
-  // 단일 정렬 상태: {key, direction} | null
   const [currentSort, setCurrentSort] = useState(null);
 
-  // 포지션/카테고리 변경 시 기본(주황) 정렬 설정
   useEffect(() => {
     const nextCategory = categories.includes(category)
       ? category
@@ -432,28 +444,29 @@ export default function StatPosition({data, teams = []}) {
 
   const currentColumns = statColumns[position]?.[category] || [];
 
-  // 헤더 클릭 → 다른 컬럼이면 새로 desc 적용, 같은 컬럼이면 desc ↔ asc 토글
   const toggleSort = (key) => {
     setCurrentSort((prev) => {
       if (!prev || prev.key !== key) {
-        // 새로운 컬럼 클릭
         return {key, direction: "desc"};
       }
-      
-      // 같은 컬럼 클릭 - desc와 asc 사이에서 토글
       return {key, direction: prev.direction === "desc" ? "asc" : "desc"};
     });
   };
 
   const sortedPlayers = useMemo(() => {
-    const rows = data.filter((d) => {
+    // 1. 백엔드 팀 코드를 프론트엔드 팀명으로 변환
+    const mappedData = data.map((d) => ({
+      ...d,
+      team: BACKEND_TO_FRONTEND_TEAM[d.team] || d.team,
+    }));
+    
+    // 2. 변환된 데이터를 필터링
+    const rows = mappedData.filter((d) => {
       if (d.position !== position) return false;
 
-      // 리그 필터 (TEAM_TO_LEAGUE로 팀-리그 매칭)
       const teamLeague = TEAM_TO_LEAGUE[d.team] || "";
       if (teamLeague !== league) return false;
 
-      // 사회인은 디비전 무시, 그 외엔 디비전 일치
       if (league !== "사회인" && d.division !== division) return false;
 
       return true;
@@ -503,7 +516,7 @@ export default function StatPosition({data, teams = []}) {
             onChange={(v) => {
               setLeague(v);
             }}
-            onTouch={() => setLeagueSelected(true)} // 리그 드롭다운을 터치하면 디비전 표시
+            onTouch={() => setLeagueSelected(true)}
           />
           {showDivision && (
             <Dropdown

@@ -76,6 +76,25 @@ export class TeamSeasonStatsAnalyzerService {
       return false;
     });
 
+    // 득점 관련 클립들 찾기 (실제 JSON 값 사용)
+    const scoringClips = teamClips.filter(clip => 
+      clip.significantPlays && clip.significantPlays.some(play => 
+        play === 'TOUCHDOWN' || play === 'PATGOOD' || play === 'FIELDGOALGOOD' || 
+        play === '2PTGOOD' || play === 'SAFETY'
+      )
+    );
+
+    console.log(`${teamName} (${homeAway}) 팀 클립 분석:`, {
+      전체클립수: clips.length,
+      팀클립수: teamClips.length,
+      득점클립수: scoringClips.length,
+      득점클립예시: scoringClips.slice(0, 3).map(clip => ({
+        playType: clip.playType,
+        significantPlays: clip.significantPlays,
+        gainYard: clip.gainYard
+      }))
+    });
+
     // 스탯 분석
     const gameStats = this.calculateGameStats(teamClips, clips, teamName, homeAway);
 
@@ -127,10 +146,11 @@ export class TeamSeasonStatsAnalyzerService {
   private hasDefensivePlay(clip: NewClipDto, teamName: string): boolean {
     if (!clip.significantPlays) return false;
     
+    const playType = clip.playType?.toUpperCase();
     return clip.significantPlays.some(play => 
-      play === 'INTERCEPTION' || 
-      play === 'FUMBLE_RECOVERY' ||
-      (clip.playType === 'Punt' || clip.playType === 'Kickoff')
+      play === 'Intercept' || 
+      play === 'Fumble recovered by def' ||
+      (playType === 'PUNT' || playType === 'KICKOFF')
     );
   }
 
@@ -199,23 +219,36 @@ export class TeamSeasonStatsAnalyzerService {
         stats.rushingYards += clip.gainYard;
         stats.totalYards += clip.gainYard;
       }
-    } else if (playType === 'PASS' || playType === 'PASSING' || playType === 'PASSCOMPLETE') {
+    } else if (playType === 'PASS' || playType === 'PASSCOMPLETE') {
       stats.passAttempts++;
-      if (clip.gainYard && clip.gainYard > 0) {
-        stats.passCompletions++;
+      stats.passCompletions++;
+      if (clip.gainYard && clip.gainYard >= 0) {
         stats.passingYards += clip.gainYard;
         stats.totalYards += clip.gainYard;
       }
-    } else if (playType === 'PUNT' || playType === 'PUNTING') {
+    } else if (playType === 'PASSINCOMPLETE' || playType === 'NOPASS') {
+      stats.passAttempts++;
+      // 패스 실패는 야드 획득 없음
+    } else if (playType === 'PUNT') {
       stats.totalPunts++;
       if (clip.gainYard && clip.gainYard >= 0) {
         stats.totalPuntYards += clip.gainYard;
       }
-    } else if (playType === 'KICKOFF' || playType === 'KICK') {
+    } else if (playType === 'KICKOFF') {
       stats.kickReturns++;
       if (clip.gainYard && clip.gainYard >= 0) {
         stats.kickReturnYards += clip.gainYard;
       }
+    } else if (playType === 'PAT') {
+      // PAT는 significantPlays에서 처리
+    } else if (playType === 'FG' || playType === 'FIELDGOAL') {
+      // 필드골은 significantPlays에서 처리
+    } else if (playType === '2PT' || playType === 'TPT') {
+      // 2점 컨버전은 significantPlays에서 처리
+    } else if (playType === 'NONE') {
+      // NONE playType은 특별한 처리 없음
+    } else if (playType && !['SACK'].includes(playType)) {
+      console.log(`❌ 매칭되지 않는 playType: ${playType}`);
     }
     
   }
@@ -226,6 +259,22 @@ export class TeamSeasonStatsAnalyzerService {
   private analyzeSignificantPlays(clip: NewClipDto, stats: any): void {
     if (!clip.significantPlays) return;
 
+    // TURNOVER가 있는지 먼저 체크  
+    const hasTurnover = clip.significantPlays.includes('Turn Over');
+
+    // 득점 관련 플레이가 있으면 로그
+    const hasScoring = clip.significantPlays.some(play => 
+      play && (play.includes('TOUCHDOWN') || play.includes('PAT') || play.includes('FIELDGOAL') || play.includes('2PT'))
+    );
+    
+    if (hasScoring) {
+      console.log('🏈 득점 클립 발견:', {
+        playType: clip.playType,
+        significantPlays: clip.significantPlays.filter(p => p !== null),
+        gainYard: clip.gainYard
+      });
+    }
+
     clip.significantPlays.forEach(play => {
       switch (play) {
         case 'TOUCHDOWN':
@@ -235,42 +284,73 @@ export class TeamSeasonStatsAnalyzerService {
           const playType = clip.playType?.toUpperCase();
           if (playType === 'RUN' || playType === 'RUNNING') {
             stats.rushingTouchdowns++;
-          } else if (playType === 'PASS' || playType === 'PASSING' || playType === 'PASSCOMPLETE') {
+          } else if (playType === 'PASS' || playType === 'PASSCOMPLETE') {
             stats.passingTouchdowns++;
+          } else if (playType === 'KICKOFF' || playType === 'PUNT') {
+            // 리턴 터치다운은 별도 카운팅하지 않고 totalTouchdowns에만 포함
           }
           break;
 
-        case 'FIELD_GOAL':
+        case 'FIELDGOALGOOD':
           stats.fieldGoalAttempts++;
           stats.fieldGoalMakes++;
           stats.totalPoints += 3; // 필드골 3점
           break;
 
-        case 'FIELD_GOAL_MISSED':
+        case 'FIELDGOALMISS':
           stats.fieldGoalAttempts++;
           break;
 
-        case 'PAT':
+        case 'PATGOOD':
           stats.totalPoints += 1; // PAT 1점
           break;
 
-        case 'FUMBLE':
+        case 'PATMISS':
+          // 실패한 PAT는 점수 없음
+          break;
+
+        case '2PTGOOD':
+          stats.totalPoints += 2; // 2점 컨버전 2점
+          break;
+
+        case '2PTMISS':
+          // 실패한 2점 컨버전는 점수 없음
+          break;
+
+        case 'SAFETY':
+          stats.totalPoints += 2; // Safety 2점
+          break;
+
+        case 'Fumble recovered by off':
+          // 공격팀이 펌블했지만 다시 회수한 경우
           stats.fumbles++;
           break;
 
-        case 'FUMBLELOSOFF':
+        case 'Fumble recovered by def':
+          // 공격팀이 펌블하고 수비팀이 회수한 경우
           stats.fumbles++;
           stats.fumblesLost++;
           stats.totalTurnovers++;
           break;
 
-        case 'INTERCEPTION_THROWN':
-          stats.interceptions++;
-          stats.totalTurnovers++;
+        case 'Intercept':
+          // 공격팀 클립에서 Intercept가 있으면 공격팀이 인터셉트를 당한 것
+          // 인터셉트를 당한 팀의 인터셉트 수는 증가하지 않음 (상대팀이 인터셉트를 한 것)
+          if (hasTurnover) {
+            stats.totalTurnovers++; // 턴오버만 증가
+          }
           break;
 
-        case 'TOUCHBACK':
-          if (clip.playType === 'Punt') {
+        case 'Turn Over':
+          // INTERCEPT나 FUMBLE이 없는 단독 TURNOVER (4th down 실패 등)
+          if (!clip.significantPlays.includes('Intercept') && 
+              !clip.significantPlays.includes('Fumble recovered by def')) {
+            stats.totalTurnovers++;
+          }
+          break;
+
+        case 'Touchback':
+          if (clip.playType?.toUpperCase() === 'PUNT') {
             stats.puntTouchbacks++;
           }
           break;
@@ -284,15 +364,34 @@ export class TeamSeasonStatsAnalyzerService {
   private analyzeDefensiveStats(clip: NewClipDto, stats: any, teamName: string): void {
     if (!clip.significantPlays) return;
 
-    // 인터셉트 리턴, 펀트 리턴, 킥 리턴 등은 수비팀이 가져가는 스탯
-    if (clip.playType === 'Punt') {
+    // SignificantPlays에서 수비 스탯 확인
+    clip.significantPlays.forEach(play => {
+      switch (play) {
+        case 'Fumble recovered by def': // 우리가 상대방 펌블을 회수
+          // 수비팀 입장에서는 펌블 회수만 카운팅 (상대방 턴오버는 별도)
+          break;
+
+        case 'Intercept':
+          // 상대방 공격 클립에서 Intercept가 있으면 우리 팀이 인터셉트를 한 것
+          stats.interceptions++;
+          break;
+      }
+    });
+
+    // 리턴 플레이 처리
+    const playType = clip.playType?.toUpperCase();
+    if (playType === 'PUNT') {
       stats.puntReturns++;
       if (clip.gainYard && clip.gainYard >= 0) {
         stats.puntReturnYards += clip.gainYard;
         stats.totalYards += clip.gainYard;
       }
-    } else if (clip.playType === 'Kickoff') {
-      // 킥오프는 리시빙 팀 스탯이므로 여기서 처리하지 않음
+    } else if (playType === 'KICKOFF') {
+      stats.kickReturns++;
+      if (clip.gainYard && clip.gainYard >= 0) {
+        stats.kickReturnYards += clip.gainYard;
+        stats.totalYards += clip.gainYard;
+      }
     }
   }
 
@@ -402,6 +501,7 @@ export class TeamSeasonStatsAnalyzerService {
       // 5. 기타
       fumbleStats: `${stats.fumbles}-${stats.fumblesLost}`,
       turnoversPerGame: Math.round((stats.totalTurnovers / gamesPlayed) * 10) / 10,
+      turnoverRate: this.calculateTurnoverRate(stats.totalTurnovers, stats.passAttempts, stats.rushingAttempts, stats.totalPunts, stats.kickReturns),
       turnoverDifferential: this.calculateTurnoverDifferential(stats.totalTurnovers, stats.opponentTurnovers),
       penaltyStats: `${stats.penalties}-${stats.penaltyYards}`,
       penaltyYardsPerGame: Math.round((stats.penaltyYards / gamesPlayed) * 10) / 10,
@@ -409,7 +509,17 @@ export class TeamSeasonStatsAnalyzerService {
   }
 
   /**
-   * 턴오버 비율 계산
+   * 턴오버 비율 계산 (총 공격 기회 대비)
+   */
+  private calculateTurnoverRate(turnovers: number, passAttempts: number, rushAttempts: number, punts: number, kicks: number): number {
+    const totalOpportunities = passAttempts + rushAttempts + punts + kicks;
+    if (totalOpportunities === 0) return 0;
+    
+    return Math.round((turnovers / totalOpportunities) * 100 * 10) / 10;
+  }
+
+  /**
+   * 턴오버 차이 계산
    */
   private calculateTurnoverDifferential(ourTurnovers: number, opponentTurnovers: number): string {
     const differential = opponentTurnovers - ourTurnovers;

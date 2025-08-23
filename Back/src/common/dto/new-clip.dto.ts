@@ -5,13 +5,15 @@ import { ApiProperty } from '@nestjs/swagger';
 // 새로운 클립 데이터 구조 DTO
 
 export class NewSideYardDto {
-  @ApiProperty({ example: 'OWN', description: 'OWN(자진영) 또는 OPP(상대진영)' })
+  @ApiProperty({ example: 'OWN', description: 'OWN(자진영) 또는 OPP(상대진영)', nullable: true })
+  @IsOptional()
   @IsString()
-  side: string;
+  side: string | null;
 
-  @ApiProperty({ example: 20, description: '야드 라인 (0-50)' })
+  @ApiProperty({ example: 20, description: '야드 라인 (0-50)', nullable: true })
+  @IsOptional()
   @IsNumber()
-  yard: number;
+  yard: number | null;
 }
 
 export class NumPosDto {
@@ -78,40 +80,46 @@ export class NewClipDto {
   @IsBoolean()
   specialTeam?: boolean | null;
 
-  @ApiProperty({ type: NewSideYardDto, description: '시작 야드' })
+  @ApiProperty({ type: NewSideYardDto, description: '시작 야드', nullable: true })
+  @IsOptional()
   @ValidateNested()
   @Type(() => NewSideYardDto)
-  start: NewSideYardDto;
+  start?: NewSideYardDto | null;
 
-  @ApiProperty({ type: NewSideYardDto, description: '종료 야드' })
+  @ApiProperty({ type: NewSideYardDto, description: '종료 야드', nullable: true })
+  @IsOptional()
   @ValidateNested()
   @Type(() => NewSideYardDto)
-  end: NewSideYardDto;
+  end?: NewSideYardDto | null;
 
   @ApiProperty({ example: 10, description: '획득 야드 (미리 계산됨)', nullable: true })
   @IsOptional()
   @IsNumber()
   gainYard?: number | null;
 
-  @ApiProperty({ type: NumPosDto, description: '첫 번째 선수' })
+  @ApiProperty({ type: NumPosDto, description: '첫 번째 선수', nullable: true })
+  @IsOptional()
   @ValidateNested()
   @Type(() => NumPosDto)
-  car: NumPosDto;
+  car?: NumPosDto | null;
 
-  @ApiProperty({ type: NumPosDto, description: '두 번째 선수' })
+  @ApiProperty({ type: NumPosDto, description: '두 번째 선수', nullable: true })
+  @IsOptional()
   @ValidateNested()
   @Type(() => NumPosDto)
-  car2: NumPosDto;
+  car2?: NumPosDto | null;
 
-  @ApiProperty({ type: NumPosDto, description: '첫 번째 태클러' })
+  @ApiProperty({ type: NumPosDto, description: '첫 번째 태클러', nullable: true })
+  @IsOptional()
   @ValidateNested()
   @Type(() => NumPosDto)
-  tkl: NumPosDto;
+  tkl?: NumPosDto | null;
 
-  @ApiProperty({ type: NumPosDto, description: '두 번째 태클러' })
+  @ApiProperty({ type: NumPosDto, description: '두 번째 태클러', nullable: true })
+  @IsOptional()
   @ValidateNested()
   @Type(() => NumPosDto)
-  tkl2: NumPosDto;
+  tkl2?: NumPosDto | null;
 
   @ApiProperty({
     type: [String],
