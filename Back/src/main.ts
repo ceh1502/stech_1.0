@@ -111,11 +111,11 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
 
   const port = process.env.PORT || 3001;
   
-  // Vercel에서는 serverless function으로 실행되므로 포트 바인딩이 다름
-  if (process.env.NODE_ENV === 'production') {
+  // Vercel 환경 감지
+  if (process.env.VERCEL) {
     await app.init();
     console.log('🚀 NestJS 서버가 Vercel에서 실행 준비 완료');
-    return app;
+    return app.getHttpAdapter().getInstance();
   } else {
     await app.listen(port);
     console.log(`🚀 NestJS 서버가 http://localhost:${port}에서 실행 중입니다.`);
@@ -124,16 +124,13 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
   }
 }
 
-// Vercel Serverless용 export
-module.exports = async function handler(req: any, res: any) {
+// Vercel handler 추가
+export default async function handler(req, res) {
   const app = await bootstrap();
-  const expressApp = app.getHttpAdapter().getInstance();
-  return expressApp(req, res);
-};
+  return app(req, res);
+}
 
-module.exports.default = module.exports;
-
-// 로컬 개발 환경에서만 실행
-if (require.main === module) {
+// 로컬 환경에서만 바로 실행
+if (!process.env.VERCEL) {
   bootstrap();
 }
