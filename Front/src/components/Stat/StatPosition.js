@@ -352,7 +352,8 @@ const statColumns = {
     default: [
       {key: "games", label: "경기 수"},
       {key: "tackles", label: "태클 수"},
-      {key: "sacks", label: "색 수"},
+      {key: "TFL", label: "TFL"},
+      {key: "sacks", label: "색"},
       {key: "forced_fumbles", label: "펌블 유도 수"},
       {key: "fumble_recovery", label: "펌블 리커버리 수"},
       {key: "fumble_recovered_yards", label: "펌블 리커버리 야드"},
@@ -366,7 +367,9 @@ const statColumns = {
     default: [
       {key: "games", label: "경기 수"},
       {key: "tackles", label: "태클 수"},
-      {key: "sacks", label: "색 수"},
+            {key: "TFL", label: "TFL"},
+
+      {key: "sacks", label: "색 "},
       {key: "forced_fumbles", label: "펌블 유도 수"},
       {key: "fumble_recovery", label: "펌블 리커버리 수"},
       {key: "fumble_recovered_yards", label: "펌블 리커버리 야드"},
@@ -380,7 +383,9 @@ const statColumns = {
     defense: [
       {key: "games", label: "경기 수"},
       {key: "tackles", label: "태클 수"},
-      {key: "sacks", label: "색 수"},
+            {key: "TFL", label: "TFL"},
+
+      {key: "sacks", label: "색 "},
       {key: "forced_fumbles", label: "펌블 유도 수"},
       {key: "fumble_recovery", label: "펌블 리커버리 수"},
       {key: "fumble_recovered_yards", label: "펌블 리커버리 야드"},

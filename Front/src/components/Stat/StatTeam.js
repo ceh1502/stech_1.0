@@ -70,49 +70,49 @@ function Dropdown({value, options, onChange, label, placeholder, onTouch}) {
 /* ─────────────────────────  리그 매핑/옵션  ───────────────────────── */
 const TEAM_TO_LEAGUE = {
   // 서울
-  "연세대학교 이글스": "서울",
-  "서울대학교 그린테러스": "서울",
-  "한양대학교 라이온스": "서울",
-  "국민대학교 레이저백스": "서울",
-  "서울시립대학교 시티혹스": "서울",
-  "한국외국어대학교 블랙나이츠": "서울",
-  "건국대학교 레이징불스": "서울",
-  "홍익대학교 카우보이스": "서울",
-  "동국대학교 터스커스": "서울",
-  "고려대학교 타이거스": "서울",
-  "중앙대학교 블루드래곤스": "서울",
-  "숭실대학교 크루세이더스": "서울",
-  "서강대학교 알바트로스": "서울",
-  "경희대학교 커맨더스": "서울",
+  "연세대 이글스": "서울",
+  "서울대 그린테러스": "서울",
+  "한양대 라이온스": "서울",
+  "국민대 레이저백스": "서울",
+  "서울시립대 시티혹스": "서울",
+  "한국외국어대 블랙나이츠": "서울",
+  "건국대 레이징불스": "서울",
+  "홍익대 카우보이스": "서울",
+  "동국대 터스커스": "서울",
+  "고려대 타이거스": "서울",
+  "중앙대 블루드래곤스": "서울",
+  "숭실대 크루세이더스": "서울",
+  "서강대 알바트로스": "서울",
+  "경희대 커맨더스": "서울",
   // 경기·강원
-  "강원대학교 카프라스": "경기강원",
-  "단국대학교 코디악베어스": "경기강원",
-  "성균관대학교 로얄스": "경기강원",
-  "용인대학교 화이트타이거스": "경기강원",
-  "인하대학교 틸 드래곤스": "경기강원",
-  "한림대학교 피닉스": "경기강원",
-  "한신대학교 킬러웨일스": "경기강원",
+  "강원대 카프라스": "경기강원",
+  "단국대 코디악베어스": "경기강원",
+  "성균관대 로얄스": "경기강원",
+  "용인대 화이트타이거스": "경기강원",
+  "인하대 틸 드래곤스": "경기강원",
+  "한림대 피닉스": "경기강원",
+  "한신대 킬러웨일스": "경기강원",
   // 대구·경북
-  "경북대학교 오렌지파이터스": "대구경북",
-  "경일대학교 블랙베어스": "대구경북",
-  "계명대학교 슈퍼라이온스": "대구경북",
-  "금오공과대학교 레이븐스": "대구경북",
-  "대구가톨릭대학교 스커드엔젤스": "대구경북",
-  "대구대학교 플라잉타이거스": "대구경북",
-  "대구한의대학교 라이노스": "대구경북",
-  "동국대학교 화이트엘리펀츠": "대구경북",
-  "영남대학교 페가수스": "대구경북",
-  "한동대학교 홀리램스": "대구경북",
+  "경북대 오렌지파이터스": "대구경북",
+  "경일대 블랙베어스": "대구경북",
+  "계명대 슈퍼라이온스": "대구경북",
+  "금오공과대 레이븐스": "대구경북",
+  "대구가톨릭대 스커드엔젤스": "대구경북",
+  "대구대 플라잉타이거스": "대구경북",
+  "대구한의대 라이노스": "대구경북",
+  "동국대 화이트엘리펀츠": "대구경북",
+  "영남대 페가수스": "대구경북",
+  "한동대 홀리램스": "대구경북",
   // 부산·경남
-  "경성대학교 드래곤스": "부산경남",
-  "동서대학교 블루돌핀스": "부산경남",
-  "동아대학교 레오파즈": "부산경남",
-  "동의대학교 터틀파이터스": "부산경남",
-  "부산대학교 이글스": "부산경남",
-  "부산외국어대학교 토네이도": "부산경남",
-  "신라대학교 데빌스": "부산경남",
-  "울산대학교 유니콘스": "부산경남",
-  "한국해양대학교 바이킹스": "부산경남",
+  "경성대 드래곤스": "부산경남",
+  "동서대 블루돌핀스": "부산경남",
+  "동아대 레오파즈": "부산경남",
+  "동의대 터틀파이터스": "부산경남",
+  "부산대 이글스": "부산경남",
+  "부산외국어대 토네이도": "부산경남",
+  "신라대 데빌스": "부산경남",
+  "울산대 유니콘스": "부산경남",
+  "한국해양대 바이킹스": "부산경남",
   // 사회인
   "군위 피닉스": "사회인",
   "부산 그리폰즈": "사회인",
@@ -147,24 +147,24 @@ const LOWER_IS_BETTER = new Set([
 // 백엔드 팀명을 프론트엔드 팀명으로 매핑
 const BACKEND_TO_FRONTEND_TEAM = {
   // 기존 매핑
-  "한양대": "한양대학교 라이온스",
-  "외대": "한국외국어대학교 블랙나이츠",
-  "한양대 라이온즈": "한양대학교 라이온스", 
-  "한국외대 블랙나이츠": "한국외국어대학교 블랙나이츠",
-  "HYLions": "한양대학교 라이온스",
-  "HFBlackKnights": "한국외국어대학교 블랙나이츠",
+  "한양대": "한양대 라이온스",
+  "외대": "한국외국어대 블랙나이츠",
+  "한양대 라이온즈": "한양대 라이온스", 
+  "한국외대 블랙나이츠": "한국외국어대 블랙나이츠",
+  "HYLions": "한양대 라이온스",
+  "HFBlackKnights": "한국외국어대 블랙나이츠",
   
   // 새로운 백엔드 팀 코드명 매핑 (10개 대학)
-  "KKRagingBulls": "건국대학교 레이징불스",
-  "KHCommanders": "경희대학교 커맨더스", 
-  "SNGreenTerrors": "서울대학교 그린테러스",
-  "USCityhawks": "서울시립대학교 시티혹스",
-  "DGTuskers": "동국대학교 터스커스",
-  "KMRazorbacks": "국민대학교 레이저백스",
-  "YSEagles": "연세대학교 이글스",
-  "KUTigers": "고려대학교 타이거스",
-  "HICowboys": "홍익대학교 카우보이스",
-  "SSCrusaders": "숭실대학교 크루세이더스"
+  "KKRagingBulls": "건국대 레이징불스",
+  "KHCommanders": "경희대 커맨더스", 
+  "SNGreenTerrors": "서울대 그린테러스",
+  "USCityhawks": "서울시립대 시티혹스",
+  "DGTuskers": "동국대 터스커스",
+  "KMRazorbacks": "국민대 레이저백스",
+  "YSEagles": "연세대 이글스",
+  "KUTigers": "고려대 타이거스",
+  "HICowboys": "홍익대 카우보이스",
+  "SSCrusaders": "숭실대 크루세이더스"
 };
 
 // 카테고리별 기본 정렬 키
@@ -396,12 +396,12 @@ export default function StatTeam({data, teams = []}) {
         <table className="stat-table">
           <thead className="table-head">
             <tr className="table-row">
-              <div className="table-row1">
-                <th className="table-header-cell rank-column">순위</th>
-                <th className="table-header-cell team-column">팀</th>
+              <div className="team-table-row1">
+                <th className="team-table-header-cell rank-column">순위</th>
+                <th className="team-table-header-cell team-column">팀</th>
               </div>
               <div
-                className="table-row2"
+                className="team-table-row2"
                 style={{"--cols": currentColumns.length}}
               >
                 {currentColumns.map((col) => {
@@ -411,7 +411,7 @@ export default function StatTeam({data, teams = []}) {
                   return (
                     <th
                       key={col.key}
-                      className={`table-header-cell stat-column sortable
+                      className={`team-table-header-cell stat-column sortable
                         ${isActive ? "active-blue" : ""}
                         ${isPrimary && !isActive ? "primary-orange" : ""}`}
                     >
@@ -453,9 +453,9 @@ export default function StatTeam({data, teams = []}) {
                   className={`team-table-rows ${isSecondDiv ? "is-division2" : ""}`}
                 >
                   <div className="team-table-row1">
-                    <td className="table-cell">{row.__rank}위</td>
+                    <td className="team-table-cell">{row.__rank}위</td>
      
-                    <td className="table-cell team-name">{teamInfo?.logo && (
+                    <td className="team-table-cell team-name">{teamInfo?.logo && (
                         <div className="team-logo">
                           <img
                             src={teamInfo.logo}
@@ -485,13 +485,13 @@ export default function StatTeam({data, teams = []}) {
                               : v.toFixed(1)
                             : v;
                         return (
-                          <td key={col.key} className="table-cell">
+                          <td key={col.key} className="team-table-cell">
                             {shown}
                           </td>
                         );
                       }
                       return (
-                        <td key={col.key} className="table-cell">
+                        <td key={col.key} className="team-table-cell">
                           {v ?? "0"}
                         </td>
                       );
