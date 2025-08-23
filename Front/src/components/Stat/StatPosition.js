@@ -3,7 +3,7 @@ import {RxTriangleDown} from "react-icons/rx";
 import {FaChevronDown} from "react-icons/fa";
 import "./StatPosition.css";
 
-function Dropdown({value, options, onChange, label, placeholder}) {
+function Dropdown({value, options, onChange, label, placeholder, onTouch}) {
   const [open, setOpen] = useState(false);
   const [touched, setTouched] = useState(false);
   const ref = useRef(null);
@@ -23,7 +23,10 @@ function Dropdown({value, options, onChange, label, placeholder}) {
         className={`dropdown-trigger ${open ? "open" : ""} ${
           !touched ? "placeholder" : ""
         }`}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setOpen((o) => !o);
+          if (onTouch) onTouch(); // 터치 콜백 호출
+        }}
       >
         <span className="dropdown-text">
           {touched ? value : placeholder ?? value}
@@ -121,7 +124,6 @@ const TEAM_TO_LEAGUE = {
 };
 
 const LEAGUE_OPTIONS = [
-  "전체",
   ...Array.from(new Set(Object.values(TEAM_TO_LEAGUE))),
 ];
 
@@ -139,7 +141,7 @@ const POSITION_OPTIONS = [
   "DB",
 ];
 
-// “적을수록 좋은” 지표
+// "적을수록 좋은" 지표
 const LOWER_IS_BETTER = new Set([
   "interceptions",
   "sacks",
@@ -376,22 +378,24 @@ const statColumns = {
     ],
   },
 };
+
 export default function StatPosition({data, teams = []}) {
   const [league, setLeague] = useState("서울");
   const [division, setDivision] = useState("1부");
   const [position, setPosition] = useState("QB");
   const [category, setCategory] = useState("pass");
+  const [leagueSelected, setLeagueSelected] = useState(false); // 리그 선택 여부 추적
   const categories = useMemo(
     ()=> POSITION_CATEGORIES[position] || ['default'],
     [position]
   );
 
-  const showDivision = league !== "사회인";
+  const showDivision = league !== "사회인" && leagueSelected;
 
-  // 다단 정렬 상태: [{key, direction}] (direction: 'desc' | 'asc')
-  const [sortChain, setSortChain] = useState([]);
+  // 단일 정렬 상태: {key, direction} | null
+  const [currentSort, setCurrentSort] = useState(null);
 
-  // 포지션/카테고리 변경 시 기본(주황) 정렬 1개를 세팅
+  // 포지션/카테고리 변경 시 기본(주황) 정렬 설정
   useEffect(() => {
     const nextCategory = categories.includes(category)
       ? category
@@ -401,8 +405,11 @@ export default function StatPosition({data, teams = []}) {
     const baseKey =
       PRIMARY_METRIC[position]?.[nextCategory] ??
       PRIMARY_METRIC[position]?.default;
-    if (baseKey) setSortChain([{key: baseKey, direction: "desc"}]);
-    else setSortChain([]);
+    if (baseKey) {
+      setCurrentSort({key: baseKey, direction: "desc"});
+    } else {
+      setCurrentSort(null);
+    }
   }, [position]);
 
   useEffect(() => {
@@ -414,31 +421,25 @@ export default function StatPosition({data, teams = []}) {
     const baseKey =
       PRIMARY_METRIC[position]?.[safeCategory] ??
       PRIMARY_METRIC[position]?.default;
-    if (baseKey) setSortChain([{key: baseKey, direction: "desc"}]);
-    else setSortChain([]);
+    if (baseKey) {
+      setCurrentSort({key: baseKey, direction: "desc"});
+    } else {
+      setCurrentSort(null);
+    }
   }, [category, position]);
 
   const currentColumns = statColumns[position]?.[category] || [];
 
-  // 헤더 클릭 → 미적용 → desc → asc → 해제
+  // 헤더 클릭 → 다른 컬럼이면 새로 desc 적용, 같은 컬럼이면 desc ↔ asc 토글
   const toggleSort = (key) => {
-    setSortChain((prev) => {
-      // 이미 체인에 있나?
-      const idx = prev.findIndex((s) => s.key === key);
-      if (idx === -1) {
-        // 새로 추가(우선순위 가장 높음)
-        return [...prev, {key, direction: "desc"}];
+    setCurrentSort((prev) => {
+      if (!prev || prev.key !== key) {
+        // 새로운 컬럼 클릭
+        return {key, direction: "desc"};
       }
-      const cur = prev[idx];
-      if (cur.direction === "desc") {
-        const next = [...prev];
-        next[idx] = {key, direction: "asc"};
-        return next;
-      }
-      // asc였다면 제거(해제)
-      const next = [...prev];
-      next.splice(idx, 1);
-      return next;
+      
+      // 같은 컬럼 클릭 - desc와 asc 사이에서 토글
+      return {key, direction: prev.direction === "desc" ? "asc" : "desc"};
     });
   };
 
@@ -446,11 +447,9 @@ export default function StatPosition({data, teams = []}) {
     const rows = data.filter((d) => {
       if (d.position !== position) return false;
 
-      // 리그 필터 (전체가 아니면 TEAM_TO_LEAGUE로 팀-리그 매칭)
-      if (league !== "전체") {
-        const teamLeague = TEAM_TO_LEAGUE[d.team] || "";
-        if (teamLeague !== league) return false;
-      }
+      // 리그 필터 (TEAM_TO_LEAGUE로 팀-리그 매칭)
+      const teamLeague = TEAM_TO_LEAGUE[d.team] || "";
+      if (teamLeague !== league) return false;
 
       // 사회인은 디비전 무시, 그 외엔 디비전 일치
       if (league !== "사회인" && d.division !== division) return false;
@@ -458,44 +457,36 @@ export default function StatPosition({data, teams = []}) {
       return true;
     });
 
+    if (!currentSort) return rows;
 
-    if (sortChain.length === 0) return rows;
+    const {key, direction} = currentSort;
+    
+    return [...rows].sort((a, b) => {
+      const av = a[key] ?? 0;
+      const bv = b[key] ?? 0;
+      const base = av < bv ? -1 : av > bv ? 1 : 0;
+      const sign = direction === "asc" ? 1 : -1;
+      const lowBetter = LOWER_IS_BETTER.has(key) ? -1 : 1;
+      return base * sign * lowBetter;
+    });
+  }, [data, league, division, position, currentSort]);
 
-    const cmp = (a, b) => {
-      for (const {key, direction} of sortChain) {
-        const av = a[key] ?? 0;
-        const bv = b[key] ?? 0;
-        const base = av < bv ? -1 : av > bv ? 1 : 0;
-        const sign = direction === "asc" ? 1 : -1;
-        const lowBetter = LOWER_IS_BETTER.has(key) ? -1 : 1;
-        const out = base * sign * lowBetter;
-        if (out !== 0) return out;
-      }
-      return 0;
-    };
+  const rankedPlayers = useMemo(() => {
+    if (!sortedPlayers.length || !currentSort) return sortedPlayers.map((r, i) => ({...r, __rank: i + 1}));
 
-    return [...rows].sort(cmp);
-  }, [data, league, division, position, sortChain]);
+    const {key} = currentSort;
+    let lastValue = null;
+    let currentRank = 0;
+    let seen = 0;
 
-const rankedPlayers = useMemo(() => {
-  if (!sortedPlayers.length) return [];
-
-  const keyOf = (r) => sortChain.map(({ key }) => r[key] ?? 0).join('|');
-
-  let lastKey = null;
-  let currentRank = 0;
-  let seen = 0;
-
-  return sortedPlayers.map((r) => {
-    seen += 1;
-    const k = keyOf(r);
-    if (k !== lastKey) currentRank = seen; // 새 값이면 순위 갱신
-    lastKey = k;
-    return { ...r, __rank: currentRank };
-  });
-}, [sortedPlayers, sortChain]);
-
-
+    return sortedPlayers.map((r) => {
+      seen += 1;
+      const currentValue = r[key] ?? 0;
+      if (currentValue !== lastValue) currentRank = seen;
+      lastValue = currentValue;
+      return { ...r, __rank: currentRank };
+    });
+  }, [sortedPlayers, currentSort]);
 
   return (
     <div className="stat-position">
@@ -509,8 +500,8 @@ const rankedPlayers = useMemo(() => {
             options={LEAGUE_OPTIONS}
             onChange={(v) => {
               setLeague(v);
-              // 디비전만 바뀌면 정렬 체인은 유지
             }}
+            onTouch={() => setLeagueSelected(true)} // 리그 드롭다운을 터치하면 디비전 표시
           />
           {showDivision && (
             <Dropdown
@@ -560,8 +551,8 @@ const rankedPlayers = useMemo(() => {
                 style={{"--cols": currentColumns.length}}
               >
                 {currentColumns.map((col) => {
-                  const active = sortChain.find((s) => s.key === col.key);
-                  const order = active ? active.direction : null;
+                  const isActive = currentSort && currentSort.key === col.key;
+                  const direction = isActive ? currentSort.direction : null;
                   const isPrimary =
                     PRIMARY_METRIC[position]?.[category] === col.key;
 
@@ -569,25 +560,25 @@ const rankedPlayers = useMemo(() => {
                     <th
                       key={col.key}
                       className={`table-header-cell stat-column sortable
-            ${active ? "active-blue" : ""}
-            ${isPrimary && !active ? "primary-orange" : ""}
+            ${isActive ? "active-blue" : ""}
+            ${isPrimary && !isActive ? "primary-orange" : ""}
           `}
                     >
                       <button
                         type="button"
-                        className={`sort-toggle one ${order ?? "none"}`}
+                        className={`sort-toggle one ${direction ?? "none"}`}
                         onClick={() => toggleSort(col.key)}
                         title={
-                          order
+                          direction
                             ? `정렬: ${
-                                order === "desc" ? "내림차순" : "오름차순"
+                                direction === "desc" ? "내림차순" : "오름차순"
                               }`
                             : "정렬 적용"
                         }
                       >
                         <span className="column-label">{col.label}</span>
                         <RxTriangleDown
-                          className={`chev ${order === "asc" ? "asc" : ""}`}
+                          className={`chev ${direction === "asc" ? "asc" : ""} ${isActive ? "active-blue" : ""}`}
                           size={30}
                         />
                       </button>
@@ -603,7 +594,6 @@ const rankedPlayers = useMemo(() => {
               const teamInfo = teams.find((t) => t.name === row.team);
               const rowClass = `table-rows ${division === '2부' ? 'is-division2' : ''}`;
 
-              
               return (
                 <tr key={row.id || row.name} className={`table-rows ${rowClass}`}>
                   <div className="table-row1">

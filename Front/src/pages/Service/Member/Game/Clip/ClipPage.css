@@ -1,0 +1,127 @@
+/* ===== 필터 바 ===== */
+.filterContainer {
+  padding: 1.25rem 3.75rem 0 3.75rem;
+  background: #111214;
+  color: #e5e7eb;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.ff-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* 공용 드롭다운 */
+.ff-dropdown { position: relative; }
+.ff-dd-btn {
+  min-width: 8.125rem;
+  height: 3.0rem;
+  padding: 0 0.875rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  border: 1.287px solid #e4e7e9;
+  background: rgba(110,110,110,0.2);
+  color: #c2c2c2;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+}
+.ff-dd-btn.open,
+.ff-dd-btn:hover {
+  background: rgba(255,255,255,0.14);
+  color: #fff;
+  border-color: #6E6E6E;
+}
+.ff-dd-label { line-height: 1; }
+.ff-dd-icon { font-size: .9rem; }
+
+.ff-dd-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: #1c1d21;
+  border: 1px solid #303136;
+  border-radius: 8px;
+  padding: 6px 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+
+.ff-dd-item {
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  text-align: left;
+  cursor: pointer;
+}
+.ff-dd-item:hover { background: #2a2b30; }
+.ff-dd-item.selected { background: rgba(255,255,255,0.08); color: #fff; }
+
+.ff-dd-avatar {
+  width: 18px; height: 18px; object-fit: contain; margin-right: 8px; vertical-align: middle;
+}
+
+.ff-dd-section { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 0; padding: 4px 0; }
+.ff-dd-actions {
+  display: flex; justify-content: space-between; gap: .5rem; padding: 6px 8px; border-top: 1px solid #303136;
+}
+.ff-dd-clear, .ff-dd-close {
+  padding: 6px 10px; font-size: .9rem; border-radius: 6px; border: 1px solid #2f3237; background: #212227; color: #e6e6e6; cursor: pointer;
+}
+.ff-dd-clear:hover, .ff-dd-close:hover { background: #2a2b30; }
+
+/* 초기화 버튼 */
+.ff-reset {
+  height: 3.0rem;
+  padding: 0 1rem;
+  border-radius: .5rem;
+  border: 1px solid #1A58E0;
+  background: #1A58E0;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 활성 필터 칩 */
+.activeFiltersSection { padding: .75rem 0 1rem 0; }
+.activeFiltersContainer {
+  display: flex; flex-wrap: wrap; gap: .5rem;
+}
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .375rem .625rem;
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,.12);
+}
+.filterChipText { font-size: .9rem; }
+.filterChipClose { font-size: .9rem; opacity: .8; }
+
+/* ===== 리스트 ===== */
+.clip-list {
+  padding: 1.25rem 3.75rem 2rem 3.75rem;
+  background: #111214;
+  color: #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+.clip-row {
+  display: grid;
+  grid-template-columns: 5rem 4rem 5rem 1fr 1fr;
+  align-items: center;
+  gap: .5rem;
+  padding: .75rem 1rem;
+  background: rgba(110,110,110,0.20);
+  border: 1px solid #6E6E6E;
+  border-radius: .5rem;
+}
+.empty { opacity: .7; padding: 1.25rem; }
