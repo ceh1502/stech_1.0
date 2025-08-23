@@ -6,7 +6,6 @@ export const API_CONFIG = {
     LOGIN: '/auth/login',
     SIGNUP: '/auth/signup',
     VERIFY_EMAIL: '/auth/verify-email',
-    PLAYER:'player',
     USER_INFO: '/auth/me',
     VERIFY_EMAIL: '/auth/verify-email',
     RESEND_VERIFICATION: '/auth/resend-verification',
