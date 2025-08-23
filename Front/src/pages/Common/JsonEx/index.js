@@ -24,6 +24,8 @@ export default function JsonEx() {
   const [resultData, setResultData] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [resetStatus, setResetStatus] = useState("idle"); // 'idle' | 'resetting' | 'success' | 'error'
+  const [resetMessage, setResetMessage] = useState("");
 
   const fileInputRef = useRef(null);
   const simulateTimerRef = useRef(null);
@@ -184,6 +186,54 @@ export default function JsonEx() {
   );
 
   // ──────────────────────────────
+  // 스탯 초기화
+  // ──────────────────────────────
+  const handleResetStats = useCallback(async () => {
+    if (!window.confirm('⚠️ 모든 선수 스탯과 팀 스탯을 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다!')) {
+      return;
+    }
+
+    try {
+      setResetStatus("resetting");
+      setResetMessage("");
+
+      // 1. 선수 스탯 초기화
+      await axios.post(
+        `${API_CONFIG.BASE_URL}/player/reset-all-stats`,
+        {},
+        { timeout: API_CONFIG.TIMEOUT }
+      );
+
+      // 2. 팀 스탯 초기화 (2024 시즌)
+      await axios.post(
+        `${API_CONFIG.BASE_URL}/player/reset-team-stats/2024`,
+        {},
+        { timeout: API_CONFIG.TIMEOUT }
+      );
+
+      setResetStatus("success");
+      setResetMessage("모든 스탯이 성공적으로 초기화되었습니다!");
+      
+      // 3초 후 자동으로 상태 리셋
+      setTimeout(() => {
+        setResetStatus("idle");
+        setResetMessage("");
+      }, 3000);
+
+    } catch (error) {
+      setResetStatus("error");
+      const errorMsg = error?.response?.data?.message || error?.message || "초기화 중 오류가 발생했습니다.";
+      setResetMessage(errorMsg);
+      
+      // 5초 후 자동으로 상태 리셋
+      setTimeout(() => {
+        setResetStatus("idle");
+        setResetMessage("");
+      }, 5000);
+    }
+  }, []);
+
+  // ──────────────────────────────
   // 드래그앤드롭
   // ──────────────────────────────
   const onDrop = useCallback(
@@ -247,6 +297,44 @@ export default function JsonEx() {
   // ──────────────────────────────
   return (
     <div>
+      {/* 스탯 초기화 버튼 */}
+      <div style={{ marginBottom: '20px', padding: '15px', border: '2px solid #ff6b6b', borderRadius: '8px', backgroundColor: '#ffe0e0' }}>
+        <h3 style={{ color: '#d63031', marginBottom: '10px' }}>⚠️ 위험한 작업</h3>
+        <p style={{ marginBottom: '15px', color: '#666' }}>
+          모든 선수 스탯과 팀 스탯을 초기화합니다. 이 작업은 되돌릴 수 없습니다!
+        </p>
+        <button
+          type="button"
+          onClick={handleResetStats}
+          disabled={resetStatus === "resetting"}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: resetStatus === "resetting" ? '#ccc' : '#d63031',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: resetStatus === "resetting" ? 'not-allowed' : 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold'
+          }}
+        >
+          {resetStatus === "resetting" ? "🔄 초기화 중..." : "🗑️ 모든 스탯 초기화"}
+        </button>
+        
+        {/* 초기화 상태 메시지 */}
+        {resetMessage && (
+          <div style={{ 
+            marginTop: '10px', 
+            padding: '8px 12px', 
+            borderRadius: '4px',
+            backgroundColor: resetStatus === "success" ? '#d4edda' : '#f8d7da',
+            color: resetStatus === "success" ? '#155724' : '#721c24',
+            border: `1px solid ${resetStatus === "success" ? '#c3e6cb' : '#f5c6cb'}`
+          }}>
+            {resetStatus === "success" ? "✅" : "❌"} {resetMessage}
+          </div>
+        )}
+      </div>
       {/* 파일 업로드 영역 */}
       <div
         className={`upload-zone ${dragOver ? "dragover" : ""}`}

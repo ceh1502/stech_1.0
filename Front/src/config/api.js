@@ -22,7 +22,7 @@ export const API_CONFIG = {
 
 
     UPLOAD_VIDEO: '/video/upload', //<-- 건아 임마를 조져
-    JSON_EX: '/player/update-game-stats',
+    JSON_EX: '/player/analyze-game-data',
 
     //player
     PLAYER_CREATE: '/player',                               // POST

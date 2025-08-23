@@ -93,7 +93,10 @@ export class TeamSeasonStatsDto {
   @ApiProperty({ example: 1.3, description: '경기 당 턴오버 수' })
   turnoversPerGame: number;
 
-  @ApiProperty({ example: '+2', description: '턴오버 비율 (우리 팀 - 상대 팀)' })
+  @ApiProperty({ example: 3.2, description: '턴오버 비율 (%) - 총 공격 기회 대비' })
+  turnoverRate: number;
+
+  @ApiProperty({ example: '+2', description: '턴오버 차이 (상대 팀 턴오버 - 우리 팀 턴오버)' })
   turnoverDifferential: string;
 
   @ApiProperty({ example: '85-650', description: '총 페널티 수-총 페널티 야드' })

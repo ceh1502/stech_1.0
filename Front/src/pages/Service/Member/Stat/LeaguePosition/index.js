@@ -17,11 +17,22 @@ const LeaguePositionPage = () => {
                 
                 if (result.success && result.data) {
                     // 백엔드 데이터를 프론트엔드 형식으로 변환
-                    const transformedData = result.data.map((player, index) => ({
+                    const transformedData = result.data.map((player, index) => {
+                        // 팀명 매핑
+                        const backendTeamName = player.teamId?.teamName || 'Unknown Team';
+                        let frontendTeamName = backendTeamName;
+                        
+                        if (backendTeamName === '한양대 라이온즈') {
+                            frontendTeamName = '한양대학교 라이온스';
+                        } else if (backendTeamName === '한국외대 블랙나이츠') {
+                            frontendTeamName = '한국외국어대학교 블랙나이츠';
+                        }
+
+                        return ({
                         id: player._id,
                         rank: index + 1,
                         name: player.name,
-                        team: player.teamId?.teamName || 'Unknown Team',
+                        team: frontendTeamName,
                         position: player.position,
                         division: '1부', // 모든 선수가 1부리그로 설정됨
                         
@@ -68,7 +79,7 @@ const LeaguePositionPage = () => {
                         punt_return_yards: player.stats?.puntReturnYards || 0,
                         yards_per_punt_return: player.stats?.yardsPerPuntReturn || 0,
                         return_td: player.stats?.returnTouchdowns || 0
-                    }));
+                    })});
                     
                     setData(transformedData);
                 } else {

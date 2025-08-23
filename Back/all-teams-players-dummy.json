@@ -1,0 +1,124 @@
+{
+  "players": [
+    {
+      "playerId": "KK00",
+      "name": "김민수",
+      "jerseyNumber": 0,
+      "position": "QB",
+      "teamName": "KKRagingBulls",
+      "league": "1부",
+      "season": "2024",
+      "height": "180cm",
+      "weight": "75kg",
+      "grade": "1학년"
+    },
+    {
+      "playerId": "KK01",
+      "name": "이정호",
+      "jerseyNumber": 1,
+      "position": "QB",
+      "teamName": "KKRagingBulls",
+      "league": "1부",
+      "season": "2024",
+      "height": "182cm",
+      "weight": "78kg",
+      "grade": "2학년"
+    },
+    {
+      "playerId": "KK02",
+      "name": "박철수",
+      "jerseyNumber": 2,
+      "position": "K",
+      "teamName": "KKRagingBulls",
+      "league": "1부",
+      "season": "2024",
+      "height": "175cm",
+      "weight": "70kg",
+      "grade": "3학년"
+    },
+    {
+      "playerId": "KK03",
+      "name": "최영수",
+      "jerseyNumber": 3,
+      "position": "P",
+      "teamName": "KKRagingBulls",
+      "league": "1부",
+      "season": "2024",
+      "height": "178cm",
+      "weight": "73kg",
+      "grade": "2학년"
+    },
+    {
+      "playerId": "KK04",
+      "name": "정태현",
+      "jerseyNumber": 4,
+      "position": "WR",
+      "teamName": "KKRagingBulls",
+      "league": "1부",
+      "season": "2024",
+      "height": "181cm",
+      "weight": "76kg",
+      "grade": "1학년"
+    },
+    {
+      "playerId": "KK05",
+      "name": "홍길동",
+      "jerseyNumber": 5,
+      "position": "WR",
+      "teamName": "KKRagingBulls",
+      "league": "1부",
+      "season": "2024",
+      "height": "183cm",
+      "weight": "77kg",
+      "grade": "4학년"
+    },
+    {
+      "playerId": "KK06",
+      "name": "윤상민",
+      "jerseyNumber": 6,
+      "position": "WR",
+      "teamName": "KKRagingBulls",
+      "league": "1부",
+      "season": "2024",
+      "height": "179cm",
+      "weight": "74kg",
+      "grade": "2학년"
+    },
+    {
+      "playerId": "KK07",
+      "name": "신동원",
+      "jerseyNumber": 7,
+      "position": "LB",
+      "teamName": "KKRagingBulls",
+      "league": "1부",
+      "season": "2024",
+      "height": "185cm",
+      "weight": "85kg",
+      "grade": "3학년"
+    },
+    {
+      "playerId": "KK08",
+      "name": "류재민",
+      "jerseyNumber": 8,
+      "position": "WR",
+      "teamName": "KKRagingBulls",
+      "league": "1부",
+      "season": "2024",
+      "height": "180cm",
+      "weight": "75kg",
+      "grade": "1학년"
+    },
+    {
+      "playerId": "KK09",
+      "name": "강현우",
+      "jerseyNumber": 9,
+      "position": "WR",
+      "teamName": "KKRagingBulls",
+      "league": "1부",
+      "season": "2024",
+      "height": "182cm",
+      "weight": "76kg",
+      "grade": "2학년"
+    }
+  ]
+}

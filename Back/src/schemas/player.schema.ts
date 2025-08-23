@@ -163,8 +163,11 @@ export class Player {
   @Prop({ trim: true })
   nickname: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Team', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Team' })
   teamId: Types.ObjectId;
+
+  @Prop({ trim: true, required: true })
+  teamName: string;
 
   // 새로 추가된 스탯 필드
   @Prop({ type: PlayerStats, default: () => ({}) })
@@ -184,7 +187,7 @@ export const PlayerSchema = SchemaFactory.createForClass(Player);
 // 인덱스 설정
 PlayerSchema.index({ playerId: 1 });
 PlayerSchema.index({ teamId: 1 });
-PlayerSchema.index({ teamId: 1, jerseyNumber: 1 }, { unique: true });
+PlayerSchema.index({ teamName: 1, jerseyNumber: 1 }, { unique: true });
 
 // 가상 필드: 속한 팀 정보
 PlayerSchema.virtual('team', {
