@@ -7,10 +7,10 @@ import { PLAY_TYPE, SIGNIFICANT_PLAY, PlayAnalysisHelper } from './constants/pla
 
 // Offensive Lineman 스탯 인터페이스 정의
 export interface OLStats {
-  games: number;
-  offensiveSnapsPlayed: number;
-  penalties: number;
-  sacksAllowed: number;
+  gamesPlayed: number; // 경기 수
+  offensive_snaps_played: number; // 공격 플레이 스냅 참여 수
+  penalties: number; // 반칙 수
+  sacks_allowed: number; // 색 허용 수
 }
 
 
@@ -23,10 +23,10 @@ export class OLStatsAnalyzerService {
   // 클립 데이터에서 OL 스탯 추출
   async analyzeOLStats(clips: ClipData[], playerId: string): Promise<OLStats> {
     const olStats: OLStats = {
-      games: 0,
-      offensiveSnapsPlayed: 0,
+      gamesPlayed: 0,
+      offensive_snaps_played: 0,
       penalties: 0,
-      sacksAllowed: 0
+      sacks_allowed: 0
     };
 
     const gameIds = new Set(); // 경기 수 계산용
@@ -58,7 +58,7 @@ export class OLStatsAnalyzerService {
     }
 
     // 계산된 스탯 업데이트
-    olStats.games = gameIds.size;
+    olStats.gamesPlayed = (player.stats?.gamesPlayed || 0) + 1;
 
     return olStats;
   }
@@ -87,14 +87,14 @@ export class OLStatsAnalyzerService {
 
     // Sack - OL이 Sack Allowed 당한 경우
     if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.SACK)) {
-      stats.sacksAllowed += 1;
-      stats.offensiveSnapsPlayed += 1; // Sack도 스냅으로 카운트
+      stats.sacks_allowed += 1;
+      stats.offensive_snaps_played += 1; // Sack도 스냅으로 카운트
     }
 
     // 일반 공격 플레이 - 스냅 카운트
     else if (playType === PLAY_TYPE.PASS || playType === PLAY_TYPE.RUN || 
              playType === PLAY_TYPE.NOPASS || playType === 'PassComplete' || playType === 'PassIncomplete') {
-      stats.offensiveSnapsPlayed += 1;
+      stats.offensive_snaps_played += 1;
     }
 
     // 패널티 상황
@@ -123,7 +123,7 @@ export class OLStatsAnalyzerService {
       if (clip.playType === PLAY_TYPE.PASS || clip.playType === PLAY_TYPE.RUN || 
           clip.playType === PLAY_TYPE.NOPASS || clip.playType === 'PassComplete' || 
           clip.playType === 'PassIncomplete') {
-        stats.offensiveSnapsPlayed += 1;
+        stats.offensive_snaps_played += 1;
       }
     }
   }

@@ -119,15 +119,13 @@ export class LBStatsAnalyzerService {
 
       switch (play) {
         case 'SACK':
-          // Sack할 때는 sacks, tackles, tacklesForLoss 모두 증가
+          // Sack할 때는 sacks, tackles 증가
           stats.sacks += 1;
           stats.tackles += 1;
-          stats.tacklesForLoss += 1;
           break;
 
         case 'TFL':
           // TFL (Tackle For Loss)
-          stats.tacklesForLoss += 1;
           stats.tackles += 1;
           break;
 

@@ -225,12 +225,16 @@ export default function JsonEx() {
         : "게임");
     const date = game?.date || resultData?.date || "";
     const analyzedClips =
+      resultData?.data?.summary?.totalClipsProcessed ||
+      resultData?.summary?.totalClipsProcessed ||
       typeof resultData?.analyzedClips === "number"
         ? resultData.analyzedClips
         : Array.isArray(clips)
         ? clips.length
         : uploadProgress.totalClips;
     const updatedPlayers =
+      resultData?.data?.summary?.successfulPlayers ||
+      resultData?.summary?.successfulPlayers ||
       typeof resultData?.updatedPlayers === "number"
         ? resultData.updatedPlayers
         : uploadProgress.playersFound;

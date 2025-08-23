@@ -6,21 +6,21 @@ import { NewClipDto } from '../common/dto/new-clip.dto';
 
 // TE 스탯 인터페이스 정의 (리턴 스탯 없음)
 export interface TeStats {
-  games: number;
-  target: number;
-  reception: number;
+  gamesPlayed: number;
+  receivingTargets: number;
+  receptions: number;
   receivingYards: number;
-  yardsPerCatch: number;
-  receivingTouchdown: number;
+  yardsPerReception: number;
+  receivingTouchdowns: number;
   longestReception: number;
   receivingFirstDowns: number;
   fumbles: number;
   fumblesLost: number;
-  rushingAttempted: number;
+  rushingAttempts: number;
   rushingYards: number;
   yardsPerCarry: number;
-  rushingTouchdown: number;
-  longestRushing: number;
+  rushingTouchdowns: number;
+  longestRush: number;
 }
 
 
@@ -52,21 +52,21 @@ export class TeStatsAnalyzerService {
   // 클립 데이터에서 TE 스탯 추출
   async analyzeTeStats(clips: NewClipDto[], playerId: string): Promise<TeStats> {
     const teStats: TeStats = {
-      games: 0,
-      target: 0,
-      reception: 0,
+      gamesPlayed: 0,
+      receivingTargets: 0,
+      receptions: 0,
       receivingYards: 0,
-      yardsPerCatch: 0,
-      receivingTouchdown: 0,
+      yardsPerReception: 0,
+      receivingTouchdowns: 0,
       longestReception: 0,
       receivingFirstDowns: 0,
       fumbles: 0,
       fumblesLost: 0,
-      rushingAttempted: 0,
+      rushingAttempts: 0,
       rushingYards: 0,
       yardsPerCarry: 0,
-      rushingTouchdown: 0,
-      longestRushing: 0
+      rushingTouchdowns: 0,
+      longestRush: 0
     };
 
     const gameIds = new Set(); // 경기 수 계산용
@@ -79,7 +79,9 @@ export class TeStatsAnalyzerService {
       throw new Error(`등번호 ${playerId}번 선수를 찾을 수 없습니다.`);
     }
 
-    for (const clip of clips) {
+    for (let i = 0; i < clips.length; i++) {
+      const clip = clips[i];
+      const nextClip = clips[i + 1]; // 다음 클립 참조
       // 게임 ID 추가 (경기 수 계산)
       if (clip.clipKey) {
         gameIds.add(clip.clipKey);
@@ -93,28 +95,28 @@ export class TeStatsAnalyzerService {
       }
 
       // SignificantPlays 기반 스탯 분석
-      this.analyzeSignificantPlaysNew(clip, teStats, playerId);
+      this.analyzeSignificantPlaysNew(clip, teStats, playerId, nextClip);
 
       // 기본 공격 플레이 분석
-      this.analyzeBasicOffensivePlay(clip, teStats, playerId);
+      this.analyzeBasicOffensivePlay(clip, teStats, playerId, nextClip);
     }
 
     // 계산된 스탯 업데이트
-    teStats.games = gameIds.size;
-    teStats.yardsPerCatch = teStats.reception > 0
-      ? Math.round((teStats.receivingYards / teStats.reception) * 10) / 10
+    teStats.gamesPlayed = (player.stats?.gamesPlayed || 0) + 1; // 기존 경기 수에 +1 추가
+    teStats.yardsPerReception = teStats.receptions > 0
+      ? Math.round((teStats.receivingYards / teStats.receptions) * 10) / 10
       : 0;
-    teStats.yardsPerCarry = teStats.rushingAttempted > 0 
-      ? Math.round((teStats.rushingYards / teStats.rushingAttempted) * 10) / 10
+    teStats.yardsPerCarry = teStats.rushingAttempts > 0 
+      ? Math.round((teStats.rushingYards / teStats.rushingAttempts) * 10) / 10
       : 0;
 
     return teStats;
   }
 
   // 리시빙 플레이 분석
-  private analyzeReceivingPlay(clip: NewClipDto, stats: TeStats, yards: number, hasTouchdown: boolean): void {
-    stats.target++; // 타겟된 횟수
-    stats.reception++; // 성공한 리셉션
+  private analyzeReceivingPlay(clip: NewClipDto, stats: TeStats, yards: number, hasTouchdown: boolean, nextClip?: NewClipDto): void {
+    stats.receivingTargets++; // 타겟된 횟수
+    stats.receptions++; // 성공한 리셉션
     stats.receivingYards += yards;
 
     // 최장 리셉션 기록 업데이트
@@ -124,28 +126,28 @@ export class TeStatsAnalyzerService {
 
     // 리시빙 터치다운 체크
     if (hasTouchdown) {
-      stats.receivingTouchdown++;
+      stats.receivingTouchdowns++;
     }
 
-    // 퍼스트 다운 체크 (획득 야드가 필요 야드 이상이면)
-    if (yards >= (clip.toGoYard || 0)) {
+    // 퍼스트 다운 체크 (다음 클립의 다운이 1인 경우)
+    if (nextClip && nextClip.down === '1') {
       stats.receivingFirstDowns++;
     }
   }
 
   // 러싱 플레이 분석 (TE가 러싱하는 경우)
   private analyzeRushingPlay(clip: NewClipDto, stats: TeStats, yards: number, hasTouchdown: boolean): void {
-    stats.rushingAttempted++;
+    stats.rushingAttempts++;
     stats.rushingYards += yards;
 
     // 최장 러싱 기록 업데이트
-    if (yards > stats.longestRushing) {
-      stats.longestRushing = yards;
+    if (yards > stats.longestRush) {
+      stats.longestRush = yards;
     }
 
     // 러싱 터치다운 체크
     if (hasTouchdown) {
-      stats.rushingTouchdown++;
+      stats.rushingTouchdowns++;
     }
   }
 
@@ -159,7 +161,7 @@ export class TeStatsAnalyzerService {
   }
 
   // 새로운 SignificantPlays 기반 스탯 분석
-  private analyzeSignificantPlaysNew(clip: any, stats: TeStats, playerId: string): void {
+  private analyzeSignificantPlaysNew(clip: any, stats: TeStats, playerId: string, nextClip?: any): void {
     if (!clip.significantPlays) return;
 
     const playerNum = parseInt(playerId);
@@ -175,22 +177,24 @@ export class TeStatsAnalyzerService {
         case 'TOUCHDOWN':
           // 플레이 타입에 따라 리시빙 TD 또는 러싱 TD
           if (clip.playType === 'PASS' || clip.playType === 'PassComplete') {
-            stats.receivingTouchdown += 1;
-            stats.target += 1;
-            stats.reception += 1;
+            stats.receivingTouchdowns += 1;
+            stats.receivingTargets += 1;
+            stats.receptions += 1;
             if (clip.gainYard && clip.gainYard >= 0) {
               stats.receivingYards += clip.gainYard;
               if (clip.gainYard > stats.longestReception) {
                 stats.longestReception = clip.gainYard;
               }
             }
+            // 터치다운은 항상 퍼스트 다운으로 간주
+            stats.receivingFirstDowns += 1;
           } else if (clip.playType === 'RUN') {
-            stats.rushingTouchdown += 1;
-            stats.rushingAttempted += 1;
+            stats.rushingTouchdowns += 1;
+            stats.rushingAttempts += 1;
             if (clip.gainYard && clip.gainYard >= 0) {
               stats.rushingYards += clip.gainYard;
-              if (clip.gainYard > stats.longestRushing) {
-                stats.longestRushing = clip.gainYard;
+              if (clip.gainYard > stats.longestRush) {
+                stats.longestRush = clip.gainYard;
               }
             }
           }
@@ -218,7 +222,7 @@ export class TeStatsAnalyzerService {
   }
 
   // 기본 공격 플레이 분석 (일반적인 Pass/Run 상황)
-  private analyzeBasicOffensivePlay(clip: any, stats: TeStats, playerId: string): void {
+  private analyzeBasicOffensivePlay(clip: any, stats: TeStats, playerId: string, nextClip?: any): void {
     const playerNum = parseInt(playerId);
     const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'TE') ||
                                 (clip.car2?.num === playerNum && clip.car2?.pos === 'TE');
@@ -232,26 +236,30 @@ export class TeStatsAnalyzerService {
 
     if (!hasSpecialPlay) {
       // 일반적인 Pass 상황 (타겟 및 리셉션) - TE의 주요 플레이
-      if (clip.playType === 'Pass' || clip.playType === 'PASS') {
-        stats.target += 1;
+      if (clip.playType === 'PASS' || clip.playType === 'PassComplete') {
+        stats.receivingTargets += 1;
         
         // 완성된 패스인지 확인 (gainYard가 0보다 크면 완성)
         if (clip.gainYard && clip.gainYard > 0) {
-          stats.reception += 1;
+          stats.receptions += 1;
           stats.receivingYards += clip.gainYard;
           if (clip.gainYard > stats.longestReception) {
             stats.longestReception = clip.gainYard;
+          }
+          // 퍼스트 다운 체크 (다음 클립의 다운이 1인 경우)
+          if (nextClip && nextClip.down === '1') {
+            stats.receivingFirstDowns += 1;
           }
         }
       }
       
       // 일반적인 Rush 상황 (TE 러싱 - 트릭 플레이 등)
       else if (clip.playType === 'RUN') {
-        stats.rushingAttempted += 1;
+        stats.rushingAttempts += 1;
         if (clip.gainYard && clip.gainYard >= 0) {
           stats.rushingYards += clip.gainYard;
-          if (clip.gainYard > stats.longestRushing) {
-            stats.longestRushing = clip.gainYard;
+          if (clip.gainYard > stats.longestRush) {
+            stats.longestRush = clip.gainYard;
           }
         }
       }
