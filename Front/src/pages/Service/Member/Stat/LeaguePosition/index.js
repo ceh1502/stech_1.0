@@ -20,19 +20,19 @@ const LeaguePositionPage = () => {
                 if (result.success && result.data) {
                     // 백엔드 팀명을 프론트엔드 팀명으로 매핑
                     const BACKEND_TO_FRONTEND_TEAM = {
-                        "KKRagingBulls": "건국대학교 레이징불스",
-                        "KHCommanders": "경희대학교 커맨더스", 
-                        "SNGreenTerrors": "서울대학교 그린테러스",
-                        "USCityhawks": "서울시립대학교 시티혹스",
-                        "DGTuskers": "동국대학교 터스커스",
-                        "KMRazorbacks": "국민대학교 레이저백스",
-                        "YSEagles": "연세대학교 이글스",
-                        "KUTigers": "고려대학교 타이거스",
-                        "HICowboys": "홍익대학교 카우보이스",
-                        "SSCrusaders": "숭실대학교 크루세이더스",
+                        "KKRagingBulls": "건국대 레이징불스",
+                        "KHCommanders": "경희대 커맨더스", 
+                        "SNGreenTerrors": "서울대 그린테러스",
+                        "USCityhawks": "서울시립대 시티혹스",
+                        "DGTuskers": "동국대 터스커스",
+                        "KMRazorbacks": "국민대 레이저백스",
+                        "YSEagles": "연세대 이글스",
+                        "KUTigers": "고려대 타이거스",
+                        "HICowboys": "홍익대 카우보이스",
+                        "SSCrusaders": "숭실대 크루세이더스",
                         // 기존 매핑도 유지
-                        "한양대 라이온즈": "한양대학교 라이온스",
-                        "한국외대 블랙나이츠": "한국외국어대학교 블랙나이츠"
+                        "한양대 라이온즈": "한양대 라이온스",
+                        "한국외대 블랙나이츠": "한국외국어대 블랙나이츠"
                     };
 
                     // 백엔드 데이터를 프론트엔드 형식으로 변환
