@@ -124,51 +124,14 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
   }
 }
 
-// Vercel Serverless Functions를 위한 handler export
-let cachedApp: any;
-
+// Vercel Serverless용 export
 export default async function handler(req: any, res: any) {
-  if (!cachedApp) {
-    const app = await NestFactory.create(AppModule);
-    
-    // CORS 설정
-    app.use(cors({
-      origin: process.env.NODE_ENV === 'production' 
-        ? [process.env.FRONTEND_URL, 'http://3.34.47.22:3000']
-        : true,
-      credentials: true,
-    }));
-
-    // 보안 미들웨어
-    app.use(helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-          imgSrc: ["'self'", "data:", "https:"],
-          fontSrc: ["'self'", "https:", "data:"],
-        },
-      },
-    }));
-
-    // 글로벌 파이프 설정
-    app.useGlobalPipes(new ValidationPipe({
-      transform: true,
-      whitelist: true,
-    }));
-
-    // API 접두사 설정
-    app.setGlobalPrefix('api');
-
-    await app.init();
-    cachedApp = app;
-  }
-  
-  return cachedApp.getHttpAdapter().getInstance()(req, res);
+  const app = await bootstrap();
+  const expressApp = app.getHttpAdapter().getInstance();
+  return expressApp(req, res);
 }
 
 // 로컬 개발 환경에서만 실행
-if (process.env.NODE_ENV !== 'production') {
+if (require.main === module) {
   bootstrap();
 }
