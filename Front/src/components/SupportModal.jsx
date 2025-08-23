@@ -59,7 +59,7 @@ export default function SupportModal({ onClose }) {
             style={{ width:'21.25rem', justifySelf:'center'}} // 원하는 높이로 조절
           />
         </div>
-        <div style={{paddingTop: '6rem'}}>
+        <div style={{paddingTop: '3rem'}}>
           <p style={{color: '#fff', fontSize: '1.875rem', fontFamily:'Inter', lineHeight: 'normal',fontWeight:'600', marginBottom: 24, textAlign: "center"}}>
             불편하시거나 문제가 있으시면 아래 연락처로 문의해주세요.
             <br /> 

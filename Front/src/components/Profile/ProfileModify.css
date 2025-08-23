@@ -1,0 +1,101 @@
+
+.profile-input {
+    width: 100%;
+    background-color: #353535;
+    border: 0.5px solid white;
+    border-radius: 10px;
+    padding: 10px;
+    color: #ffffff;
+    font-size: 16px;
+    margin: 0;
+}
+
+.profile-image-buttons {
+ display: flex;
+ flex-direction: column;
+    align-items: center;
+ width: 100%;
+ gap: 10px; /* 버튼 사이 간격 */
+}
+
+.profile-image-button {
+ padding: 10px 20px;
+ border: none;
+ border-radius: 5px;
+ cursor: pointer;
+ font-size: 14px;
+ color: white;
+ text-align: center;
+ width: 50%;
+ background-color: #1A58E0;
+}
+
+.profile-image-button.delete {
+ background-color: #D32F2F;
+}
+
+
+.profile-image-button#file-upload {
+ background-color: #1A58E0;
+ display: flex;
+ justify-content: center;
+ align-items: center;
+}
+
+
+#file-upload {
+ display: none;
+}
+
+.profile-save-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 10 auto;
+    text-align: center;
+}
+
+.profile-save-button {
+    padding: 15px 60px;
+    border: none;
+    background-color: #1A58E0;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.profile-save-button:hover {
+    background-color: #3f71dd;
+}
+
+.password-change-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+.profile-input-password {
+    width: 100%;
+    align-items: center;
+    background-color: #353535;
+    border: 0.5px solid white;
+    border-radius: 10px;
+    padding: 10px;
+    color: #ffffff;
+    font-size: 16px;
+    margin: 0;
+}
+
+.profilepasswordToggleButton {
+    position: absolute;
+    right: 890px;
+    transform: translateY(10%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+}

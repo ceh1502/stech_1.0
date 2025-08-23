@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "recharts": "^3.1.2",
     "swagger-ui": "^5.27.0",
     "swagger-ui-dist": "^5.27.0",
     "swagger-ui-react": "^5.27.0"

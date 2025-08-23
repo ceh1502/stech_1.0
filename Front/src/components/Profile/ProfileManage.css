@@ -1,0 +1,56 @@
+
+.profile-manage-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 20px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+}
+
+.manage-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+    border-radius: 10px;
+    background-color: #363636;
+}
+
+.manage-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ccc;
+}
+
+.manage-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+.excel-upload-btn {
+  background-color: #ff7b00;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.excel-upload-btn:hover {
+  background-color: #e06d00;
+}
+
+.upload-hint {
+  font-size: 13px;
+  color: hsl(221, 100%, 84%);
+}
+
+.manage-status {
+  font-size: 14px;
+  color: #aaa;
+}

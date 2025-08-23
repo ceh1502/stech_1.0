@@ -8,13 +8,13 @@
     border: 2px solid white;
 }
 
-.profiletab-container {
+.profileformtab-container {
     display: flex;
     width: 100%;
     margin-bottom: 15px;
 }
 
-.profileTitle {
+.profileformTitle {
     flex: 1;
     padding: 5px;
     background-color: transparent;
@@ -34,7 +34,7 @@
     margin-bottom: 30px;
 }
 
-.profileimagePlaceholder {
+.profileformimagePlaceholder {
     width: 250px;
     height: 300px;
     background-color: #C2C2C2;
@@ -45,20 +45,20 @@
     align-items: center;
 }
 
-.profileimagePlaceholder .profileImage {
+.profileformimagePlaceholder .profileImage {
     width: 100%;
     height: 100%;
     object-fit: cover;
     border-radius: 10px;
 }
 
-.profileimageButtons {
+.profileformimageButtons {
     display: flex;
     gap: 30px;
 }
 
-.profileuploadButton,
-.profileremoveButton {
+.profileformuploadButton,
+.profileformremoveButton {
     padding: 8px 20px;
     border: none;
     border-radius: 5px;
@@ -67,12 +67,12 @@
     font-weight: bold;
 }
 
-.profileuploadButton {
+.profileformuploadButton {
     background-color: #1A58E0;
     color: white;
 }
 
-.profileremoveButton {
+.profileformremoveButton {
     background-color: #C2C2C2;
     color: black;
 }
@@ -148,7 +148,7 @@
     cursor: pointer;
 }
 
-.profilesubmitButton {
+.profileformsubmitButton {
     width: 100%;
     padding: 15px;
     background-color: #f77705;
@@ -161,11 +161,11 @@
     margin-top: 20px;
 }
 
-.profile-team {
+.profileform-team {
     position: relative;
 }
 
-.profile-team-select {
+.profileform-team-select {
     background-color: transparent;
     border: 1px solid white;
     border-radius: 10px;
@@ -183,11 +183,11 @@
     background-size: 16px;
 }
 
-.profile-team-select.placeholder {
+.profileform-team-select.placeholder {
     color: #b8b8b8;
 }
 
-.profile-team-options {
+.profileform-team-options {
     position: absolute;
     left: 0;
     right: 0;
@@ -199,7 +199,7 @@
     overflow-y: auto;    
 }
 
-.profile-team-option {
+.profileform-team-option {
     display: flex;
     align-items: center;
     padding: 10px;
@@ -207,16 +207,16 @@
     cursor: pointer;
 }
 
-.profile-team-option:hover {
+.profileform-team-option:hover {
     background-color: #616161;
 }
 
-.profile-team-icon {
+.profileform-team-icon {
     width: 200px;
     height: auto;
 }
 
-.profile-team-no-options {
+.profileform-team-no-options {
     padding: 10px;
     color: #b8b8b8;
     text-align: center;

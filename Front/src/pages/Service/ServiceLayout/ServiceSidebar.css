@@ -157,7 +157,7 @@
 .sectionTitle {
     font-size: 11px;
     font-weight: 600;
-    color: #6b7280;
+    color: #bcbec2;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding: 8px 16px 8px 32px;
@@ -336,7 +336,7 @@
 }
 
 .sidebarFooter .navLink {
-    color: #6b7280;
+    color: #a0a2a8;
     font-size: 13px;
 }
 
