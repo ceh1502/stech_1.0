@@ -1,20 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import './ProfileMain.css';
 import './ProfileModify.css';
-import ChungAng from '../../assets/images/png/TeamLogosPng/ChungAng-Blue-Dragons.png';
-import Dongguk from '../../assets/images/png/TeamLogosPng/Dongguk-Tuskers.png';
-import Hanyang from '../../assets/images/png/TeamLogosPng/Hanyang-Lions.png';
-import Hongik from '../../assets/images/png/TeamLogosPng/Hongik-Cowboys.png';
-import HUFS from '../../assets/images/png/TeamLogosPng/HUFS-Black-Knights.png';
-import Konkuk from '../../assets/images/png/TeamLogosPng/Konkuk-Raging-Bulls.png';
-import Kookmin from '../../assets/images/png/TeamLogosPng/Kookmin-Razorbacks.png';
-import Korea from '../../assets/images/png/TeamLogosPng/Korea-Univeristy-Tigers.png';
-import Kyunghee from '../../assets/images/png/TeamLogosPng/Kyunghee-Commanders.png';
-import Seoul from '../../assets/images/png/TeamLogosPng/Seoul-Vikings.png';
-import SNU from '../../assets/images/png/TeamLogosPng/SNU-Green-Terrors.png';
-import Sogang from '../../assets/images/png/TeamLogosPng/Sogang-Albatross.png';
-import Soongsil from '../../assets/images/png/TeamLogosPng/soongsil-crusaders.png';
-import UOS from '../../assets/images/png/TeamLogosPng/UOS-City-Hawks.png';
-import Yonsei from '../../assets/images/png/TeamLogosPng/Yonsei-Eagles.png';
+import { teamData } from '../../data/teamData'; 
+import Eye from '../../assets/images/png/AuthPng/Eye.png';
+import EyeActive from '../../assets/images/png/AuthPng/EyeActive.png';
 
 // 백엔드 연결 부분
 const fetchProfileDataFromBackend = async () => {
@@ -25,44 +14,25 @@ const fetchProfileDataFromBackend = async () => {
         email: 'test@example.com',
         address1: '서울시 강남구 테헤란로 123',
         address2: '멀티캠퍼스',
-        height: '180cm',
-        weight: '75kg',
+        height: '180',
+        weight: '75',
         position: 'QB',
-        age: '28세',
-        career: '5년',
+        age: '28',
+        career: '5',
         region: 'seoul-first',
         team: 'hanyang'
     };
 };
 
-// 팀 데이터 (예시)
-const teamData = {
-    'seoul-first': [
-        { value: 'yonsei', label: 'YONSEI EAGLES', logo: Yonsei },
-        { value: 'seoul-national', label: 'SNU GREEN TERRORS', logo:  SNU },
-        { value: 'hanyang', label: 'HANYANG LIONS', logo: Hanyang },
-        { value: 'kookmin', label: 'KOOKMIN RAZORBACKS', logo:  Kookmin },
-        { value: 'hufs', label: 'HUFS BLACK KNIGHTS', logo: HUFS },
-        { value: 'uos', label: 'UOS CITY HAWKS', logo:  UOS },
-        { value: 'konkuk', label: 'KONKUK RAGING BULLS', logo: Konkuk },
-        { value: 'hongik', label: 'HONGIK COWBOYS', logo:  Hongik },
-    ],
-    'seoul-second': [
-        { value: 'korea', label: 'KOREA TIGERS', logo:  Korea },
-        { value: 'dongguk', label: 'DONGGUK TESKERS', logo: Dongguk },
-        { value: 'soongsil', label: 'SOONGSIL CRUSADERS', logo:  Soongsil },
-        { value: 'chungang', label: 'CHUNGANG BLUE DRAGONS', logo: ChungAng },
-        { value: 'kyunghee', label: 'KYUNGHEE COMMANDERS', logo:  Kyunghee },
-        { value: 'sogang', label: 'SOGANG ALBATROSS', logo:  Sogang },
-    ],
-    'adult': [
-        { value: 'seoul-vikings', label: 'SEOUL VIKINGS', logo:  Seoul },
-    ],
-};
 
-const ProfileMain = () => {
+const ProfileModify = () => {
     const [profileData, setProfileData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [passwords, setPasswords] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmNewPassword: ''
+    });
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -72,6 +42,95 @@ const ProfileMain = () => {
         };
         loadProfile();
     }, []);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setProfileData(prevData => ({
+            ...prevData,
+            [name]: value
+        }));
+    };
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProfileData(prevData => ({
+                    ...prevData,
+                    profileImage: reader.result
+                }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleImageDelete = () => {
+        setProfileData(prevData => ({
+            ...prevData,
+            profileImage: null
+        }));
+    };
+
+    const handleSave = () => {
+        // 유효성 검사 로직
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(profileData.email)) {
+            alert('유효한 이메일 주소를 입력해주세요.');
+            return;
+        }
+
+        if (isNaN(profileData.height) || isNaN(profileData.weight) || isNaN(profileData.age) || isNaN(profileData.career)) {
+            alert('키, 몸무게, 나이, 경력은 숫자만 입력 가능합니다.');
+            return;
+        }
+
+        // 백엔드에 수정된 데이터 전송 로직
+        console.log("Saving changes...", profileData);
+        alert('변경사항이 저장되었습니다!');
+    };
+
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+
+    // 비밀번호 입력 핸들러
+    const handlePasswordChange = (e) => {
+        const { name, value } = e.target;
+        setPasswords(prevPasswords => ({
+            ...prevPasswords,
+            [name]: value
+        }));
+    };
+
+    // 비밀번호 변경 버튼 클릭 핸들러
+    const handlePasswordSave = () => {
+        const { currentPassword, newPassword, confirmNewPassword } = passwords;
+
+        // 현재 비밀번호 확인 (백엔드 로직 필요)
+        // 이 부분은 실제 백엔드와 통신하여 현재 비밀번호가 맞는지 확인해야 함!!!!!
+        // 현재는 더미로직으로 처리 중이에요
+        // if (currentPassword !== 'dummy_password') {
+        //     alert('현재 비밀번호가 일치하지 않습니다.');
+        //     return;
+        // }
+
+        // 새로운 비밀번호와 확인 비밀번호 일치 여부 확인
+        if (newPassword !== confirmNewPassword) {
+            alert('새로운 비밀번호와 확인 비밀번호가 일치하지 않습니다.');
+            return;
+        }
+
+        // 새로운 비밀번호 최소 8자 확인
+        if (newPassword.length < 8) {
+            alert('새로운 비밀번호는 최소 8자 이상이어야 합니다.');
+            return;
+        }
+
+        // 모든 유효성 검사 통과 시
+        console.log("Password change successful!");
+        alert('비밀번호가 성공적으로 변경되었습니다!');
+    };
 
     const getSelectedTeam = () => {
         if (!profileData || !profileData.team) {
@@ -106,56 +165,63 @@ const ProfileMain = () => {
                 </div>
 
                 <div className="profile-content">
-                    <div className="profile-image-section">
-                        {profileData.profileImage ? (
-                            <img src={profileData.profileImage} alt="Profile" className="profile-image" />
-                        ) : (
-                            <div className="profile-placeholder-text"></div>
-                        )}
+                    <div className="profile-image-modify">
+                        <div className="profile-image-section">
+                            {profileData.profileImage ? (
+                                <img src={profileData.profileImage} alt="Profile" className="profile-image" />
+                            ) : (
+                                <div className="profile-placeholder-text"></div>
+                            )}
+                        </div>
+                        <div className="profile-image-buttons">
+                            <label htmlFor="file-upload" className="profile-image-button">사진 업로드</label>
+                            <input id="file-upload" type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+                            <button onClick={handleImageDelete} className="profile-image-button delete">삭제</button>
+                        </div>
                     </div>
 
                     <div className="profile-info-section">
                         <div className="profile-info-grid">
                             <div className="profile-form-group">
-                                <label>성명</label>
-                                <p className="profile-info-text">{profileData.fullName}</p>
+                                <label >성명</label>
+                                <input id="fullName" name="fullName" type="text" value={profileData.fullName} onChange={handleChange} className="profile-input" />
                             </div>
                             <div className="profile-form-group">
-                                <label>이메일</label>
-                                <p className="profile-info-text">{profileData.email}</p>
+                                <label >이메일</label>
+                                <input id="email" name="email" type="email" value={profileData.email} onChange={handleChange} className="profile-input" />
                             </div>
                             <div className="profile-form-group full-width">
-                                <label>주소</label>
-                                <p className="profile-info-text">{profileData.address1}</p>
-                                <p className="profile-info-text">{profileData.address2}</p>
+                                <label >주소</label>
+                                <input id="address1" name="address1" type="text" value={profileData.address1} onChange={handleChange} className="profile-input" />
+                                <input id="address2" name="address2" type="text" value={profileData.address2} onChange={handleChange} className="profile-input mt-2" />
                             </div>
                         </div>
                         <div className="profile-info-four-column">
                             <div className="profile-form-group">
-                                <label>키</label>
-                                <p className="profile-info-text">{profileData.height}</p>
+                                <label >키(cm)</label>
+                                <input id="height" name="height" type="text" value={profileData.height} onChange={handleChange} className="profile-input" />
                             </div>
                             <div className="profile-form-group">
-                                <label>몸무게</label>
-                                <p className="profile-info-text">{profileData.weight}</p>
+                                <label>몸무게(kg)</label>
+                                <input id="weight" name="weight" type="text" value={profileData.weight} onChange={handleChange} className="profile-input" />
                             </div>
                             <div className="profile-form-group">
                                 <label>나이</label>
-                                <p className="profile-info-text">{profileData.age}</p>
+                                <input id="age" name="age" type="text" value={profileData.age} onChange={handleChange} className="profile-input" />
                             </div>
                             <div className="profile-form-group">
-                                <label>경력</label>
-                                <p className="profile-info-text">{profileData.career}</p>
+                                <label>경력(년)</label>
+                                <input id="career" name="career" type="text" value={profileData.career} onChange={handleChange} className="profile-input" />
                             </div>
                         </div>
                         <div className="profile-info-three-column">
                             <div className="profile-form-group">
                                 <label>포지션</label>
-                                <p className="profile-info-text">{profileData.position}</p>
+                                <input id="position" name="position" type="text" value={profileData.position} onChange={handleChange} className="profile-input" />
                             </div>
                             <div className="profile-form-group">
                                 <label>지역</label>
-                                <p className="profile-info-text">
+                                <p className="profile-input">
                                     {profileData.region === 'seoul-first' ? '서울 1부 리그' :
                                         profileData.region === 'seoul-second' ? '서울 2부 리그' :
                                         profileData.region === 'adult' ? '사회인 리그' : 'N/A'}
@@ -173,28 +239,97 @@ const ProfileMain = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div className="profile-container">
-                <div className="profile-title-container">
-                    <h1 className="profile-title">통산 커리어 스탯</h1>
+                <div className="profile-save-container">
+                    <button onClick={handleSave} className="profile-save-button">변경사항 저장</button>
                 </div>
             </div>
 
             <div className="profile-container">
                 <div className="profile-title-container">
-                    <h1 className="profile-title">올해 시즌 나의 스탯</h1>
+                    <h1 className="profile-title">비밀번호 변경</h1>
+                </div>
+                <div className="password-change-section">
+                    <div className="profile-form-group">
+                        <label >현재 비밀번호</label>
+                        <div className="input-with-icon">
+                            <input
+                                id="currentPassword"
+                                name="currentPassword"
+                                type={showCurrentPassword ? 'text' : 'password'}
+                                value={passwords.currentPassword}
+                                onChange={handlePasswordChange}
+                                className="profile-input-password"
+                            />
+                            <button
+                                type="button"
+                                className="profilepasswordToggleButton"
+                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            >
+                                {showCurrentPassword ? (
+                                    <img src={EyeActive} alt="hide Password" />
+                                ) : (
+                                    <img src={Eye} alt="show Password" />
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="profile-form-group">
+                        <label >새로운 비밀번호</label>
+                        <div className="input-with-icon">
+                            <input
+                                id="newPassword"
+                                name="newPassword"
+                                type={showPassword ? 'text' : 'password'}
+                                value={passwords.newPassword}
+                                onChange={handlePasswordChange}
+                                className="profile-input-password"
+                                placeholder="최소 8자"
+                            />
+                            <button
+                                type="button"
+                                className="profilepasswordToggleButton"
+                                onClick={() => setShowPassword(!showPassword)}
+                            >
+                                {showPassword ? (
+                                    <img src={EyeActive} alt="hide Password" />
+                                ) : (
+                                    <img src={Eye} alt="show Password" />
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="profile-form-group">
+                        <label >새로운 비밀번호 확인</label>
+                        <div className="input-with-icon">
+                            <input
+                                id="confirmNewPassword"
+                                name="confirmNewPassword"
+                                type={showPasswordConfirm ? 'text' : 'password'}
+                                value={passwords.confirmNewPassword}
+                                onChange={handlePasswordChange}
+                                className="profile-input-password"
+                            />
+                            <button
+                                type="button"
+                                className="profilepasswordToggleButton"
+                                onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                            >
+                                {showPasswordConfirm ? (
+                                    <img src={EyeActive} alt="hide Password" />
+                                ) : (
+                                    <img src={Eye} alt="show Password" />
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="profile-save-container">
+                        <button onClick={handlePasswordSave} className="profile-save-button">비밀번호 변경</button>
+                    </div>
                 </div>
             </div>
-
-            <div className="profile-container">
-                <div className="profile-title-container">
-                    <h1 className="profile-title">경기별 스탯</h1>
-                </div>
-            </div> 
 
         </div>
     );
 };
 
-export default ProfileMain;
+export default ProfileModify;

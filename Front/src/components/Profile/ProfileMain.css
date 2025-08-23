@@ -61,6 +61,14 @@
 }
 
 /* 프로필 사진 섹션 */
+.profile-image-modify {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ gap: 20px;
+    margin: auto 0 auto 40px;
+}
+
 .profile-image-section {
     width: 250px;
     height: 300px;
@@ -70,7 +78,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: auto 0 auto 40px;
 }
 
 .profile-image-section .profile-image {
@@ -83,7 +90,7 @@
 /* 프로필 정보 섹션 */
 .profile-info-section {
     flex-grow: 1;
-    display: flex; /* flexbox를 사용해 항목들을 세로로 정렬 */
+    display: flex;
     flex-direction: column;
     gap: 15px;
     margin: 0 40px 20px 0;
@@ -91,13 +98,13 @@
 
 .profile-info-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* 1:1 비율로 2개의 열을 생성합니다. */
+    grid-template-columns: 1fr 1fr;
     gap: 15px;
 }
 
 .profile-info-four-column {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4개의 동일한 너비의 열 생성 */
+    grid-template-columns: repeat(4, 1fr);
     gap: 15px;
 }
 
@@ -115,7 +122,6 @@
     grid-column: 3 / span 1;
 }
 
-/* 모든 입력/출력 그룹 공통 스타일 */
 .profile-form-group {
     display: flex;
     flex-direction: column;
@@ -172,3 +178,4 @@
     color: #fff;
     padding: 20px;
 }
+

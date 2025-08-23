@@ -1,174 +1,62 @@
-.profile-buttons-top {
-    max-width: 1300px;
-    width: 100%;
-    display: flex;
-    gap: 10px;
-    margin: 60px auto;
-    justify-content: space-around;
+/* Clip Card */
+.clip-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background-color: #555;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  font-size: 14px;
 }
 
-.profile-button {
-    padding: 15px 40px;
-    border: none;
-    background-color: #6E6E6E;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
+.clip-card .clip-date {
+  white-space: nowrap;
 }
 
-.profile-button.active {
-    background-color: #1A58E0;
+.clip-card .clip-team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px; /* 팀 이름이 잘리지 않도록 최소 너비 설정 */
 }
 
-
-/* 전체 프로필 컨테이너 */
-.profile-container {
-    max-width: 1200px;
-    width: 100%;
-    margin: 40px auto;
-    padding: 10px;
-    background-color: #262626;
-    color: #fff;
-    border-radius: 10px;
-    border: 0.5px solid white;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+.clip-card .clip-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
-
-/* 프로필 타이틀 */
-.profile-title-container {
-    width: 100%;
-    text-align: center;
-    border-bottom: 0.8px solid #ffffff;
-    padding-bottom: 10px;
+.clip-card .clip-score {
+  background-color: #333;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-weight: bold;
 }
 
-.profile-title {
-    font-size: 20px;
-    font-weight: 400;
-    color: #ffffff;
-    margin: 0;
+.clip-card .clip-report {
+  color: #87CEEB; /* 하늘색 */
+  text-decoration: none;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-/* 프로필 내용 컨테이너 */
-.profile-content {
-    display: flex;
-    gap: 40px;
-    align-items: flex-start;
+.clip-card .clip-report-icon,
+.clip-card .clip-play-icon {
+  font-size: 18px;
+  cursor: pointer;
 }
 
-/* 프로필 사진 섹션 */
-.profile-image-section {
-    width: 250px;
-    height: 300px;
-    flex-shrink: 0;
-    background-color: #C2C2C2;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: auto 0 auto 40px;
+.clip-card .clip-video-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.profile-image-section .profile-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-}
-
-/* 프로필 정보 섹션 */
-.profile-info-section {
-    flex-grow: 1;
-    display: flex; /* flexbox를 사용해 항목들을 세로로 정렬 */
-    flex-direction: column;
-    gap: 15px;
-    margin: 0 40px 20px 0;
-}
-
-.profile-info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* 1:1 비율로 2개의 열을 생성합니다. */
-    gap: 15px;
-}
-
-.profile-info-four-column {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4개의 동일한 너비의 열 생성 */
-    gap: 15px;
-}
-
-.profile-info-three-column {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 15px;
-}
-
-.profile-form-group.position-and-region {
-    grid-column: span 1;
-}
-
-.profile-form-group.team {
-    grid-column: 3 / span 1;
-}
-
-/* 모든 입력/출력 그룹 공통 스타일 */
-.profile-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.profile-form-group.full-width {
-    grid-column: 1 / 3;
-}
-
-.profile-form-group label {
-    font-size: 15px;
-    font-weight: 400;
-    color: #ffffff;
-}
-
-/* 텍스트 표시 스타일 (출력용) */
-.profile-info-text {
-    background-color: #353535;
-    border: 0.5px solid white;
-    border-radius: 10px;
-    padding: 10px;
-    color: #ffffff;
-    font-size: 16px;
-    margin: 0;
-}
-
-/* 팀 정보 표시 스타일 */
-.profile-team-display {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background-color: #353535;
-    border: 0.5px solid white;
-    border-radius: 10px;
-    padding: 0px;
-}
-
-.profile-team-display p {
-    font-size: 16px;
-    margin: 10px;
-    color: white;
-}
-
-.profile-team-icon {
-    width: 30px;
-    height: auto;
-    margin-left: 10px;
-}
-
-/* 로딩/에러 메시지 스타일 */
-.loading-message, .error-message {
-    text-align: center;
-    color: #fff;
-    padding: 20px;
+.clip-card .clip-time {
+  margin-left: auto; /* 마지막 요소를 오른쪽 끝으로 이동 */
+  white-space: nowrap;
 }
