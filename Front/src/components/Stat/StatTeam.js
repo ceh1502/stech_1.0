@@ -144,10 +144,16 @@ const LOWER_IS_BETTER = new Set([
      "penalty-pen_yards", 
      "pen_yards_per_game",
 ])
+// 백엔드 팀명을 프론트엔드 팀명으로 매핑
+const BACKEND_TO_FRONTEND_TEAM = {
+  "한양대": "한양대학교 라이온스",
+  "외대": "한국외국어대학교 블랙나이츠"
+};
+
 // 카테고리별 기본 정렬 키
 const PRIMARY_TEAM_METRIC = {
   '득점/경기': "total_yards",
-  pass: "pass_completions-attempts",
+  pass: "pass_completions-attempts", 
   run: "rushing_attempts",
   스페셜팀: "total_return_yards",
   기타: "turnover_per_game",
@@ -243,7 +249,56 @@ export default function StatTeam({data, teams = []}) {
   const sortedTeams = useMemo(() => {
     const source = Array.isArray(data) ? data : []; // ✅ safety guard
 
-    const rows = source.filter((d) => {
+    // 백엔드 응답을 프론트엔드 컴포넌트가 기대하는 형태로 변환
+    const mappedData = source.map(item => ({
+      team: BACKEND_TO_FRONTEND_TEAM[item.teamName] || item.teamName, // 팀명 매핑
+      division: "1부", // 기본값 (실제로는 팀별로 설정 필요)
+      
+      // 득점/경기 관련
+      points_per_game: item.pointsPerGame,
+      total_points: item.totalPoints,
+      total_touchdowns: item.totalTouchdowns,
+      total_yards: item.totalYards,
+      yards_per_game: item.yardsPerGame,
+      
+      // 러시 관련
+      rushing_attempts: item.rushingAttempts,
+      rushing_yards: item.rushingYards,
+      yards_per_carry: item.yardsPerCarry,
+      rushing_yards_per_game: item.rushingYardsPerGame,
+      rushing_td: item.rushingTouchdowns,
+      
+      // 패스 관련  
+      "pass_completions-attempts": item.passCompletionAttempts,
+      passing_yards: item.passingYards,
+      passing_yards_per_passing_attempts: item.yardsPerPassAttempt,
+      passing_yards_per_game: item.passingYardsPerGame,
+      passing_td: item.passingTouchdowns,
+      interceptions: item.interceptions,
+      
+      // 스페셜팀 관련
+      total_punt_yards: item.totalPuntYards,
+      average_punt_yards: item.averagePuntYards,
+      touchback_percentage: item.puntTouchbackPercentage,
+      "field_goal_completions-attempts": item.fieldGoalStats,
+      yards_per_kick_return: item.averageKickReturnYards,
+      yards_per_punt_return: item.averagePuntReturnYards,
+      total_return_yards: item.totalReturnYards,
+      
+      // 기타
+      "fumble-turnover": item.fumbleStats,
+      turnover_per_game: item.turnoversPerGame,
+      turnover_rate: item.turnoversPerGame, // 같은 값 사용
+      "penalty-pen_yards": item.penaltyStats,
+      pen_yards_per_game: item.penaltyYardsPerGame,
+      
+      // 기본 정보
+      id: item.teamName,
+      season: item.season,
+      gamesPlayed: item.gamesPlayed
+    }));
+
+    const rows = mappedData.filter((d) => {
       // 리그 필터 (TEAM_TO_LEAGUE로 팀-리그 매칭)
       const teamLeague = TEAM_TO_LEAGUE[d.team] || "";
       if (teamLeague !== league) return false;

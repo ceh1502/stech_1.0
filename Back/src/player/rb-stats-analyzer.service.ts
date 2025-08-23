@@ -6,28 +6,28 @@ import { NewClipDto } from '../common/dto/new-clip.dto';
 
 // RB 스탯 인터페이스 정의
 export interface RbStats {
-  games: number;
-  rushingAttempted: number;
+  gamesPlayed: number;
+  rushingAttempts: number;
   rushingYards: number;
   yardsPerCarry: number;
-  rushingTouchdown: number;
-  longestRushing: number;
-  target: number;
-  reception: number;
+  rushingTouchdowns: number;
+  longestRush: number;
+  receivingTargets: number;
+  receptions: number;
   receivingYards: number;
-  yardsPerCatch: number;
-  receivingTouchdown: number;
+  yardsPerReception: number;
+  receivingTouchdowns: number;
   longestReception: number;
   receivingFirstDowns: number;
   fumbles: number;
   fumblesLost: number;
-  kickReturn: number;
+  kickReturns: number;
   kickReturnYards: number;
   yardsPerKickReturn: number;
-  puntReturn: number;
+  puntReturns: number;
   puntReturnYards: number;
   yardsPerPuntReturn: number;
-  returnTouchdown: number;
+  returnTouchdowns: number;
 }
 
 @Injectable()
@@ -58,28 +58,28 @@ export class RbStatsAnalyzerService {
   // 클립 데이터에서 RB 스탯 추출
   async analyzeRbStats(clips: NewClipDto[], playerId: string): Promise<RbStats> {
     const rbStats: RbStats = {
-      games: 0,
-      rushingAttempted: 0,
+      gamesPlayed: 0,
+      rushingAttempts: 0,
       rushingYards: 0,
       yardsPerCarry: 0,
-      rushingTouchdown: 0,
-      longestRushing: 0,
-      target: 0,
-      reception: 0,
+      rushingTouchdowns: 0,
+      longestRush: 0,
+      receivingTargets: 0,
+      receptions: 0,
       receivingYards: 0,
-      yardsPerCatch: 0,
-      receivingTouchdown: 0,
+      yardsPerReception: 0,
+      receivingTouchdowns: 0,
       longestReception: 0,
       receivingFirstDowns: 0,
       fumbles: 0,
       fumblesLost: 0,
-      kickReturn: 0,
+      kickReturns: 0,
       kickReturnYards: 0,
       yardsPerKickReturn: 0,
-      puntReturn: 0,
+      puntReturns: 0,
       puntReturnYards: 0,
       yardsPerPuntReturn: 0,
-      returnTouchdown: 0
+      returnTouchdowns: 0
     };
 
     const gameIds = new Set(); // 경기 수 계산용
@@ -92,7 +92,10 @@ export class RbStatsAnalyzerService {
       throw new Error(`등번호 ${playerId}번 선수를 찾을 수 없습니다.`);
     }
 
-    for (const clip of clips) {
+    for (let i = 0; i < clips.length; i++) {
+      const clip = clips[i];
+      const nextClip = clips[i + 1]; // 다음 클립 참조
+
       // 게임 ID 추가 (경기 수 계산)
       if (clip.clipKey) {
         gameIds.add(clip.clipKey);
@@ -106,25 +109,25 @@ export class RbStatsAnalyzerService {
       }
 
       // SignificantPlays 기반 스탯 분석
-      this.analyzeSignificantPlaysNew(clip, rbStats, playerId);
+      this.analyzeSignificantPlaysNew(clip, rbStats, playerId, nextClip);
 
       // 기본 공격 플레이 분석
-      this.analyzeBasicOffensivePlay(clip, rbStats, playerId);
+      this.analyzeBasicOffensivePlay(clip, rbStats, playerId, nextClip);
     }
 
     // 계산된 스탯 업데이트
-    rbStats.games = gameIds.size;
-    rbStats.yardsPerCarry = rbStats.rushingAttempted > 0 
-      ? Math.round((rbStats.rushingYards / rbStats.rushingAttempted) * 10) / 10
+    rbStats.gamesPlayed = (player.stats?.gamesPlayed || 0) + 1; // 기존 경기 수에 +1 추가
+    rbStats.yardsPerCarry = rbStats.rushingAttempts > 0 
+      ? Math.round((rbStats.rushingYards / rbStats.rushingAttempts) * 10) / 10
       : 0;
-    rbStats.yardsPerCatch = rbStats.reception > 0
-      ? Math.round((rbStats.receivingYards / rbStats.reception) * 10) / 10
+    rbStats.yardsPerReception = rbStats.receptions > 0
+      ? Math.round((rbStats.receivingYards / rbStats.receptions) * 10) / 10
       : 0;
-    rbStats.yardsPerKickReturn = rbStats.kickReturn > 0
-      ? Math.round((rbStats.kickReturnYards / rbStats.kickReturn) * 10) / 10
+    rbStats.yardsPerKickReturn = rbStats.kickReturns > 0
+      ? Math.round((rbStats.kickReturnYards / rbStats.kickReturns) * 10) / 10
       : 0;
-    rbStats.yardsPerPuntReturn = rbStats.puntReturn > 0
-      ? Math.round((rbStats.puntReturnYards / rbStats.puntReturn) * 10) / 10
+    rbStats.yardsPerPuntReturn = rbStats.puntReturns > 0
+      ? Math.round((rbStats.puntReturnYards / rbStats.puntReturns) * 10) / 10
       : 0;
 
     return rbStats;
@@ -132,24 +135,24 @@ export class RbStatsAnalyzerService {
 
   // 러싱 플레이 분석
   private analyzeRushingPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
-    stats.rushingAttempted++;
+    stats.rushingAttempts++;
     stats.rushingYards += yards;
 
     // 최장 러싱 기록 업데이트
-    if (yards > stats.longestRushing) {
-      stats.longestRushing = yards;
+    if (yards > stats.longestRush) {
+      stats.longestRush = yards;
     }
 
     // 러싱 터치다운 체크
     if (hasTouchdown) {
-      stats.rushingTouchdown++;
+      stats.rushingTouchdowns++;
     }
   }
 
   // 리시빙 플레이 분석
-  private analyzeReceivingPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
-    stats.target++; // 타겟된 횟수
-    stats.reception++; // 성공한 리셉션
+  private analyzeReceivingPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean, nextClip?: NewClipDto): void {
+    stats.receivingTargets++; // 타겟된 횟수
+    stats.receptions++; // 성공한 리셉션
     stats.receivingYards += yards;
 
     // 최장 리셉션 기록 업데이트
@@ -159,34 +162,34 @@ export class RbStatsAnalyzerService {
 
     // 리시빙 터치다운 체크
     if (hasTouchdown) {
-      stats.receivingTouchdown++;
+      stats.receivingTouchdowns++;
     }
 
-    // 퍼스트 다운 체크 (획득 야드가 필요 야드 이상이면)
-    if (yards >= (clip.toGoYard || 0)) {
+    // 퍼스트 다운 체크 (다음 클립의 다운이 1인 경우)
+    if (nextClip && nextClip.down === '1') {
       stats.receivingFirstDowns++;
     }
   }
 
   // 킥 리턴 플레이 분석
   private analyzeKickReturnPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
-    stats.kickReturn++;
+    stats.kickReturns++;
     stats.kickReturnYards += yards;
 
     // 리턴 터치다운 체크
     if (hasTouchdown) {
-      stats.returnTouchdown++;
+      stats.returnTouchdowns++;
     }
   }
 
-  // 펀트 리턴 플레이 분석
+  // 펀트 리턴 플래이 분석
   private analyzePuntReturnPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
-    stats.puntReturn++;
+    stats.puntReturns++;
     stats.puntReturnYards += yards;
 
     // 리턴 터치다운 체크
     if (hasTouchdown) {
-      stats.returnTouchdown++;
+      stats.returnTouchdowns++;
     }
   }
 
@@ -200,7 +203,7 @@ export class RbStatsAnalyzerService {
   }
 
   // 새로운 특수 케이스 분석 로직
-  private analyzeSignificantPlaysNew(clip: any, stats: RbStats, playerId: string): void {
+  private analyzeSignificantPlaysNew(clip: any, stats: RbStats, playerId: string, nextClip?: any): void {
     if (!clip.significantPlays) return;
 
     const playerNum = parseInt(playerId);
@@ -215,44 +218,46 @@ export class RbStatsAnalyzerService {
 
     // Rushing Touchdown
     if (significantPlays.includes('TOUCHDOWN') && playType === 'RUN') {
-      stats.rushingTouchdown += 1;
-      stats.rushingAttempted += 1;
+      stats.rushingTouchdowns += 1;
+      stats.rushingAttempts += 1;
       stats.rushingYards += gainYard;
-      if (gainYard > stats.longestRushing) {
-        stats.longestRushing = gainYard;
+      if (gainYard > stats.longestRush) {
+        stats.longestRush = gainYard;
       }
     }
 
     // Receiving Touchdown (Pass로 받은 경우)
     else if (significantPlays.includes('TOUCHDOWN') && 
              (playType === 'PASS' || playType === 'PassComplete')) {
-      stats.receivingTouchdown += 1;
-      stats.target += 1;
-      stats.reception += 1;
+      stats.receivingTouchdowns += 1;
+      stats.receivingTargets += 1;
+      stats.receptions += 1;
       stats.receivingYards += gainYard;
       if (gainYard > stats.longestReception) {
         stats.longestReception = gainYard;
       }
+      // 터치다운은 항상 퍼스트 다운으로 간주
+      stats.receivingFirstDowns += 1;
     }
 
     // Kickoff Return Touchdown
     else if (significantPlays.includes('TOUCHDOWN') && playType === 'Kickoff') {
-      stats.returnTouchdown += 1;
-      stats.kickReturn += 1;
+      stats.returnTouchdowns += 1;
+      stats.kickReturns += 1;
       stats.kickReturnYards += gainYard;
     }
 
     // Punt Return Touchdown
     else if (significantPlays.includes('TOUCHDOWN') && playType === 'Punt') {
-      stats.returnTouchdown += 1;
-      stats.puntReturn += 1;
+      stats.returnTouchdowns += 1;
+      stats.puntReturns += 1;
       stats.puntReturnYards += gainYard;
     }
 
     // Fumble (Run)
     else if (significantPlays.includes('FUMBLE') && playType === 'RUN') {
       stats.fumbles += 1;
-      stats.rushingAttempted += 1;
+      stats.rushingAttempts += 1;
       
       if (significantPlays.includes('FUMBLERECOFF')) {
         // 오펜스 리커버리 시 - 스크리미지 라인 기준 야드 계산
@@ -271,8 +276,8 @@ export class RbStatsAnalyzerService {
     else if (significantPlays.includes('FUMBLE') && 
              (playType === 'PASS' || playType === 'PassComplete')) {
       stats.fumbles += 1;
-      stats.target += 1;
-      stats.reception += 1;
+      stats.receivingTargets += 1;
+      stats.receptions += 1;
       stats.receivingYards += gainYard;
       
       if (significantPlays.includes('FUMBLERECDEF')) {
@@ -282,51 +287,55 @@ export class RbStatsAnalyzerService {
 
     // TFL (Tackle for Loss)
     else if (significantPlays.includes('TFL') && playType === 'RUN') {
-      stats.rushingAttempted += 1;
+      stats.rushingAttempts += 1;
       stats.rushingYards += gainYard; // 음수 야드
     }
 
     // Pass Complete (일반)
     else if (playType === 'PASS' || playType === 'PassComplete') {
-      stats.target += 1;
+      stats.receivingTargets += 1;
       if (gainYard > 0) {
-        stats.reception += 1;
+        stats.receptions += 1;
         stats.receivingYards += gainYard;
         if (gainYard > stats.longestReception) {
           stats.longestReception = gainYard;
+        }
+        // 퍼스트 다운 체크 (다음 클립의 다운이 1인 경우)
+        if (nextClip && nextClip.down === '1') {
+          stats.receivingFirstDowns += 1;
         }
       }
     }
 
     // Pass Incomplete
     else if (playType === 'NOPASS' || playType === 'PassIncomplete') {
-      stats.target += 1;
+      stats.receivingTargets += 1;
     }
 
     // Run (일반)
     else if (playType === 'RUN') {
-      stats.rushingAttempted += 1;
+      stats.rushingAttempts += 1;
       stats.rushingYards += gainYard;
-      if (gainYard > stats.longestRushing) {
-        stats.longestRushing = gainYard;
+      if (gainYard > stats.longestRush) {
+        stats.longestRush = gainYard;
       }
     }
 
     // Kickoff Return (일반)
     else if (playType === 'Kickoff') {
-      stats.kickReturn += 1;
+      stats.kickReturns += 1;
       stats.kickReturnYards += gainYard;
     }
 
     // Punt Return (일반)
     else if (playType === 'Punt') {
-      stats.puntReturn += 1;
+      stats.puntReturns += 1;
       stats.puntReturnYards += gainYard;
     }
   }
 
   // 기본 공격 플레이 분석 (일반적인 Pass/Run 상황)
-  private analyzeBasicOffensivePlay(clip: any, stats: RbStats, playerId: string): void {
+  private analyzeBasicOffensivePlay(clip: any, stats: RbStats, playerId: string, nextClip?: any): void {
     const playerNum = parseInt(playerId);
     const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'RB') ||
                                 (clip.car2?.num === playerNum && clip.car2?.pos === 'RB');
@@ -341,37 +350,41 @@ export class RbStatsAnalyzerService {
     if (!hasSpecialPlay) {
       // 일반적인 Rush 상황
       if (clip.playType === 'RUN') {
-        stats.rushingAttempted += 1;
+        stats.rushingAttempts += 1;
         if (clip.gainYard && clip.gainYard >= 0) {
           stats.rushingYards += clip.gainYard;
-          if (clip.gainYard > stats.longestRushing) {
-            stats.longestRushing = clip.gainYard;
+          if (clip.gainYard > stats.longestRush) {
+            stats.longestRush = clip.gainYard;
           }
         }
       }
       
       // 일반적인 Pass 상황 (타겟 및 리셉션)
       else if (clip.playType === 'PASS' || clip.playType === 'PassComplete') {
-        stats.target += 1;
+        stats.receivingTargets += 1;
         
         // 완성된 패스인지 확인 (gainYard가 0보다 크면 완성)
         if (clip.gainYard && clip.gainYard > 0) {
-          stats.reception += 1;
+          stats.receptions += 1;
           stats.receivingYards += clip.gainYard;
           if (clip.gainYard > stats.longestReception) {
             stats.longestReception = clip.gainYard;
+          }
+          // 퍼스트 다운 체크 (다음 클립의 다운이 1인 경우)
+          if (nextClip && nextClip.down === '1') {
+            stats.receivingFirstDowns += 1;
           }
         }
       }
 
       // 킥오프/펀트 리턴
       else if (clip.playType === 'Kickoff') {
-        stats.kickReturn += 1;
+        stats.kickReturns += 1;
         if (clip.gainYard && clip.gainYard >= 0) {
           stats.kickReturnYards += clip.gainYard;
         }
       } else if (clip.playType === 'Punt') {
-        stats.puntReturn += 1;
+        stats.puntReturns += 1;
         if (clip.gainYard && clip.gainYard >= 0) {
           stats.puntReturnYards += clip.gainYard;
         }

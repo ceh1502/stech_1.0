@@ -352,6 +352,31 @@ export class PlayerService {
    * 게임 전체 데이터로 여러 선수 스탯 업데이트
    */
   async updateGameStats(gameData: { Clips: NewClipDto[] }) {
+    // 게임 고유 식별자 생성 (첫 번째 클립의 정보로)
+    const firstClip = gameData.Clips[0];
+    if (!firstClip) {
+      throw new Error('클립 데이터가 없습니다.');
+    }
+
+    // 게임 식별자 생성 (날짜, 팀 정보 등 조합)
+    const gameId = this.generateGameId(firstClip);
+    
+    // 이미 처리된 게임인지 확인
+    const existingPlayer = await this.playerModel.findOne({ 
+      'processedGames': gameId 
+    });
+
+    if (existingPlayer) {
+      return {
+        success: false,
+        message: `이미 처리된 게임입니다: ${gameId}`,
+        totalPlayers: 0,
+        successfulUpdates: 0,
+        totalClips: gameData.Clips.length,
+        results: []
+      };
+    }
+
     const results = [];
     const processedPlayers = new Set<number>();
 
@@ -387,13 +412,80 @@ export class PlayerService {
     const successCount = results.filter(r => r.success).length;
     const totalClips = gameData.Clips.length;
 
+    // 성공한 선수들에게 처리된 게임 ID 추가
+    if (successCount > 0) {
+      await this.playerModel.updateMany(
+        { jerseyNumber: { $in: Array.from(processedPlayers) } },
+        { $addToSet: { processedGames: gameId } }
+      );
+    }
+
     return {
       success: true,
       message: `게임 데이터 처리 완료: ${successCount}명의 선수 스탯 업데이트`,
+      gameId: gameId,
       totalPlayers: processedPlayers.size,
       successfulUpdates: successCount,
       totalClips: totalClips,
       results: results
     };
+  }
+
+  /**
+   * 게임 고유 식별자 생성
+   */
+  private generateGameId(clip: any): string {
+    // 클립의 다양한 정보로 게임 고유 ID 생성
+    const date = new Date().toISOString().split('T')[0]; // 오늘 날짜
+    const teams = [clip.car?.pos, clip.car2?.pos, clip.tkl?.pos, clip.tkl2?.pos]
+      .filter(Boolean)
+      .sort()
+      .join('-');
+    
+    return `game-${date}-${teams.slice(0, 10)}`;
+  }
+
+  /**
+   * 모든 선수 스탯 초기화
+   */
+  async resetAllPlayersStats() {
+    try {
+      const result = await this.playerModel.updateMany(
+        {},
+        {
+          $unset: { stats: 1 }
+        }
+      );
+
+      return {
+        success: true,
+        message: `${result.modifiedCount}명의 선수 스탯이 초기화되었습니다.`,
+        modifiedCount: result.modifiedCount
+      };
+    } catch (error) {
+      throw new Error(`스탯 초기화 실패: ${error.message}`);
+    }
+  }
+
+  /**
+   * 처리된 게임 목록 초기화 (중복 입력 방지용)
+   */
+  async resetProcessedGames() {
+    try {
+      const result = await this.playerModel.updateMany(
+        {},
+        {
+          $unset: { processedGames: 1 }
+        }
+      );
+
+      return {
+        success: true,
+        message: '처리된 게임 목록이 초기화되었습니다.',
+        modifiedCount: result.modifiedCount
+      };
+    } catch (error) {
+      throw new Error(`처리된 게임 목록 초기화 실패: ${error.message}`);
+    }
   }
 }

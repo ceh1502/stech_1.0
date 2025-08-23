@@ -8,9 +8,11 @@ import cors from 'cors';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // CORS 설정
+  // CORS 설정 (개발 환경에서는 모든 origin 허용)
   app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.NODE_ENV === 'production' 
+      ? [process.env.FRONTEND_URL, 'http://3.34.47.22:3000']
+      : true, // 개발 환경에서는 모든 origin 허용
     credentials: true,
   }));
 

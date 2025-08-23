@@ -1,0 +1,55 @@
+{
+  "clips": [
+    {
+      "clipKey": "HY_vs_HUFS_2024_game1",
+      "offensiveTeam": "Home",
+      "quarter": 1,
+      "down": "1",
+      "toGoYard": 10,
+      "playType": "Run",
+      "specialTeam": false,
+      "start": { "side": "OWN", "yard": 25 },
+      "end": { "side": "OWN", "yard": 30 },
+      "gainYard": 5,
+      "car": { "num": 10, "pos": "QB" },
+      "car2": { "num": null, "pos": null },
+      "tkl": { "num": 34, "pos": "LB" },
+      "tkl2": { "num": null, "pos": null },
+      "significantPlays": [null, null, null, null]
+    },
+    {
+      "clipKey": "HY_vs_HUFS_2024_game1",
+      "offensiveTeam": "Home",
+      "quarter": 1,
+      "down": "2",
+      "toGoYard": 5,
+      "playType": "Pass",
+      "specialTeam": false,
+      "start": { "side": "OWN", "yard": 30 },
+      "end": { "side": "OWN", "yard": 45 },
+      "gainYard": 15,
+      "car": { "num": 10, "pos": "QB" },
+      "car2": { "num": 88, "pos": "WR" },
+      "tkl": { "num": 22, "pos": "DB" },
+      "tkl2": { "num": null, "pos": null },
+      "significantPlays": [null, null, null, null]
+    },
+    {
+      "clipKey": "HY_vs_HUFS_2024_game1",
+      "offensiveTeam": "Home",
+      "quarter": 1,
+      "down": "1",
+      "toGoYard": 10,
+      "playType": "Pass",
+      "specialTeam": false,
+      "start": { "side": "OWN", "yard": 45 },
+      "end": { "side": "OPP", "yard": 30 },
+      "gainYard": 25,
+      "car": { "num": 10, "pos": "QB" },
+      "car2": { "num": 88, "pos": "WR" },
+      "tkl": { "num": null, "pos": null },
+      "tkl2": { "num": null, "pos": null },
+      "significantPlays": ["TOUCHDOWN", null, null, null]
+    }
+  ]
+}

@@ -9,11 +9,11 @@ import { PLAY_TYPE, SIGNIFICANT_PLAY, PlayAnalysisHelper } from './constants/pla
 export interface PunterStats {
   games: number;
   punts: number;
-  averagePuntYards: number;
-  longestPunt: number;
-  puntYards: number;
-  touchbackPercentage: number;
-  puntsInside20Percentage: number;
+  average_punt_yards: number;
+  longest_punt: number;
+  punt_yards: number;
+  touchback_percentage: number;
+  punts_inside_20: number;
 }
 
 
@@ -57,11 +57,11 @@ export class PunterStatsAnalyzerService {
     const punterStats: PunterStats = {
       games: 0,
       punts: 0,
-      averagePuntYards: 0,
-      longestPunt: 0,
-      puntYards: 0,
-      touchbackPercentage: 0,
-      puntsInside20Percentage: 0
+      average_punt_yards: 0,
+      longest_punt: 0,
+      punt_yards: 0,
+      touchback_percentage: 0,
+      punts_inside_20: 0
     };
 
     const gameIds = new Set(); // 경기 수 계산용
@@ -97,14 +97,14 @@ export class PunterStatsAnalyzerService {
     }
 
     // 계산된 스탯 업데이트
-    punterStats.games = gameIds.size;
-    punterStats.averagePuntYards = punterStats.punts > 0
-      ? Math.round((punterStats.puntYards / punterStats.punts) * 10) / 10
+    punterStats.games = (player.stats?.gamesPlayed || 0) + 1;
+    punterStats.average_punt_yards = punterStats.punts > 0
+      ? Math.round((punterStats.punt_yards / punterStats.punts) * 10) / 10
       : 0;
-    punterStats.touchbackPercentage = punterStats.punts > 0
+    punterStats.touchback_percentage = punterStats.punts > 0
       ? Math.round((touchbacks / punterStats.punts) * 100 * 10) / 10
       : 0;
-    punterStats.puntsInside20Percentage = punterStats.punts > 0
+    punterStats.punts_inside_20 = punterStats.punts > 0
       ? Math.round((puntsInside20 / punterStats.punts) * 100 * 10) / 10
       : 0;
 
@@ -122,11 +122,11 @@ export class PunterStatsAnalyzerService {
       clip.EndYard.side
     );
     
-    stats.puntYards += puntYards;
+    stats.punt_yards += puntYards;
 
     // 최장 펀트 기록 업데이트
-    if (puntYards > stats.longestPunt) {
-      stats.longestPunt = puntYards;
+    if (puntYards > stats.longest_punt) {
+      stats.longest_punt = puntYards;
     }
 
     // 터치백 체크

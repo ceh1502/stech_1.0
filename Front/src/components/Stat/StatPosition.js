@@ -70,9 +70,11 @@ const TEAM_TO_LEAGUE = {
   "연세대학교 이글스": "서울",
   "서울대학교 그린테러스": "서울",
   "한양대학교 라이온스": "서울",
+  "한양대 라이온즈": "서울",
   "국민대학교 레이저백스": "서울",
   "서울시립대학교 시티혹스": "서울",
   "한국외국어대학교 블랙나이츠": "서울",
+  "한국외대 블랙나이츠": "서울",
   "건국대학교 레이징불스": "서울",
   "홍익대학교 카우보이스": "서울",
   "동국대학교 터스커스": "서울",
@@ -155,27 +157,27 @@ const LOWER_IS_BETTER = new Set([
 // 포지션/카테고리별 기본(주황) 정렬 컬럼
 const PRIMARY_METRIC = {
   QB: {pass: "passing_yards", run: "rushing_yards"},
-  RB: {run: "rushing_yards", pass: "receiving_yards", ST: "kick_return_yards"},
-  WR: {pass: "receiving_yards", run: "rushing_yards", ST: "kick_return_yards"},
+  RB: {run: "rushing_yards", pass: "receiving_yards", "스페셜팀": "kick_return_yards"},
+  WR: {pass: "receiving_yards", run: "rushing_yards", "스페셜팀": "kick_return_yards"},
   TE: {pass: "receiving_yards", run: "rushing_yards"},
-  K: {ST: "field_goal_percentage"},
-  P: {ST: "average_punt_yards"},
+  K: {"스페셜팀": "field_goal_percentage"},
+  P: {"스페셜팀": "average_punt_yards"},
   OL: {default: "offensive_snaps_played"},
   DL: {default: "sacks"},
   LB: {default: "tackles"},
-  DB: {defense: "interceptions", ST: "kick_return_yards"},
+  DB: {defense: "interceptions", "스페셜팀": "kick_return_yards"},
 };
 const POSITION_CATEGORIES = {
   QB: ["pass", "run"],
-  RB: ["run", "pass", "ST"],
-  WR: ["pass", "run", "ST"],
+  RB: ["run", "pass", "스페셜팀"],
+  WR: ["pass", "run", "스페셜팀"],
   TE: ["pass", "run"],
-  K: ["ST"],
-  P: ["ST"],
+  K: ["스페셜팀"],
+  P: ["스페셜팀"],
   OL: ["default"],
   DL: ["default"],
   LB: ["default"],
-  DB: ["defense", "ST"],
+  DB: ["defense", "스페셜팀"],
 };
 
 const statColumns = {
@@ -223,7 +225,7 @@ const statColumns = {
       {key: "fumbles", label: "펌블 수"},
       {key: "fumbles_lost", label: "펌블 턴오버 수"},
     ],
-    ST: [
+    "스페셜팀": [
       {key: "games", label: "경기 수"},
       {key: "kick_returns", label: "킥 리턴 시도 수"},
       {key: "kick_return_yards", label: "킥 리턴 야드"},
@@ -257,7 +259,7 @@ const statColumns = {
       {key: "fumbles", label: "펌블 수"},
       {key: "fumbles_lost", label: "펌블 턴오버 수"},
     ],
-    ST: [
+    "스페셜팀": [
       {key: "games", label: "경기 수"},
       {key: "kick_returns", label: "킥 리턴 시도 수"},
       {key: "kick_return_yards", label: "킥 리턴 야드"},
@@ -292,7 +294,7 @@ const statColumns = {
     ],
   },
   K: {
-    ST: [
+    "스페셜팀": [
       {key: "games", label: "경기 수"},
       {key: "extra_point_attempts", label: "PAT 시도 수"},
       {key: "extra_point_made", label: "PAT 성공 수"},
@@ -308,7 +310,7 @@ const statColumns = {
     ],
   },
   P: {
-    ST: [
+    "스페셜팀": [
       {key: "games", label: "경기 수"},
       {key: "punts", label: "펀트 수"},
       {key: "average_punt_yards", label: "평균 펀트 거리"},
@@ -366,7 +368,7 @@ const statColumns = {
       {key: "interception_yards", label: "인터셉션 야드"},
       {key: "touchdowns", label: "수비 터치다운"},
     ],
-    ST: [
+    "스페셜팀": [
       {key: "games", label: "경기 수"},
       {key: "kick_returns", label: "킥 리턴 시도 수"},
       {key: "kick_return_yards", label: "킥 리턴 야드"},

@@ -6,20 +6,20 @@ import { NewClipDto } from '../common/dto/new-clip.dto';
 
 // QB 스탯 인터페이스 정의
 export interface QbStats {
-  games: number;
-  passAttempted: number;
-  passCompletion: number;
+  gamesPlayed: number;
+  passingAttempts: number;
+  passingCompletions: number;
   completionPercentage: number;
   passingYards: number;
-  passingTouchdown: number;
-  interception: number;
+  passingTouchdowns: number;
+  passingInterceptions: number;
   longestPass: number;
-  sack: number;
-  rushingAttempted: number;
+  sacks: number;
+  rushingAttempts: number;
   rushingYards: number;
   yardsPerCarry: number;
-  rushingTouchdown: number;
-  longestRushing: number;
+  rushingTouchdowns: number;
+  longestRush: number;
   fumbles: number; // 펌블 추가
 }
 
@@ -57,24 +57,22 @@ export class QbStatsAnalyzerService {
     console.log(`🏈 QB 스탯 분석 시작 - 선수 ID: ${playerId}, 클립 수: ${clips.length}`);
     
     const qbStats: QbStats = {
-      games: 0,
-      passAttempted: 0,
-      passCompletion: 0,
+      gamesPlayed: 0,
+      passingAttempts: 0,
+      passingCompletions: 0,
       completionPercentage: 0,
       passingYards: 0,
-      passingTouchdown: 0,
-      interception: 0,
+      passingTouchdowns: 0,
+      passingInterceptions: 0,
       longestPass: 0,
-      sack: 0,
-      rushingAttempted: 0,
+      sacks: 0,
+      rushingAttempts: 0,
       rushingYards: 0,
       yardsPerCarry: 0,
-      rushingTouchdown: 0,
-      longestRushing: 0,
+      rushingTouchdowns: 0,
+      longestRush: 0,
       fumbles: 0
     };
-
-    const gameIds = new Set(); // 경기 수 계산용
 
     // Player DB에서 해당 선수 정보 미리 조회 (jerseyNumber로 검색)
     const player = await this.playerModel.findOne({ 
@@ -86,11 +84,6 @@ export class QbStatsAnalyzerService {
 
     for (const clip of clips) {
       console.log(`📎 클립 분석 중 - PlayType: ${(clip as any).PlayType}, playType: ${(clip as any).playType}, car: ${JSON.stringify((clip as any).car)}, car2: ${JSON.stringify((clip as any).car2)}`);
-      
-      // 게임 ID 추가 (경기 수 계산)
-      if ((clip as any).clipKey) {
-        gameIds.add((clip as any).clipKey);
-      }
 
       // 이 클립에서 해당 QB가 car 또는 car2에 있는지 확인 (공격수) - 레거시 제거
       
@@ -112,12 +105,12 @@ export class QbStatsAnalyzerService {
     }
 
     // 계산된 스탯 업데이트
-    qbStats.games = gameIds.size;
-    qbStats.completionPercentage = qbStats.passAttempted > 0 
-      ? Math.round((qbStats.passCompletion / qbStats.passAttempted) * 100) 
+    qbStats.gamesPlayed = (player.stats?.gamesPlayed || 0) + 1; // 기존 경기 수에 +1 추가
+    qbStats.completionPercentage = qbStats.passingAttempts > 0 
+      ? Math.round((qbStats.passingCompletions / qbStats.passingAttempts) * 100) 
       : 0;
-    qbStats.yardsPerCarry = qbStats.rushingAttempted > 0
-      ? Math.round((qbStats.rushingYards / qbStats.rushingAttempted) * 10) / 10
+    qbStats.yardsPerCarry = qbStats.rushingAttempts > 0
+      ? Math.round((qbStats.rushingYards / qbStats.rushingAttempts) * 10) / 10
       : 0;
 
     return qbStats;
@@ -156,9 +149,9 @@ export class QbStatsAnalyzerService {
     // Passing Touchdown
     if (significantPlays.includes('TOUCHDOWN') && 
         (playType === 'PASS' || playType === 'PassComplete')) {
-      stats.passingTouchdown += 1;
-      stats.passAttempted += 1;
-      stats.passCompletion += 1;
+      stats.passingTouchdowns += 1;
+      stats.passingAttempts += 1;
+      stats.passingCompletions += 1;
       stats.passingYards += gainYard;
       if (gainYard > stats.longestPass) {
         stats.longestPass = gainYard;
@@ -168,31 +161,31 @@ export class QbStatsAnalyzerService {
     // Rushing Touchdown (QB Scramble/Designed Run)
     else if (significantPlays.includes('TOUCHDOWN') && 
              playType === 'RUN') {
-      stats.rushingTouchdown += 1;
-      stats.rushingAttempted += 1;
+      stats.rushingTouchdowns += 1;
+      stats.rushingAttempts += 1;
       stats.rushingYards += gainYard;
-      if (gainYard > stats.longestRushing) {
-        stats.longestRushing = gainYard;
+      if (gainYard > stats.longestRush) {
+        stats.longestRush = gainYard;
       }
     }
 
     // Sack
     else if (significantPlays.includes('SACK')) {
-      stats.sack += 1;
+      stats.sacks += 1;
     }
 
     // Interception
     else if (significantPlays.includes('INTERCEPT') || significantPlays.includes('INTERCEPTION')) {
-      stats.interception += 1;
-      stats.passAttempted += 1;
+      stats.passingInterceptions += 1;
+      stats.passingAttempts += 1;
     }
 
     // Fumble (Pass)
     else if (significantPlays.includes('FUMBLE') && 
              (playType === 'PASS' || playType === 'PassComplete')) {
       stats.fumbles += 1;
-      stats.passAttempted += 1;
-      stats.passCompletion += 1;
+      stats.passingAttempts += 1;
+      stats.passingCompletions += 1;
       stats.passingYards += gainYard;
     }
 
@@ -200,7 +193,7 @@ export class QbStatsAnalyzerService {
     else if (significantPlays.includes('FUMBLE') && 
              playType === 'RUN') {
       stats.fumbles += 1;
-      stats.rushingAttempted += 1;
+      stats.rushingAttempts += 1;
       
       // 스크리미지 라인 기준으로 야드 계산
       if (significantPlays.includes('FUMBLERECOFF')) {
@@ -217,9 +210,9 @@ export class QbStatsAnalyzerService {
 
     // Pass Complete (일반)
     else if (playType === 'PASS' || playType === 'PassComplete') {
-      stats.passAttempted += 1;
+      stats.passingAttempts += 1;
       if (gainYard > 0) {
-        stats.passCompletion += 1;
+        stats.passingCompletions += 1;
         stats.passingYards += gainYard;
         if (gainYard > stats.longestPass) {
           stats.longestPass = gainYard;
@@ -229,15 +222,15 @@ export class QbStatsAnalyzerService {
 
     // Pass Incomplete
     else if (playType === 'NOPASS' || playType === 'PassIncomplete') {
-      stats.passAttempted += 1;
+      stats.passingAttempts += 1;
     }
 
     // Run (일반)
     else if (playType === 'RUN') {
-      stats.rushingAttempted += 1;
+      stats.rushingAttempts += 1;
       stats.rushingYards += gainYard;
-      if (gainYard > stats.longestRushing) {
-        stats.longestRushing = gainYard;
+      if (gainYard > stats.longestRush) {
+        stats.longestRush = gainYard;
       }
     }
   }
@@ -262,12 +255,12 @@ export class QbStatsAnalyzerService {
     if (!hasSpecialPlay) {
       // 일반적인 Pass 상황
       if (clip.playType === 'PASS') {
-        stats.passAttempted += 1;
-        console.log(`✅ 패스 시도 추가! 총 ${stats.passAttempted}회`);
+        stats.passingAttempts += 1;
+        console.log(`✅ 패스 시도 추가! 총 ${stats.passingAttempts}회`);
         
         // 완성된 패스인지 확인 (gainYard가 0보다 크면 완성)
         if (clip.gainYard && clip.gainYard > 0) {
-          stats.passCompletion += 1;
+          stats.passingCompletions += 1;
           stats.passingYards += clip.gainYard;
           console.log(`✅ 패스 완성! ${clip.gainYard}야드 추가, 총 ${stats.passingYards}야드`);
           if (clip.gainYard > stats.longestPass) {
@@ -278,13 +271,13 @@ export class QbStatsAnalyzerService {
       
       // 일반적인 Run 상황 (QB 스크램블 등)
       else if (clip.playType === 'RUN') {
-        stats.rushingAttempted += 1;
-        console.log(`✅ 러시 시도 추가! 총 ${stats.rushingAttempted}회`);
+        stats.rushingAttempts += 1;
+        console.log(`✅ 러시 시도 추가! 총 ${stats.rushingAttempts}회`);
         if (clip.gainYard && clip.gainYard >= 0) {
           stats.rushingYards += clip.gainYard;
           console.log(`✅ 러시 야드 추가! ${clip.gainYard}야드, 총 ${stats.rushingYards}야드`);
-          if (clip.gainYard > stats.longestRushing) {
-            stats.longestRushing = clip.gainYard;
+          if (clip.gainYard > stats.longestRush) {
+            stats.longestRush = clip.gainYard;
           }
         }
       } else {

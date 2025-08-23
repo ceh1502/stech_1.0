@@ -15,6 +15,7 @@ import { DLStatsAnalyzerService } from './dl-stats-analyzer.service';
 import { LBStatsAnalyzerService } from './lb-stats-analyzer.service';
 import { DBStatsAnalyzerService } from './db-stats-analyzer.service';
 import { StatsManagementService } from '../common/services/stats-management.service';
+import { TeamModule } from '../team/team.module';
 import { Player, PlayerSchema } from '../schemas/player.schema';
 import { PlayerNew, PlayerNewSchema } from '../schemas/player-new.schema';
 import { Team, TeamSchema } from '../schemas/team.schema';
@@ -32,6 +33,7 @@ import { CareerStats, CareerStatsSchema } from '../schemas/career-stats.schema';
       { name: SeasonStats.name, schema: SeasonStatsSchema },
       { name: CareerStats.name, schema: CareerStatsSchema },
     ]),
+    TeamModule
   ],
   controllers: [PlayerController, PlayerNewController],
   providers: [

@@ -20,6 +20,7 @@ import {
 } from '../common/dto/player.dto';
 import { AnalyzeNewClipsDto } from '../common/dto/new-clip.dto';
 import { StatsManagementService } from '../common/services/stats-management.service';
+import { TeamSeasonStatsAnalyzerService } from '../team/team-season-stats-analyzer.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { User } from '../common/decorators/user.decorator';
 
@@ -28,7 +29,8 @@ import { User } from '../common/decorators/user.decorator';
 export class PlayerController {
   constructor(
     private readonly playerService: PlayerService,
-    private readonly statsManagementService: StatsManagementService
+    private readonly statsManagementService: StatsManagementService,
+    private readonly teamSeasonStatsService: TeamSeasonStatsAnalyzerService
   ) {}
 
   @Post()
@@ -136,7 +138,32 @@ export class PlayerController {
     @Body() analyzeNewClipsDto: AnalyzeNewClipsDto
   ) {
     const jerseyNum = parseInt(jerseyNumber);
-    return this.playerService.updatePlayerStatsFromNewClips(jerseyNum, analyzeNewClipsDto.clips);
+    const result = await this.playerService.updatePlayerStatsFromNewClips(jerseyNum, analyzeNewClipsDto.clips);
+    
+    // 팀 스탯도 함께 업데이트
+    try {
+      if (analyzeNewClipsDto.clips && analyzeNewClipsDto.clips.length > 0) {
+        const gameKey = analyzeNewClipsDto.clips[0]?.clipKey || 'unknown';
+        const season = '2024'; // 현재 시즌
+        
+        // 더미 데이터로 한양대 vs 외대 설정
+        const homeTeam = '한양대';
+        const awayTeam = '외대';
+        
+        await this.teamSeasonStatsService.analyzeAndUpdateTeamStats(
+          analyzeNewClipsDto.clips, 
+          gameKey,
+          homeTeam,
+          awayTeam,
+          season
+        );
+      }
+    } catch (error) {
+      console.log('팀 스탯 업데이트 중 오류 발생:', error);
+      // 팀 스탯 오류가 있어도 개인 스탯 결과는 반환
+    }
+    
+    return result;
   }
 
   @Post('jersey/:jerseyNumber/analyze-new-clips-only')
@@ -162,9 +189,10 @@ export class PlayerController {
   })
   @ApiResponse({ status: 200, description: '게임 스탯 업데이트 성공' })
   async updateGameStats(
-    @Body() gameData: { Clips: AnalyzeNewClipsDto }
+    @Body() gameData: any
   ) {
-    return this.playerService.updateGameStats({ Clips: gameData.Clips.clips });
+    console.log('받은 데이터 구조:', JSON.stringify(gameData, null, 2));
+    return this.playerService.updateGameStats(gameData);
   }
 
   // === 3단계 스탯 관리 시스템 엔드포인트 ===
@@ -268,5 +296,48 @@ export class PlayerController {
       batchData.awayTeam,
       batchData.playersStats
     );
+  }
+
+  @Post('reset-all-stats')
+  @ApiOperation({ 
+    summary: '모든 선수 스탯 초기화',
+    description: '데이터베이스의 모든 선수 스탯을 초기화합니다.'
+  })
+  @ApiResponse({ status: 200, description: '스탯 초기화 성공' })
+  async resetAllPlayersStats() {
+    return this.playerService.resetAllPlayersStats();
+  }
+
+  @Post('reset-processed-games')
+  @ApiOperation({ 
+    summary: '처리된 게임 목록 초기화',
+    description: 'JSON 중복 입력 방지를 위한 처리된 게임 목록을 초기화합니다.'
+  })
+  @ApiResponse({ status: 200, description: '처리된 게임 목록 초기화 성공' })
+  async resetProcessedGames() {
+    return this.playerService.resetProcessedGames();
+  }
+
+  @Post('reset-team-stats/:season')
+  @ApiOperation({ 
+    summary: '🔄 팀 시즌 스탯 초기화',
+    description: '특정 시즌의 모든 팀 스탯을 초기화합니다. (개발/테스트용)'
+  })
+  @ApiResponse({ status: 200, description: '팀 시즌 스탯 초기화 성공' })
+  async resetTeamStats(@Param('season') season: string = '2024') {
+    try {
+      const result = await this.teamSeasonStatsService.resetTeamSeasonStats(season);
+      
+      return {
+        ...result,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '팀 시즌 스탯 초기화 중 오류가 발생했습니다',
+        timestamp: new Date().toISOString()
+      };
+    }
   }
 }

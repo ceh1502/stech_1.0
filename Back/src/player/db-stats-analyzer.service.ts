@@ -4,19 +4,27 @@ import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
 import { NewClipDto } from '../common/dto/new-clip.dto';
 
-// Defensive Back 스탯 인터페이스 정의 (DL, LB와 동일)
+// Defensive Back 스탯 인터페이스 정의
 export interface DBStats {
-  games: number;
-  tackles: number;
-  sacks: number;
-  tacklesForLoss: number; // TFL 추가
-  forcedFumbles: number;
-  fumbleRecovery: number;
-  fumbleRecoveredYards: number;
-  passDefended: number;
-  interception: number;
-  interceptionYards: number;
-  touchdown: number;
+  // Defense category
+  gamesPlayed: number; // 경기 수
+  tackles: number; // 태클 수
+  sacks: number; // 색 수
+  forced_fumbles: number; // 펀블 유도 수
+  fumble_recovery: number; // 펀블 리커버리 수
+  fumble_recovered_yards: number; // 펀블 리커버리 야드
+  pass_defended: number; // 패스를 막은 수
+  interceptions: number; // 인터셉션
+  interception_yards: number; // 인터셉션 야드
+  touchdowns: number; // 수비 터치다운
+  // ST category
+  kick_returns: number; // 킥 리턴 시도 수
+  kick_return_yards: number; // 킥 리턴 야드
+  yards_per_kick_return: number; // 킥 리턴 시도 당 리턴 야드
+  punt_returns: number; // 펐트 리턴 시도 수
+  punt_return_yards: number; // 펐트 리턴 야드
+  yards_per_punt_return: number; // 펐트 리턴 시도 당 리턴 야드
+  return_td: number; // 리턴 터치다운
 }
 
 
@@ -48,17 +56,23 @@ export class DBStatsAnalyzerService {
   // 클립 데이터에서 DB 스탯 추출
   async analyzeDBStats(clips: NewClipDto[], playerId: string): Promise<DBStats> {
     const dbStats: DBStats = {
-      games: 0,
+      gamesPlayed: 0,
       tackles: 0,
       sacks: 0,
-      tacklesForLoss: 0,
-      forcedFumbles: 0,
-      fumbleRecovery: 0,
-      fumbleRecoveredYards: 0,
-      passDefended: 0,
-      interception: 0,
-      interceptionYards: 0,
-      touchdown: 0
+      forced_fumbles: 0,
+      fumble_recovery: 0,
+      fumble_recovered_yards: 0,
+      pass_defended: 0,
+      interceptions: 0,
+      interception_yards: 0,
+      touchdowns: 0,
+      kick_returns: 0,
+      kick_return_yards: 0,
+      yards_per_kick_return: 0,
+      punt_returns: 0,
+      punt_return_yards: 0,
+      yards_per_punt_return: 0,
+      return_td: 0
     };
 
     const gameIds = new Set(); // 경기 수 계산용
@@ -77,23 +91,36 @@ export class DBStatsAnalyzerService {
         gameIds.add(clip.clipKey);
       }
 
-      // 이 클립에서 해당 DB가 tkl 또는 tkl2에 있는지 확인 (수비수)
-      // NewClipDto 구조 지원 - tkl, tkl2에서 찾기
+      // 이 클립에서 해당 DB가 참여했는지 확인 (수비 또는 스페셜팀)
       const isDefender = this.isPlayerInDefense(clip, playerId);
+      const isSTPlayer = this.isPlayerInSpecialTeams(clip, playerId);
       
-      if (!isDefender) {
-        continue; // 이 클립은 해당 DB 플래이가 아님
+      if (!isDefender && !isSTPlayer) {
+        continue; // 이 클립은 해당 DB 플레이가 아님
       }
 
-      // SignificantPlays 기반 스탯 분석
-      this.analyzeSignificantPlaysNew(clip, dbStats, playerId);
-
-      // 기본 디펜시브 플레이 분석
-      this.analyzeBasicDefensivePlay(clip, dbStats, playerId);
+      // 수비 플레이 분석
+      if (isDefender) {
+        // SignificantPlays 기반 스탯 분석
+        this.analyzeSignificantPlaysNew(clip, dbStats, playerId);
+        // 기본 디펜시브 플레이 분석
+        this.analyzeBasicDefensivePlay(clip, dbStats, playerId);
+      }
+      
+      // 스페셜팀 플레이 분석
+      if (isSTPlayer) {
+        this.analyzeSpecialTeamsPlay(clip, dbStats, playerId);
+      }
     }
 
     // 계산된 스탯 업데이트
-    dbStats.games = gameIds.size;
+    dbStats.gamesPlayed = (player.stats?.gamesPlayed || 0) + 1;
+    dbStats.yards_per_kick_return = dbStats.kick_returns > 0
+      ? Math.round((dbStats.kick_return_yards / dbStats.kick_returns) * 10) / 10
+      : 0;
+    dbStats.yards_per_punt_return = dbStats.punt_returns > 0
+      ? Math.round((dbStats.punt_return_yards / dbStats.punt_returns) * 10) / 10
+      : 0;
 
     return dbStats;
   }
@@ -120,46 +147,44 @@ export class DBStatsAnalyzerService {
 
       switch (play) {
         case 'SACK':
-          // Sack할 때는 sacks, tackles, tacklesForLoss 모두 증가
+          // Sack할 때는 sacks, tackles 증가
           stats.sacks += 1;
           stats.tackles += 1;
-          stats.tacklesForLoss += 1;
           break;
 
         case 'TFL':
           // TFL (Tackle For Loss)
-          stats.tacklesForLoss += 1;
           stats.tackles += 1;
           break;
 
         case 'FUMBLE':
           // 펌블을 유발한 경우
-          stats.forcedFumbles += 1;
+          stats.forced_fumbles += 1;
           stats.tackles += 1; // 펌블 상황에서도 tackle 증가
           break;
 
         case 'FUMBLERECDEF':
           // 수비가 펌블을 리커버한 경우
-          stats.fumbleRecovery += 1;
+          stats.fumble_recovery += 1;
           stats.tackles += 1;
           // 펌블 리커버 야드 계산
           if (clip.gainYard && clip.gainYard > 0) {
-            stats.fumbleRecoveredYards += clip.gainYard;
+            stats.fumble_recovered_yards += clip.gainYard;
           }
           break;
 
         case 'INTERCEPT':
           // 인터셉션한 경우
-          stats.interception += 1;
+          stats.interceptions += 1;
           // 인터셉션 리턴 야드 계산
           if (clip.gainYard && clip.gainYard > 0) {
-            stats.interceptionYards += clip.gainYard;
+            stats.interception_yards += clip.gainYard;
           }
           break;
 
         case 'TOUCHDOWN':
           // 수비 터치다운 (인터셉션 리턴 TD, 펌블 리커버 TD 등)
-          stats.touchdown += 1;
+          stats.touchdowns += 1;
           break;
       }
     });
@@ -190,7 +215,49 @@ export class DBStatsAnalyzerService {
       const isIncomplete = clip.significantPlays?.includes('INCOMPLETE') || 
                           clip.gainYard === 0;
       if (isIncomplete && isThisPlayerTackler) {
-        stats.passDefended += 1;
+        stats.pass_defended += 1;
+      }
+    }
+  }
+
+  // NewClipDto에서 해당 선수가 특수팀에 참여했는지 확인
+  private isPlayerInSpecialTeams(clip: any, playerId: string): boolean {
+    // car, car2에서 해당 선수 찾기 (킥/펀트 리턴)
+    const playerNum = parseInt(playerId);
+    
+    return ((clip.car?.num === playerNum && clip.car?.pos === 'DB') ||
+            (clip.car2?.num === playerNum && clip.car2?.pos === 'DB')) &&
+           (clip.playType === 'Kickoff' || clip.playType === 'Punt');
+  }
+
+  // 특수팀 플레이 분석
+  private analyzeSpecialTeamsPlay(clip: any, stats: DBStats, playerId: string): void {
+    const playerNum = parseInt(playerId);
+    const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'DB') ||
+                                (clip.car2?.num === playerNum && clip.car2?.pos === 'DB');
+
+    if (!isThisPlayerCarrier) return;
+
+    const gainYard = clip.gainYard || 0;
+    const hasTouchdown = clip.significantPlays?.includes('TOUCHDOWN');
+
+    // 킥오프 리턴
+    if (clip.playType === 'Kickoff') {
+      stats.kick_returns += 1;
+      stats.kick_return_yards += gainYard;
+      
+      if (hasTouchdown) {
+        stats.return_td += 1;
+      }
+    }
+    
+    // 펀트 리턴
+    else if (clip.playType === 'Punt') {
+      stats.punt_returns += 1;
+      stats.punt_return_yards += gainYard;
+      
+      if (hasTouchdown) {
+        stats.return_td += 1;
       }
     }
   }
