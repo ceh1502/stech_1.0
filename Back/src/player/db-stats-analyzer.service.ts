@@ -127,11 +127,10 @@ export class DBStatsAnalyzerService {
 
   // NewClipDto에서 해당 선수가 수비에 참여했는지 확인
   private isPlayerInDefense(clip: any, playerId: string): boolean {
-    // tkl, tkl2에서 해당 선수 찾기
+    // tkl, tkl2에서 해당 선수 찾기 (DB 분석기에서 호출되므로 포지션 무관하게 수비 참여만 확인)
     const playerNum = parseInt(playerId);
     
-    return (clip.tkl?.num === playerNum && clip.tkl?.pos === 'DB') ||
-           (clip.tkl2?.num === playerNum && clip.tkl2?.pos === 'DB');
+    return (clip.tkl?.num === playerNum) || (clip.tkl2?.num === playerNum);
   }
 
   // 새로운 SignificantPlays 기반 스탯 분석
@@ -139,8 +138,7 @@ export class DBStatsAnalyzerService {
     if (!clip.significantPlays) return;
 
     const playerNum = parseInt(playerId);
-    const isThisPlayerTackler = (clip.tkl?.num === playerNum && clip.tkl?.pos === 'DB') ||
-                                (clip.tkl2?.num === playerNum && clip.tkl2?.pos === 'DB');
+    const isThisPlayerTackler = (clip.tkl?.num === playerNum) || (clip.tkl2?.num === playerNum);
 
     clip.significantPlays.forEach((play: string | null) => {
       if (!play || !isThisPlayerTackler) return;
@@ -193,8 +191,7 @@ export class DBStatsAnalyzerService {
   // 기본 디펜시브 플레이 분석 (일반적인 Run/Pass 상황에서의 tackle)
   private analyzeBasicDefensivePlay(clip: any, stats: DBStats, playerId: string): void {
     const playerNum = parseInt(playerId);
-    const isThisPlayerTackler = (clip.tkl?.num === playerNum && clip.tkl?.pos === 'DB') ||
-                                (clip.tkl2?.num === playerNum && clip.tkl2?.pos === 'DB');
+    const isThisPlayerTackler = (clip.tkl?.num === playerNum) || (clip.tkl2?.num === playerNum);
 
     if (!isThisPlayerTackler) return;
 

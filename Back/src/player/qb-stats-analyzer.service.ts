@@ -137,10 +137,11 @@ export class QbStatsAnalyzerService {
     if (!clip.significantPlays || !Array.isArray(clip.significantPlays)) return;
 
     const playerNum = parseInt(playerId);
-    const isQB = (clip.car?.num === playerNum && clip.car?.pos === 'QB') ||
-                 (clip.car2?.num === playerNum && clip.car2?.pos === 'QB');
+    
+    // QB 분석기에서 호출되므로 해당 선수가 QB임을 가정하고, 클립에 참여했는지만 확인
+    const isPlayerInClip = (clip.car?.num === playerNum) || (clip.car2?.num === playerNum);
 
-    if (!isQB) return;
+    if (!isPlayerInClip) return;
 
     const significantPlays = clip.significantPlays;
     const playType = clip.playType;
@@ -238,12 +239,13 @@ export class QbStatsAnalyzerService {
   // 기본 공격 플레이 분석 (일반적인 Pass/Run 상황)
   private analyzeBasicOffensivePlay(clip: any, stats: QbStats, playerId: string): void {
     const playerNum = parseInt(playerId);
-    const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'QB') ||
-                                (clip.car2?.num === playerNum && clip.car2?.pos === 'QB');
+    
+    // QB 분석기에서 호출되므로 선수가 클립에 참여했는지만 확인 (포지션 무관)
+    const isPlayerInClip = (clip.car?.num === playerNum) || (clip.car2?.num === playerNum);
 
-    console.log(`🏈 QB 기본 플레이 분석 - 선수: ${playerId}, 클립 playType: ${clip.playType}, isCarrier: ${isThisPlayerCarrier}`);
+    console.log(`🏈 QB 기본 플레이 분석 - 선수: ${playerId}, 클립 playType: ${clip.playType}, isCarrier: ${isPlayerInClip}`);
 
-    if (!isThisPlayerCarrier) return;
+    if (!isPlayerInClip) return;
 
     // SignificantPlays에서 이미 처리된 경우가 아니라면 기본 스탯 추가
     const hasSpecialPlay = Array.isArray(clip.significantPlays) && clip.significantPlays.some((play: string | null) => 

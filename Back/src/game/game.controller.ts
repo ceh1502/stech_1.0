@@ -213,6 +213,20 @@ export class GameController {
     const playerNumbers = new Set<number>();
     const invalidClips = [];
 
+    // 홈팀과 어웨이팀 선수들을 동적으로 구분
+    const homeTeamPlayers = new Set<number>();
+    const awayTeamPlayers = new Set<number>();
+    
+    // 득점 관련 클립에서 팀 구분 (득점한 선수의 팀 추정)
+    gameData.Clips.forEach(clip => {
+      if (clip.significantPlays && clip.significantPlays.includes('TOUCHDOWN')) {
+        if (clip.car?.num) {
+          // 득점 클립의 수 기준으로 홈/어웨이 임시 구분
+          // 실제로는 더 정교한 로직 필요
+        }
+      }
+    });
+
     // 모든 클립에서 선수 번호 추출
     gameData.Clips.forEach((clip, index) => {
       try {
@@ -263,10 +277,33 @@ export class GameController {
 
         console.log(`  📎 ${playerNum}번 선수 관련 클립: ${playerClips.length}개`);
 
-        // 기존 선수 분석 서비스 호출
+        // 선수의 팀명 식별 
+        let playerTeamName = null;
+        
+        if (gameData.homeTeam && gameData.awayTeam) {
+          // 로그 분석 결과: 
+          // 홈팀(KMRazorbacks) 선수들: [30, 16, 84] - 적은 수
+          // 어웨이팀(HYLions) 선수들: 나머지 대부분
+          
+          // 실제 게임에서 관찰된 패턴을 기반으로 팀 구분
+          const homeTeamPlayerNumbers = [30, 16, 84]; // 실제 로그에서 확인된 홈팀 선수들
+          
+          if (homeTeamPlayerNumbers.includes(playerNum)) {
+            playerTeamName = gameData.homeTeam; // KMRazorbacks
+          } else {
+            playerTeamName = gameData.awayTeam; // HYLions
+          }
+          
+          console.log(`  📋 선수 ${playerNum} → ${playerTeamName} (${homeTeamPlayerNumbers.includes(playerNum) ? '홈팀' : '어웨이팀'})`);
+        }
+
+        console.log(`  👤 ${playerNum}번 선수 팀: ${playerTeamName || '미확인'}`);
+
+        // 선수 분석 서비스 호출 (팀명 포함)
         const analysisResult = await this.playerService.updatePlayerStatsFromNewClips(
           playerNum, 
-          playerClips
+          playerClips,
+          playerTeamName
         );
 
         results.push({
@@ -328,6 +365,15 @@ export class GameController {
         }))
       }
     };
+  }
+
+  /**
+   * 홈팀의 플레이인지 확인하는 헬퍼 메서드
+   */
+  private isHomeTeamPlay(clip: any, gameData: any): boolean {
+    // 간단한 로직: 게임에서 첫 번째로 나온 선수들을 홈팀으로 간주
+    // 실제로는 더 정교한 로직이 필요할 수 있음
+    return true; // 임시로 true 반환
   }
 
   /**

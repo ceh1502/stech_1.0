@@ -15,17 +15,34 @@ const LeaguePositionPage = () => {
                 const response = await fetch(`${API_CONFIG.BASE_URL}/player/rankings`);
                 const result = await response.json();
                 
+                console.log('🐛 선수 데이터 API 응답:', result);
+                
                 if (result.success && result.data) {
+                    // 백엔드 팀명을 프론트엔드 팀명으로 매핑
+                    const BACKEND_TO_FRONTEND_TEAM = {
+                        "KKRagingBulls": "건국대학교 레이징불스",
+                        "KHCommanders": "경희대학교 커맨더스", 
+                        "SNGreenTerrors": "서울대학교 그린테러스",
+                        "USCityhawks": "서울시립대학교 시티혹스",
+                        "DGTuskers": "동국대학교 터스커스",
+                        "KMRazorbacks": "국민대학교 레이저백스",
+                        "YSEagles": "연세대학교 이글스",
+                        "KUTigers": "고려대학교 타이거스",
+                        "HICowboys": "홍익대학교 카우보이스",
+                        "SSCrusaders": "숭실대학교 크루세이더스",
+                        // 기존 매핑도 유지
+                        "한양대 라이온즈": "한양대학교 라이온스",
+                        "한국외대 블랙나이츠": "한국외국어대학교 블랙나이츠"
+                    };
+
                     // 백엔드 데이터를 프론트엔드 형식으로 변환
                     const transformedData = result.data.map((player, index) => {
                         // 팀명 매핑
-                        const backendTeamName = player.teamId?.teamName || 'Unknown Team';
-                        let frontendTeamName = backendTeamName;
+                        const backendTeamName = player.teamName || 'Unknown Team';
+                        const frontendTeamName = BACKEND_TO_FRONTEND_TEAM[backendTeamName] || backendTeamName;
                         
-                        if (backendTeamName === '한양대 라이온즈') {
-                            frontendTeamName = '한양대학교 라이온스';
-                        } else if (backendTeamName === '한국외대 블랙나이츠') {
-                            frontendTeamName = '한국외국어대학교 블랙나이츠';
+                        if (index < 3) { // 처음 3명만 로그 출력
+                            console.log(`🐛 선수 ${index + 1}: ${player.name} (${backendTeamName} → ${frontendTeamName})`);
                         }
 
                         return ({
@@ -81,6 +98,7 @@ const LeaguePositionPage = () => {
                         return_td: player.stats?.returnTouchdowns || 0
                     })});
                     
+                    console.log(`🐛 변환된 선수 데이터 ${transformedData.length}명:`, transformedData.slice(0, 2));
                     setData(transformedData);
                 } else {
                     throw new Error('Failed to fetch player data');
