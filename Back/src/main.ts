@@ -125,11 +125,13 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
 }
 
 // Vercel Serverless용 export
-export default async function handler(req: any, res: any) {
+module.exports = async function handler(req: any, res: any) {
   const app = await bootstrap();
   const expressApp = app.getHttpAdapter().getInstance();
   return expressApp(req, res);
-}
+};
+
+module.exports.default = module.exports;
 
 // 로컬 개발 환경에서만 실행
 if (require.main === module) {
