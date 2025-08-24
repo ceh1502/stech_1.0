@@ -88,7 +88,7 @@ export const MOCKSTATTEAM = [
   {
     id: "3",
     team: "건국대 레이징불스",
-    division: "1부",
+    division: "2부",
 
     /* 득점/경기 탭(기본 표시) */
     points_per_game: 35,
@@ -131,7 +131,7 @@ export const MOCKSTATTEAM = [
   {
     id: "4",
     team: "경희대 커맨더스",
-    division: "1부",
+    division: "2부",
 
     /* 득점/경기 탭(기본 표시) */
     points_per_game: 13,
