@@ -368,16 +368,18 @@ export default function StatTeam({data, teams = []}) {
 
     const {key, direction} = currentSort;
     const cmp = (a, b) => {
-      if (PAIR_FIRST_DESC.has(key)) {
-        const [a1, a2] = parsePair(a[key]);
-        const [b1, b2] = parsePair(b[key]);
-        if (a1 !== b1) {
-          // desc: a1 큰 게 위 / asc: a1 작은 게 위
-          return direction === "asc" ? a1 - b1 : b1 - a1;
-        }
-        // 동률이면 두 번째 숫자(B)도 같은 규칙으로
-        return direction === "asc" ? a2 - b2 : b2 - a2;
-      }
+    if (PAIR_FIRST_DESC.has(key)) {
+    const [a1, a2] = parsePair(a[key] ?? "0-0");    
+    const [b1, b2] = parsePair(b[key] ?? "0-0");
+    // 낮을수록 좋은 지표면 prefSign=+1, 클수록 좋으면 -1
+    const prefSign = LOWER_IS_BETTER.has(key) ? 1 : -1;
+    // asc 클릭 시 뒤집기
+    const dirSign  = direction === "asc" ? -1 : 1;
+    const d1 = (a1 - b1) * prefSign * dirSign;
+    if (d1 !== 0) return d1;
+    const d2 = (a2 - b2) * prefSign * dirSign;
+    return d2;
+  }
       const av = getSortValue(a, key);
       const bv = getSortValue(b, key);
       if (av === bv) return 0;
@@ -481,7 +483,7 @@ export default function StatTeam({data, teams = []}) {
                       >
                         <span className="column-label">{col.label}</span>
                         <RxTriangleDown
-                          className={`chev ${direction === "asc" ? "asc" : ""}`}
+                          className={`chev ${direction === "asc" ? "asc" : ""} ${isActive? "active-blue": ""}`}
                           size={30}
                         />
                       </button>
@@ -528,12 +530,11 @@ export default function StatTeam({data, teams = []}) {
                     {currentColumns.map((col) => {
                       const v = row[col.key];
                       if (typeof v === "number") {
-                        // 퍼센트 키면 % 표시
                         const isPct = String(col.key).includes("percentage");
                         const shown =
                           v % 1 !== 0 || isPct
                             ? isPct
-                              ? `${v.toFixed(1)}%`
+                              ? `${v.toFixed(1)}`
                               : v.toFixed(1)
                             : v;
                         return (

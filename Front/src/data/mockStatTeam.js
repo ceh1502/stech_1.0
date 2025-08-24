@@ -62,10 +62,10 @@ export const MOCKSTATTEAM = [
     rushing_td: 1,
 
     /* pass 탭 */
-    "pass_completions-attempts": "5-20",
-    passing_yards: 43,
-    passing_yards_per_passing_attempts: 8.6,
-    passing_yards_per_game: 43,
+    "pass_completions-attempts": "4-18",
+    passing_yards: 4,
+    passing_yards_per_passing_attempts: 10,
+    passing_yards_per_game: 40,
     passing_td: 0,
     interceptions: 2,
 
