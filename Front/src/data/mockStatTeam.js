@@ -1,6 +1,6 @@
 export const MOCKSTATTEAM = [
   {
-    id: "hyu-2024",
+    id: "1",
     team: "서울대 그린테러스",
     division: "1부",
 
@@ -43,8 +43,8 @@ export const MOCKSTATTEAM = [
     pen_yards_per_game: 120,
   },
   {
-    id: "UOS11",
-    team: "시립대 시티혹스",
+    id: "2",
+    team: "서울시립대 시티혹스",
     division: "1부",
 
     /* 득점/경기 탭(기본 표시) */
@@ -84,8 +84,9 @@ export const MOCKSTATTEAM = [
     turnover_rate: 1,
     "penalty-pen_yards": "5-36",
     pen_yards_per_game: 36,
-  },{
-    id: "hyu-2024",
+  },
+  {
+    id: "3",
     team: "건국대 레이징불스",
     division: "1부",
 
@@ -128,7 +129,7 @@ export const MOCKSTATTEAM = [
     pen_yards_per_game: 10,
   },
   {
-    id: "UOS11",
+    id: "4",
     team: "경희대 커맨더스",
     division: "1부",
 
@@ -169,8 +170,9 @@ export const MOCKSTATTEAM = [
     turnover_rate: -2,
     "penalty-pen_yards": "3-20",
     pen_yards_per_game: 20,
-  },{
-    id: "hyu-2024",
+  },
+  {
+    id: "5",
     team: "한국외국어대 블랙나이츠",
     division: "1부",
 
@@ -213,7 +215,7 @@ export const MOCKSTATTEAM = [
     pen_yards_per_game: 25,
   },
   {
-    id: "UOS11",
+    id: "6",
     team: "한양대 라이온스",
     division: "1부",
 
