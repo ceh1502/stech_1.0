@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import StatTeam from '../../../../../components/Stat/StatTeam';
 import { TEAMS } from '../../../../../data/TEAMS';
+import {MOCKSTATTEAM} from '../../../../../data/mockStatTeam';
 
 const LeagueTeamPage = () => {
   const [teamStatsData, setTeamStatsData] = useState([]);
@@ -36,7 +37,7 @@ const LeagueTeamPage = () => {
 
   return (
     <div>
-      <StatTeam data={teamStatsData} teams={TEAMS}/>
+      <StatTeam data={MOCKSTATTEAM} teams={TEAMS}/>
     </div>
   );
 }
