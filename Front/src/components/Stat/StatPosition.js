@@ -1,8 +1,10 @@
+// src/components/Stat/StatPosition.jsx
 import React, {useMemo, useState, useEffect, useRef} from "react";
 import {RxTriangleDown} from "react-icons/rx";
 import {FaChevronDown} from "react-icons/fa";
 import "./StatPosition.css";
 
+/* ─────────────────────────  공통 드롭다운  ───────────────────────── */
 function Dropdown({value, options, onChange, label, placeholder, onTouch}) {
   const [open, setOpen] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -25,7 +27,7 @@ function Dropdown({value, options, onChange, label, placeholder, onTouch}) {
         }`}
         onClick={() => {
           setOpen((o) => !o);
-          if (onTouch) onTouch(); // 터치 콜백 호출
+          if (onTouch) onTouch();
         }}
       >
         <span className="dropdown-text">
@@ -48,7 +50,7 @@ function Dropdown({value, options, onChange, label, placeholder, onTouch}) {
                   }`}
                   onClick={() => {
                     onChange(opt);
-                    setTouched(true); // 사용자가 실제로 선택함
+                    setTouched(true);
                     setOpen(false);
                   }}
                   role="option"
@@ -65,6 +67,7 @@ function Dropdown({value, options, onChange, label, placeholder, onTouch}) {
   );
 }
 
+/* ─────────────────────────  리그 매핑/옵션  ───────────────────────── */
 const TEAM_TO_LEAGUE = {
   // 서울
   "연세대 이글스": "서울",
@@ -84,6 +87,7 @@ const TEAM_TO_LEAGUE = {
   "서강대 알바트로스": "서울",
   "경희대 커맨더스": "서울",
 
+  // 경기강원
   "강원대 카프라스": "경기강원",
   "단국대 코디악베어스": "경기강원",
   "성균관대 로얄스": "경기강원",
@@ -104,7 +108,7 @@ const TEAM_TO_LEAGUE = {
   "영남대 페가수스": "대구경북",
   "한동대 홀리램스": "대구경북",
 
-  // 부산경남(부울경)
+  // 부산경남
   "경성대 드래곤스": "부산경남",
   "동서대 블루돌핀스": "부산경남",
   "동아대 레오파즈": "부산경남",
@@ -115,7 +119,7 @@ const TEAM_TO_LEAGUE = {
   "울산대 유니콘스": "부산경남",
   "한국해양대 바이킹스": "부산경남",
 
-  //"사회인
+  // 사회인
   "군위 피닉스": "사회인",
   "부산 그리폰즈": "사회인",
   "삼성 블루스톰": "사회인",
@@ -141,21 +145,10 @@ const BACKEND_TO_FRONTEND_TEAM = {
 };
 
 const LEAGUE_OPTIONS = [...Array.from(new Set(Object.values(TEAM_TO_LEAGUE)))];
-
 const DIVISION_OPTIONS = ["1부", "2부"];
-const POSITION_OPTIONS = [
-  "QB",
-  "RB",
-  "WR",
-  "TE",
-  "K",
-  "P",
-  "OL",
-  "DL",
-  "LB",
-  "DB",
-];
+const POSITION_OPTIONS = ["QB", "RB", "WR", "TE", "K", "P", "OL", "DL", "LB", "DB"];
 
+/* ─────────────────────────  정렬/보조 유틸  ───────────────────────── */
 // "적을수록 좋은" 지표
 const LOWER_IS_BETTER = new Set([
   "interceptions",
@@ -167,19 +160,19 @@ const LOWER_IS_BETTER = new Set([
   "touchback_percentage",
 ]);
 
-// 포지션/카테고리별 기본(주황) 정렬 컬럼
+// "A-B" 문자열(앞 숫자 큰 쪽이 상위) — 예: K.field_goal = "성공-시도"
+const PAIR_FIRST_DESC = new Set(["field_goal"]);
+const parsePair = (str) => {
+  if (typeof str !== "string") return [0, 0];
+  const [a, b] = str.split("-").map((n) => parseFloat(n) || 0);
+  return [a, b];
+};
+
+/* 포지션/카테고리 기본 정렬 키(주황) */
 const PRIMARY_METRIC = {
   QB: {pass: "passing_yards", run: "rushing_yards"},
-  RB: {
-    run: "rushing_yards",
-    pass: "receiving_yards",
-    스페셜팀: "kick_return_yards",
-  },
-  WR: {
-    pass: "receiving_yards",
-    run: "rushing_yards",
-    스페셜팀: "kick_return_yards",
-  },
+  RB: {run: "rushing_yards", pass: "receiving_yards", 스페셜팀: "kick_return_yards"},
+  WR: {pass: "receiving_yards", run: "rushing_yards", 스페셜팀: "kick_return_yards"},
   TE: {pass: "receiving_yards", run: "rushing_yards"},
   K: {스페셜팀: "field_goal_percentage"},
   P: {스페셜팀: "average_punt_yards"},
@@ -188,6 +181,7 @@ const PRIMARY_METRIC = {
   LB: {default: "tackles"},
   DB: {defense: "interceptions", 스페셜팀: "kick_return_yards"},
 };
+
 const POSITION_CATEGORIES = {
   QB: ["pass", "run"],
   RB: ["run", "pass", "스페셜팀"],
@@ -367,8 +361,7 @@ const statColumns = {
     default: [
       {key: "games", label: "경기 수"},
       {key: "tackles", label: "태클 수"},
-            {key: "TFL", label: "TFL"},
-
+      {key: "TFL", label: "TFL"},
       {key: "sacks", label: "색 "},
       {key: "forced_fumbles", label: "펌블 유도 수"},
       {key: "fumble_recovery", label: "펌블 리커버리 수"},
@@ -383,8 +376,7 @@ const statColumns = {
     defense: [
       {key: "games", label: "경기 수"},
       {key: "tackles", label: "태클 수"},
-            {key: "TFL", label: "TFL"},
-
+      {key: "TFL", label: "TFL"},
       {key: "sacks", label: "색 "},
       {key: "forced_fumbles", label: "펌블 유도 수"},
       {key: "fumble_recovery", label: "펌블 리커버리 수"},
@@ -412,7 +404,7 @@ export default function StatPosition({data, teams = []}) {
   const [division, setDivision] = useState("1부");
   const [position, setPosition] = useState("QB");
   const [category, setCategory] = useState("pass");
-  const [leagueSelected, setLeagueSelected] = useState(false); // 리그 선택 여부 추적
+  const [leagueSelected, setLeagueSelected] = useState(false);
   const categories = useMemo(
     () => POSITION_CATEGORIES[position] || ["default"],
     [position]
@@ -435,6 +427,7 @@ export default function StatPosition({data, teams = []}) {
     } else {
       setCurrentSort(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [position]);
 
   useEffect(() => {
@@ -451,35 +444,31 @@ export default function StatPosition({data, teams = []}) {
     } else {
       setCurrentSort(null);
     }
-  }, [category, position]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
 
   const currentColumns = statColumns[position]?.[category] || [];
 
   const toggleSort = (key) => {
     setCurrentSort((prev) => {
-      if (!prev || prev.key !== key) {
-        return {key, direction: "desc"};
-      }
+      if (!prev || prev.key !== key) return {key, direction: "desc"};
       return {key, direction: prev.direction === "desc" ? "asc" : "desc"};
     });
   };
 
   const sortedPlayers = useMemo(() => {
-    // 1. 백엔드 팀 코드를 프론트엔드 팀명으로 변환
-    const mappedData = data.map((d) => ({
-      ...d,
-      team: BACKEND_TO_FRONTEND_TEAM[d.team] || d.team,
-    }));
+    // ✅ 목 데이터 사용: 팀명 매핑 미사용
+    // const mappedData = data.map((d) => ({
+    //   ...d,
+    //   team: BACKEND_TO_FRONTEND_TEAM[d.team] || d.team,
+    // }));
+    const mappedData = data;
 
-    // 2. 변환된 데이터를 필터링
     const rows = mappedData.filter((d) => {
       if (d.position !== position) return false;
-
       const teamLeague = TEAM_TO_LEAGUE[d.team] || "";
       if (teamLeague !== league) return false;
-
       if (league !== "사회인" && d.division !== division) return false;
-
       return true;
     });
 
@@ -488,6 +477,19 @@ export default function StatPosition({data, teams = []}) {
     const {key, direction} = currentSort;
 
     return [...rows].sort((a, b) => {
+      // ── "A-B" 문자열(앞 숫자 우선) ──
+      if (PAIR_FIRST_DESC.has(key)) {
+        const [a1, a2] = parsePair(a[key] ?? "0-0");
+        const [b1, b2] = parsePair(b[key] ?? "0-0");
+        const prefSign = LOWER_IS_BETTER.has(key) ? 1 : -1; // 낮을수록 좋으면 뒤집기
+        const dirSign = direction === "asc" ? -1 : 1;
+        const d1 = (a1 - b1) * prefSign * dirSign;
+        if (d1 !== 0) return d1;
+        const d2 = (a2 - b2) * prefSign * dirSign;
+        return d2;
+      }
+
+      // ── 일반 숫자 ──
       const av = a[key] ?? 0;
       const bv = b[key] ?? 0;
       const base = av < bv ? -1 : av > bv ? 1 : 0;
@@ -502,18 +504,36 @@ export default function StatPosition({data, teams = []}) {
       return sortedPlayers.map((r, i) => ({...r, __rank: i + 1}));
 
     const {key} = currentSort;
+
+    const valueOf = (row) => {
+      if (PAIR_FIRST_DESC.has(key)) {
+        const [x, y] = parsePair(row[key] ?? "0-0");
+        return `${x}|${y}`;
+      }
+      return row[key] ?? 0;
+    };
+
     let lastValue = null;
     let currentRank = 0;
     let seen = 0;
 
     return sortedPlayers.map((r) => {
       seen += 1;
-      const currentValue = r[key] ?? 0;
+      const currentValue = valueOf(r);
       if (currentValue !== lastValue) currentRank = seen;
       lastValue = currentValue;
       return {...r, __rank: currentRank};
     });
   }, [sortedPlayers, currentSort]);
+
+  // 값 포맷(퍼센트/소수점)
+  const fmt = (key, v) => {
+    if (typeof v === "number") {
+      const isPct = String(key).toLowerCase().includes("percentage");
+      return isPct ? `${v.toFixed(1)}%` : v % 1 !== 0 ? v.toFixed(1) : v;
+    }
+    return v ?? "0";
+  };
 
   return (
     <div className="stat-position">
@@ -563,6 +583,7 @@ export default function StatPosition({data, teams = []}) {
         <div className="table-title">포지션별 선수 순위</div>
       </div>
 
+      {/* ▼▼▼ 렌더 구조 유지 ▼▼▼ */}
       <div className="table-wrapper">
         <table className="stat-table">
           <thead className="table-head">
@@ -580,7 +601,8 @@ export default function StatPosition({data, teams = []}) {
                   const isActive = currentSort && currentSort.key === col.key;
                   const direction = isActive ? currentSort.direction : null;
                   const isPrimary =
-                    PRIMARY_METRIC[position]?.[category] === col.key;
+                    PRIMARY_METRIC[position]?.[category] === col.key ||
+                    PRIMARY_METRIC[position]?.default === col.key;
 
                   return (
                     <th
@@ -626,7 +648,7 @@ export default function StatPosition({data, teams = []}) {
 
               return (
                 <tr
-                  key={row.id || row.name}
+                  key={row.id || row.name || idx}
                   className={`table-rows ${rowClass}`}
                 >
                   <div className="table-row1">
@@ -638,30 +660,28 @@ export default function StatPosition({data, teams = []}) {
                     <td className="table-cell team-name">
                       {teamInfo?.logo && (
                         <div className='team-logo'>
-                        <img
-                          src={teamInfo.logo}
-                          alt={`${row.team} 로고`}
-                          className={`team-logo-img ${
-                            teamInfo.logo.endsWith(".svg")
-                              ? "svg-logo"
-                              : "png-logo"
-                          }`}
-                        />
+                          <img
+                            src={teamInfo.logo}
+                            alt={`${row.team} 로고`}
+                            className={`team-logo-img ${
+                              teamInfo.logo.endsWith(".svg")
+                                ? "svg-logo"
+                                : "png-logo"
+                            }`}
+                          />
                         </div>
                       )}
                       <span>{row.team}</span>
                     </td>
                   </div>
+
                   <div
                     className="table-row2"
                     style={{"--cols": currentColumns.length}}
                   >
                     {currentColumns.map((col) => (
                       <td key={col.key} className="table-cell">
-                        {typeof row[col.key] === "number" &&
-                        row[col.key] % 1 !== 0
-                          ? row[col.key].toFixed(1)
-                          : row[col.key] ?? "0"}
+                        {fmt(col.key, row[col.key])}
                       </td>
                     ))}
                   </div>
