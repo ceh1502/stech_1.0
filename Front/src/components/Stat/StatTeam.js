@@ -123,9 +123,7 @@ const TEAM_TO_LEAGUE = {
   "인천 라이노스": "사회인",
 };
 
-const LEAGUE_OPTIONS = [
-  ...Array.from(new Set(Object.values(TEAM_TO_LEAGUE))),
-];
+const LEAGUE_OPTIONS = [...Array.from(new Set(Object.values(TEAM_TO_LEAGUE)))];
 const DIVISION_OPTIONS = ["1부", "2부"];
 const PLAY_TYPES = ["득점/경기", "run", "pass", "스페셜팀", "기타"]; // ← 유형 드롭다운
 
@@ -139,38 +137,81 @@ const LOWER_IS_BETTER = new Set([
   "sacks_allowed",
   "touchback_percentage",
   "fumble-turnover",
-    "turnover_per_game",
-    "turnover_rate",
-     "penalty-pen_yards", 
-     "pen_yards_per_game",
-])
+  "turnover_per_game",
+  "turnover_rate",
+  "penalty-pen_yards",
+  "pen_yards_per_game",
+]);
+// "A-B" 형태로 표시되는 컬럼들: 앞 숫자(A)로 정렬
+const PAIR_FIRST_DESC = new Set([
+  "pass_completions-attempts",
+  "field_goal_completions-attempts",
+  "fumble-turnover",
+  "penalty-pen_yards",
+]);
+
+// "10-22" 같은 쌍 값을 파싱
+const parsePair = (str) => {
+  if (typeof str !== "string") return [0, 0];
+  const [a, b] = str.split("-").map((n) => parseFloat(n) || 0);
+  return [a, b];
+};
+
+// 정렬 비교에 쓸 숫자 값으로 변환
+const getSortValue = (row, key) => {
+  const v = row?.[key];
+  if (typeof v === "number") return v;
+  if (typeof v === "string") {
+    switch (key) {
+      case "pass_completions-attempts": {
+        const [c, a] = parsePair(v); // 성공/시도 → 성공률
+        return a > 0 ? c / a : 0;
+      }
+      case "field_goal_completions-attempts": {
+        const [m, a] = parsePair(v); // 성공/시도 → 성공률
+        return a > 0 ? m / a : 0;
+      }
+      case "fumble-turnover": {
+        const [, t] = parsePair(v); // 턴오버 개수
+        return t;
+      }
+      case "penalty-pen_yards": {
+        const [, y] = parsePair(v); // 페널티 야드
+        return y;
+      }
+      default:
+        return parseFloat(v) || 0;
+    }
+  }
+  return 0;
+};
 // 백엔드 팀명을 프론트엔드 팀명으로 매핑
 const BACKEND_TO_FRONTEND_TEAM = {
   // 기존 매핑
-  "한양대": "한양대 라이온스",
-  "외대": "한국외국어대 블랙나이츠",
-  "한양대 라이온즈": "한양대 라이온스", 
+  한양대: "한양대 라이온스",
+  외대: "한국외국어대 블랙나이츠",
+  "한양대 라이온즈": "한양대 라이온스",
   "한국외대 블랙나이츠": "한국외국어대 블랙나이츠",
-  "HYLions": "한양대 라이온스",
-  "HFBlackKnights": "한국외국어대 블랙나이츠",
-  
+  HYLions: "한양대 라이온스",
+  HFBlackKnights: "한국외국어대 블랙나이츠",
+
   // 새로운 백엔드 팀 코드명 매핑 (10개 대학)
-  "KKRagingBulls": "건국대 레이징불스",
-  "KHCommanders": "경희대 커맨더스", 
-  "SNGreenTerrors": "서울대 그린테러스",
-  "USCityhawks": "서울시립대 시티혹스",
-  "DGTuskers": "동국대 터스커스",
-  "KMRazorbacks": "국민대 레이저백스",
-  "YSEagles": "연세대 이글스",
-  "KUTigers": "고려대 타이거스",
-  "HICowboys": "홍익대 카우보이스",
-  "SSCrusaders": "숭실대 크루세이더스"
+  KKRagingBulls: "건국대 레이징불스",
+  KHCommanders: "경희대 커맨더스",
+  SNGreenTerrors: "서울대 그린테러스",
+  USCityhawks: "서울시립대 시티혹스",
+  DGTuskers: "동국대 터스커스",
+  KMRazorbacks: "국민대 레이저백스",
+  YSEagles: "연세대 이글스",
+  KUTigers: "고려대 타이거스",
+  HICowboys: "홍익대 카우보이스",
+  SSCrusaders: "숭실대 크루세이더스",
 };
 
 // 카테고리별 기본 정렬 키
 const PRIMARY_TEAM_METRIC = {
-  '득점/경기': "total_yards",
-  pass: "pass_completions-attempts", 
+  "득점/경기": "total_yards",
+  pass: "pass_completions-attempts",
   run: "rushing_attempts",
   스페셜팀: "total_return_yards",
   기타: "turnover_per_game",
@@ -256,7 +297,7 @@ export default function StatTeam({data, teams = []}) {
         // 새로운 컬럼 클릭
         return {key, direction: "desc"};
       }
-      
+
       // 같은 컬럼 클릭 - desc와 asc 사이에서 토글
       return {key, direction: prev.direction === "desc" ? "asc" : "desc"};
     });
@@ -267,80 +308,93 @@ export default function StatTeam({data, teams = []}) {
     const source = Array.isArray(data) ? data : []; // ✅ safety guard
 
     // 백엔드 응답을 프론트엔드 컴포넌트가 기대하는 형태로 변환
-    const mappedData = source.map(item => ({
-        team: BACKEND_TO_FRONTEND_TEAM[item.teamName] || item.teamName, // 팀명 매핑
-        division: "1부", // 기본값 (실제로는 팀별로 설정 필요)
-        
-        // 득점/경기 관련
-        points_per_game: item.pointsPerGame,
-        total_points: item.totalPoints,
-        total_touchdowns: item.totalTouchdowns,
-        total_yards: item.totalYards,
-        yards_per_game: item.yardsPerGame,
-        
-        // 러시 관련
-        rushing_attempts: item.rushingAttempts,
-        rushing_yards: item.rushingYards,
-        yards_per_carry: item.yardsPerCarry,
-        rushing_yards_per_game: item.rushingYardsPerGame,
-        rushing_td: item.rushingTouchdowns,
-        
-        // 패스 관련  
-        "pass_completions-attempts": item.passCompletionAttempts,
-        passing_yards: item.passingYards,
-        passing_yards_per_passing_attempts: item.yardsPerPassAttempt,
-        passing_yards_per_game: item.passingYardsPerGame,
-        passing_td: item.passingTouchdowns,
-        interceptions: item.interceptions,
-        
-        // 스페셜팀 관련
-        total_punt_yards: item.totalPuntYards,
-        average_punt_yards: item.averagePuntYards,
-        touchback_percentage: item.puntTouchbackPercentage,
-        "field_goal_completions-attempts": item.fieldGoalStats,
-        yards_per_kick_return: item.averageKickReturnYards,
-        yards_per_punt_return: item.averagePuntReturnYards,
-        total_return_yards: item.totalReturnYards,
-        
-        // 기타
-        "fumble-turnover": item.fumbleStats,
-        turnover_per_game: item.turnoversPerGame,
-        turnover_rate: item.turnoversPerGame, // 같은 값 사용
-        "penalty-pen_yards": item.penaltyStats,
-        pen_yards_per_game: item.penaltyYardsPerGame,
-        
-        // 기본 정보
-        id: item.teamName,
-        season: item.season,
-        gamesPlayed: item.gamesPlayed
-    }));
+    // const mappedData = source.map(item => ({
+    //     team: BACKEND_TO_FRONTEND_TEAM[item.teamName] || item.teamName, // 팀명 매핑
+    //     division: "1부", // 기본값 (실제로는 팀별로 설정 필요)
 
-    const rows = mappedData.filter((d) => {
-      // 리그 필터 (TEAM_TO_LEAGUE로 팀-리그 매칭)
-      const teamLeague = TEAM_TO_LEAGUE[d.team] || "";
-      if (teamLeague !== league) return false;
-      
+    //     // 득점/경기 관련
+    //     points_per_game: item.pointsPerGame,
+    //     total_points: item.totalPoints,
+    //     total_touchdowns: item.totalTouchdowns,
+    //     total_yards: item.totalYards,
+    //     yards_per_game: item.yardsPerGame,
+
+    //     // 러시 관련
+    //     rushing_attempts: item.rushingAttempts,
+    //     rushing_yards: item.rushingYards,
+    //     yards_per_carry: item.yardsPerCarry,
+    //     rushing_yards_per_game: item.rushingYardsPerGame,
+    //     rushing_td: item.rushingTouchdowns,
+
+    //     // 패스 관련
+    //     "pass_completions-attempts": item.passCompletionAttempts,
+    //     passing_yards: item.passingYards,
+    //     passing_yards_per_passing_attempts: item.yardsPerPassAttempt,
+    //     passing_yards_per_game: item.passingYardsPerGame,
+    //     passing_td: item.passingTouchdowns,
+    //     interceptions: item.interceptions,
+
+    //     // 스페셜팀 관련
+    //     total_punt_yards: item.totalPuntYards,
+    //     average_punt_yards: item.averagePuntYards,
+    //     touchback_percentage: item.puntTouchbackPercentage,
+    //     "field_goal_completions-attempts": item.fieldGoalStats,
+    //     yards_per_kick_return: item.averageKickReturnYards,
+    //     yards_per_punt_return: item.averagePuntReturnYards,
+    //     total_return_yards: item.totalReturnYards,
+
+    //     // 기타
+    //     "fumble-turnover": item.fumbleStats,
+    //     turnover_per_game: item.turnoversPerGame,
+    //     turnover_rate: item.turnoversPerGame, // 같은 값 사용
+    //     "penalty-pen_yards": item.penaltyStats,
+    //     pen_yards_per_game: item.penaltyYardsPerGame,
+
+    //     // 기본 정보
+    //     id: item.teamName,
+    //     season: item.season,
+    //     gamesPlayed: item.gamesPlayed
+    // }));
+
+    const rows = source.filter((d) => {
+      if (league !== "전체") {
+        const teamLeague = TEAM_TO_LEAGUE[d.team] || "";
+        if (teamLeague !== league) return false;
+      }
       if (league !== "사회인" && d.division !== division) return false;
       return true;
     });
-
     if (!currentSort) return rows;
 
     const {key, direction} = currentSort;
-    
-    return [...rows].sort((a, b) => {
-      const av = a[key] ?? 0;
-      const bv = b[key] ?? 0;
-      const base = av < bv ? -1 : av > bv ? 1 : 0;
-      const sign = direction === "asc" ? 1 : -1;
-      const lowBetter = LOWER_IS_BETTER.has(key) ? -1 : 1;
-      return base * sign * lowBetter;
-    });
+    const cmp = (a, b) => {
+    if (PAIR_FIRST_DESC.has(key)) {
+    const [a1, a2] = parsePair(a[key] ?? "0-0");    
+    const [b1, b2] = parsePair(b[key] ?? "0-0");
+    // 낮을수록 좋은 지표면 prefSign=+1, 클수록 좋으면 -1
+    const prefSign = LOWER_IS_BETTER.has(key) ? 1 : -1;
+    // asc 클릭 시 뒤집기
+    const dirSign  = direction === "asc" ? -1 : 1;
+    const d1 = (a1 - b1) * prefSign * dirSign;
+    if (d1 !== 0) return d1;
+    const d2 = (a2 - b2) * prefSign * dirSign;
+    return d2;
+  }
+      const av = getSortValue(a, key);
+      const bv = getSortValue(b, key);
+      if (av === bv) return 0;
+      // 낮을수록 좋은 지표는 비교 방향 반전
+      let diff = av - bv;
+      if (LOWER_IS_BETTER.has(key)) diff = -diff;
+      return direction === "asc" ? diff : -diff;
+    };
+    return [...rows].sort(cmp);
   }, [data, league, division, currentSort]);
 
   // 동순위 처리
   const rankedTeams = useMemo(() => {
-    if (!sortedTeams.length || !currentSort) return sortedTeams.map((r, i) => ({...r, __rank: i + 1}));
+    if (!sortedTeams.length || !currentSort)
+      return sortedTeams.map((r, i) => ({...r, __rank: i + 1}));
 
     const {key} = currentSort;
     let lastValue = null;
@@ -429,7 +483,7 @@ export default function StatTeam({data, teams = []}) {
                       >
                         <span className="column-label">{col.label}</span>
                         <RxTriangleDown
-                          className={`chev ${direction === "asc" ? "asc" : ""}`}
+                          className={`chev ${direction === "asc" ? "asc" : ""} ${isActive? "active-blue": ""}`}
                           size={30}
                         />
                       </button>
@@ -440,7 +494,7 @@ export default function StatTeam({data, teams = []}) {
             </tr>
           </thead>
 
-          <tbody className="table-body">
+         <tbody className="table-body">
             {rankedTeams.map((row) => {
               const teamInfo = teams.find((t) => t.name === row.team);
               const isSecondDiv =
@@ -476,12 +530,11 @@ export default function StatTeam({data, teams = []}) {
                     {currentColumns.map((col) => {
                       const v = row[col.key];
                       if (typeof v === "number") {
-                        // 퍼센트 키면 % 표시
                         const isPct = String(col.key).includes("percentage");
                         const shown =
                           v % 1 !== 0 || isPct
                             ? isPct
-                              ? `${v.toFixed(1)}%`
+                              ? `${v.toFixed(1)}`
                               : v.toFixed(1)
                             : v;
                         return (
@@ -500,9 +553,10 @@ export default function StatTeam({data, teams = []}) {
                 </tr>
               );
             })}
-          </tbody>
+             </tbody>
         </table>
       </div>
     </div>
   );
 }
+
