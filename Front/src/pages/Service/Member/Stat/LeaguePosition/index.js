@@ -31,7 +31,7 @@ const LeaguePositionPage = () => {
                         "HICowboys": "홍익대 카우보이스",
                         "SSCrusaders": "숭실대 크루세이더스",
                         "HYLions": "한양대 라이온스",
-                        "HYBlackknights": "한국외국어대 블랙나이츠"
+                        "HFBlackKnights": "한국외국어대 블랙나이츠"
                     };
 
                     // 백엔드 데이터를 프론트엔드 형식으로 변환
