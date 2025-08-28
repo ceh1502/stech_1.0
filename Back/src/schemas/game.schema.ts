@@ -33,12 +33,12 @@ GameSchema.virtual('team', {
   ref: 'Team',
   localField: 'teamId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
 });
 
 // 가상 필드: 이 경기의 비디오들
 GameSchema.virtual('videos', {
   ref: 'Video',
   localField: '_id',
-  foreignField: 'gameId'
+  foreignField: 'gameId',
 });

@@ -1,4 +1,12 @@
-import { IsString, IsNumber, IsEmail, IsOptional, IsDateString, ValidateNested, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsEmail,
+  IsOptional,
+  IsDateString,
+  ValidateNested,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
@@ -139,27 +147,27 @@ export class FieldGoalsByDistanceDto {
   @ApiProperty({ description: '0-19야드' })
   @ValidateNested()
   @Type(() => FieldGoalDistanceDto)
-  "0_19": FieldGoalDistanceDto;
+  '0_19': FieldGoalDistanceDto;
 
   @ApiProperty({ description: '20-29야드' })
   @ValidateNested()
   @Type(() => FieldGoalDistanceDto)
-  "20_29": FieldGoalDistanceDto;
+  '20_29': FieldGoalDistanceDto;
 
   @ApiProperty({ description: '30-39야드' })
   @ValidateNested()
   @Type(() => FieldGoalDistanceDto)
-  "30_39": FieldGoalDistanceDto;
+  '30_39': FieldGoalDistanceDto;
 
   @ApiProperty({ description: '40-49야드' })
   @ValidateNested()
   @Type(() => FieldGoalDistanceDto)
-  "40_49": FieldGoalDistanceDto;
+  '40_49': FieldGoalDistanceDto;
 
   @ApiProperty({ description: '50야드 이상' })
   @ValidateNested()
   @Type(() => FieldGoalDistanceDto)
-  "50_plus": FieldGoalDistanceDto;
+  '50_plus': FieldGoalDistanceDto;
 }
 
 // Game Stats DTO
@@ -247,7 +255,11 @@ export class GameStatsDto {
   @IsNumber()
   LongReception?: number;
 
-  @ApiProperty({ description: '리시빙 퍼스트다운', required: false, default: 0 })
+  @ApiProperty({
+    description: '리시빙 퍼스트다운',
+    required: false,
+    default: 0,
+  })
   @IsOptional()
   @IsNumber()
   ReceivingFD?: number;
@@ -315,7 +327,11 @@ export class CareerStatsDto {
   @IsNumber()
   ReceivingYards?: number;
 
-  @ApiProperty({ description: '총 리시빙 터치다운', required: false, default: 0 })
+  @ApiProperty({
+    description: '총 리시빙 터치다운',
+    required: false,
+    default: 0,
+  })
   @IsOptional()
   @IsNumber()
   ReceivingTD?: number;

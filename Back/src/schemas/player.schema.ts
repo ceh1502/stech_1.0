@@ -194,5 +194,5 @@ PlayerSchema.virtual('team', {
   ref: 'Team',
   localField: 'teamId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
 });

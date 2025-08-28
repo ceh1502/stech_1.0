@@ -9,22 +9,28 @@ import { TeamModule } from './team/team.module';
 import { VideoModule } from './video/video.module';
 import { PlayerModule } from './player/player.module';
 import { GameModule } from './game/game.module';
+import { NewPlayerModule } from './player/new-player.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/stech'),
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 10,
-    }]),
+    MongooseModule.forRoot(
+      process.env.MONGODB_URI || 'mongodb://localhost:27017/stech',
+    ),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     AuthModule,
     TeamModule,
     VideoModule,
     PlayerModule,
     GameModule,
+    NewPlayerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

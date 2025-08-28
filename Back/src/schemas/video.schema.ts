@@ -104,5 +104,5 @@ VideoSchema.virtual('game', {
   ref: 'Game',
   localField: 'gameId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
 });

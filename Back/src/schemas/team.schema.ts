@@ -28,5 +28,5 @@ TeamSchema.index({ ownerId: 1 });
 TeamSchema.virtual('players', {
   ref: 'Player',
   localField: '_id',
-  foreignField: 'teamId'
+  foreignField: 'teamId',
 });

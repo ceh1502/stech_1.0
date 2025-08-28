@@ -1,11 +1,24 @@
-import { IsString, IsNumber, IsBoolean, IsOptional, ValidateNested, IsArray, ArrayMinSize, ArrayMaxSize } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsBoolean,
+  IsOptional,
+  ValidateNested,
+  IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 // 새로운 클립 데이터 구조 DTO
 
 export class NewSideYardDto {
-  @ApiProperty({ example: 'OWN', description: 'OWN(자진영) 또는 OPP(상대진영)', nullable: true })
+  @ApiProperty({
+    example: 'OWN',
+    description: 'OWN(자진영) 또는 OPP(상대진영)',
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   side: string | null;
@@ -41,7 +54,11 @@ export class NewScoreDto {
 }
 
 export class NewClipDto {
-  @ApiProperty({ example: '12845', description: '클립 고유 식별자', nullable: true })
+  @ApiProperty({
+    example: '12845',
+    description: '클립 고유 식별자',
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   clipKey?: string | null;
@@ -66,10 +83,10 @@ export class NewClipDto {
   @IsNumber()
   toGoYard?: number | null;
 
-  @ApiProperty({ 
-    example: 'Kickoff', 
-    description: '플레이 타입', 
-    nullable: true 
+  @ApiProperty({
+    example: 'Kickoff',
+    description: '플레이 타입',
+    nullable: true,
   })
   @IsOptional()
   @IsString()
@@ -80,19 +97,31 @@ export class NewClipDto {
   @IsBoolean()
   specialTeam?: boolean | null;
 
-  @ApiProperty({ type: NewSideYardDto, description: '시작 야드', nullable: true })
+  @ApiProperty({
+    type: NewSideYardDto,
+    description: '시작 야드',
+    nullable: true,
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => NewSideYardDto)
   start?: NewSideYardDto | null;
 
-  @ApiProperty({ type: NewSideYardDto, description: '종료 야드', nullable: true })
+  @ApiProperty({
+    type: NewSideYardDto,
+    description: '종료 야드',
+    nullable: true,
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => NewSideYardDto)
   end?: NewSideYardDto | null;
 
-  @ApiProperty({ example: 10, description: '획득 야드 (미리 계산됨)', nullable: true })
+  @ApiProperty({
+    example: 10,
+    description: '획득 야드 (미리 계산됨)',
+    nullable: true,
+  })
   @IsOptional()
   @IsNumber()
   gainYard?: number | null;
@@ -109,13 +138,21 @@ export class NewClipDto {
   @Type(() => NumPosDto)
   car2?: NumPosDto | null;
 
-  @ApiProperty({ type: NumPosDto, description: '첫 번째 태클러', nullable: true })
+  @ApiProperty({
+    type: NumPosDto,
+    description: '첫 번째 태클러',
+    nullable: true,
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => NumPosDto)
   tkl?: NumPosDto | null;
 
-  @ApiProperty({ type: NumPosDto, description: '두 번째 태클러', nullable: true })
+  @ApiProperty({
+    type: NumPosDto,
+    description: '두 번째 태클러',
+    nullable: true,
+  })
   @IsOptional()
   @ValidateNested()
   @Type(() => NumPosDto)
@@ -126,7 +163,7 @@ export class NewClipDto {
     description: '특별한 플레이들 (고정 4개 배열)',
     example: ['TOUCHDOWN', null, null, null],
     minItems: 4,
-    maxItems: 4
+    maxItems: 4,
   })
   @IsArray()
   @ArrayMinSize(4)
@@ -135,12 +172,20 @@ export class NewClipDto {
 }
 
 export class NewGameDto {
-  @ApiProperty({ example: 'KMHY241110', description: '게임 키', nullable: true })
+  @ApiProperty({
+    example: 'KMHY241110',
+    description: '게임 키',
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   gameKey?: string | null;
 
-  @ApiProperty({ example: '2024-11-10(수) 10:00', description: '날짜 및 시간', nullable: true })
+  @ApiProperty({
+    example: '2024-11-10(수) 10:00',
+    description: '날짜 및 시간',
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   date?: string | null;
@@ -160,24 +205,36 @@ export class NewGameDto {
   @IsString()
   region?: string | null;
 
-  @ApiProperty({ example: 'Hyochang Field', description: '장소', nullable: true })
+  @ApiProperty({
+    example: 'Hyochang Field',
+    description: '장소',
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   location?: string | null;
 
-  @ApiProperty({ example: 'Kookmin Razorbacks', description: '홈팀', nullable: true })
+  @ApiProperty({
+    example: 'Kookmin Razorbacks',
+    description: '홈팀',
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   homeTeam?: string | null;
 
-  @ApiProperty({ example: 'Hanyang Lions', description: '어웨이팀', nullable: true })
+  @ApiProperty({
+    example: 'Hanyang Lions',
+    description: '어웨이팀',
+    nullable: true,
+  })
   @IsOptional()
   @IsString()
   awayTeam?: string | null;
 
-  @ApiProperty({ 
-    type: [NewClipDto], 
-    description: '클립 데이터 배열' 
+  @ApiProperty({
+    type: [NewClipDto],
+    description: '클립 데이터 배열',
   })
   @IsArray()
   @ValidateNested({ each: true })
@@ -187,26 +244,28 @@ export class NewGameDto {
 
 // 분석 요청 DTO
 export class AnalyzeNewClipsDto {
-  @ApiProperty({ 
-    type: [NewClipDto], 
+  @ApiProperty({
+    type: [NewClipDto],
     description: '새로운 형식의 클립 데이터 배열',
-    example: [{
-      clipKey: '12845',
-      offensiveTeam: 'Home',
-      quarter: 1,
-      down: '1',
-      toGoYard: 10,
-      playType: 'Kickoff',
-      specialTeam: true,
-      start: { side: 'OWN', yard: 20 },
-      end: { side: 'OPP', yard: 30 },
-      gainYard: 10,
-      car: { num: 88, pos: 'QB' },
-      car2: { num: null, pos: null },
-      tkl: { num: 34, pos: 'WR' },
-      tkl2: { num: 11, pos: 'DB' },
-      significantPlays: ['TOUCHDOWN', null, null, null]
-    }]
+    example: [
+      {
+        clipKey: '12845',
+        offensiveTeam: 'Home',
+        quarter: 1,
+        down: '1',
+        toGoYard: 10,
+        playType: 'Kickoff',
+        specialTeam: true,
+        start: { side: 'OWN', yard: 20 },
+        end: { side: 'OPP', yard: 30 },
+        gainYard: 10,
+        car: { num: 88, pos: 'QB' },
+        car2: { num: null, pos: null },
+        tkl: { num: 34, pos: 'WR' },
+        tkl2: { num: 11, pos: 'DB' },
+        significantPlays: ['TOUCHDOWN', null, null, null],
+      },
+    ],
   })
   @IsArray()
   @ValidateNested({ each: true })

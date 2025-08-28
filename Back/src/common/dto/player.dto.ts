@@ -1,4 +1,10 @@
-import { IsString, IsNumber, IsOptional, IsEnum, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsEnum,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -251,7 +257,10 @@ export class UpdatePlayerStatsDto {
 
 // 클립 데이터 관련 DTO
 export class YardDto {
-  @ApiProperty({ example: 'own', description: 'own(자진영) 또는 opp(상대진영)' })
+  @ApiProperty({
+    example: 'own',
+    description: 'own(자진영) 또는 opp(상대진영)',
+  })
   @IsString()
   side: string;
 
@@ -308,7 +317,10 @@ export class ClipDataDto {
   @IsString()
   ClipKey: string;
 
-  @ApiProperty({ example: 'https://example.com/clip.mp4', description: '클립 URL' })
+  @ApiProperty({
+    example: 'https://example.com/clip.mp4',
+    description: '클립 URL',
+  })
   @IsString()
   ClipUrl: string;
 
@@ -320,9 +332,10 @@ export class ClipDataDto {
   @IsString()
   OffensiveTeam: string;
 
-  @ApiProperty({ 
-    example: 'Pass', 
-    description: '플레이 타입 (Pass, NoPass, Run, Sack, PAT, NoPAT, FieldGoal, NoFieldGoal, Punt, Kickoff, None)' 
+  @ApiProperty({
+    example: 'Pass',
+    description:
+      '플레이 타입 (Pass, NoPass, Run, Sack, PAT, NoPAT, FieldGoal, NoFieldGoal, Punt, Kickoff, None)',
   })
   @IsString()
   PlayType: string;
@@ -354,7 +367,11 @@ export class ClipDataDto {
   @Type(() => CarrierDto)
   Carrier: CarrierDto[];
 
-  @ApiProperty({ type: [SignificantPlayDto], description: '특별한 플레이들', required: false })
+  @ApiProperty({
+    type: [SignificantPlayDto],
+    description: '특별한 플레이들',
+    required: false,
+  })
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => SignificantPlayDto)
@@ -367,30 +384,34 @@ export class ClipDataDto {
 }
 
 export class AnalyzeClipsDto {
-  @ApiProperty({ 
-    type: [ClipDataDto], 
+  @ApiProperty({
+    type: [ClipDataDto],
     description: '분석할 클립 데이터 배열',
-    example: [{
-      ClipKey: 'GAME_001_PLAY_15',
-      ClipUrl: 'https://example.com/clip.mp4',
-      Quarter: '1',
-      OffensiveTeam: 'Away',
-      PlayType: 'Pass',
-      SpecialTeam: false,
-      Down: 1,
-      RemainYard: 10,
-      StartYard: { side: 'own', yard: 25 },
-      EndYard: { side: 'own', yard: 35 },
-      Carrier: [{
-        playercode: 'QB001',
-        backnumber: 10,
-        team: 'Away',
-        position: 'QB',
-        action: 'throw'
-      }],
-      SignificantPlays: [{ key: 'TOUCHDOWN', label: 'Touchdown' }],
-      StartScore: { Home: 0, Away: 0 }
-    }]
+    example: [
+      {
+        ClipKey: 'GAME_001_PLAY_15',
+        ClipUrl: 'https://example.com/clip.mp4',
+        Quarter: '1',
+        OffensiveTeam: 'Away',
+        PlayType: 'Pass',
+        SpecialTeam: false,
+        Down: 1,
+        RemainYard: 10,
+        StartYard: { side: 'own', yard: 25 },
+        EndYard: { side: 'own', yard: 35 },
+        Carrier: [
+          {
+            playercode: 'QB001',
+            backnumber: 10,
+            team: 'Away',
+            position: 'QB',
+            action: 'throw',
+          },
+        ],
+        SignificantPlays: [{ key: 'TOUCHDOWN', label: 'Touchdown' }],
+        StartScore: { Home: 0, Away: 0 },
+      },
+    ],
   })
   @ValidateNested({ each: true })
   @Type(() => ClipDataDto)

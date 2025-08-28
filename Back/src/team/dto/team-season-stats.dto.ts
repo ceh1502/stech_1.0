@@ -83,7 +83,10 @@ export class TeamSeasonStatsDto {
   @ApiProperty({ example: 8.3, description: '평균 펀트 리턴 야드' })
   averagePuntReturnYards: number;
 
-  @ApiProperty({ example: 450, description: '총 리턴 야드 (킥 리턴 + 펀트 리턴)' })
+  @ApiProperty({
+    example: 450,
+    description: '총 리턴 야드 (킥 리턴 + 펀트 리턴)',
+  })
   totalReturnYards: number;
 
   // 5. 기타
@@ -93,13 +96,22 @@ export class TeamSeasonStatsDto {
   @ApiProperty({ example: 1.3, description: '경기 당 턴오버 수' })
   turnoversPerGame: number;
 
-  @ApiProperty({ example: 3.2, description: '턴오버 비율 (%) - 총 공격 기회 대비' })
+  @ApiProperty({
+    example: 3.2,
+    description: '턴오버 비율 (%) - 총 공격 기회 대비',
+  })
   turnoverRate: number;
 
-  @ApiProperty({ example: '+2', description: '턴오버 차이 (상대 팀 턴오버 - 우리 팀 턴오버)' })
+  @ApiProperty({
+    example: '+2',
+    description: '턴오버 차이 (상대 팀 턴오버 - 우리 팀 턴오버)',
+  })
   turnoverDifferential: string;
 
-  @ApiProperty({ example: '85-650', description: '총 페널티 수-총 페널티 야드' })
+  @ApiProperty({
+    example: '85-650',
+    description: '총 페널티 수-총 페널티 야드',
+  })
   penaltyStats: string;
 
   @ApiProperty({ example: 54.2, description: '경기 당 페널티 야드' })

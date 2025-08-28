@@ -1,18 +1,30 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiExtraModels } from '@nestjs/swagger';
-import { SampleGameDataDto, SampleSuccessResponseDto } from './dto/game-sample.dto';
-import { 
-  GameUploadSuccessDto, 
-  GameUploadErrorDto 
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiExtraModels,
+} from '@nestjs/swagger';
+import {
+  SampleGameDataDto,
+  SampleSuccessResponseDto,
+} from './dto/game-sample.dto';
+import {
+  GameUploadSuccessDto,
+  GameUploadErrorDto,
 } from './dto/game-upload.dto';
 
 @ApiTags('🏈 Game Data Upload')
-@ApiExtraModels(SampleGameDataDto, SampleSuccessResponseDto, GameUploadSuccessDto, GameUploadErrorDto)
+@ApiExtraModels(
+  SampleGameDataDto,
+  SampleSuccessResponseDto,
+  GameUploadSuccessDto,
+  GameUploadErrorDto,
+)
 @Controller('api/game/docs')
 export class GameDocsController {
-
   @Get('sample-json')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '📋 업로드용 샘플 JSON 구조',
     description: `
     ## 📝 JSON 파일 구조 가이드
@@ -37,64 +49,64 @@ export class GameDocsController {
     ### 🏟️ 필드 포지션
     - **side**: 'OWN' (자진영) 또는 'OPP' (상대진영)
     - **yard**: 0-50 야드 라인
-    `
+    `,
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: '📄 샘플 JSON 구조',
-    type: SampleGameDataDto
+    type: SampleGameDataDto,
   })
   getSampleJsonStructure(): SampleGameDataDto {
     return {
-      gameKey: "DGKM240908",
-      date: "2024-09-08(일) 16:00",
-      type: "League", 
+      gameKey: 'DGKM240908',
+      date: '2024-09-08(일) 16:00',
+      type: 'League',
       score: { home: 0, away: 36 },
-      region: "Seoul",
-      location: "서울대학교 종합운동장",
-      homeTeam: "DGTuskers",
-      awayTeam: "KMRazorbacks",
+      region: 'Seoul',
+      location: '서울대학교 종합운동장',
+      homeTeam: 'DGTuskers',
+      awayTeam: 'KMRazorbacks',
       Clips: [
         {
-          clipKey: "1",
-          offensiveTeam: "Away",
+          clipKey: '1',
+          offensiveTeam: 'Away',
           quarter: 2,
-          down: "4",
+          down: '4',
           toGoYard: 7,
-          playType: "PASS",
+          playType: 'PASS',
           specialTeam: false,
-          start: { side: "OPP", yard: 8 },
-          end: { side: "OPP", yard: 0 },
+          start: { side: 'OPP', yard: 8 },
+          end: { side: 'OPP', yard: 0 },
           gainYard: 8,
-          car: { num: 33, pos: "WR" },
-          car2: { num: 15, pos: "QB" },
+          car: { num: 33, pos: 'WR' },
+          car2: { num: 15, pos: 'QB' },
           tkl: { num: null, pos: null },
           tkl2: { num: null, pos: null },
-          significantPlays: ["TOUCHDOWN", null, null, null]
+          significantPlays: ['TOUCHDOWN', null, null, null],
         },
         {
-          clipKey: "2",
-          offensiveTeam: "Away", 
+          clipKey: '2',
+          offensiveTeam: 'Away',
           quarter: 2,
-          down: "PAT",
+          down: 'PAT',
           toGoYard: null,
-          playType: "PAT",
+          playType: 'PAT',
           specialTeam: true,
           start: { side: null, yard: null },
           end: { side: null, yard: null },
           gainYard: 0,
-          car: { num: 24, pos: "K" },
+          car: { num: 24, pos: 'K' },
           car2: { num: null, pos: null },
           tkl: { num: null, pos: null },
           tkl2: { num: null, pos: null },
-          significantPlays: ["PATNOGOOD", null, null, null]
-        }
-      ]
+          significantPlays: ['PATNOGOOD', null, null, null],
+        },
+      ],
     };
   }
 
   @Get('sample-response')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '📊 성공 응답 예시',
     description: `
     ## ✅ 성공적인 업로드 후 응답 형식
@@ -113,57 +125,57 @@ export class GameDocsController {
     - 포지션 정보
     - 상세 통계 데이터
     - 성공/실패 여부
-    `
+    `,
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: '📊 성공 응답 예시',
-    type: SampleSuccessResponseDto
+    type: SampleSuccessResponseDto,
   })
   getSampleResponse(): SampleSuccessResponseDto {
     return {
       success: true,
-      message: "게임 데이터 업로드 및 분석이 완료되었습니다",
+      message: '게임 데이터 업로드 및 분석이 완료되었습니다',
       data: {
         gameInfo: {
-          gameKey: "DGKM240908",
-          date: "2024-09-08(일) 16:00",
-          homeTeam: "DGTuskers", 
-          awayTeam: "KMRazorbacks",
-          location: "서울대학교 종합운동장",
+          gameKey: 'DGKM240908',
+          date: '2024-09-08(일) 16:00',
+          homeTeam: 'DGTuskers',
+          awayTeam: 'KMRazorbacks',
+          location: '서울대학교 종합운동장',
           finalScore: { home: 0, away: 36 },
           totalClips: 80,
-          processedAt: "2024-12-26T10:30:00.000Z"
+          processedAt: '2024-12-26T10:30:00.000Z',
         },
         playerResults: [
           {
             playerNumber: 15,
             success: true,
             clipsAnalyzed: 12,
-            position: "QB",
+            position: 'QB',
             stats: {
               games: 1,
               passAttempted: 15,
               passCompletion: 12,
               passingYards: 180,
-              passingTouchdown: 2
+              passingTouchdown: 2,
             },
-            message: "15번 선수 분석 완료"
+            message: '15번 선수 분석 완료',
           },
           {
             playerNumber: 33,
             success: true,
             clipsAnalyzed: 8,
-            position: "WR",
+            position: 'WR',
             stats: {
               games: 1,
               target: 6,
               reception: 5,
               receivingYards: 85,
-              receivingTouchdown: 1
+              receivingTouchdown: 1,
             },
-            message: "33번 선수 분석 완료"
-          }
+            message: '33번 선수 분석 완료',
+          },
         ],
         summary: {
           totalPlayers: 15,
@@ -171,24 +183,24 @@ export class GameDocsController {
           failedPlayers: 1,
           totalClipsProcessed: 80,
           invalidClips: 0,
-          successRate: 93
+          successRate: 93,
         },
         errors: {
           invalidClips: [],
           failedPlayers: [
             {
               playerNumber: 99,
-              error: "해당 선수는 DB에 존재하지 않습니다"
-            }
-          ]
-        }
+              error: '해당 선수는 DB에 존재하지 않습니다',
+            },
+          ],
+        },
       },
-      timestamp: "2024-12-26T10:30:00.000Z"
+      timestamp: '2024-12-26T10:30:00.000Z',
     };
   }
 
   @Get('error-codes')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '⚠️ 에러 코드 및 해결 방법',
     description: `
     ## 🚨 가능한 에러 코드 및 해결 방법
@@ -212,40 +224,44 @@ export class GameDocsController {
     2. 파일 크기 확인 (최대 10MB)
     3. 필수 필드 누락 여부 확인
     4. 선수 등번호 정확성 확인
-    `
+    `,
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: '📝 에러 코드 가이드',
     schema: {
       example: {
-        "파일 업로드 에러": {
-          "NO_FILE_UPLOADED": "파일이 업로드되지 않았습니다",
-          "FILE_TOO_LARGE": "파일 크기가 너무 큽니다 (최대 10MB)",
-          "INVALID_JSON_FORMAT": "올바른 JSON 형식이 아닙니다"
+        '파일 업로드 에러': {
+          NO_FILE_UPLOADED: '파일이 업로드되지 않았습니다',
+          FILE_TOO_LARGE: '파일 크기가 너무 큽니다 (최대 10MB)',
+          INVALID_JSON_FORMAT: '올바른 JSON 형식이 아닙니다',
         },
-        "데이터 구조 에러": {
-          "INVALID_GAME_DATA_STRUCTURE": "올바른 게임 데이터 형식이 아닙니다 (Clips 배열이 필요)"
+        '데이터 구조 에러': {
+          INVALID_GAME_DATA_STRUCTURE:
+            '올바른 게임 데이터 형식이 아닙니다 (Clips 배열이 필요)',
         },
-        "처리 에러": {
-          "INTERNAL_PROCESSING_ERROR": "게임 데이터 처리 중 예상치 못한 오류가 발생했습니다"
-        }
-      }
-    }
+        '처리 에러': {
+          INTERNAL_PROCESSING_ERROR:
+            '게임 데이터 처리 중 예상치 못한 오류가 발생했습니다',
+        },
+      },
+    },
   })
   getErrorCodes() {
     return {
-      "파일 업로드 에러": {
-        "NO_FILE_UPLOADED": "파일이 업로드되지 않았습니다",
-        "FILE_TOO_LARGE": "파일 크기가 너무 큽니다 (최대 10MB)", 
-        "INVALID_JSON_FORMAT": "올바른 JSON 형식이 아닙니다"
+      '파일 업로드 에러': {
+        NO_FILE_UPLOADED: '파일이 업로드되지 않았습니다',
+        FILE_TOO_LARGE: '파일 크기가 너무 큽니다 (최대 10MB)',
+        INVALID_JSON_FORMAT: '올바른 JSON 형식이 아닙니다',
       },
-      "데이터 구조 에러": {
-        "INVALID_GAME_DATA_STRUCTURE": "올바른 게임 데이터 형식이 아닙니다 (Clips 배열이 필요)"
+      '데이터 구조 에러': {
+        INVALID_GAME_DATA_STRUCTURE:
+          '올바른 게임 데이터 형식이 아닙니다 (Clips 배열이 필요)',
       },
-      "처리 에러": {
-        "INTERNAL_PROCESSING_ERROR": "게임 데이터 처리 중 예상치 못한 오류가 발생했습니다"
-      }
+      '처리 에러': {
+        INTERNAL_PROCESSING_ERROR:
+          '게임 데이터 처리 중 예상치 못한 오류가 발생했습니다',
+      },
     };
   }
 }

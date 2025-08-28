@@ -35,9 +35,14 @@ export class RbStatsAnalyzerService {
   constructor(
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
   ) {}
-  
+
   // 필드 포지션 기반 야드 계산
-  private calculateYards(startYard: number, startSide: string, endYard: number, endSide: string): number {
+  private calculateYards(
+    startYard: number,
+    startSide: string,
+    endYard: number,
+    endSide: string,
+  ): number {
     // 시작과 끝이 같은 사이드인 경우
     if (startSide === endSide) {
       if (startSide === 'own') {
@@ -46,17 +51,20 @@ export class RbStatsAnalyzerService {
         return startYard - endYard; // opp side에서는 야드가 작을수록 전진
       }
     }
-    
+
     // 사이드를 넘나든 경우 (own -> opp 또는 opp -> own)
     if (startSide === 'own' && endSide === 'opp') {
-      return (50 - startYard) + (50 - endYard); // own에서 50까지 + opp에서 50까지
+      return 50 - startYard + (50 - endYard); // own에서 50까지 + opp에서 50까지
     } else {
-      return (50 - startYard) + (50 - endYard); // 반대의 경우도 동일한 계산
+      return 50 - startYard + (50 - endYard); // 반대의 경우도 동일한 계산
     }
   }
 
   // 클립 데이터에서 RB 스탯 추출
-  async analyzeRbStats(clips: NewClipDto[], playerId: string): Promise<RbStats> {
+  async analyzeRbStats(
+    clips: NewClipDto[],
+    playerId: string,
+  ): Promise<RbStats> {
     const rbStats: RbStats = {
       gamesPlayed: 0,
       rushingAttempts: 0,
@@ -79,14 +87,14 @@ export class RbStatsAnalyzerService {
       puntReturns: 0,
       puntReturnYards: 0,
       yardsPerPuntReturn: 0,
-      returnTouchdowns: 0
+      returnTouchdowns: 0,
     };
 
     const gameIds = new Set(); // 경기 수 계산용
 
     // Player DB에서 해당 선수 정보 미리 조회 (jerseyNumber로 검색)
-    const player = await this.playerModel.findOne({ 
-      jerseyNumber: parseInt(playerId)
+    const player = await this.playerModel.findOne({
+      jerseyNumber: parseInt(playerId),
     });
     if (!player) {
       throw new Error(`등번호 ${playerId}번 선수를 찾을 수 없습니다.`);
@@ -103,7 +111,7 @@ export class RbStatsAnalyzerService {
 
       // NewClipDto 구조 지원 - car, car2에서 찾기
       const isOffender = this.isPlayerInOffense(clip, playerId);
-      
+
       if (!isOffender) {
         continue; // 이 클립은 해당 RB 플레이가 아님
       }
@@ -117,24 +125,33 @@ export class RbStatsAnalyzerService {
 
     // 계산된 스탯 업데이트
     rbStats.gamesPlayed = (player.stats?.gamesPlayed || 0) + 1; // 기존 경기 수에 +1 추가
-    rbStats.yardsPerCarry = rbStats.rushingAttempts > 0 
-      ? Math.round((rbStats.rushingYards / rbStats.rushingAttempts) * 10) / 10
-      : 0;
-    rbStats.yardsPerReception = rbStats.receptions > 0
-      ? Math.round((rbStats.receivingYards / rbStats.receptions) * 10) / 10
-      : 0;
-    rbStats.yardsPerKickReturn = rbStats.kickReturns > 0
-      ? Math.round((rbStats.kickReturnYards / rbStats.kickReturns) * 10) / 10
-      : 0;
-    rbStats.yardsPerPuntReturn = rbStats.puntReturns > 0
-      ? Math.round((rbStats.puntReturnYards / rbStats.puntReturns) * 10) / 10
-      : 0;
+    rbStats.yardsPerCarry =
+      rbStats.rushingAttempts > 0
+        ? Math.round((rbStats.rushingYards / rbStats.rushingAttempts) * 10) / 10
+        : 0;
+    rbStats.yardsPerReception =
+      rbStats.receptions > 0
+        ? Math.round((rbStats.receivingYards / rbStats.receptions) * 10) / 10
+        : 0;
+    rbStats.yardsPerKickReturn =
+      rbStats.kickReturns > 0
+        ? Math.round((rbStats.kickReturnYards / rbStats.kickReturns) * 10) / 10
+        : 0;
+    rbStats.yardsPerPuntReturn =
+      rbStats.puntReturns > 0
+        ? Math.round((rbStats.puntReturnYards / rbStats.puntReturns) * 10) / 10
+        : 0;
 
     return rbStats;
   }
 
   // 러싱 플레이 분석
-  private analyzeRushingPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
+  private analyzeRushingPlay(
+    clip: NewClipDto,
+    stats: RbStats,
+    yards: number,
+    hasTouchdown: boolean,
+  ): void {
     stats.rushingAttempts++;
     stats.rushingYards += yards;
 
@@ -150,7 +167,13 @@ export class RbStatsAnalyzerService {
   }
 
   // 리시빙 플레이 분석
-  private analyzeReceivingPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean, nextClip?: NewClipDto): void {
+  private analyzeReceivingPlay(
+    clip: NewClipDto,
+    stats: RbStats,
+    yards: number,
+    hasTouchdown: boolean,
+    nextClip?: NewClipDto,
+  ): void {
     stats.receivingTargets++; // 타겟된 횟수
     stats.receptions++; // 성공한 리셉션
     stats.receivingYards += yards;
@@ -172,7 +195,12 @@ export class RbStatsAnalyzerService {
   }
 
   // 킥 리턴 플레이 분석
-  private analyzeKickReturnPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
+  private analyzeKickReturnPlay(
+    clip: NewClipDto,
+    stats: RbStats,
+    yards: number,
+    hasTouchdown: boolean,
+  ): void {
     stats.kickReturns++;
     stats.kickReturnYards += yards;
 
@@ -183,7 +211,12 @@ export class RbStatsAnalyzerService {
   }
 
   // 펀트 리턴 플래이 분석
-  private analyzePuntReturnPlay(clip: NewClipDto, stats: RbStats, yards: number, hasTouchdown: boolean): void {
+  private analyzePuntReturnPlay(
+    clip: NewClipDto,
+    stats: RbStats,
+    yards: number,
+    hasTouchdown: boolean,
+  ): void {
     stats.puntReturns++;
     stats.puntReturnYards += yards;
 
@@ -197,18 +230,26 @@ export class RbStatsAnalyzerService {
   private isPlayerInOffense(clip: any, playerId: string): boolean {
     // car, car2에서 해당 선수 찾기
     const playerNum = parseInt(playerId);
-    
-    return (clip.car?.num === playerNum && clip.car?.pos === 'RB') ||
-           (clip.car2?.num === playerNum && clip.car2?.pos === 'RB');
+
+    return (
+      (clip.car?.num === playerNum && clip.car?.pos === 'RB') ||
+      (clip.car2?.num === playerNum && clip.car2?.pos === 'RB')
+    );
   }
 
   // 새로운 특수 케이스 분석 로직
-  private analyzeSignificantPlaysNew(clip: any, stats: RbStats, playerId: string, nextClip?: any): void {
+  private analyzeSignificantPlaysNew(
+    clip: any,
+    stats: RbStats,
+    playerId: string,
+    nextClip?: any,
+  ): void {
     if (!clip.significantPlays) return;
 
     const playerNum = parseInt(playerId);
-    const isRB = (clip.car?.num === playerNum && clip.car?.pos === 'RB') ||
-                 (clip.car2?.num === playerNum && clip.car2?.pos === 'RB');
+    const isRB =
+      (clip.car?.num === playerNum && clip.car?.pos === 'RB') ||
+      (clip.car2?.num === playerNum && clip.car2?.pos === 'RB');
 
     if (!isRB) return;
 
@@ -227,8 +268,10 @@ export class RbStatsAnalyzerService {
     }
 
     // Receiving Touchdown (Pass로 받은 경우)
-    else if (significantPlays.includes('TOUCHDOWN') && 
-             (playType === 'PASS' || playType === 'PassComplete')) {
+    else if (
+      significantPlays.includes('TOUCHDOWN') &&
+      (playType === 'PASS' || playType === 'PassComplete')
+    ) {
       stats.receivingTouchdowns += 1;
       stats.receivingTargets += 1;
       stats.receptions += 1;
@@ -258,28 +301,31 @@ export class RbStatsAnalyzerService {
     else if (significantPlays.includes('FUMBLE') && playType === 'RUN') {
       stats.fumbles += 1;
       stats.rushingAttempts += 1;
-      
+
       if (significantPlays.includes('FUMBLERECOFF')) {
         // 오펜스 리커버리 시 - 스크리미지 라인 기준 야드 계산
         const startYard = clip.start?.yard || 0;
         const endYard = clip.end?.yard || 0;
-        const actualGain = gainYard < 0 ? gainYard : Math.min(gainYard, endYard - startYard);
+        const actualGain =
+          gainYard < 0 ? gainYard : Math.min(gainYard, endYard - startYard);
         stats.rushingYards += actualGain;
       } else if (significantPlays.includes('FUMBLERECDEF')) {
-        // 디펜스 리커버리 시 
+        // 디펜스 리커버리 시
         stats.rushingYards += gainYard;
         stats.fumblesLost += 1;
       }
     }
 
     // Fumble (Pass)
-    else if (significantPlays.includes('FUMBLE') && 
-             (playType === 'PASS' || playType === 'PassComplete')) {
+    else if (
+      significantPlays.includes('FUMBLE') &&
+      (playType === 'PASS' || playType === 'PassComplete')
+    ) {
       stats.fumbles += 1;
       stats.receivingTargets += 1;
       stats.receptions += 1;
       stats.receivingYards += gainYard;
-      
+
       if (significantPlays.includes('FUMBLERECDEF')) {
         stats.fumblesLost += 1;
       }
@@ -335,16 +381,23 @@ export class RbStatsAnalyzerService {
   }
 
   // 기본 공격 플레이 분석 (일반적인 Pass/Run 상황)
-  private analyzeBasicOffensivePlay(clip: any, stats: RbStats, playerId: string, nextClip?: any): void {
+  private analyzeBasicOffensivePlay(
+    clip: any,
+    stats: RbStats,
+    playerId: string,
+    nextClip?: any,
+  ): void {
     const playerNum = parseInt(playerId);
-    const isThisPlayerCarrier = (clip.car?.num === playerNum && clip.car?.pos === 'RB') ||
-                                (clip.car2?.num === playerNum && clip.car2?.pos === 'RB');
+    const isThisPlayerCarrier =
+      (clip.car?.num === playerNum && clip.car?.pos === 'RB') ||
+      (clip.car2?.num === playerNum && clip.car2?.pos === 'RB');
 
     if (!isThisPlayerCarrier) return;
 
     // SignificantPlays에서 이미 처리된 경우가 아니라면 기본 스탯 추가
-    const hasSpecialPlay = clip.significantPlays?.some((play: string | null) => 
-      play === 'TOUCHDOWN' || play === 'FUMBLE' || play === 'FUMBLELOSOFF'
+    const hasSpecialPlay = clip.significantPlays?.some(
+      (play: string | null) =>
+        play === 'TOUCHDOWN' || play === 'FUMBLE' || play === 'FUMBLELOSOFF',
     );
 
     if (!hasSpecialPlay) {
@@ -358,11 +411,11 @@ export class RbStatsAnalyzerService {
           }
         }
       }
-      
+
       // 일반적인 Pass 상황 (타겟 및 리셉션)
       else if (clip.playType === 'PASS' || clip.playType === 'PassComplete') {
         stats.receivingTargets += 1;
-        
+
         // 완성된 패스인지 확인 (gainYard가 0보다 크면 완성)
         if (clip.gainYard && clip.gainYard > 0) {
           stats.receptions += 1;
@@ -410,7 +463,7 @@ export class RbStatsAnalyzerService {
         car2: { num: null, pos: null },
         tkl: { num: null, pos: null },
         tkl2: { num: null, pos: null },
-        significantPlays: [null, null, null, null]
+        significantPlays: [null, null, null, null],
       },
       {
         clipKey: 'SAMPLE_GAME_1',
@@ -427,8 +480,8 @@ export class RbStatsAnalyzerService {
         car2: { num: null, pos: null },
         tkl: { num: null, pos: null },
         tkl2: { num: null, pos: null },
-        significantPlays: ['TOUCHDOWN', null, null, null]
-      }
+        significantPlays: ['TOUCHDOWN', null, null, null],
+      },
     ];
 
     const result = await this.analyzeRbStats(sampleClips, playerId);

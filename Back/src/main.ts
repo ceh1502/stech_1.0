@@ -9,37 +9,43 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // CORS 설정 (프론트엔드 Vercel 도메인 허용)
-  app.use(cors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3001', 
-      'https://stech-1-0-iz4v.vercel.app',
-      'http://3.34.47.22:3000',
-      process.env.FRONTEND_URL
-    ].filter(Boolean), // undefined 값 제거
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-  }));
+  app.use(
+    cors({
+      origin: [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'https://stech-1-0-iz4v.vercel.app',
+        'http://3.34.47.22:3000',
+        process.env.FRONTEND_URL,
+      ].filter(Boolean), // undefined 값 제거
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    }),
+  );
 
   // 보안 미들웨어 (Swagger UI를 위한 설정 추가)
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https:"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        imgSrc: ["'self'", "data:", "https:"],
-        fontSrc: ["'self'", "https:", "data:"],
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          fontSrc: ["'self'", 'https:', 'data:'],
+        },
       },
-    },
-  }));
+    }),
+  );
 
   // 글로벌 파이프 설정
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }),
+  );
 
   // API 접두사 설정
   app.setGlobalPrefix('api');
@@ -47,7 +53,8 @@ async function bootstrap() {
   // Swagger 설정
   const config = new DocumentBuilder()
     .setTitle('🏈 STECH Pro API')
-    .setDescription(`
+    .setDescription(
+      `
 미식축구 전문 플랫폼의 종합 스탯 분석 API
 
 ## 📋 주요 기능
@@ -71,7 +78,8 @@ async function bootstrap() {
 
 ## 🔑 인증
 Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있습니다.
-`)
+`,
+    )
     .setVersion('1.0.0')
     .addBearerAuth(
       {
@@ -91,9 +99,9 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
     .addServer('http://localhost:4000', '개발 서버')
     .addServer('https://api.stech.pro', '운영 서버')
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
-  
+
   // 두 경로 모두에서 Swagger 접근 가능하도록 설정
   SwaggerModule.setup('api', app, document, {
     customSiteTitle: 'STECH Pro API 문서',
@@ -116,7 +124,7 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
   });
 
   const port = process.env.PORT || 3001;
-  
+
   // Vercel 환경 감지
   if (process.env.VERCEL) {
     await app.init();

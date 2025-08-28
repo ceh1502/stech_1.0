@@ -16,54 +16,54 @@ export class FinalScoreDto {
  * 게임 정보 DTO
  */
 export class GameInfoDto {
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'DGKM240908',
-    description: '게임 고유 키' 
+    description: '게임 고유 키',
   })
   gameKey: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '2024-09-08(일) 16:00',
     description: '게임 날짜 및 시간',
-    required: false 
+    required: false,
   })
   date?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'DGTuskers',
-    description: '홈팀 이름' 
+    description: '홈팀 이름',
   })
   homeTeam: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'KMRazorbacks',
-    description: '어웨이팀 이름' 
+    description: '어웨이팀 이름',
   })
   awayTeam: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '서울대학교 종합운동장',
     description: '경기 장소',
-    required: false 
+    required: false,
   })
   location?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     type: FinalScoreDto,
     description: '최종 스코어',
-    required: false 
+    required: false,
   })
   finalScore?: FinalScoreDto;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 80,
-    description: '총 클립 수' 
+    description: '총 클립 수',
   })
   totalClips: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '2024-12-26T10:30:00.000Z',
-    description: '처리 완료 시간' 
+    description: '처리 완료 시간',
   })
   processedAt: string;
 }
@@ -78,21 +78,21 @@ export class PlayerResultDto {
   @ApiProperty({ example: true, description: '분석 성공 여부' })
   success: boolean;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 12,
     description: '분석된 클립 수',
-    required: false 
+    required: false,
   })
   clipsAnalyzed?: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'QB',
     description: '선수 포지션',
-    required: false 
+    required: false,
   })
   position?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: '분석된 통계 데이터',
     required: false,
     example: {
@@ -100,21 +100,21 @@ export class PlayerResultDto {
       passAttempted: 15,
       passCompletion: 12,
       passingYards: 180,
-      passingTouchdown: 2
-    }
+      passingTouchdown: 2,
+    },
   })
   stats?: any;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '15번 선수 분석 완료',
-    description: '분석 결과 메시지' 
+    description: '분석 결과 메시지',
   })
   message: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '해당 선수는 DB에 존재하지 않습니다',
     description: '에러 메시지 (실패 시)',
-    required: false 
+    required: false,
   })
   error?: string;
 }
@@ -152,9 +152,9 @@ export class InvalidClipDto {
   @ApiProperty({ example: 'clip_001', description: '클립 키' })
   clipKey: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'Missing player information',
-    description: '에러 메시지' 
+    description: '에러 메시지',
   })
   error: string;
 }
@@ -166,9 +166,9 @@ export class FailedPlayerDto {
   @ApiProperty({ example: 99, description: '선수 등번호' })
   playerNumber: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '해당 선수는 DB에 존재하지 않습니다',
-    description: '실패 원인' 
+    description: '실패 원인',
   })
   error: string;
 }
@@ -177,15 +177,15 @@ export class FailedPlayerDto {
  * 에러 상세 정보 DTO
  */
 export class ErrorDetailsDto {
-  @ApiProperty({ 
+  @ApiProperty({
     type: [InvalidClipDto],
-    description: '유효하지 않은 클립 목록' 
+    description: '유효하지 않은 클립 목록',
   })
   invalidClips: InvalidClipDto[];
 
-  @ApiProperty({ 
+  @ApiProperty({
     type: [FailedPlayerDto],
-    description: '분석 실패한 선수 목록' 
+    description: '분석 실패한 선수 목록',
   })
   failedPlayers: FailedPlayerDto[];
 }
@@ -197,9 +197,9 @@ export class GameUploadDataDto {
   @ApiProperty({ type: GameInfoDto, description: '게임 기본 정보' })
   gameInfo: GameInfoDto;
 
-  @ApiProperty({ 
-    type: [PlayerResultDto], 
-    description: '선수별 분석 결과' 
+  @ApiProperty({
+    type: [PlayerResultDto],
+    description: '선수별 분석 결과',
   })
   playerResults: PlayerResultDto[];
 
@@ -209,10 +209,10 @@ export class GameUploadDataDto {
   @ApiProperty({ type: ErrorDetailsDto, description: '에러 상세 정보' })
   errors: ErrorDetailsDto;
 
-  @ApiProperty({ 
-    type: TeamStatsResultDto, 
+  @ApiProperty({
+    type: TeamStatsResultDto,
     description: '팀 스탯 결과 (자동 계산)',
-    required: false
+    required: false,
   })
   teamStats?: TeamStatsResultDto;
 }
@@ -224,18 +224,18 @@ export class GameUploadSuccessDto {
   @ApiProperty({ example: true, description: '업로드 성공 여부' })
   success: boolean;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '게임 데이터 업로드 및 분석이 완료되었습니다',
-    description: '응답 메시지' 
+    description: '응답 메시지',
   })
   message: string;
 
   @ApiProperty({ type: GameUploadDataDto, description: '업로드 결과 데이터' })
   data: GameUploadDataDto;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '2024-12-26T10:30:00.000Z',
-    description: '처리 완료 시간' 
+    description: '처리 완료 시간',
   })
   timestamp: string;
 }
@@ -247,27 +247,26 @@ export class GameUploadErrorDto {
   @ApiProperty({ example: false, description: '업로드 성공 여부' })
   success: boolean;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: '파일이 업로드되지 않았습니다',
-    description: '에러 메시지' 
+    description: '에러 메시지',
   })
   message: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'NO_FILE_UPLOADED',
     description: '에러 코드',
-    required: false 
+    required: false,
   })
   code?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'Invalid file format',
     description: '에러 상세 정보',
-    required: false 
+    required: false,
   })
   details?: string;
 }
-
 
 /**
  * 파일 업로드 요청 DTO (Swagger용)
@@ -277,7 +276,7 @@ export class FileUploadDto {
     type: 'string',
     format: 'binary',
     description: 'JSON 형식의 게임 데이터 파일 (최대 10MB)',
-    example: 'game-data.json'
+    example: 'game-data.json',
   })
   gameFile: Express.Multer.File;
 }

@@ -12,7 +12,7 @@ export class S3UploadService {
     this.s3 = new AWS.S3({
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: process.env.AWS_REGION || 'ap-northeast-2'
+      region: process.env.AWS_REGION || 'ap-northeast-2',
     });
   }
 
@@ -20,10 +20,14 @@ export class S3UploadService {
   async uploadToS3(file: Express.Multer.File, folder = 'videos') {
     try {
       // AWS 설정 확인
-      if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_BUCKET_NAME) {
+      if (
+        !process.env.AWS_ACCESS_KEY_ID ||
+        !process.env.AWS_SECRET_ACCESS_KEY ||
+        !process.env.AWS_BUCKET_NAME
+      ) {
         return {
           success: false,
-          error: 'AWS 설정이 완료되지 않았습니다.'
+          error: 'AWS 설정이 완료되지 않았습니다.',
         };
       }
 
@@ -38,7 +42,7 @@ export class S3UploadService {
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
-        ACL: 'public-read'  // 공개 읽기 권한
+        ACL: 'public-read', // 공개 읽기 권한
       };
 
       // S3에 파일 업로드 실행
@@ -46,16 +50,16 @@ export class S3UploadService {
 
       return {
         success: true,
-        url: result.Location,     // 파일 URL
-        key: result.Key,          // S3 키
-        bucket: result.Bucket,    // 버킷 이름
-        fileName: fileName        // 생성된 파일명
+        url: result.Location, // 파일 URL
+        key: result.Key, // S3 키
+        bucket: result.Bucket, // 버킷 이름
+        fileName: fileName, // 생성된 파일명
       };
     } catch (error) {
       console.error('S3 업로드 오류:', error);
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -64,8 +68,8 @@ export class S3UploadService {
   async deleteFromS3(key: string) {
     try {
       const params = {
-        Bucket: process.env.AWS_BUCKET_NAME!,
-        Key: key
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: key,
       };
 
       await this.s3.deleteObject(params).promise();

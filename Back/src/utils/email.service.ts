@@ -12,8 +12,8 @@ export class EmailService {
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER, // Gmail 계정
-        pass: process.env.EMAIL_PASS  // Gmail 앱 비밀번호
-      }
+        pass: process.env.EMAIL_PASS, // Gmail 앱 비밀번호
+      },
     });
   }
 
@@ -23,9 +23,13 @@ export class EmailService {
   }
 
   // 인증 이메일 발송
-  async sendVerificationEmail(email: string, token: string, name?: string): Promise<boolean> {
+  async sendVerificationEmail(
+    email: string,
+    token: string,
+    name?: string,
+  ): Promise<boolean> {
     const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/verify-email?token=${token}&email=${email}`;
-    
+
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
@@ -59,9 +63,9 @@ export class EmailService {
             </p>
           </div>
         </div>
-      `
+      `,
     };
-    
+
     try {
       await this.transporter.sendMail(mailOptions);
       console.log(`인증 이메일 발송 성공: ${email}`);

@@ -1,8 +1,13 @@
-import { Injectable, BadRequestException, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+// import * as bcrypt from 'bcrypt'; // TODO: 사용할 때 주석 해제
 import * as crypto from 'crypto';
 import { User, UserDocument } from '../schemas/user.schema';
 import { SignupDto, LoginDto, VerifyEmailDto } from '../common/dto/auth.dto';
@@ -18,7 +23,7 @@ export class AuthService {
 
   async signup(signupDto: SignupDto) {
     const { email, password, name, nickname } = signupDto;
-    
+
     const fullName = name || nickname;
 
     // 이메일 중복 확인
@@ -53,9 +58,9 @@ export class AuthService {
         user: {
           id: newUser._id,
           email: newUser.email,
-          name: newUser.name
-        }
-      }
+          name: newUser.name,
+        },
+      },
     };
   }
 
@@ -97,9 +102,9 @@ export class AuthService {
           id: user._id,
           email: user.email,
           name: user.name,
-          isEmailVerified: user.isEmailVerified
-        }
-      }
+          isEmailVerified: user.isEmailVerified,
+        },
+      },
     };
   }
 
@@ -150,8 +155,8 @@ export class AuthService {
           email: user.email,
           name: user.name,
           isEmailVerified: true,
-        }
-      }
+        },
+      },
     };
   }
 }

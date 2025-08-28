@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { API_CONFIG } from '../../../config/api';
+import './index.css';
 
 /**
  * JSON 전체 게임 데이터를 업로드하는 컴포넌트
@@ -296,7 +297,8 @@ export default function JsonEx() {
   // 렌더
   // ──────────────────────────────
   return (
-    <div>
+    <div style={{ padding: '20px', minHeight: '100vh', backgroundColor: 'white' }}>
+      <h1>JSON 파일 업로드 테스트</h1>
       {/* 스탯 초기화 버튼 */}
       <div style={{ marginBottom: '20px', padding: '15px', border: '2px solid #ff6b6b', borderRadius: '8px', backgroundColor: '#ffe0e0' }}>
         <h3 style={{ color: '#d63031', marginBottom: '10px' }}>⚠️ 위험한 작업</h3>
@@ -346,7 +348,10 @@ export default function JsonEx() {
         onKeyDown={(e) => {
           if (e.key === "Enter" && fileInputRef.current) fileInputRef.current.click();
         }}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => {
+          console.log('Upload zone clicked!');
+          fileInputRef.current?.click();
+        }}
         aria-label="JSON 파일을 드래그하거나 클릭해서 업로드하세요"
       >
         <div>📤 JSON 파일을 드래그하거나 클릭해서 업로드하세요</div>
@@ -356,8 +361,12 @@ export default function JsonEx() {
           accept=".json,application/json"
           className="hidden"
           onChange={(e) => {
+            console.log('File input changed!', e.target.files);
             const file = e.target.files?.[0];
-            if (file) handleFileUpload(file);
+            if (file) {
+              console.log('File selected:', file.name);
+              handleFileUpload(file);
+            }
             e.target.value = ""; // 동일 파일 재업로드 가능하도록 초기화
           }}
         />

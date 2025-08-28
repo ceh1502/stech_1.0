@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsObject, IsArray, ValidateNested, IsOptional } from 'class-validator';
+import {
+  IsString,
+  // IsObject, // TODO: 사용할 때 주석 해제
+  IsArray,
+  ValidateNested,
+  IsOptional,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { NewClipDto } from './new-clip.dto';
 
@@ -24,7 +30,10 @@ export class GameDataDto {
   @IsString()
   gameKey: string;
 
-  @ApiProperty({ example: '2024-09-07(토) 16:00', description: '경기 날짜 및 시간' })
+  @ApiProperty({
+    example: '2024-09-07(토) 16:00',
+    description: '경기 날짜 및 시간',
+  })
   @IsOptional()
   @IsString()
   date?: string;
@@ -58,9 +67,9 @@ export class GameDataDto {
   @IsString()
   awayTeam: string;
 
-  @ApiProperty({ 
-    type: [NewClipDto], 
-    description: '클립 데이터 배열 (Clips 또는 clips 필드명 모두 지원)' 
+  @ApiProperty({
+    type: [NewClipDto],
+    description: '클립 데이터 배열 (Clips 또는 clips 필드명 모두 지원)',
   })
   @IsArray()
   @ValidateNested({ each: true })
