@@ -265,9 +265,36 @@ export class ClipAnalyzerService {
           player: qbPlayer.name,
         };
       } else {
+        // 선수가 없으면 새로 생성
+        console.log(`🆕 새 QB 선수 생성: ${qbStats.jerseyNumber}번 (${qbStats.teamName})`);
+        
+        const newPlayer = new this.playerModel({
+          name: `QB ${qbStats.jerseyNumber}번`,
+          jerseyNumber: qbStats.jerseyNumber,
+          position: 'QB',
+          teamName: qbStats.teamName,
+          stats: qbStats,
+          // 필수 필드들
+          playerId: `QB_${qbStats.teamName}_${qbStats.jerseyNumber}`,
+          studentId: `STU_${qbStats.jerseyNumber}`,
+          email: `qb${qbStats.jerseyNumber}@${qbStats.teamName.toLowerCase()}.com`,
+          phone: '000-0000-0000',
+          height: 180,
+          weight: 80,
+          birthDate: new Date('2000-01-01'),
+          league: '1부',
+          division: '1부',
+          grade: 3,
+          major: '컴퓨터공학과',
+          admissionYear: 2020,
+        });
+
+        await newPlayer.save();
+
         return {
-          success: false,
-          message: `QB ${qbStats.jerseyNumber}번 (${qbStats.teamName}) 선수를 데이터베이스에서 찾을 수 없습니다`,
+          success: true,
+          message: `QB ${qbStats.jerseyNumber}번 (${qbStats.teamName}) 신규 선수 생성 및 스탯 저장 완료`,
+          player: newPlayer.name,
         };
       }
     } catch (error) {

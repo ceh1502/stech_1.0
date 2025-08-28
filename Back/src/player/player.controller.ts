@@ -40,6 +40,30 @@ export class PlayerController {
     private readonly teamSeasonStatsService: TeamSeasonStatsAnalyzerService,
   ) {}
 
+  @Post('reset-all')
+  @ApiOperation({ summary: '모든 선수 데이터 초기화' })
+  @ApiResponse({ status: 200, description: '초기화 성공' })
+  @HttpCode(HttpStatus.OK)
+  async resetAllPlayers() {
+    console.log('🔄 모든 선수 데이터 초기화 요청');
+    
+    try {
+      const result = await this.playerService.resetAllPlayerData();
+      return {
+        success: true,
+        message: `${result.deletedCount}명의 선수 데이터가 삭제되었습니다.`,
+        deletedCount: result.deletedCount,
+      };
+    } catch (error) {
+      console.error('❌ 선수 데이터 초기화 실패:', error);
+      return {
+        success: false,
+        message: '선수 데이터 초기화에 실패했습니다.',
+        error: error.message,
+      };
+    }
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

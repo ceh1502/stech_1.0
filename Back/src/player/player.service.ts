@@ -582,4 +582,24 @@ export class PlayerService {
 
     return finalStats;
   }
+
+  /**
+   * 모든 선수 데이터 완전 삭제
+   */
+  async resetAllPlayerData() {
+    try {
+      console.log('🗑️ 모든 선수 데이터 삭제 시작...');
+      const result = await this.playerModel.deleteMany({});
+      
+      console.log(`✅ ${result.deletedCount}명의 선수 데이터가 삭제되었습니다.`);
+      return {
+        success: true,
+        message: `${result.deletedCount}명의 선수 데이터가 삭제되었습니다.`,
+        deletedCount: result.deletedCount,
+      };
+    } catch (error) {
+      console.error('❌ 선수 데이터 삭제 실패:', error);
+      throw new Error(`선수 데이터 삭제 실패: ${error.message}`);
+    }
+  }
 }

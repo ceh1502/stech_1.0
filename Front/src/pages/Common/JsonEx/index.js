@@ -190,7 +190,7 @@ export default function JsonEx() {
   // 스탯 초기화
   // ──────────────────────────────
   const handleResetStats = useCallback(async () => {
-    if (!window.confirm('⚠️ 모든 선수 스탯과 팀 스탯을 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다!')) {
+    if (!window.confirm('⚠️ 모든 선수 데이터와 팀 스탯을 완전히 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다!')) {
       return;
     }
 
@@ -198,9 +198,9 @@ export default function JsonEx() {
       setResetStatus("resetting");
       setResetMessage("");
 
-      // 1. 선수 스탯 초기화
+      // 1. 모든 선수 데이터 삭제
       await axios.post(
-        `${API_CONFIG.BASE_URL}/player/reset-all-stats`,
+        `${API_CONFIG.BASE_URL}/player/reset-all`,
         {},
         { timeout: API_CONFIG.TIMEOUT }
       );
@@ -213,7 +213,7 @@ export default function JsonEx() {
       );
 
       setResetStatus("success");
-      setResetMessage("모든 스탯이 성공적으로 초기화되었습니다!");
+      setResetMessage("모든 선수 데이터가 성공적으로 삭제되었습니다!");
       
       // 3초 후 자동으로 상태 리셋
       setTimeout(() => {
@@ -223,7 +223,7 @@ export default function JsonEx() {
 
     } catch (error) {
       setResetStatus("error");
-      const errorMsg = error?.response?.data?.message || error?.message || "초기화 중 오류가 발생했습니다.";
+      const errorMsg = error?.response?.data?.message || error?.message || "삭제 중 오류가 발생했습니다.";
       setResetMessage(errorMsg);
       
       // 5초 후 자동으로 상태 리셋
@@ -303,7 +303,7 @@ export default function JsonEx() {
       <div style={{ marginBottom: '20px', padding: '15px', border: '2px solid #ff6b6b', borderRadius: '8px', backgroundColor: '#ffe0e0' }}>
         <h3 style={{ color: '#d63031', marginBottom: '10px' }}>⚠️ 위험한 작업</h3>
         <p style={{ marginBottom: '15px', color: '#666' }}>
-          모든 선수 스탯과 팀 스탯을 초기화합니다. 이 작업은 되돌릴 수 없습니다!
+          모든 선수 데이터와 팀 스탯을 완전히 삭제합니다. 이 작업은 되돌릴 수 없습니다!
         </p>
         <button
           type="button"
@@ -320,7 +320,7 @@ export default function JsonEx() {
             fontWeight: 'bold'
           }}
         >
-          {resetStatus === "resetting" ? "🔄 초기화 중..." : "🗑️ 모든 스탯 초기화"}
+          {resetStatus === "resetting" ? "🔄 삭제 중..." : "🗑️ 모든 선수 데이터 삭제"}
         </button>
         
         {/* 초기화 상태 메시지 */}
