@@ -25,31 +25,62 @@ const prettyPlayType = (raw) => {
   return raw; // 그 외 값은 원문 유지 (KICKOFF 등)
 };
 
-// 스키마 → 내부 표현으로 변환
 const normalizeClips = (clips = []) =>
-  clips.map((c) => {
-    const startScore = Array.isArray(c?.StartScore) ? c.StartScore[0] : null;
-    return {
-      id: String(c.ClipKey),
-      videoUrl: c.ClipUrl || null,
-      quarter: Number(c.Quarter) || 1,
-      offensiveTeam: c.OffensiveTeam || null, // 'HOME' | 'AWAY'
-      specialTeam: !!c.SpecialTeam,
-      down: c.Down ?? null, // number
-      yardsToGo: c.RemainYard ?? null, // number
-      playType: c.PlayType || null, // 'RUN'|'PASS'|'NOPASS'|...
-      startYard: c.StartYard || null, // {side:'own'|'opp', yard:number}
-      endYard: c.EndYard || null,
-      carriers: Array.isArray(c.Carrier) ? c.Carrier : [],
-      significant: Array.isArray(c.SignificantPlays)
+  clips.map((c, idx) => {
+    const startScoreArr = c?.StartScore || c?.startScore;
+    const startScore = Array.isArray(startScoreArr) ? startScoreArr[0] : null;
+
+    const id =
+      c?.id ?? c?.ClipKey ?? c?.clipKey ?? c?.key ?? `idx-${idx}`;
+
+    const url =
+      c?.videoUrl ?? c?.clipUrl ?? c?.ClipUrl ?? null;
+
+    const quarter = Number(c?.quarter ?? c?.Quarter) || 1;
+
+    const downRaw = c?.down ?? c?.Down;
+    const down =
+      typeof downRaw === "number"
+        ? downRaw
+        : parseInt(downRaw, 10) || null;
+
+    const yardsToGo =
+      c?.yardsToGo ?? c?.RemainYard ?? c?.remainYard ?? null;
+
+    const playType = c?.playType ?? c?.PlayType ?? null;
+
+    const offensiveTeam =
+      c?.offensiveTeam ?? c?.OffensiveTeam ?? null;
+
+    const significant =
+      Array.isArray(c?.significantPlay)
+        ? c.significantPlay
+        : Array.isArray(c?.SignificantPlays)
         ? c.SignificantPlays.map((sp) => sp?.label || sp?.key).filter(Boolean)
+        : [];
+
+    return {
+      id: String(id),
+      videoUrl: url,
+      quarter,
+      offensiveTeam,
+      specialTeam: !!(c?.specialTeam ?? c?.SpecialTeam),
+      down,
+      yardsToGo,
+      playType,
+      startYard: c?.startYard ?? c?.StartYard ?? null,
+      endYard: c?.endYard ?? c?.EndYard ?? null,
+      carriers: Array.isArray(c?.carriers)
+        ? c.carriers
+        : Array.isArray(c?.Carrier)
+        ? c.Carrier
         : [],
-      scoreHome: startScore?.Home ?? 0,
-      scoreAway: startScore?.Away ?? 0,
-      raw: c, // 필요 시 원본 접근
+      significant,
+      scoreHome: startScore?.Home ?? c?.scoreHome ?? 0,
+      scoreAway: startScore?.Away ?? c?.scoreAway ?? 0,
+      raw: c,
     };
   });
-
 const getOrdinal = (n) => {
   if (n === 1) return 'st';
   if (n === 2) return 'nd';
