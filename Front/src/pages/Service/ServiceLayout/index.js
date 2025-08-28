@@ -1,6 +1,6 @@
 // src/pages/Service/ServiceLayout/index.js
-import React, { useState } from "react";
-import { useLocation, useNavigate, Outlet } from "react-router-dom";
+import React, {useState} from "react";
+import {useLocation, useNavigate, Outlet, useMatch} from "react-router-dom";
 import ServiceSidebar from "./ServiceSidebar";
 import SupportModal from "../../../components/SupportModal";
 import UploadVideoModal from "../../../components/UploadVideoModal.jsx";
@@ -11,16 +11,22 @@ const ServiceLayout = () => {
   const navigate = useNavigate();
   const [showUpload, setShowUpload] = useState(false);
 
+  const isVideo = !!useMatch("/service/video/*");
+
   return (
     <>
-      <div className="serviceLayoutContainer">
-        <ServiceSidebar className="serviceSidebar" />
-
-        <main className="flex-1">
+      {isVideo ? (
+        <div className="flex-1">
           <Outlet />
-        </main>
-      </div>
-
+        </div>
+      ) : (
+        <div className="serviceLayoutContainer">
+          <ServiceSidebar className="serviceSidebar" />
+          <main className="flex-1">
+            <Outlet />
+          </main>
+        </div>
+      )}
       <UploadVideoModal
         isOpen={showUpload}
         onClose={() => setShowUpload(false)}
