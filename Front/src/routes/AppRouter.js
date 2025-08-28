@@ -40,6 +40,8 @@ export default function AppRouter() {
                     <Route path="manage" element={<ServicePages.ProfileManage />} />
                 </Route>
                 <Route path="settings" element={<ServicePages.SettingsPage />} />
+                <Route path="video" element={<ServicePages.VideoPlayer /> } />
+
 
                 {/* Guest Pages */}
                 <Route path="guest" element={<ServicePages.GuestLayout />}>

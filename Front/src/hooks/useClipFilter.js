@@ -1,207 +1,128 @@
-// hooks/useFootballFilter.js
-import {useState, useCallback, useMemo, useEffect} from "react";
+// src/hooks/useClipFiltering.js
+import { useEffect, useMemo, useState } from "react";
 
-// 내부 기본값
 const DEFAULT_FILTERS = {
-  quarter: null,
-  playType: null,
-  significantPlay: [],
-  team: null,
+  quarter: null,          // 1|2|3|4|null
+  playType: null,         // '런' | '패스' | null
+  significantPlay: [],    // ['터치다운', ...]
+  team: null,             // 팀명 | null
 };
 
-// 팀 코드 → 표시명 (FootballFilter와 일치)
-const TEAM_NAMES = {
-  HY: "Hanyang Lions",
-  YS: "Yonsei Eagles",
-  KM: "Kookmin Razorbacks", // 필요시 확장
-};
-
-// 반대 속성(중복 선택 방지) — FootballFilter의 라벨과 맞춤
-const OPPOSITES = {
-  "2PT 성공": "2PT 실패",
-  "2PT 실패": "2PT 성공",
-  "PAT 성공": "PAT 실패",
-  "PAT 실패": "PAT 성공",
-  "FG 성공": "FG 실패",
-  "FG 실패": "FG 성공",
-};
-
-export const useFootballFilter = (persistKey = null) => {
-  // 초기 로드(로컬스토리지) → 없으면 기본값
+export function useClipFilter({ persistKey = "clipFilters:default", rawClips = [], teamOptions = [] }) {
   const [filters, setFilters] = useState(() => {
-    if (!persistKey) return DEFAULT_FILTERS;
     try {
-      const saved = JSON.parse(localStorage.getItem(persistKey) || "{}");
-      if (saved?.filters) {
-        return {...DEFAULT_FILTERS, ...saved.filters};
+      const raw = localStorage.getItem(persistKey);
+      if (raw) {
+        const p = JSON.parse(raw);
+        return {
+          quarter: p?.quarter ?? null,
+          playType: p?.playType ?? null,
+          significantPlay: Array.isArray(p?.significantPlay) ? p.significantPlay : [],
+          team: p?.team ?? null,
+        };
       }
-    } catch (_) {}
-    return DEFAULT_FILTERS;
+    } catch {}
+    return { ...DEFAULT_FILTERS };
   });
 
-  const [selectedPlay, setSelectedPlay] = useState(() => {
-    if (!persistKey) return null;
-    try {
-      const saved = JSON.parse(localStorage.getItem(persistKey) || "{}");
-      return saved?.selectedPlay ?? null;
-    } catch (_) {}
-    return null;
-  });
-
-  // 변경 시 저장
   useEffect(() => {
-    if (!persistKey) return;
-    const payload = JSON.stringify({filters, selectedPlay});
-    localStorage.setItem(persistKey, payload);
-  }, [persistKey, filters, selectedPlay]);
+    try { localStorage.setItem(persistKey, JSON.stringify(filters)); } catch {}
+  }, [filters, persistKey]);
 
-  // ── 필터 변경
-  const handleFilterChange = useCallback((category, value) => {
-    if (category === "significantPlay") {
-      setFilters((prev) => {
-        const current = [...prev.significantPlay];
+  // 저장된 team 값이 현재 팀 옵션에 없다면 해제
+  useEffect(() => {
+    if (filters.team && !teamOptions.some((o) => o.value === filters.team)) {
+      setFilters((f) => ({ ...f, team: null }));
+    }
+  }, [teamOptions, filters.team]);
 
-        if (OPPOSITES[value]) {
-          // 반대값 제거
-          const filtered = current.filter((v) => v !== OPPOSITES[value]);
-          const exists = filtered.includes(value);
-          return {
-            ...prev,
-            significantPlay: exists
-              ? filtered.filter((v) => v !== value)
-              : [...filtered, value],
-          };
-        } else {
-          const idx = current.indexOf(value);
-          if (idx > -1) {
-            current.splice(idx, 1);
-          } else {
-            current.push(value);
-          }
-          return {...prev, significantPlay: current};
+  const handleFilterChange = (category, value) => {
+    setFilters((prev) => {
+      const next = { ...prev };
+      switch (category) {
+        case "team": next.team = value || null; break;
+        case "quarter": next.quarter = value ?? null; break;
+        case "playType": next.playType = value || null; break;
+        case "significantPlay": {
+          const arr = Array.isArray(prev.significantPlay) ? [...prev.significantPlay] : [];
+          const idx = arr.indexOf(value);
+          if (idx >= 0) arr.splice(idx, 1);
+          else arr.push(value);
+          next.significantPlay = arr;
+          break;
         }
-      });
-    } else {
-      setFilters((prev) => ({
-        ...prev,
-        [category]: prev[category] === value ? null : value,
-      }));
-    }
-  }, []);
+        default: break;
+      }
+      return next;
+    });
+  };
 
-  // ── 단일/전체 제거
-  const removeFilter = useCallback((category, value = null) => {
-    if (category === "significantPlay" && value) {
-      setFilters((prev) => ({
-        ...prev,
-        significantPlay: prev.significantPlay.filter((v) => v !== value),
-      }));
-    } else {
-      setFilters((prev) => ({
-        ...prev,
-        [category]: category === "significantPlay" ? [] : null,
-      }));
-    }
-  }, []);
+  const removeFilter = (category, value) => {
+    setFilters((prev) => {
+      const next = { ...prev };
+      if (category === "significantPlay") {
+        next.significantPlay = (prev.significantPlay || []).filter((v) => v !== value);
+      } else {
+        next[category] = null;
+      }
+      return next;
+    });
+  };
 
-  const clearAllFilters = useCallback(() => {
-    setFilters(DEFAULT_FILTERS);
-  }, []);
+  const clearAllFilters = () => setFilters({ ...DEFAULT_FILTERS });
 
-  // ── 활성 필터 칩
+  // 실제 필터 적용
+  const clips = useMemo(() => {
+    return (rawClips || []).filter((r) => {
+      if (filters.team && r.offensiveTeam !== filters.team) return false;
+      if (filters.quarter && r.quarter !== filters.quarter) return false;
+      if (filters.playType && r.playType !== filters.playType) return false;
+      if (filters.significantPlay?.length) {
+        const hasAny = (r.significantPlay || []).some((s) => filters.significantPlay.includes(s));
+        if (!hasAny) return false;
+      }
+      return true;
+    });
+  }, [rawClips, filters]);
+
+  // 요약/칩
+  const summaries = {
+    team: filters.team || "공격팀",
+    quarter: filters.quarter ? `Q${filters.quarter}` : "쿼터",
+    playType: filters.playType || "유형",
+    significant: (() => {
+      const arr = Array.isArray(filters.significantPlay) ? filters.significantPlay : [];
+      if (arr.length === 0) return "중요플레이";
+      if (arr.length === 1) return arr[0];
+      return `${arr[0]} 외 ${arr.length - 1}`;
+    })(),
+  };
+
   const activeFilters = useMemo(() => {
-    const active = [];
-    if (filters.quarter) {
-      active.push({
-        category: "quarter",
-        value: filters.quarter,
-        label: `Q${filters.quarter}`,
-      });
-    }
-    if (filters.playType) {
-      active.push({
-        category: "playType",
-        value: filters.playType,
-        label: filters.playType,
-      });
-    }
-    if (filters.significantPlay?.length) {
-      filters.significantPlay.forEach((p) => {
-        active.push({category: "significantPlay", value: p, label: p});
-      });
-    }
-    if (filters.team) {
-      active.push({category: "team", value: filters.team, label: filters.team});
-    }
-    return active;
+    const chips = [];
+    if (filters.team) chips.push({ category: "team", value: filters.team, label: filters.team });
+    if (filters.quarter) chips.push({ category: "quarter", value: filters.quarter, label: `Q${filters.quarter}` });
+    if (filters.playType) chips.push({ category: "playType", value: filters.playType, label: filters.playType });
+    (filters.significantPlay || []).forEach((s) => chips.push({ category: "significantPlay", value: s, label: s }));
+    return chips;
   }, [filters]);
 
-  // ── 데이터 필터링
-  const filterData = useCallback(
-    (data) => {
-      const filtered = data.filter((play) => {
-        // Quarter
-        if (filters.quarter && play.quarter !== filters.quarter) return false;
-
-        // Play Type
-        if (filters.playType && play.playType !== filters.playType)
-          return false;
-
-        // Significant (모든 선택 포함 AND)
-        if (filters.significantPlay?.length) {
-          const ok = filters.significantPlay.every(
-            (s) => play.significantPlay && play.significantPlay.includes(s)
-          );
-          if (!ok) return false;
-        }
-
-        // Team
-        if (filters.team) {
-          if (
-            (play.offensiveTeam || "").toLowerCase() !==
-            filters.team.toLowerCase()
-          )
-            return false;
-        }
-
-        return true;
-      });
-
-      // 선택된 플레이가 사라졌으면 선택 해제
-      if (selectedPlay && !filtered.find((p) => p.id === selectedPlay)) {
-        setSelectedPlay(null);
-      }
-      return filtered;
-    },
-    [filters, selectedPlay]
-  );
-
-  // ── 플레이 선택
-  const selectPlay = useCallback((playId) => {
-    setSelectedPlay((prev) => (prev === playId ? null : playId));
-  }, []);
-  const clearSelectedPlay = useCallback(() => setSelectedPlay(null), []);
-  const isPlaySelected = useCallback(
-    (playId) => selectedPlay === playId,
-    [selectedPlay]
-  );
-  const getSelectedPlayData = useCallback(
-    (data) => (selectedPlay ? data.find((p) => p.id === selectedPlay) : null),
-    [selectedPlay]
-  );
+  // 플레이어로 넘길 때 함께 보낼 페이로드(필터 결과 + 선택 ID + 메타)
+  const buildPlayerNavState = (initialPlayId = null) => ({
+    filteredPlaysData: clips,
+    initialPlayId,
+    filtersSnapshot: filters,
+  });
 
   return {
     filters,
+    setFilters,
+    summaries,
+    activeFilters,
+    clips,                 // 필터 적용된 클립들
     handleFilterChange,
     removeFilter,
     clearAllFilters,
-    activeFilters,
-    filterData,
-    // 선택 관련
-    selectedPlay,
-    selectPlay,
-    clearSelectedPlay,
-    isPlaySelected,
-    getSelectedPlayData,
+    buildPlayerNavState,   // 플레이어 네비게이션용 스냅샷 빌더
   };
-};
+}
