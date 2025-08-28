@@ -584,13 +584,13 @@ export default function StatPosition({data, teams = []}) {
 
       {/* ▼▼▼ 렌더 구조 유지 ▼▼▼ */}
       <div className="table-wrapper">
-        <table className="stat-table">
-          <thead className="table-head">
-            <tr className="table-row">
+        <div className="stat-table">
+          <div className="table-head">
+            <div className="table-row">
               <div className="table-row1">
-                <th className="table-header-cell rank-column">순위</th>
-                <th className="table-header-cell player-column">선수 이름</th>
-                <th className="table-header-cell team-column">소속팀</th>
+                <div className="table-header-cell rank-column">순위</div>
+                <div className="table-header-cell player-column">선수 이름</div>
+                <div className="table-header-cell team-column">소속팀</div>
               </div>
               <div
                 className="table-row2"
@@ -604,7 +604,7 @@ export default function StatPosition({data, teams = []}) {
                     PRIMARY_METRIC[position]?.default === col.key;
 
                   return (
-                    <th
+                    <div
                       key={col.key}
                       className={`table-header-cell stat-column sortable
                       ${isActive ? "active-blue" : ""}
@@ -631,14 +631,14 @@ export default function StatPosition({data, teams = []}) {
                           size={30}
                         />
                       </button>
-                    </th>
+                    </div>
                   );
                 })}
               </div>
-            </tr>
-          </thead>
+            </div>
+          </div>
 
-          <tbody className="table-body">
+          <div className="table-body">
             {rankedPlayers.map((row, idx) => {
               const teamInfo = teams.find((t) => t.name === row.team);
               const rowClass = `table-rows ${
@@ -646,17 +646,17 @@ export default function StatPosition({data, teams = []}) {
               }`;
 
               return (
-                <tr
+                <div
                   key={row.id || row.name || idx}
                   className={`table-rows ${rowClass}`}
                 >
                   <div className="table-row1">
-                    <td className="table-cell">{row.__rank}위</td>
-                    <td className="table-cell player-name clickable">
+                    <div className="table-cell">{row.__rank}위</div>
+                    <div className="table-cell player-name clickable">
                       {row.name}
-                    </td>
+                    </div>
 
-                    <td className="table-cell team-name">
+                    <div className="table-cell team-name">
                       {teamInfo?.logo && (
                         <div className='team-logo'>
                           <img
@@ -671,7 +671,7 @@ export default function StatPosition({data, teams = []}) {
                         </div>
                       )}
                       <span>{row.team}</span>
-                    </td>
+                    </div>
                   </div>
 
                   <div
@@ -679,16 +679,16 @@ export default function StatPosition({data, teams = []}) {
                     style={{"--cols": currentColumns.length}}
                   >
                     {currentColumns.map((col) => (
-                      <td key={col.key} className="table-cell">
+                      <div key={col.key} className="table-cell">
                         {fmt(col.key, row[col.key])}
-                      </td>
+                      </div>
                     ))}
                   </div>
-                </tr>
+                </div>
               );
             })}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
     </div>
   );
