@@ -2,7 +2,6 @@ import StatPosition from "../../../../../components/Stat/StatPosition";
 import {TEAMS} from "../../../../../data/TEAMS";
 import { useState, useEffect } from 'react';
 import { API_CONFIG } from '../../../../../config/api';
-import {mockData} from '../../../../../data/mockData';
 
 const LeaguePositionPage = () => {
     const [data, setData] = useState([]);
@@ -125,7 +124,7 @@ const LeaguePositionPage = () => {
 
     return (
         <div>
-            <StatPosition data={mockData} teams={TEAMS} />
+            <StatPosition  data={data} teams={TEAMS} />
         </div>
     );
 }
