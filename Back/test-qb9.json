@@ -1,0 +1,29 @@
+{
+  "gameKey": "TESTQB9_20241228",
+  "homeTeam": "HFBlackKnights", 
+  "awayTeam": "HYLions",
+  "Clips": [
+    {
+      "clipKey": "1",
+      "offensiveTeam": "Home",
+      "playType": "PASS",
+      "gainYard": 15,
+      "car": {"num": 20, "pos": "WR"},
+      "car2": {"num": 9, "pos": "QB"},
+      "tkl": {"num": 24, "pos": "LB"},
+      "tkl2": {"num": null, "pos": null},
+      "significantPlays": [null, null, null, null]
+    },
+    {
+      "clipKey": "2",
+      "offensiveTeam": "Home", 
+      "playType": "PASS",
+      "gainYard": 8,
+      "car": {"num": 18, "pos": "WR"},
+      "car2": {"num": 9, "pos": "QB"},
+      "tkl": {"num": null, "pos": null},
+      "tkl2": {"num": null, "pos": null},
+      "significantPlays": [null, null, null, null]
+    }
+  ]
+}

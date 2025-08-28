@@ -16,7 +16,12 @@ export class VideoService {
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
   ) {}
 
-  async uploadVideo(file: Express.Multer.File, uploadResult: any, title?: string, description?: string) {
+  async uploadVideo(
+    file: Express.Multer.File,
+    uploadResult: any,
+    title?: string,
+    description?: string,
+  ) {
     // 고유한 비디오 ID 생성
     const videoId = `vid_${uuidv4().substring(0, 8)}`;
 
@@ -27,16 +32,16 @@ export class VideoService {
       fileName: file.originalname,
       fileSize: file.size,
       // 기본값들
-      quarter: "1Q",
-      playType: "Run",
+      quarter: '1Q',
+      playType: 'Run',
       success: true,
       startYard: {
-        side: "own",
-        yard: 0
+        side: 'own',
+        yard: 0,
       },
       endYard: {
-        side: "own",
-        yard: 0
+        side: 'own',
+        yard: 0,
       },
       gainedYard: 0,
       players: [],
@@ -49,7 +54,7 @@ export class VideoService {
     return {
       success: true,
       message: '영상이 성공적으로 업로드되었습니다.',
-      data: newVideo
+      data: newVideo,
     };
   }
 
@@ -59,8 +64,8 @@ export class VideoService {
       path: 'gameId',
       populate: {
         path: 'teamId',
-        select: 'teamName logoUrl'
-      }
+        select: 'teamName logoUrl',
+      },
     });
 
     if (!video) {
@@ -69,17 +74,19 @@ export class VideoService {
 
     return {
       success: true,
-      data: video
+      data: video,
     };
   }
 
   async getGameVideos(gameId: string) {
     // 특정 경기의 모든 영상 조회 (최신순)
-    const videos = await this.videoModel.find({ gameId }).sort({ createdAt: -1 });
+    const videos = await this.videoModel
+      .find({ gameId })
+      .sort({ createdAt: -1 });
 
     return {
       success: true,
-      data: videos
+      data: videos,
     };
   }
 
@@ -95,7 +102,7 @@ export class VideoService {
 
     return {
       success: true,
-      message: '영상이 성공적으로 삭제되었습니다.'
+      message: '영상이 성공적으로 삭제되었습니다.',
     };
   }
 
@@ -121,9 +128,9 @@ export class VideoService {
           date: game.date,
           opponent: game.opponent,
           type: game.type,
-          clips: videos // JSON 형식에 맞춰 clips로 명명
+          clips: videos, // JSON 형식에 맞춰 clips로 명명
         };
-      })
+      }),
     );
 
     // JSON 형식에 맞춰 응답 구성
@@ -134,8 +141,8 @@ export class VideoService {
         logoUrl: team.logoUrl,
         players: players,
         games: gamesWithVideos,
-        createdAt: (team as any).createdAt
-      }
+        createdAt: (team as any).createdAt,
+      },
     };
 
     return response;

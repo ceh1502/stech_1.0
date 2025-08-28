@@ -1,4 +1,5 @@
-import { IsString, IsOptional, IsUrl } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
+// import { IsUrl } from 'class-validator'; // TODO: 사용할 때 주석 해제
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTeamDto {

@@ -1,14 +1,32 @@
-import { Controller, Post, UseInterceptors, UploadedFile, HttpException, HttpStatus, Inject, forwardRef } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseInterceptors,
+  UploadedFile,
+  HttpException,
+  HttpStatus,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiConsumes, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiConsumes,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { PlayerService } from '../player/player.service';
 import { TeamStatsAnalyzerService } from '../team/team-stats-analyzer.service';
-import { 
-  GameUploadSuccessDto, 
-  GameUploadErrorDto, 
-  FileUploadDto 
+import {
+  GameUploadSuccessDto,
+  GameUploadErrorDto,
+  FileUploadDto,
 } from './dto/game-upload.dto';
-import { SampleGameDataDto, SampleSuccessResponseDto } from './dto/game-sample.dto';
+import {
+  SampleGameDataDto,
+  SampleSuccessResponseDto,
+} from './dto/game-sample.dto';
 
 @ApiTags('🏈 Game Data Upload')
 @Controller('api/game')
@@ -23,7 +41,7 @@ export class GameController {
   @Post('upload-json')
   @UseInterceptors(FileInterceptor('gameFile'))
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '📤 JSON 게임 데이터 파일 업로드 및 자동 분석',
     description: `
     ## 🏈 게임 데이터 자동 분석 시스템
@@ -61,77 +79,85 @@ export class GameController {
     - **팀 통계**: 총야드, 패싱야드, 러싱야드, 리턴야드, 턴오버 ✨
     - **모든 통계**: 패싱, 러싱, 리시빙, 수비, 스페셜팀
     - **3-Tier 시스템**: 게임별 → 시즌별 → 커리어 자동 집계
-    `
+    `,
   })
   @ApiBody({
     description: '📄 JSON 게임 데이터 파일 업로드',
     type: FileUploadDto,
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: '✅ 게임 데이터 업로드 및 분석 성공',
-    type: GameUploadSuccessDto
+    type: GameUploadSuccessDto,
   })
-  @ApiResponse({ 
-    status: 400, 
+  @ApiResponse({
+    status: 400,
     description: '❌ 잘못된 요청 (파일 없음, 형식 오류, JSON 구조 오류)',
     type: GameUploadErrorDto,
     schema: {
       example: {
         success: false,
-        message: "올바른 JSON 형식이 아닙니다",
-        code: "INVALID_JSON_FORMAT"
-      }
-    }
+        message: '올바른 JSON 형식이 아닙니다',
+        code: 'INVALID_JSON_FORMAT',
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 413, 
+  @ApiResponse({
+    status: 413,
     description: '❌ 파일 크기 초과 (최대 10MB)',
     type: GameUploadErrorDto,
     schema: {
       example: {
         success: false,
-        message: "파일 크기가 너무 큽니다 (최대 10MB)",
-        code: "FILE_TOO_LARGE"
-      }
-    }
+        message: '파일 크기가 너무 큽니다 (최대 10MB)',
+        code: 'FILE_TOO_LARGE',
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 500, 
+  @ApiResponse({
+    status: 500,
     description: '❌ 서버 내부 오류',
     type: GameUploadErrorDto,
     schema: {
       example: {
         success: false,
-        message: "게임 데이터 처리 중 예상치 못한 오류가 발생했습니다",
-        code: "INTERNAL_PROCESSING_ERROR",
-        details: "Database connection failed"
-      }
-    }
+        message: '게임 데이터 처리 중 예상치 못한 오류가 발생했습니다',
+        code: 'INTERNAL_PROCESSING_ERROR',
+        details: 'Database connection failed',
+      },
+    },
   })
   async uploadGameJson(@UploadedFile() file: Express.Multer.File) {
     try {
       console.log('🎮 게임 JSON 파일 업로드 시작');
-      
+
       // 1. 파일 검증
       if (!file) {
-        throw new HttpException({
-          success: false,
-          message: '파일이 업로드되지 않았습니다',
-          code: 'NO_FILE_UPLOADED'
-        }, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          {
+            success: false,
+            message: '파일이 업로드되지 않았습니다',
+            code: 'NO_FILE_UPLOADED',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // 파일 크기 검증 (10MB)
       if (file.size > 10 * 1024 * 1024) {
-        throw new HttpException({
-          success: false,
-          message: '파일 크기가 너무 큽니다 (최대 10MB)',
-          code: 'FILE_TOO_LARGE'
-        }, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          {
+            success: false,
+            message: '파일 크기가 너무 큽니다 (최대 10MB)',
+            code: 'FILE_TOO_LARGE',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
-      console.log(`📁 파일 정보: ${file.originalname} (${(file.size / 1024).toFixed(1)}KB)`);
+      console.log(
+        `📁 파일 정보: ${file.originalname} (${(file.size / 1024).toFixed(1)}KB)`,
+      );
 
       // 2. JSON 파싱
       let gameData;
@@ -139,7 +165,7 @@ export class GameController {
         // BOM 제거 및 UTF-8 처리
         let jsonContent = file.buffer.toString('utf-8');
         // BOM 제거 (UTF-8 BOM: EF BB BF)
-        if (jsonContent.charCodeAt(0) === 0xFEFF) {
+        if (jsonContent.charCodeAt(0) === 0xfeff) {
           jsonContent = jsonContent.slice(1);
         }
         console.log('🔍 JSON 내용 첫 200자:', jsonContent.substring(0, 200));
@@ -147,21 +173,30 @@ export class GameController {
         console.log('✅ JSON 파싱 성공');
       } catch (parseError) {
         console.error('❌ JSON 파싱 에러:', parseError.message);
-        console.error('🔍 파일 내용:', file.buffer.toString('utf-8').substring(0, 500));
-        throw new HttpException({
-          success: false,
-          message: '올바른 JSON 형식이 아닙니다',
-          code: 'INVALID_JSON_FORMAT'
-        }, HttpStatus.BAD_REQUEST);
+        console.error(
+          '🔍 파일 내용:',
+          file.buffer.toString('utf-8').substring(0, 500),
+        );
+        throw new HttpException(
+          {
+            success: false,
+            message: '올바른 JSON 형식이 아닙니다',
+            code: 'INVALID_JSON_FORMAT',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // 3. 기본 구조 검증
       if (!gameData.Clips || !Array.isArray(gameData.Clips)) {
-        throw new HttpException({
-          success: false,
-          message: '올바른 게임 데이터 형식이 아닙니다 (Clips 배열이 필요)',
-          code: 'INVALID_GAME_DATA_STRUCTURE'
-        }, HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          {
+            success: false,
+            message: '올바른 게임 데이터 형식이 아닙니다 (Clips 배열이 필요)',
+            code: 'INVALID_GAME_DATA_STRUCTURE',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       console.log(`📊 게임 데이터 검증 완료: ${gameData.Clips.length}개 클립`);
@@ -171,10 +206,14 @@ export class GameController {
 
       // 5. 팀 스탯 자동 계산
       console.log('📊 팀 스탯 계산 시작...');
-      const teamStatsResult = await this.teamStatsService.analyzeTeamStats(gameData);
-      
+      const teamStatsResult =
+        await this.teamStatsService.analyzeTeamStats(gameData);
+
       // 6. 팀 스탯 데이터베이스 저장
-      await this.teamStatsService.saveTeamStats(gameData.gameKey, teamStatsResult);
+      await this.teamStatsService.saveTeamStats(
+        gameData.gameKey,
+        teamStatsResult,
+      );
 
       console.log('✅ 게임 데이터 및 팀 스탯 처리 완료');
 
@@ -185,9 +224,8 @@ export class GameController {
           ...playerResults,
           teamStats: teamStatsResult,
         },
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-
     } catch (error) {
       console.error('❌ 게임 데이터 업로드 실패:', error);
 
@@ -195,12 +233,15 @@ export class GameController {
         throw error;
       }
 
-      throw new HttpException({
-        success: false,
-        message: '게임 데이터 처리 중 예상치 못한 오류가 발생했습니다',
-        code: 'INTERNAL_PROCESSING_ERROR',
-        details: error.message
-      }, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        {
+          success: false,
+          message: '게임 데이터 처리 중 예상치 못한 오류가 발생했습니다',
+          code: 'INTERNAL_PROCESSING_ERROR',
+          details: error.message,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -209,17 +250,20 @@ export class GameController {
    */
   private async processGameData(gameData: any) {
     console.log('🔍 선수 추출 시작');
-    
+
     const playerNumbers = new Set<number>();
     const invalidClips = [];
 
     // 홈팀과 어웨이팀 선수들을 동적으로 구분
     const homeTeamPlayers = new Set<number>();
     const awayTeamPlayers = new Set<number>();
-    
+
     // 득점 관련 클립에서 팀 구분 (득점한 선수의 팀 추정)
-    gameData.Clips.forEach(clip => {
-      if (clip.significantPlays && clip.significantPlays.includes('TOUCHDOWN')) {
+    gameData.Clips.forEach((clip) => {
+      if (
+        clip.significantPlays &&
+        clip.significantPlays.includes('TOUCHDOWN')
+      ) {
         if (clip.car?.num) {
           // 득점 클립의 수 기준으로 홈/어웨이 임시 구분
           // 실제로는 더 정교한 로직 필요
@@ -246,13 +290,17 @@ export class GameController {
         invalidClips.push({
           clipIndex: index,
           clipKey: clip.clipKey || 'unknown',
-          error: error.message
+          error: error.message,
         });
       }
     });
 
     console.log(`👥 발견된 선수: ${playerNumbers.size}명`);
-    console.log(`📋 선수 목록: [${Array.from(playerNumbers).sort((a, b) => a - b).join(', ')}]`);
+    console.log(
+      `📋 선수 목록: [${Array.from(playerNumbers)
+        .sort((a, b) => a - b)
+        .join(', ')}]`,
+    );
 
     if (invalidClips.length > 0) {
       console.log(`⚠️ 처리할 수 없는 클립 ${invalidClips.length}개 발견`);
@@ -265,46 +313,56 @@ export class GameController {
     for (const playerNum of Array.from(playerNumbers).sort((a, b) => a - b)) {
       try {
         processedCount++;
-        console.log(`🔄 ${processedCount}/${playerNumbers.size} - ${playerNum}번 선수 분석 중...`);
-
-        // 해당 선수가 참여한 클립들만 필터링
-        const playerClips = gameData.Clips.filter(clip => 
-          clip.car?.num === playerNum || 
-          clip.car2?.num === playerNum ||
-          clip.tkl?.num === playerNum || 
-          clip.tkl2?.num === playerNum
+        console.log(
+          `🔄 ${processedCount}/${playerNumbers.size} - ${playerNum}번 선수 분석 중...`,
         );
 
-        console.log(`  📎 ${playerNum}번 선수 관련 클립: ${playerClips.length}개`);
+        // 해당 선수가 참여한 클립들만 필터링
+        const playerClips = gameData.Clips.filter(
+          (clip) =>
+            clip.car?.num === playerNum ||
+            clip.car2?.num === playerNum ||
+            clip.tkl?.num === playerNum ||
+            clip.tkl2?.num === playerNum,
+        );
 
-        // 선수의 팀명 식별 
+        console.log(
+          `  📎 ${playerNum}번 선수 관련 클립: ${playerClips.length}개`,
+        );
+
+        // 선수의 팀명 식별
         let playerTeamName = null;
-        
+
         if (gameData.homeTeam && gameData.awayTeam) {
-          // 로그 분석 결과: 
+          // 로그 분석 결과:
           // 홈팀(KMRazorbacks) 선수들: [30, 16, 84] - 적은 수
           // 어웨이팀(HYLions) 선수들: 나머지 대부분
-          
+
           // 실제 게임에서 관찰된 패턴을 기반으로 팀 구분
           const homeTeamPlayerNumbers = [30, 16, 84]; // 실제 로그에서 확인된 홈팀 선수들
-          
+
           if (homeTeamPlayerNumbers.includes(playerNum)) {
             playerTeamName = gameData.homeTeam; // KMRazorbacks
           } else {
             playerTeamName = gameData.awayTeam; // HYLions
           }
-          
-          console.log(`  📋 선수 ${playerNum} → ${playerTeamName} (${homeTeamPlayerNumbers.includes(playerNum) ? '홈팀' : '어웨이팀'})`);
+
+          console.log(
+            `  📋 선수 ${playerNum} → ${playerTeamName} (${homeTeamPlayerNumbers.includes(playerNum) ? '홈팀' : '어웨이팀'})`,
+          );
         }
 
-        console.log(`  👤 ${playerNum}번 선수 팀: ${playerTeamName || '미확인'}`);
+        console.log(
+          `  👤 ${playerNum}번 선수 팀: ${playerTeamName || '미확인'}`,
+        );
 
         // 선수 분석 서비스 호출 (팀명 포함)
-        const analysisResult = await this.playerService.updatePlayerStatsFromNewClips(
-          playerNum, 
-          playerClips,
-          playerTeamName
-        );
+        const analysisResult =
+          await this.playerService.updatePlayerStatsFromNewClips(
+            playerNum,
+            playerClips,
+            playerTeamName,
+          );
 
         results.push({
           playerNumber: playerNum,
@@ -312,26 +370,25 @@ export class GameController {
           clipsAnalyzed: playerClips.length,
           position: this.extractPlayerPosition(playerClips, playerNum),
           stats: analysisResult,
-          message: `${playerNum}번 선수 분석 완료`
+          message: `${playerNum}번 선수 분석 완료`,
         });
 
         console.log(`  ✅ ${playerNum}번 선수 분석 완료`);
-
       } catch (error) {
         console.error(`  ❌ ${playerNum}번 선수 분석 실패:`, error.message);
-        
+
         results.push({
           playerNumber: playerNum,
           success: false,
           error: error.message,
-          message: `${playerNum}번 선수 분석 실패`
+          message: `${playerNum}번 선수 분석 실패`,
         });
       }
     }
 
     // 결과 요약
-    const successfulPlayers = results.filter(r => r.success);
-    const failedPlayers = results.filter(r => !r.success);
+    const successfulPlayers = results.filter((r) => r.success);
+    const failedPlayers = results.filter((r) => !r.success);
 
     console.log(`📊 분석 완료 요약:`);
     console.log(`  ✅ 성공: ${successfulPlayers.length}명`);
@@ -346,7 +403,7 @@ export class GameController {
         location: gameData.location || null,
         finalScore: gameData.score || null,
         totalClips: gameData.Clips.length,
-        processedAt: new Date().toISOString()
+        processedAt: new Date().toISOString(),
       },
       playerResults: results,
       summary: {
@@ -355,15 +412,18 @@ export class GameController {
         failedPlayers: failedPlayers.length,
         totalClipsProcessed: gameData.Clips.length,
         invalidClips: invalidClips.length,
-        successRate: results.length > 0 ? Math.round((successfulPlayers.length / results.length) * 100) : 0
+        successRate:
+          results.length > 0
+            ? Math.round((successfulPlayers.length / results.length) * 100)
+            : 0,
       },
       errors: {
         invalidClips: invalidClips,
-        failedPlayers: failedPlayers.map(p => ({
+        failedPlayers: failedPlayers.map((p) => ({
           playerNumber: p.playerNumber,
-          error: p.error
-        }))
-      }
+          error: p.error,
+        })),
+      },
     };
   }
 
@@ -381,8 +441,8 @@ export class GameController {
    */
   private extractPlayerPosition(clips: any[], playerNumber: number): string {
     const positions = [];
-    
-    clips.forEach(clip => {
+
+    clips.forEach((clip) => {
       if (clip.car?.num === playerNumber && clip.car?.pos) {
         positions.push(clip.car.pos);
       }
@@ -399,14 +459,14 @@ export class GameController {
 
     // 가장 많이 나온 포지션 반환
     if (positions.length === 0) return 'Unknown';
-    
+
     const positionCounts = positions.reduce((acc, pos) => {
       acc[pos] = (acc[pos] || 0) + 1;
       return acc;
     }, {});
 
-    return Object.keys(positionCounts).reduce((a, b) => 
-      positionCounts[a] > positionCounts[b] ? a : b
+    return Object.keys(positionCounts).reduce((a, b) =>
+      positionCounts[a] > positionCounts[b] ? a : b,
     );
   }
 }

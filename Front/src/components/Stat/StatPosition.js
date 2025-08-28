@@ -1,4 +1,3 @@
-// src/components/Stat/StatPosition.jsx
 import React, {useMemo, useState, useEffect, useRef} from "react";
 import {RxTriangleDown} from "react-icons/rx";
 import {FaChevronDown} from "react-icons/fa";

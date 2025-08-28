@@ -21,7 +21,10 @@ export class AuthController {
   @ApiOperation({ summary: '로그인' })
   @ApiResponse({ status: 200, description: '로그인 성공' })
   @ApiResponse({ status: 400, description: '존재하지 않는 이메일' })
-  @ApiResponse({ status: 401, description: '비밀번호 불일치 또는 이메일 인증 필요' })
+  @ApiResponse({
+    status: 401,
+    description: '비밀번호 불일치 또는 이메일 인증 필요',
+  })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }

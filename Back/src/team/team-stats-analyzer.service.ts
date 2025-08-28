@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TeamStats, TeamStatsDocument } from '../schemas/team-stats.schema';
-import { PLAY_TYPE, SIGNIFICANT_PLAY, PlayAnalysisHelper } from '../player/constants/play-types.constants';
+import {
+  PLAY_TYPE,
+  SIGNIFICANT_PLAY,
+  PlayAnalysisHelper,
+} from '../player/constants/play-types.constants';
 
 export interface TeamStatsResult {
   homeTeamStats: TeamStatsData;
@@ -25,7 +29,8 @@ export interface TeamStatsData {
 @Injectable()
 export class TeamStatsAnalyzerService {
   constructor(
-    @InjectModel(TeamStats.name) private teamStatsModel: Model<TeamStatsDocument>,
+    @InjectModel(TeamStats.name)
+    private teamStatsModel: Model<TeamStatsDocument>,
   ) {}
 
   /**
@@ -64,7 +69,9 @@ export class TeamStatsAnalyzerService {
     let clipIndex = 0;
     for (const clip of gameData.Clips || []) {
       clipIndex++;
-      console.log(`📎 클립 ${clipIndex}/${gameData.Clips.length}: ${clip.playType}, 야드: ${clip.gainYard}, 공격팀: ${clip.offensiveTeam}`);
+      console.log(
+        `📎 클립 ${clipIndex}/${gameData.Clips.length}: ${clip.playType}, 야드: ${clip.gainYard}, 공격팀: ${clip.offensiveTeam}`,
+      );
       await this.analyzeClip(clip, homeTeamStats, awayTeamStats);
     }
 
@@ -72,17 +79,19 @@ export class TeamStatsAnalyzerService {
     console.log('✈️ 어웨이팀 중간 결과:', awayTeamStats);
 
     // 총 야드 계산
-    homeTeamStats.totalYards = homeTeamStats.passingYards + 
-                               homeTeamStats.rushingYards + 
-                               homeTeamStats.interceptionReturnYards +
-                               homeTeamStats.puntReturnYards +
-                               homeTeamStats.kickoffReturnYards;
+    homeTeamStats.totalYards =
+      homeTeamStats.passingYards +
+      homeTeamStats.rushingYards +
+      homeTeamStats.interceptionReturnYards +
+      homeTeamStats.puntReturnYards +
+      homeTeamStats.kickoffReturnYards;
 
-    awayTeamStats.totalYards = awayTeamStats.passingYards + 
-                               awayTeamStats.rushingYards + 
-                               awayTeamStats.interceptionReturnYards +
-                               awayTeamStats.puntReturnYards +
-                               awayTeamStats.kickoffReturnYards;
+    awayTeamStats.totalYards =
+      awayTeamStats.passingYards +
+      awayTeamStats.rushingYards +
+      awayTeamStats.interceptionReturnYards +
+      awayTeamStats.puntReturnYards +
+      awayTeamStats.kickoffReturnYards;
 
     // 러싱야드에서 sack 야드 차감
     homeTeamStats.rushingYards -= homeTeamStats.sackYards;
@@ -98,15 +107,15 @@ export class TeamStatsAnalyzerService {
    * 개별 클립 분석
    */
   private async analyzeClip(
-    clip: any, 
-    homeTeamStats: TeamStatsData, 
-    awayTeamStats: TeamStatsData
+    clip: any,
+    homeTeamStats: TeamStatsData,
+    awayTeamStats: TeamStatsData,
   ): Promise<void> {
     const gainYard = clip.gainYard || 0;
     const playType = clip.playType;
     const significantPlays = clip.significantPlays || [];
     const offensiveTeam = clip.offensiveTeam;
-    
+
     // 공격팀과 수비팀 결정
     const isHomeOffense = offensiveTeam === 'Home';
     const offenseStats = isHomeOffense ? homeTeamStats : awayTeamStats;
@@ -129,14 +138,24 @@ export class TeamStatsAnalyzerService {
     }
 
     // 3. Sack 야드 계산 (러싱야드에서 차감할 용도)
-    if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.SACK)) {
+    if (
+      PlayAnalysisHelper.hasSignificantPlay(
+        significantPlays,
+        SIGNIFICANT_PLAY.SACK,
+      )
+    ) {
       if (gainYard < 0) {
         offenseStats.sackYards += Math.abs(gainYard);
       }
     }
 
     // 4. 인터셉트 리턴 야드
-    if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.INTERCEPT)) {
+    if (
+      PlayAnalysisHelper.hasSignificantPlay(
+        significantPlays,
+        SIGNIFICANT_PLAY.INTERCEPT,
+      )
+    ) {
       // 인터셉트 후 리턴한 야드는 수비팀에게
       if (gainYard > 0) {
         defenseStats.interceptionReturnYards += gainYard;
@@ -162,18 +181,38 @@ export class TeamStatsAnalyzerService {
     }
 
     // 7. 턴오버 계산
-    if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.TURNOVER)) {
+    if (
+      PlayAnalysisHelper.hasSignificantPlay(
+        significantPlays,
+        SIGNIFICANT_PLAY.TURNOVER,
+      )
+    ) {
       offenseStats.turnovers += 1;
     }
-    
+
     // 펌블, 인터셉트도 턴오버로 계산
-    if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLE)) {
-      if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.FUMBLERECDEF)) {
+    if (
+      PlayAnalysisHelper.hasSignificantPlay(
+        significantPlays,
+        SIGNIFICANT_PLAY.FUMBLE,
+      )
+    ) {
+      if (
+        PlayAnalysisHelper.hasSignificantPlay(
+          significantPlays,
+          SIGNIFICANT_PLAY.FUMBLERECDEF,
+        )
+      ) {
         offenseStats.turnovers += 1;
       }
     }
-    
-    if (PlayAnalysisHelper.hasSignificantPlay(significantPlays, SIGNIFICANT_PLAY.INTERCEPT)) {
+
+    if (
+      PlayAnalysisHelper.hasSignificantPlay(
+        significantPlays,
+        SIGNIFICANT_PLAY.INTERCEPT,
+      )
+    ) {
       offenseStats.turnovers += 1;
     }
 
@@ -184,21 +223,32 @@ export class TeamStatsAnalyzerService {
   /**
    * 데이터베이스에 팀 스탯 저장
    */
-  async saveTeamStats(gameKey: string, teamStatsResult: TeamStatsResult): Promise<void> {
+  async saveTeamStats(
+    gameKey: string,
+    teamStatsResult: TeamStatsResult,
+  ): Promise<void> {
     // 홈팀 스탯 저장
-    await this.saveTeamStatsToDb(gameKey, 'home', teamStatsResult.homeTeamStats);
-    
+    await this.saveTeamStatsToDb(
+      gameKey,
+      'home',
+      teamStatsResult.homeTeamStats,
+    );
+
     // 어웨이팀 스탯 저장
-    await this.saveTeamStatsToDb(gameKey, 'away', teamStatsResult.awayTeamStats);
+    await this.saveTeamStatsToDb(
+      gameKey,
+      'away',
+      teamStatsResult.awayTeamStats,
+    );
   }
 
   /**
    * 개별 팀 스탯을 데이터베이스에 저장
    */
   private async saveTeamStatsToDb(
-    gameKey: string, 
-    homeAway: string, 
-    teamStats: TeamStatsData
+    gameKey: string,
+    homeAway: string,
+    teamStats: TeamStatsData,
   ): Promise<void> {
     const existingStats = await this.teamStatsModel.findOne({
       gameKey,
@@ -212,7 +262,7 @@ export class TeamStatsAnalyzerService {
         {
           ...teamStats,
           updatedAt: new Date(),
-        }
+        },
       );
     } else {
       // 새 기록 생성

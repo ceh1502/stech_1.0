@@ -36,4 +36,3 @@ export interface ClipData {
     Away: number;
   };
 }
-

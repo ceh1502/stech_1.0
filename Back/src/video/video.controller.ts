@@ -1,17 +1,22 @@
-import { 
-  Controller, 
-  Post, 
-  Get, 
-  Delete, 
-  Param, 
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Param,
   Body,
   UseInterceptors,
   UploadedFile,
   HttpCode,
-  HttpStatus
+  HttpStatus,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { VideoService } from './video.service';
 
 @ApiTags('Video')
@@ -26,12 +31,20 @@ export class VideoController {
   @ApiResponse({ status: 201, description: '영상 업로드 성공' })
   async uploadVideo(
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: { title?: string; description?: string }
+    @Body() body: { title?: string; description?: string },
   ) {
     // S3 업로드 로직은 나중에 구현
-    const uploadResult = { success: true, url: `http://localhost:4000/uploads/${file.filename}` };
-    
-    return this.videoService.uploadVideo(file, uploadResult, body.title, body.description);
+    const uploadResult = {
+      success: true,
+      url: `http://localhost:4000/uploads/${file.filename}`,
+    };
+
+    return this.videoService.uploadVideo(
+      file,
+      uploadResult,
+      body.title,
+      body.description,
+    );
   }
 
   @Get(':videoId')

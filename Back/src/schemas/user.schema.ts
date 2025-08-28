@@ -30,9 +30,9 @@ export class User {
       bio: String,
       position: String,
       team: String,
-      joinDate: { type: Date, default: Date.now }
+      joinDate: { type: Date, default: Date.now },
     },
-    default: {}
+    default: {},
   })
   profile: {
     avatar?: string;
@@ -50,9 +50,9 @@ export class User {
 export const UserSchema = SchemaFactory.createForClass(User);
 
 // 비밀번호 해싱 미들웨어
-UserSchema.pre('save', async function(next) {
+UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -63,6 +63,8 @@ UserSchema.pre('save', async function(next) {
 });
 
 // 비밀번호 검증 메서드 추가
-UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+UserSchema.methods.comparePassword = async function (
+  candidatePassword: string,
+): Promise<boolean> {
   return await bcrypt.compare(candidatePassword, this.password);
 };

@@ -7,7 +7,10 @@ import { TeamSeasonStatsAnalyzerService } from './team-season-stats-analyzer.ser
 import { Team, TeamSchema } from '../schemas/team.schema';
 import { Player, PlayerSchema } from '../schemas/player.schema';
 import { TeamStats, TeamStatsSchema } from '../schemas/team-stats.schema';
-import { TeamSeasonStats, TeamSeasonStatsSchema } from '../schemas/team-season-stats.schema';
+import {
+  TeamSeasonStats,
+  TeamSeasonStatsSchema,
+} from '../schemas/team-season-stats.schema';
 
 @Module({
   imports: [
@@ -19,7 +22,15 @@ import { TeamSeasonStats, TeamSeasonStatsSchema } from '../schemas/team-season-s
     ]),
   ],
   controllers: [TeamController],
-  providers: [TeamService, TeamStatsAnalyzerService, TeamSeasonStatsAnalyzerService],
-  exports: [TeamService, TeamStatsAnalyzerService, TeamSeasonStatsAnalyzerService],
+  providers: [
+    TeamService,
+    TeamStatsAnalyzerService,
+    TeamSeasonStatsAnalyzerService,
+  ],
+  exports: [
+    TeamService,
+    TeamStatsAnalyzerService,
+    TeamSeasonStatsAnalyzerService,
+  ],
 })
 export class TeamModule {}

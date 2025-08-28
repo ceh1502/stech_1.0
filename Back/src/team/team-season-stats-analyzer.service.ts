@@ -1,28 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { TeamSeasonStats, TeamSeasonStatsDocument } from '../schemas/team-season-stats.schema';
+import {
+  TeamSeasonStats,
+  TeamSeasonStatsDocument,
+} from '../schemas/team-season-stats.schema';
 import { TeamSeasonStatsDto } from './dto/team-season-stats.dto';
 import { NewClipDto } from '../common/dto/new-clip.dto';
 
 @Injectable()
 export class TeamSeasonStatsAnalyzerService {
   constructor(
-    @InjectModel(TeamSeasonStats.name) 
+    @InjectModel(TeamSeasonStats.name)
     private teamSeasonStatsModel: Model<TeamSeasonStatsDocument>,
   ) {}
 
   /**
    * JSON 데이터를 분석하여 팀 시즌 스탯 업데이트
    */
-  async analyzeAndUpdateTeamStats(clips: NewClipDto[], gameKey: string, homeTeam?: string, awayTeam?: string, season: string = '2024'): Promise<void> {
+  async analyzeAndUpdateTeamStats(
+    clips: NewClipDto[],
+    gameKey: string,
+    homeTeam?: string,
+    awayTeam?: string,
+    season: string = '2024',
+  ): Promise<void> {
     if (!clips || clips.length === 0) {
       return;
     }
 
     // homeTeam, awayTeam이 제공되지 않은 경우 클립에서 추정
     if (!homeTeam || !awayTeam) {
-      console.log('팀 정보가 제공되지 않았습니다. 현재는 팀 스탯을 생략합니다.');
+      console.log(
+        '팀 정보가 제공되지 않았습니다. 현재는 팀 스탯을 생략합니다.',
+      );
       return;
     }
 
@@ -35,20 +46,23 @@ export class TeamSeasonStatsAnalyzerService {
    * 특정 팀의 스탯 분석 및 업데이트
    */
   private async analyzeTeamStats(
-    clips: NewClipDto[], 
-    teamName: string, 
+    clips: NewClipDto[],
+    teamName: string,
     homeAway: 'home' | 'away',
     gameKey: string,
-    season: string
+    season: string,
   ): Promise<void> {
     // 기존 팀 스탯 조회 또는 생성
-    let teamStats = await this.teamSeasonStatsModel.findOne({ teamName, season });
-    
+    let teamStats = await this.teamSeasonStatsModel.findOne({
+      teamName,
+      season,
+    });
+
     if (!teamStats) {
-      teamStats = new this.teamSeasonStatsModel({ 
-        teamName, 
+      teamStats = new this.teamSeasonStatsModel({
+        teamName,
         season,
-        processedGames: []
+        processedGames: [],
       });
     }
 
@@ -58,45 +72,56 @@ export class TeamSeasonStatsAnalyzerService {
     }
 
     // 해당 팀의 클립들만 필터링
-    const teamClips = clips.filter(clip => {
+    const teamClips = clips.filter((clip) => {
       // 공격 플레이: offensiveTeam이 일치하는 클립
       if (homeAway === 'home' && clip.offensiveTeam === 'Home') return true;
       if (homeAway === 'away' && clip.offensiveTeam === 'Away') return true;
-      
+
       // 수비 플레이: 상대방 공격일 때 우리 팀의 수비 스탯
       if (homeAway === 'home' && clip.offensiveTeam === 'Away') {
         // 홈팀 수비시 어웨이팀 공격 클립에서 인터셉트 등 추출
         return this.hasDefensivePlay(clip, teamName);
       }
       if (homeAway === 'away' && clip.offensiveTeam === 'Home') {
-        // 어웨이팀 수비시 홈팀 공격 클립에서 인터셉트 등 추출  
+        // 어웨이팀 수비시 홈팀 공격 클립에서 인터셉트 등 추출
         return this.hasDefensivePlay(clip, teamName);
       }
-      
+
       return false;
     });
 
     // 득점 관련 클립들 찾기 (실제 JSON 값 사용)
-    const scoringClips = teamClips.filter(clip => 
-      clip.significantPlays && clip.significantPlays.some(play => 
-        play === 'TOUCHDOWN' || play === 'PATGOOD' || play === 'FIELDGOALGOOD' || 
-        play === '2PTGOOD' || play === 'SAFETY'
-      )
+    const scoringClips = teamClips.filter(
+      (clip) =>
+        clip.significantPlays &&
+        clip.significantPlays.some(
+          (play) =>
+            play === 'TOUCHDOWN' ||
+            play === 'PATGOOD' ||
+            play === 'FIELDGOALGOOD' ||
+            play === '2PTGOOD' ||
+            play === 'SAFETY',
+        ),
     );
 
     console.log(`${teamName} (${homeAway}) 팀 클립 분석:`, {
       전체클립수: clips.length,
       팀클립수: teamClips.length,
       득점클립수: scoringClips.length,
-      득점클립예시: scoringClips.slice(0, 3).map(clip => ({
+      득점클립예시: scoringClips.slice(0, 3).map((clip) => ({
         playType: clip.playType,
         significantPlays: clip.significantPlays,
-        gainYard: clip.gainYard
-      }))
+        gainYard: clip.gainYard,
+      })),
     });
 
     // 스탯 분석
-    const gameStats = this.calculateGameStats(teamClips, clips, teamName, homeAway);
+    const gameStats = this.calculateGameStats(
+      teamClips,
+      clips,
+      teamName,
+      homeAway,
+    );
 
     // 스탯 누적 업데이트
     teamStats.totalPoints += gameStats.totalPoints;
@@ -145,19 +170,26 @@ export class TeamSeasonStatsAnalyzerService {
    */
   private hasDefensivePlay(clip: NewClipDto, teamName: string): boolean {
     if (!clip.significantPlays) return false;
-    
+
     const playType = clip.playType?.toUpperCase();
-    return clip.significantPlays.some(play => 
-      play === 'Intercept' || 
-      play === 'Fumble recovered by def' ||
-      (playType === 'PUNT' || playType === 'KICKOFF')
+    return clip.significantPlays.some(
+      (play) =>
+        play === 'Intercept' ||
+        play === 'Fumble recovered by def' ||
+        playType === 'PUNT' ||
+        playType === 'KICKOFF',
     );
   }
 
   /**
    * 게임별 스탯 계산
    */
-  private calculateGameStats(teamClips: NewClipDto[], allClips: NewClipDto[], teamName: string, homeAway: 'home' | 'away') {
+  private calculateGameStats(
+    teamClips: NewClipDto[],
+    allClips: NewClipDto[],
+    teamName: string,
+    homeAway: 'home' | 'away',
+  ) {
     const stats = {
       totalPoints: 0,
       totalTouchdowns: 0,
@@ -183,21 +215,22 @@ export class TeamSeasonStatsAnalyzerService {
       fumblesLost: 0,
       totalTurnovers: 0,
       penalties: 0,
-      penaltyYards: 0
+      penaltyYards: 0,
     };
 
     for (const clip of teamClips) {
       // 기본 플레이 분석
       this.analyzeBasicPlay(clip, stats);
-      
+
       // SignificantPlays 분석
       this.analyzeSignificantPlays(clip, stats);
     }
 
     // 상대방 클립에서 우리 팀의 수비 스탯 추출 (인터셉트, 리턴 등)
-    const opponentClips = allClips.filter(clip => 
-      (homeAway === 'home' && clip.offensiveTeam === 'Away') ||
-      (homeAway === 'away' && clip.offensiveTeam === 'Home')
+    const opponentClips = allClips.filter(
+      (clip) =>
+        (homeAway === 'home' && clip.offensiveTeam === 'Away') ||
+        (homeAway === 'away' && clip.offensiveTeam === 'Home'),
     );
 
     for (const clip of opponentClips) {
@@ -212,7 +245,7 @@ export class TeamSeasonStatsAnalyzerService {
    */
   private analyzeBasicPlay(clip: NewClipDto, stats: any): void {
     const playType = clip.playType?.toUpperCase();
-    
+
     if (playType === 'RUN' || playType === 'RUNNING') {
       stats.rushingAttempts++;
       if (clip.gainYard && clip.gainYard >= 0) {
@@ -250,7 +283,6 @@ export class TeamSeasonStatsAnalyzerService {
     } else if (playType && !['SACK'].includes(playType)) {
       console.log(`❌ 매칭되지 않는 playType: ${playType}`);
     }
-    
   }
 
   /**
@@ -259,28 +291,33 @@ export class TeamSeasonStatsAnalyzerService {
   private analyzeSignificantPlays(clip: NewClipDto, stats: any): void {
     if (!clip.significantPlays) return;
 
-    // TURNOVER가 있는지 먼저 체크  
+    // TURNOVER가 있는지 먼저 체크
     const hasTurnover = clip.significantPlays.includes('Turn Over');
 
     // 득점 관련 플레이가 있으면 로그
-    const hasScoring = clip.significantPlays.some(play => 
-      play && (play.includes('TOUCHDOWN') || play.includes('PAT') || play.includes('FIELDGOAL') || play.includes('2PT'))
+    const hasScoring = clip.significantPlays.some(
+      (play) =>
+        play &&
+        (play.includes('TOUCHDOWN') ||
+          play.includes('PAT') ||
+          play.includes('FIELDGOAL') ||
+          play.includes('2PT')),
     );
-    
+
     if (hasScoring) {
       console.log('🏈 득점 클립 발견:', {
         playType: clip.playType,
-        significantPlays: clip.significantPlays.filter(p => p !== null),
-        gainYard: clip.gainYard
+        significantPlays: clip.significantPlays.filter((p) => p !== null),
+        gainYard: clip.gainYard,
       });
     }
 
-    clip.significantPlays.forEach(play => {
+    clip.significantPlays.forEach((play) => {
       switch (play) {
         case 'TOUCHDOWN':
           stats.totalTouchdowns++;
           stats.totalPoints += 6; // 터치다운 6점
-          
+
           const playType = clip.playType?.toUpperCase();
           if (playType === 'RUN' || playType === 'RUNNING') {
             stats.rushingTouchdowns++;
@@ -343,8 +380,10 @@ export class TeamSeasonStatsAnalyzerService {
 
         case 'Turn Over':
           // INTERCEPT나 FUMBLE이 없는 단독 TURNOVER (4th down 실패 등)
-          if (!clip.significantPlays.includes('Intercept') && 
-              !clip.significantPlays.includes('Fumble recovered by def')) {
+          if (
+            !clip.significantPlays.includes('Intercept') &&
+            !clip.significantPlays.includes('Fumble recovered by def')
+          ) {
             stats.totalTurnovers++;
           }
           break;
@@ -361,11 +400,15 @@ export class TeamSeasonStatsAnalyzerService {
   /**
    * 상대방 공격 시 우리 팀의 수비 스탯 분석
    */
-  private analyzeDefensiveStats(clip: NewClipDto, stats: any, teamName: string): void {
+  private analyzeDefensiveStats(
+    clip: NewClipDto,
+    stats: any,
+    teamName: string,
+  ): void {
     if (!clip.significantPlays) return;
 
     // SignificantPlays에서 수비 스탯 확인
-    clip.significantPlays.forEach(play => {
+    clip.significantPlays.forEach((play) => {
       switch (play) {
         case 'Fumble recovered by def': // 우리가 상대방 펌블을 회수
           // 수비팀 입장에서는 펌블 회수만 카운팅 (상대방 턴오버는 별도)
@@ -398,44 +441,64 @@ export class TeamSeasonStatsAnalyzerService {
   /**
    * 모든 팀의 시즌 스탯 조회 (순위표용)
    */
-  async getAllTeamSeasonStats(season: string = '2024'): Promise<TeamSeasonStatsDto[]> {
+  async getAllTeamSeasonStats(
+    season: string = '2024',
+  ): Promise<TeamSeasonStatsDto[]> {
     const teamStats = await this.teamSeasonStatsModel.find({ season }).exec();
-    
-    return teamStats.map(stats => this.convertToDto(stats));
+
+    return teamStats.map((stats) => this.convertToDto(stats));
   }
 
   /**
    * 특정 팀의 시즌 스탯 조회
    */
-  async getTeamSeasonStats(teamName: string, season: string = '2024'): Promise<TeamSeasonStatsDto | null> {
-    const stats = await this.teamSeasonStatsModel.findOne({ teamName, season }).exec();
-    
+  async getTeamSeasonStats(
+    teamName: string,
+    season: string = '2024',
+  ): Promise<TeamSeasonStatsDto | null> {
+    const stats = await this.teamSeasonStatsModel
+      .findOne({ teamName, season })
+      .exec();
+
     return stats ? this.convertToDto(stats) : null;
   }
 
   /**
    * 팀 스탯 초기화
    */
-  async resetTeamSeasonStats(season: string = '2024'): Promise<{ success: boolean; message: string }> {
+  async resetTeamSeasonStats(
+    season: string = '2024',
+  ): Promise<{ success: boolean; message: string }> {
     await this.teamSeasonStatsModel.deleteMany({ season });
-    
+
     return {
       success: true,
-      message: `${season} 시즌의 모든 팀 스탯이 초기화되었습니다.`
+      message: `${season} 시즌의 모든 팀 스탯이 초기화되었습니다.`,
     };
   }
 
   /**
    * 상대방 턴오버 수 업데이트 (게임 종료 후 호출)
    */
-  async updateOpponentTurnovers(gameKey: string, homeTeam: string, awayTeam: string, season: string = '2024'): Promise<void> {
-    const homeStats = await this.teamSeasonStatsModel.findOne({ teamName: homeTeam, season });
-    const awayStats = await this.teamSeasonStatsModel.findOne({ teamName: awayTeam, season });
+  async updateOpponentTurnovers(
+    gameKey: string,
+    homeTeam: string,
+    awayTeam: string,
+    season: string = '2024',
+  ): Promise<void> {
+    const homeStats = await this.teamSeasonStatsModel.findOne({
+      teamName: homeTeam,
+      season,
+    });
+    const awayStats = await this.teamSeasonStatsModel.findOne({
+      teamName: awayTeam,
+      season,
+    });
 
     if (homeStats && awayStats) {
       // 홈팀의 상대 턴오버는 어웨이팀의 턴오버
       homeStats.opponentTurnovers += awayStats.totalTurnovers;
-      
+
       // 어웨이팀의 상대 턴오버는 홈팀의 턴오버
       awayStats.opponentTurnovers += homeStats.totalTurnovers;
 
@@ -453,7 +516,7 @@ export class TeamSeasonStatsAnalyzerService {
     return {
       teamName: stats.teamName,
       season: stats.season,
-      
+
       // 1. 득점
       totalPoints: stats.totalPoints,
       pointsPerGame: Math.round((stats.totalPoints / gamesPlayed) * 10) / 10,
@@ -465,63 +528,92 @@ export class TeamSeasonStatsAnalyzerService {
       // 2. 런
       rushingAttempts: stats.rushingAttempts,
       rushingYards: stats.rushingYards,
-      yardsPerCarry: stats.rushingAttempts > 0 
-        ? Math.round((stats.rushingYards / stats.rushingAttempts) * 10) / 10 
-        : 0,
-      rushingYardsPerGame: Math.round((stats.rushingYards / gamesPlayed) * 10) / 10,
+      yardsPerCarry:
+        stats.rushingAttempts > 0
+          ? Math.round((stats.rushingYards / stats.rushingAttempts) * 10) / 10
+          : 0,
+      rushingYardsPerGame:
+        Math.round((stats.rushingYards / gamesPlayed) * 10) / 10,
       rushingTouchdowns: stats.rushingTouchdowns,
 
       // 3. 패스
       passCompletionAttempts: `${stats.passCompletions}-${stats.passAttempts}`,
       passingYards: stats.passingYards,
-      yardsPerPassAttempt: stats.passAttempts > 0 
-        ? Math.round((stats.passingYards / stats.passAttempts) * 10) / 10 
-        : 0,
-      passingYardsPerGame: Math.round((stats.passingYards / gamesPlayed) * 10) / 10,
+      yardsPerPassAttempt:
+        stats.passAttempts > 0
+          ? Math.round((stats.passingYards / stats.passAttempts) * 10) / 10
+          : 0,
+      passingYardsPerGame:
+        Math.round((stats.passingYards / gamesPlayed) * 10) / 10,
       passingTouchdowns: stats.passingTouchdowns,
       interceptions: stats.interceptions,
 
       // 4. 스페셜팀
       totalPuntYards: stats.totalPuntYards,
-      averagePuntYards: stats.totalPunts > 0 
-        ? Math.round((stats.totalPuntYards / stats.totalPunts) * 10) / 10 
-        : 0,
-      puntTouchbackPercentage: stats.totalPunts > 0 
-        ? Math.round((stats.puntTouchbacks / stats.totalPunts) * 100 * 10) / 10 
-        : 0,
+      averagePuntYards:
+        stats.totalPunts > 0
+          ? Math.round((stats.totalPuntYards / stats.totalPunts) * 10) / 10
+          : 0,
+      puntTouchbackPercentage:
+        stats.totalPunts > 0
+          ? Math.round((stats.puntTouchbacks / stats.totalPunts) * 100 * 10) /
+            10
+          : 0,
       fieldGoalStats: `${stats.fieldGoalMakes}-${stats.fieldGoalAttempts}`,
-      averageKickReturnYards: stats.kickReturns > 0 
-        ? Math.round((stats.kickReturnYards / stats.kickReturns) * 10) / 10 
-        : 0,
-      averagePuntReturnYards: stats.puntReturns > 0 
-        ? Math.round((stats.puntReturnYards / stats.puntReturns) * 10) / 10 
-        : 0,
+      averageKickReturnYards:
+        stats.kickReturns > 0
+          ? Math.round((stats.kickReturnYards / stats.kickReturns) * 10) / 10
+          : 0,
+      averagePuntReturnYards:
+        stats.puntReturns > 0
+          ? Math.round((stats.puntReturnYards / stats.puntReturns) * 10) / 10
+          : 0,
       totalReturnYards: stats.kickReturnYards + stats.puntReturnYards,
 
       // 5. 기타
       fumbleStats: `${stats.fumbles}-${stats.fumblesLost}`,
-      turnoversPerGame: Math.round((stats.totalTurnovers / gamesPlayed) * 10) / 10,
-      turnoverRate: this.calculateTurnoverRate(stats.totalTurnovers, stats.passAttempts, stats.rushingAttempts, stats.totalPunts, stats.kickReturns),
-      turnoverDifferential: this.calculateTurnoverDifferential(stats.totalTurnovers, stats.opponentTurnovers),
+      turnoversPerGame:
+        Math.round((stats.totalTurnovers / gamesPlayed) * 10) / 10,
+      turnoverRate: this.calculateTurnoverRate(
+        stats.totalTurnovers,
+        stats.passAttempts,
+        stats.rushingAttempts,
+        stats.totalPunts,
+        stats.kickReturns,
+      ),
+      turnoverDifferential: this.calculateTurnoverDifferential(
+        stats.totalTurnovers,
+        stats.opponentTurnovers,
+      ),
       penaltyStats: `${stats.penalties}-${stats.penaltyYards}`,
-      penaltyYardsPerGame: Math.round((stats.penaltyYards / gamesPlayed) * 10) / 10,
+      penaltyYardsPerGame:
+        Math.round((stats.penaltyYards / gamesPlayed) * 10) / 10,
     };
   }
 
   /**
    * 턴오버 비율 계산 (총 공격 기회 대비)
    */
-  private calculateTurnoverRate(turnovers: number, passAttempts: number, rushAttempts: number, punts: number, kicks: number): number {
+  private calculateTurnoverRate(
+    turnovers: number,
+    passAttempts: number,
+    rushAttempts: number,
+    punts: number,
+    kicks: number,
+  ): number {
     const totalOpportunities = passAttempts + rushAttempts + punts + kicks;
     if (totalOpportunities === 0) return 0;
-    
+
     return Math.round((turnovers / totalOpportunities) * 100 * 10) / 10;
   }
 
   /**
    * 턴오버 차이 계산
    */
-  private calculateTurnoverDifferential(ourTurnovers: number, opponentTurnovers: number): string {
+  private calculateTurnoverDifferential(
+    ourTurnovers: number,
+    opponentTurnovers: number,
+  ): string {
     const differential = opponentTurnovers - ourTurnovers;
     return differential >= 0 ? `+${differential}` : differential.toString();
   }

@@ -3,35 +3,20 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
 import { Team, TeamDocument } from '../schemas/team.schema';
-import { CreatePlayerDto, UpdatePlayerStatsDto } from '../common/dto/player.dto';
-import { QbStatsAnalyzerService } from './qb-stats-analyzer.service';
-import { RbStatsAnalyzerService } from './rb-stats-analyzer.service';
-import { WrStatsAnalyzerService } from './wr-stats-analyzer.service';
-import { TeStatsAnalyzerService } from './te-stats-analyzer.service';
-import { KickerStatsAnalyzerService } from './kicker-stats-analyzer.service';
-import { PunterStatsAnalyzerService } from './punter-stats-analyzer.service';
-import { OLStatsAnalyzerService } from './ol-stats-analyzer.service';
-import { DLStatsAnalyzerService } from './dl-stats-analyzer.service';
-import { LBStatsAnalyzerService } from './lb-stats-analyzer.service';
-import { DBStatsAnalyzerService } from './db-stats-analyzer.service';
-import { StatsManagementService } from '../common/services/stats-management.service';
+import {
+  CreatePlayerDto,
+  UpdatePlayerStatsDto,
+} from '../common/dto/player.dto';
 import { NewClipDto } from '../common/dto/new-clip.dto';
+import { ClipAnalyzerService } from './clip-analyzer.service';
+import { StatsManagementService } from '../common/services/stats-management.service';
 
 @Injectable()
 export class PlayerService {
   constructor(
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
     @InjectModel(Team.name) private teamModel: Model<TeamDocument>,
-    private qbStatsAnalyzer: QbStatsAnalyzerService,
-    private rbStatsAnalyzer: RbStatsAnalyzerService,
-    private wrStatsAnalyzer: WrStatsAnalyzerService,
-    private teStatsAnalyzer: TeStatsAnalyzerService,
-    private kickerStatsAnalyzer: KickerStatsAnalyzerService,
-    private punterStatsAnalyzer: PunterStatsAnalyzerService,
-    private olStatsAnalyzer: OLStatsAnalyzerService,
-    private dlStatsAnalyzer: DLStatsAnalyzerService,
-    private lbStatsAnalyzer: LBStatsAnalyzerService,
-    private dbStatsAnalyzer: DBStatsAnalyzerService,
+    private clipAnalyzer: ClipAnalyzerService,
     private statsManagement: StatsManagementService,
   ) {}
 
@@ -39,27 +24,18 @@ export class PlayerService {
   private mapJsonTeamNameToDbTeamName(jsonTeamName: string): string {
     const teamMapping = {
       // 기존 매핑 (정확히 일치하는 팀들)
-      'KKRagingBulls': 'KKRagingBulls',
-      'KHCommanders': 'KHCommanders', 
-      'SNGreenTerrors': 'SNGreenTerrors',
-      'USCityhawks': 'USCityhawks',
-      'DGTuskers': 'DGTuskers',
-      'KMRazorbacks': 'KMRazorbacks',
-      'YSEagles': 'YSEagles',
-      'KUTigers': 'KUTigers',
-      'HICowboys': 'HICowboys',
-      'SSCrusaders': 'SSCrusaders',
-      
-      // JSON에서 사용하는 팀명 매핑
-      // 한양대(HYLions)가 이제 데이터베이스에 추가됨
-      'HYLions': 'HYLions', // 한양대 라이온스 -> 그대로 유지 (데이터베이스에 존재)
-      'HFBlackKnights': 'KHCommanders', // 한국외대 -> 경희대로 매핑
-      
-      // 추가 가능한 JSON 팀명들
-      'KMRB': 'KMRazorbacks',
-      'HYLI': 'YSEagles',
-      'HanYang': 'YSEagles', // 한양대 다른 표기법
-      'Lions': 'YSEagles', // 라이온스만으로 표기된 경우
+      KKRagingBulls: 'KKRagingBulls',
+      KHCommanders: 'KHCommanders',
+      SNGreenTerrors: 'SNGreenTerrors',
+      USCityhawks: 'USCityhawks',
+      DGTuskers: 'DGTuskers',
+      KMRazorbacks: 'KMRazorbacks',
+      YSEagles: 'YSEagles',
+      KUTigers: 'KUTigers',
+      HICowboys: 'HICowboys',
+      SSCrusaders: 'SSCrusaders',
+      HYLions: 'HYLions', // 한양대 라이온스 -> 그대로 유지 (데이터베이스에 존재)
+      // HFBlackKnights: 'HFBlackKnights', // 한국외대 -> 데이터베이스에 존재하지 않음 (주석 처리)
     };
 
     const mappedName = teamMapping[jsonTeamName];
@@ -67,7 +43,7 @@ export class PlayerService {
       console.log(`⚠️ 알 수 없는 팀명: ${jsonTeamName}, 원본 팀명 사용`);
       return jsonTeamName;
     }
-    
+
     console.log(`🔄 팀명 매핑: ${jsonTeamName} -> ${mappedName}`);
     return mappedName;
   }
@@ -102,7 +78,7 @@ export class PlayerService {
           puntReturn: 0,
           puntReturnYards: 0,
           yardsPerPuntReturn: 0,
-          returnTouchdown: 0
+          returnTouchdown: 0,
         };
       case 'WR':
       case 'TE':
@@ -128,7 +104,7 @@ export class PlayerService {
           puntReturn: 0,
           puntReturnYards: 0,
           yardsPerPuntReturn: 0,
-          returnTouchdown: 0
+          returnTouchdown: 0,
         };
       case 'DB':
       case 'LB':
@@ -144,7 +120,7 @@ export class PlayerService {
           passDefended: 0,
           interception: 0,
           interceptionYards: 0,
-          touchdown: 0
+          touchdown: 0,
         };
       default:
         return baseStats;
@@ -162,20 +138,22 @@ export class PlayerService {
     return {
       success: true,
       message: '선수가 성공적으로 생성되었습니다.',
-      data: newPlayer
+      data: newPlayer,
     };
   }
 
   // PlayerCode로 개별 선수 조회
   async getPlayerByCode(playerId: string) {
-    const player = await this.playerModel.findOne({ playerId }).populate('teamId', 'teamName');
+    const player = await this.playerModel
+      .findOne({ playerId })
+      .populate('teamId', 'teamName');
     if (!player) {
       throw new NotFoundException('선수를 찾을 수 없습니다.');
     }
 
     return {
       success: true,
-      data: player
+      data: player,
     };
   }
 
@@ -193,7 +171,7 @@ export class PlayerService {
 
     return {
       success: true,
-      data: players
+      data: players,
     };
   }
 
@@ -216,12 +194,15 @@ export class PlayerService {
 
     return {
       success: true,
-      data: players
+      data: players,
     };
   }
 
   // 선수 스탯 업데이트
-  async updatePlayerStats(playerId: string, updateStatsDto: UpdatePlayerStatsDto) {
+  async updatePlayerStats(
+    playerId: string,
+    updateStatsDto: UpdatePlayerStatsDto,
+  ) {
     const player = await this.playerModel.findOne({ playerId });
     if (!player) {
       throw new NotFoundException('선수를 찾을 수 없습니다.');
@@ -234,7 +215,7 @@ export class PlayerService {
     return {
       success: true,
       message: '선수 스탯이 성공적으로 업데이트되었습니다.',
-      data: player
+      data: player,
     };
   }
 
@@ -247,74 +228,86 @@ export class PlayerService {
 
     return {
       success: true,
-      data: players
+      data: players,
     };
   }
-
 
   // === 새로운 클립 구조 처리 메서드들 ===
 
   /**
    * 새로운 클립 구조로 선수 스탯 업데이트 (팀명 + 등번호 기반)
    */
-  async updatePlayerStatsFromNewClips(playerNumber: number, newClips: NewClipDto[], teamName?: string) {
+  async updatePlayerStatsFromNewClips(
+    playerNumber: number,
+    newClips: NewClipDto[],
+    teamName?: string,
+  ) {
     let player;
-    
+
     if (teamName) {
       // JSON 팀명을 DB 팀명으로 매핑
       const dbTeamName = this.mapJsonTeamNameToDbTeamName(teamName);
-      
+
       // 팀명 + 등번호로 선수 찾기
-      player = await this.playerModel.findOne({ 
+      player = await this.playerModel.findOne({
         jerseyNumber: playerNumber,
-        teamName: dbTeamName
+        teamName: dbTeamName,
       });
-      
+
       if (!player) {
-        console.log(`🔍 팀 ${teamName} (매핑: ${dbTeamName})의 등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`);
-        
+        console.log(
+          `🔍 팀 ${teamName} (매핑: ${dbTeamName})의 등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`,
+        );
+
         // 매핑된 팀명으로도 찾을 수 없으면 등번호로만 시도
-        player = await this.playerModel.findOne({ 
-          jerseyNumber: playerNumber 
+        player = await this.playerModel.findOne({
+          jerseyNumber: playerNumber,
         });
-        
+
         if (player) {
-          console.log(`✅ 등번호로 선수 발견: ${player.name} (${player.teamName})`);
+          console.log(
+            `✅ 등번호로 선수 발견: ${player.name} (${player.teamName})`,
+          );
         } else {
-          console.log(`❌ 등번호 ${playerNumber}번 선수를 전혀 찾을 수 없습니다.`);
-          return { 
-            success: false, 
+          console.log(
+            `❌ 등번호 ${playerNumber}번 선수를 전혀 찾을 수 없습니다.`,
+          );
+          return {
+            success: false,
             message: `등번호 ${playerNumber}번 선수를 찾을 수 없습니다. (JSON팀명: ${teamName}, DB팀명: ${dbTeamName})`,
             playerNumber,
             teamName,
-            dbTeamName
+            dbTeamName,
           };
         }
       }
     } else {
       // 기존 방식: 등번호로만 찾기 (하위 호환성)
-      player = await this.playerModel.findOne({ 
-        jerseyNumber: playerNumber 
+      player = await this.playerModel.findOne({
+        jerseyNumber: playerNumber,
       });
-      
+
       if (!player) {
-        throw new NotFoundException(`등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`);
+        throw new NotFoundException(
+          `등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`,
+        );
       }
     }
 
     // 해당 선수가 참여한 클립들만 필터링 (새 구조에서 직접)
-    const playerClips = newClips.filter(clip => 
-      clip.car?.num === playerNumber || 
-      clip.car2?.num === playerNumber ||
-      clip.tkl?.num === playerNumber || 
-      clip.tkl2?.num === playerNumber
+    const playerClips = newClips.filter(
+      (clip) =>
+        clip.car?.num === playerNumber ||
+        clip.car2?.num === playerNumber ||
+        clip.tkl?.num === playerNumber ||
+        clip.tkl2?.num === playerNumber,
     );
 
     if (playerClips.length === 0) {
       return {
         success: false,
         message: `등번호 ${playerNumber}번 선수의 플레이가 클립에서 발견되지 않았습니다.`,
-        data: player
+        data: player,
       };
     }
 
@@ -324,137 +317,36 @@ export class PlayerService {
 
     switch (position) {
       case 'QB':
-        analyzedStats = await this.qbStatsAnalyzer.analyzeQbStats(playerClips as any, player.jerseyNumber.toString());
+        console.log(
+          `🏈 QB ${player.jerseyNumber}번 분석 시작 - ${player.name} (${player.teamName})`,
+        );
+        analyzedStats = this.analyzeQBStats(
+          playerClips,
+          player.jerseyNumber,
+          player.name,
+          player.teamName,
+        );
         break;
       case 'RB':
-        // RB 분석기가 새 구조로 업데이트됨
-        console.log(`🏈 RB 분석기 실행 - 클립 수: ${playerClips.length}`);
-        analyzedStats = await this.rbStatsAnalyzer?.analyzeRbStats?.(playerClips as any, player.jerseyNumber.toString()) || 
-                       this.getDefaultStatsForPosition(position);
-        break;
       case 'WR':
-        // WR 분석기가 새 구조로 업데이트됨  
-        console.log(`🏈 WR 분석기 실행 - 클립 수: ${playerClips.length}`);
-        analyzedStats = await this.wrStatsAnalyzer?.analyzeWrStats?.(playerClips as any, player.jerseyNumber.toString()) || 
-                       this.getDefaultStatsForPosition(position);
-        break;
       case 'TE':
-        // TE 분석기가 새 구조로 업데이트됨
-        console.log(`🏈 TE 분석기 실행 - 클립 수: ${playerClips.length}`);
-        analyzedStats = await this.teStatsAnalyzer?.analyzeTeStats?.(playerClips as any, player.jerseyNumber.toString()) || 
-                       this.getDefaultStatsForPosition(position);
-        break;
       case 'DB':
-        // DB 분석기가 새 구조로 업데이트됨
-        console.log(`🏈 DB 분석기 실행 - 클립 수: ${playerClips.length}`);
-        const dbStats = await this.dbStatsAnalyzer?.analyzeDBStats?.(playerClips as any, player.jerseyNumber.toString()) || 
-                       this.getDefaultStatsForPosition(position);
-        
-        // DB 분석기 결과를 프론트엔드 형태로 변환
-        analyzedStats = {
-          ...dbStats,
-          // 수비 스탯 매핑
-          gamesPlayed: dbStats.gamesPlayed || 0,
-          tackles: dbStats.tackles || 0,
-          sacks: dbStats.sacks || 0,
-          forcedFumbles: dbStats.forced_fumbles || 0,
-          fumbleRecoveries: dbStats.fumble_recovery || 0,
-          fumbleRecoveryYards: dbStats.fumble_recovered_yards || 0,
-          passesDefended: dbStats.pass_defended || 0,
-          interceptions: dbStats.interceptions || 0,
-          interceptionYards: dbStats.interception_yards || 0,
-          defensiveTouchdowns: dbStats.touchdowns || 0,
-          
-          // 기존 더미 스탯 필드도 유지
-          passingYards: 0,
-          passingTouchdowns: 0,
-          rushingYards: 0,
-          rushingTouchdowns: 0,
-          receivingYards: 0,
-          receivingTouchdowns: 0,
-          totalYards: 0,
-          totalTouchdowns: dbStats.touchdowns || 0,
-        };
-        break;
       case 'LB':
-        // LB 분석기가 새 구조로 업데이트됨
-        console.log(`🏈 LB 분석기 실행 - 클립 수: ${playerClips.length}`);
-        const lbStats = await this.lbStatsAnalyzer?.analyzeLBStats?.(playerClips as any, player.jerseyNumber.toString()) || 
-                       this.getDefaultStatsForPosition(position);
-        
-        // LB 분석기 결과를 프론트엔드 형태로 변환
-        analyzedStats = {
-          ...lbStats,
-          // 수비 스탯 매핑 (LB도 DB와 같은 형태)
-          gamesPlayed: lbStats.games || lbStats.gamesPlayed || 0,
-          tackles: lbStats.tackles || 0,
-          sacks: lbStats.sacks || 0,
-          forcedFumbles: lbStats.forcedFumbles || lbStats.forced_fumbles || 0,
-          fumbleRecoveries: lbStats.fumbleRecovery || lbStats.fumble_recovery || 0,
-          fumbleRecoveryYards: lbStats.fumbleRecoveredYards || lbStats.fumble_recovered_yards || 0,
-          passesDefended: lbStats.passDefended || lbStats.pass_defended || 0,
-          interceptions: lbStats.interception || lbStats.interceptions || 0,
-          interceptionYards: lbStats.interceptionYards || lbStats.interception_yards || 0,
-          defensiveTouchdowns: lbStats.touchdown || lbStats.touchdowns || 0,
-          
-          // 기존 더미 스탯 필드도 유지
-          passingYards: 0,
-          passingTouchdowns: 0,
-          rushingYards: 0,
-          rushingTouchdowns: 0,
-          receivingYards: 0,
-          receivingTouchdowns: 0,
-          totalYards: 0,
-          totalTouchdowns: lbStats.touchdown || lbStats.touchdowns || 0,
-        };
-        break;
       case 'DL':
-        // DL 분석기가 새 구조로 업데이트됨
-        console.log(`🏈 DL 분석기 실행 - 클립 수: ${playerClips.length}`);
-        const dlStats = await this.dlStatsAnalyzer?.analyzeDLStats?.(playerClips as any, player.jerseyNumber.toString()) || 
-                       this.getDefaultStatsForPosition(position);
-        
-        // DL 분석기 결과를 프론트엔드 형태로 변환
-        analyzedStats = {
-          ...dlStats,
-          // 수비 스탯 매핑
-          gamesPlayed: dlStats.games || dlStats.gamesPlayed || 0,
-          tackles: dlStats.tackles || 0,
-          sacks: dlStats.sacks || 0,
-          forcedFumbles: dlStats.forcedFumbles || dlStats.forced_fumbles || 0,
-          fumbleRecoveries: dlStats.fumbleRecovery || dlStats.fumble_recovery || 0,
-          fumbleRecoveryYards: dlStats.fumbleRecoveredYards || dlStats.fumble_recovered_yards || 0,
-          passesDefended: dlStats.passDefended || dlStats.pass_defended || 0,
-          interceptions: dlStats.interception || dlStats.interceptions || 0,
-          interceptionYards: dlStats.interceptionYards || dlStats.interception_yards || 0,
-          defensiveTouchdowns: dlStats.touchdown || dlStats.touchdowns || 0,
-          
-          // 기존 더미 스탯 필드도 유지
-          passingYards: 0,
-          passingTouchdowns: 0,
-          rushingYards: 0,
-          rushingTouchdowns: 0,
-          receivingYards: 0,
-          receivingTouchdowns: 0,
-          totalYards: 0,
-          totalTouchdowns: dlStats.touchdown || dlStats.touchdowns || 0,
-        };
-        break;
-      case 'Kicker':
-      case 'K':
-        analyzedStats = await this.kickerStatsAnalyzer.analyzeKickerStats(playerClips as any, player.jerseyNumber.toString());
-        break;
-      case 'Punter':
-      case 'P':
-        // P 포지션 지원 추가
-        console.log(`🏈 Punter 분석기 실행 - 클립 수: ${playerClips.length}`);
-        analyzedStats = await this.punterStatsAnalyzer.analyzePunterStats(playerClips as any, player.jerseyNumber.toString());
-        break;
       case 'OL':
-        analyzedStats = await this.olStatsAnalyzer.analyzeOLStats(playerClips as any, player.jerseyNumber.toString());
-        break;
+      case 'K':
+      case 'P':
+        console.log(
+          `⚠️ ${position} ${player.jerseyNumber}번 분석 건너뜀 - ${player.name} (${player.teamName})`,
+        );
+        return {
+          success: true,
+          message: `${position} 포지션은 현재 분석을 지원하지 않습니다.`,
+          data: player,
+          skipped: true,
+        };
       default:
-        throw new Error(`지원하지 않는 포지션입니다: ${position}`);
+        throw new Error(`알 수 없는 포지션입니다: ${position}`);
     }
 
     // 🏈 3단계 스탯 시스템 업데이트
@@ -464,10 +356,11 @@ export class PlayerService {
 
     // 2. 새로운 3단계 시스템 업데이트
     // gameKey 생성 (클립의 첫 번째 clipKey 또는 현재 타임스탬프 사용)
-    const gameKey = newClips.length > 0 && newClips[0].clipKey 
-      ? `GAME_${newClips[0].clipKey}` 
-      : `GAME_${Date.now()}`;
-    
+    const gameKey =
+      newClips.length > 0 && newClips[0].clipKey
+        ? `GAME_${newClips[0].clipKey}`
+        : `GAME_${Date.now()}`;
+
     const gameDate = new Date();
     const homeTeam = '홈팀'; // TODO: 실제 게임 정보에서 가져와야 함
     const awayTeam = '어웨이팀'; // TODO: 실제 게임 정보에서 가져와야 함
@@ -479,7 +372,7 @@ export class PlayerService {
       gameDate,
       homeTeam,
       awayTeam,
-      analyzedStats
+      analyzedStats,
     );
 
     return {
@@ -492,93 +385,16 @@ export class PlayerService {
       tierSystemUpdate: {
         gameKey: gameKey,
         gameDate: gameDate,
-        autoAggregated: true
-      }
+        autoAggregated: true,
+      },
     };
   }
 
-
   /**
-   * 게임 전체 데이터로 여러 선수 스탯 업데이트
+   * 새로운 게임 데이터 분석 (JSON 클립 구조)
    */
-  async updateGameStats(gameData: { Clips: NewClipDto[] }) {
-    // 게임 고유 식별자 생성 (첫 번째 클립의 정보로)
-    const firstClip = gameData.Clips[0];
-    if (!firstClip) {
-      throw new Error('클립 데이터가 없습니다.');
-    }
-
-    // 게임 식별자 생성 (날짜, 팀 정보 등 조합)
-    const gameId = this.generateGameId(firstClip);
-    
-    // 이미 처리된 게임인지 확인
-    const existingPlayer = await this.playerModel.findOne({ 
-      'processedGames': gameId 
-    });
-
-    if (existingPlayer) {
-      return {
-        success: false,
-        message: `이미 처리된 게임입니다: ${gameId}`,
-        totalPlayers: 0,
-        successfulUpdates: 0,
-        totalClips: gameData.Clips.length,
-        results: []
-      };
-    }
-
-    const results = [];
-    const processedPlayers = new Set<number>();
-
-    // 모든 클립에서 등번호 추출
-    gameData.Clips.forEach(clip => {
-      [clip.car, clip.car2, clip.tkl, clip.tkl2].forEach(player => {
-        if (player?.num) {
-          processedPlayers.add(player.num);
-        }
-      });
-    });
-
-    // 각 선수별로 스탯 업데이트
-    for (const playerNumber of processedPlayers) {
-      try {
-        const result = await this.updatePlayerStatsFromNewClips(playerNumber, gameData.Clips);
-        results.push({
-          playerNumber,
-          success: result.success,
-          message: result.message,
-          processedClips: result.processedClips || 0
-        });
-      } catch (error) {
-        results.push({
-          playerNumber,
-          success: false,
-          message: error.message,
-          processedClips: 0
-        });
-      }
-    }
-
-    const successCount = results.filter(r => r.success).length;
-    const totalClips = gameData.Clips.length;
-
-    // 성공한 선수들에게 처리된 게임 ID 추가
-    if (successCount > 0) {
-      await this.playerModel.updateMany(
-        { jerseyNumber: { $in: Array.from(processedPlayers) } },
-        { $addToSet: { processedGames: gameId } }
-      );
-    }
-
-    return {
-      success: true,
-      message: `게임 데이터 처리 완료: ${successCount}명의 선수 스탯 업데이트`,
-      gameId: gameId,
-      totalPlayers: processedPlayers.size,
-      successfulUpdates: successCount,
-      totalClips: totalClips,
-      results: results
-    };
+  async analyzeGameData(gameData: any) {
+    return await this.clipAnalyzer.analyzeGameData(gameData);
   }
 
   /**
@@ -591,7 +407,7 @@ export class PlayerService {
       .filter(Boolean)
       .sort()
       .join('-');
-    
+
     return `game-${date}-${teams.slice(0, 10)}`;
   }
 
@@ -603,14 +419,14 @@ export class PlayerService {
       const result = await this.playerModel.updateMany(
         {},
         {
-          $unset: { stats: 1 }
-        }
+          $unset: { stats: 1 },
+        },
       );
 
       return {
         success: true,
         message: `${result.modifiedCount}명의 선수 스탯이 초기화되었습니다.`,
-        modifiedCount: result.modifiedCount
+        modifiedCount: result.modifiedCount,
       };
     } catch (error) {
       throw new Error(`스탯 초기화 실패: ${error.message}`);
@@ -625,17 +441,145 @@ export class PlayerService {
       const result = await this.playerModel.updateMany(
         {},
         {
-          $unset: { processedGames: 1 }
-        }
+          $unset: { processedGames: 1 },
+        },
       );
 
       return {
         success: true,
         message: '처리된 게임 목록이 초기화되었습니다.',
-        modifiedCount: result.modifiedCount
+        modifiedCount: result.modifiedCount,
       };
     } catch (error) {
       throw new Error(`처리된 게임 목록 초기화 실패: ${error.message}`);
     }
+  }
+
+  /**
+   * QB 스탯 분석 메서드
+   */
+  private analyzeQBStats(
+    clips: any[],
+    jerseyNumber: number,
+    playerName: string,
+    teamName: string,
+  ) {
+    let passingAttempts = 0;
+    let passingCompletions = 0;
+    let passingYards = 0;
+    let passingTouchdowns = 0;
+    let passingInterceptions = 0;
+    let longestPass = 0;
+    let sacks = 0;
+
+    console.log(
+      `📈 ${playerName} ${jerseyNumber}번 QB 통계 계산 시작 (${clips.length}개 클립)`,
+    );
+
+    // 클립 데이터 구조 디버깅
+    clips.forEach((clip, index) => {
+      console.log(`🔍 클립 ${index + 1}:`, {
+        playType: clip.playType,
+        gainYard: clip.gainYard,
+        car: clip.car,
+        car2: clip.car2,
+        significantPlays: clip.significantPlays,
+      });
+    });
+
+    for (const clip of clips) {
+      const isPlayerInCar = clip.car?.num === jerseyNumber;
+      const isPlayerInCar2 = clip.car2?.num === jerseyNumber;
+
+      if (!isPlayerInCar && !isPlayerInCar2) continue;
+
+      // 패스 시도 수 계산
+      if (clip.playType === 'PASS' || clip.playType === 'NOPASS') {
+        passingAttempts++;
+        console.log(
+          `  ✅ 패스 시도: ${clip.playType} (총 ${passingAttempts}회)`,
+        );
+      }
+
+      // 패스 성공 수 계산
+      if (clip.playType === 'PASS') {
+        passingCompletions++;
+        console.log(
+          `  ✅ 패스 성공: ${clip.gainYard}야드 (총 ${passingCompletions}회)`,
+        );
+      }
+
+      // 패싱 야드 계산
+      if (clip.playType === 'PASS') {
+        passingYards += clip.gainYard;
+        // 가장 긴 패스 업데이트
+        if (clip.gainYard > longestPass) {
+          longestPass = clip.gainYard;
+          console.log(`  🏈 새로운 최장 패스: ${longestPass}야드`);
+        }
+        console.log(
+          `  ✅ 패싱 야드: +${clip.gainYard} (총 ${passingYards}야드)`,
+        );
+      }
+
+      // 색(sack) 계산
+      if (clip.playType === 'SACK') {
+        sacks++;
+        console.log(`  💥 색(playType): 총 ${sacks}회`);
+      }
+
+      // significantPlays 확인
+      const hasSignificantPlay =
+        clip.significantPlays &&
+        Array.isArray(clip.significantPlays) &&
+        clip.significantPlays.some((play) => play !== null);
+
+      if (hasSignificantPlay) {
+        const plays = clip.significantPlays.filter((play) => play !== null);
+
+        for (const play of plays) {
+          // 패싱 터치다운 계산
+          if (play === 'TOUCHDOWN' && clip.playType === 'PASS') {
+            passingTouchdowns++;
+            console.log(`  🎯 패싱 터치다운: 총 ${passingTouchdowns}회`);
+          }
+          // 인터셉션 계산
+          else if (play === 'INTERCEPT' || play === 'INTERCEPTION') {
+            passingInterceptions++;
+            console.log(`  ❌ 인터셉션: 총 ${passingInterceptions}회`);
+          }
+          // 색 계산
+          else if (play === 'SACK') {
+            sacks++;
+            console.log(`  💥 색(significantPlay): 총 ${sacks}회`);
+          }
+        }
+      }
+    }
+
+    // 패스 성공률 계산
+    const completionPercentage =
+      passingAttempts > 0
+        ? Math.round((passingCompletions / passingAttempts) * 100)
+        : 0;
+
+    const finalStats = {
+      gamesPlayed: 1,
+      passingAttempts,
+      passingCompletions,
+      completionPercentage,
+      passingYards,
+      passingTouchdowns,
+      passingInterceptions,
+      longestPass,
+      sacks,
+    };
+
+    // 🏈 원하시는 한 줄 요약 출력
+    console.log(
+      `🏈 ${teamName} ${jerseyNumber}번 QB: 패스시도 ${passingAttempts}회, 패스성공 ${passingCompletions}회, 성공률 ${completionPercentage}%, 패싱야드 ${passingYards}야드`,
+    );
+
+    return finalStats;
   }
 }

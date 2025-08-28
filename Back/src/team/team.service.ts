@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,7 +28,7 @@ export class TeamService {
       teamId,
       teamName,
       logoUrl,
-      ownerId
+      ownerId,
     });
 
     await newTeam.save();
@@ -32,13 +36,15 @@ export class TeamService {
     return {
       success: true,
       message: '팀이 성공적으로 생성되었습니다.',
-      data: newTeam
+      data: newTeam,
     };
   }
 
   async getTeam(teamId: string) {
     // 팀 정보와 선수들을 함께 조회
-    const team = await this.teamModel.findOne({ teamId }).populate('ownerId', 'name email');
+    const team = await this.teamModel
+      .findOne({ teamId })
+      .populate('ownerId', 'name email');
     if (!team) {
       throw new NotFoundException('팀을 찾을 수 없습니다.');
     }
@@ -50,21 +56,27 @@ export class TeamService {
       success: true,
       data: {
         ...team.toObject(),
-        players
-      }
+        players,
+      },
     };
   }
 
   async getMyTeams(ownerId: string) {
-    const teams = await this.teamModel.find({ ownerId }).sort({ createdAt: -1 });
+    const teams = await this.teamModel
+      .find({ ownerId })
+      .sort({ createdAt: -1 });
 
     return {
       success: true,
-      data: teams
+      data: teams,
     };
   }
 
-  async updateTeam(teamId: string, updateTeamDto: UpdateTeamDto, ownerId: string) {
+  async updateTeam(
+    teamId: string,
+    updateTeamDto: UpdateTeamDto,
+    ownerId: string,
+  ) {
     const { teamName, logoUrl } = updateTeamDto;
 
     // 팀 찾기 및 권한 확인
@@ -82,13 +94,13 @@ export class TeamService {
     const updatedTeam = await this.teamModel.findOneAndUpdate(
       { teamId },
       { teamName, logoUrl },
-      { new: true }
+      { new: true },
     );
 
     return {
       success: true,
       message: '팀 정보가 성공적으로 수정되었습니다.',
-      data: updatedTeam
+      data: updatedTeam,
     };
   }
 
@@ -112,7 +124,7 @@ export class TeamService {
 
     return {
       success: true,
-      message: '팀이 성공적으로 삭제되었습니다.'
+      message: '팀이 성공적으로 삭제되었습니다.',
     };
   }
 }

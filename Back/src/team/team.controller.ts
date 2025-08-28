@@ -1,16 +1,21 @@
-import { 
-  Controller, 
-  Post, 
-  Get, 
-  Put, 
-  Delete, 
-  Body, 
-  Param, 
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Delete,
+  Body,
+  Param,
   UseGuards,
   HttpCode,
-  HttpStatus
+  HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { TeamService } from './team.service';
 import { TeamStatsAnalyzerService } from './team-stats-analyzer.service';
 import { TeamSeasonStatsAnalyzerService } from './team-season-stats-analyzer.service';
@@ -67,7 +72,7 @@ export class TeamController {
   async updateTeam(
     @Param('teamId') teamId: string,
     @Body() updateTeamDto: UpdateTeamDto,
-    @User() user: any
+    @User() user: any,
   ) {
     return this.teamService.updateTeam(teamId, updateTeamDto, user._id);
   }
@@ -85,7 +90,7 @@ export class TeamController {
   }
 
   @Get('stats/:gameKey')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '🏈 게임별 팀 스탯 조회',
     description: `
     ## 📊 팀 스탯 조회 API
@@ -103,10 +108,10 @@ export class TeamController {
     ### 🎯 사용 예시
     - 게임키: "DGKM240908"
     - 응답: 홈팀/어웨이팀 각각의 상세 스탯
-    `
+    `,
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: '✅ 팀 스탯 조회 성공',
     type: TeamStatsSuccessDto,
     schema: {
@@ -124,10 +129,10 @@ export class TeamController {
             kickoffReturnYards: 35,
             turnovers: 2,
             penaltyYards: 45,
-            sackYards: 15
+            sackYards: 15,
           },
           awayTeamStats: {
-            teamName: 'KMRazorbacks', 
+            teamName: 'KMRazorbacks',
             totalYards: 380,
             passingYards: 220,
             rushingYards: 160,
@@ -136,34 +141,35 @@ export class TeamController {
             kickoffReturnYards: 25,
             turnovers: 1,
             penaltyYards: 30,
-            sackYards: 8
-          }
+            sackYards: 8,
+          },
         },
-        timestamp: '2024-12-26T10:30:00.000Z'
-      }
-    }
+        timestamp: '2024-12-26T10:30:00.000Z',
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 404, 
+  @ApiResponse({
+    status: 404,
     description: '❌ 팀 스탯을 찾을 수 없음',
     type: TeamStatsErrorDto,
     schema: {
       example: {
         success: false,
         message: '해당 게임의 팀 스탯을 찾을 수 없습니다',
-        code: 'TEAM_STATS_NOT_FOUND'
-      }
-    }
+        code: 'TEAM_STATS_NOT_FOUND',
+      },
+    },
   })
   async getTeamStatsByGame(@Param('gameKey') gameKey: string) {
     try {
-      const teamStatsResult = await this.teamStatsService.getTeamStatsByGame(gameKey);
-      
+      const teamStatsResult =
+        await this.teamStatsService.getTeamStatsByGame(gameKey);
+
       if (!teamStatsResult) {
         return {
           success: false,
           message: '해당 게임의 팀 스탯을 찾을 수 없습니다',
-          code: 'TEAM_STATS_NOT_FOUND'
+          code: 'TEAM_STATS_NOT_FOUND',
         };
       }
 
@@ -171,19 +177,19 @@ export class TeamController {
         success: true,
         message: '팀 스탯 조회가 완료되었습니다',
         data: teamStatsResult,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
         success: false,
         message: '팀 스탯 조회 중 오류가 발생했습니다',
-        code: 'TEAM_STATS_ERROR'
+        code: 'TEAM_STATS_ERROR',
       };
     }
   }
 
   @Get('season-stats/:season')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '🏆 팀 시즌 스탯 순위 조회',
     description: `
     ## 📊 팀 시즌 스탯 순위 API
@@ -228,27 +234,28 @@ export class TeamController {
     - 턴오버 비율 (우리 팀 - 상대 팀)
     - 총 페널티 수-총 페널티 야드
     - 경기 당 페널티 야드
-    `
+    `,
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: '✅ 팀 시즌 스탯 조회 성공',
-    type: TeamRankingResponseDto
+    type: TeamRankingResponseDto,
   })
-  @ApiResponse({ 
-    status: 404, 
-    description: '❌ 해당 시즌 데이터를 찾을 수 없음'
+  @ApiResponse({
+    status: 404,
+    description: '❌ 해당 시즌 데이터를 찾을 수 없음',
   })
   async getTeamSeasonStats(@Param('season') season: string) {
     try {
-      const teamStats = await this.teamSeasonStatsService.getAllTeamSeasonStats(season);
-      
+      const teamStats =
+        await this.teamSeasonStatsService.getAllTeamSeasonStats(season);
+
       if (!teamStats || teamStats.length === 0) {
         return {
           success: false,
           message: `${season} 시즌의 팀 스탯을 찾을 수 없습니다`,
           data: [],
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
       }
 
@@ -259,44 +266,47 @@ export class TeamController {
         success: true,
         message: `${season} 시즌 팀 순위 조회가 완료되었습니다`,
         data: teamStats,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
         success: false,
         message: '팀 시즌 스탯 조회 중 오류가 발생했습니다',
         data: [],
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
 
   @Get('season-stats/:teamName/:season')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '🎯 특정 팀 시즌 스탯 조회',
-    description: '특정 팀의 시즌 스탯을 상세하게 조회합니다.'
+    description: '특정 팀의 시즌 스탯을 상세하게 조회합니다.',
   })
-  @ApiResponse({ 
-    status: 200, 
-    description: '✅ 팀 시즌 스탯 조회 성공'
+  @ApiResponse({
+    status: 200,
+    description: '✅ 팀 시즌 스탯 조회 성공',
   })
-  @ApiResponse({ 
-    status: 404, 
-    description: '❌ 해당 팀 또는 시즌 데이터를 찾을 수 없음'
+  @ApiResponse({
+    status: 404,
+    description: '❌ 해당 팀 또는 시즌 데이터를 찾을 수 없음',
   })
   async getSpecificTeamSeasonStats(
     @Param('teamName') teamName: string,
-    @Param('season') season: string
+    @Param('season') season: string,
   ) {
     try {
-      const teamStats = await this.teamSeasonStatsService.getTeamSeasonStats(teamName, season);
-      
+      const teamStats = await this.teamSeasonStatsService.getTeamSeasonStats(
+        teamName,
+        season,
+      );
+
       if (!teamStats) {
         return {
           success: false,
           message: `${teamName} 팀의 ${season} 시즌 스탯을 찾을 수 없습니다`,
           data: null,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
       }
 
@@ -304,40 +314,41 @@ export class TeamController {
         success: true,
         message: `${teamName} 팀의 ${season} 시즌 스탯 조회가 완료되었습니다`,
         data: teamStats,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
         success: false,
         message: '팀 시즌 스탯 조회 중 오류가 발생했습니다',
         data: null,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }
 
   @Post('season-stats/reset/:season')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: '🔄 팀 시즌 스탯 초기화',
-    description: '특정 시즌의 모든 팀 스탯을 초기화합니다. (개발/테스트용)'
+    description: '특정 시즌의 모든 팀 스탯을 초기화합니다. (개발/테스트용)',
   })
-  @ApiResponse({ 
-    status: 200, 
-    description: '✅ 팀 시즌 스탯 초기화 성공'
+  @ApiResponse({
+    status: 200,
+    description: '✅ 팀 시즌 스탯 초기화 성공',
   })
   async resetTeamSeasonStats(@Param('season') season: string) {
     try {
-      const result = await this.teamSeasonStatsService.resetTeamSeasonStats(season);
-      
+      const result =
+        await this.teamSeasonStatsService.resetTeamSeasonStats(season);
+
       return {
         ...result,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
         success: false,
         message: '팀 시즌 스탯 초기화 중 오류가 발생했습니다',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
   }

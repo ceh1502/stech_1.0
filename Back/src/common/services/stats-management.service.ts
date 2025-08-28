@@ -2,17 +2,26 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { GameStats, GameStatsDocument } from '../../schemas/game-stats.schema';
-import { SeasonStats, SeasonStatsDocument } from '../../schemas/season-stats.schema';
-import { CareerStats, CareerStatsDocument } from '../../schemas/career-stats.schema';
+import {
+  SeasonStats,
+  SeasonStatsDocument,
+} from '../../schemas/season-stats.schema';
+import {
+  CareerStats,
+  CareerStatsDocument,
+} from '../../schemas/career-stats.schema';
 import { Player, PlayerDocument } from '../../schemas/player.schema';
 import { NewClipDto } from '../dto/new-clip.dto';
 
 @Injectable()
 export class StatsManagementService {
   constructor(
-    @InjectModel(GameStats.name) private gameStatsModel: Model<GameStatsDocument>,
-    @InjectModel(SeasonStats.name) private seasonStatsModel: Model<SeasonStatsDocument>,
-    @InjectModel(CareerStats.name) private careerStatsModel: Model<CareerStatsDocument>,
+    @InjectModel(GameStats.name)
+    private gameStatsModel: Model<GameStatsDocument>,
+    @InjectModel(SeasonStats.name)
+    private seasonStatsModel: Model<SeasonStatsDocument>,
+    @InjectModel(CareerStats.name)
+    private careerStatsModel: Model<CareerStatsDocument>,
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
   ) {}
 
@@ -25,9 +34,11 @@ export class StatsManagementService {
     gameDate: Date,
     homeTeam: string,
     awayTeam: string,
-    analyzedStats: any
+    analyzedStats: any,
   ) {
-    const player = await this.playerModel.findOne({ jerseyNumber: playerNumber });
+    const player = await this.playerModel.findOne({
+      jerseyNumber: playerNumber,
+    });
     if (!player) {
       throw new Error(`등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`);
     }
@@ -36,7 +47,7 @@ export class StatsManagementService {
     const gameStats = await this.gameStatsModel.findOneAndUpdate(
       {
         playerId: player._id,
-        gameKey: gameKey
+        gameKey: gameKey,
       },
       {
         $set: {
@@ -46,20 +57,32 @@ export class StatsManagementService {
           awayTeam: awayTeam,
           position: player.position,
           gamesPlayed: 1,
-          ...analyzedStats
-        }
+          ...analyzedStats,
+        },
       },
       {
         upsert: true,
-        new: true
-      }
+        new: true,
+      },
     );
 
     // 시즌 스탯 업데이트
-    await this.updateSeasonStats(player._id as Types.ObjectId, player.position, player.league, player.season, analyzedStats, gameKey);
+    await this.updateSeasonStats(
+      player._id as Types.ObjectId,
+      player.position,
+      player.league,
+      player.season,
+      analyzedStats,
+      gameKey,
+    );
 
     // 커리어 스탯 업데이트
-    await this.updateCareerStats(player._id as Types.ObjectId, player.position, player.season, analyzedStats);
+    await this.updateCareerStats(
+      player._id as Types.ObjectId,
+      player.position,
+      player.season,
+      analyzedStats,
+    );
 
     return gameStats;
   }
@@ -73,11 +96,11 @@ export class StatsManagementService {
     league: string,
     season: string,
     newStats: any,
-    gameKey: string
+    gameKey: string,
   ) {
     const seasonStats = await this.seasonStatsModel.findOne({
       playerId: playerId,
-      season: season
+      season: season,
     });
 
     if (!seasonStats) {
@@ -90,13 +113,13 @@ export class StatsManagementService {
         league: league,
         gamesPlayed: 1,
         gameKeys: [gameKey],
-        ...newStats
+        ...newStats,
       });
       await newSeasonStats.save();
     } else {
       // 기존 시즌 스탯 업데이트
       const updateData: any = {};
-      
+
       // 게임 키 추가 (중복 제거)
       if (!seasonStats.gameKeys.includes(gameKey)) {
         updateData.gameKeys = [...seasonStats.gameKeys, gameKey];
@@ -106,7 +129,9 @@ export class StatsManagementService {
       // 누적 스탯 업데이트
       this.accumulateStats(updateData, seasonStats, newStats);
 
-      await this.seasonStatsModel.findByIdAndUpdate(seasonStats._id, { $set: updateData });
+      await this.seasonStatsModel.findByIdAndUpdate(seasonStats._id, {
+        $set: updateData,
+      });
     }
   }
 
@@ -117,9 +142,11 @@ export class StatsManagementService {
     playerId: Types.ObjectId,
     position: string,
     season: string,
-    newStats: any
+    newStats: any,
   ) {
-    const careerStats = await this.careerStatsModel.findOne({ playerId: playerId });
+    const careerStats = await this.careerStatsModel.findOne({
+      playerId: playerId,
+    });
 
     if (!careerStats) {
       // 새로운 커리어 스탯 생성
@@ -130,13 +157,13 @@ export class StatsManagementService {
         seasonsPlayed: [season],
         totalGamesPlayed: 1,
         totalSeasons: 1,
-        ...newStats
+        ...newStats,
       });
       await newCareerStats.save();
     } else {
       // 기존 커리어 스탯 업데이트
       const updateData: any = {};
-      
+
       // 시즌 추가 (중복 제거)
       if (!careerStats.seasonsPlayed.includes(season)) {
         updateData.seasonsPlayed = [...careerStats.seasonsPlayed, season];
@@ -151,7 +178,9 @@ export class StatsManagementService {
       // 최고 기록 업데이트
       this.updateCareerRecords(updateData, careerStats, newStats, season);
 
-      await this.careerStatsModel.findByIdAndUpdate(careerStats._id, { $set: updateData });
+      await this.careerStatsModel.findByIdAndUpdate(careerStats._id, {
+        $set: updateData,
+      });
     }
   }
 
@@ -161,57 +190,139 @@ export class StatsManagementService {
   private accumulateStats(updateData: any, existingStats: any, newStats: any) {
     // 누적 가능한 스탯들
     const accumulativeStats = [
-      'passingYards', 'passingTouchdowns', 'passingInterceptions', 'completions', 'passingAttempts',
-      'rushingYards', 'rushingTouchdowns', 'rushingAttempts', 'rushingFirstDowns',
-      'receivingYards', 'receivingTouchdowns', 'receptions', 'receivingTargets', 'receivingFirstDowns',
-      'kickoffReturnYards', 'kickoffReturns', 'kickoffReturnTouchdowns',
-      'puntReturnYards', 'puntReturns', 'puntReturnTouchdowns',
-      'totalYards', 'totalTouchdowns',
-      'fieldGoalsMade', 'fieldGoalAttempts', 'extraPointsMade', 'extraPointAttempts',
-      'kickoffYards', 'kickoffs', 'kickoffTouchbacks', 'inside20Kicks', 'inside10Kicks',
-      'fieldGoals0_29', 'fieldGoals30_39', 'fieldGoals40_49', 'fieldGoals50Plus',
-      'totalKickingPoints', 'puntingYards', 'punts', 'puntsInside20', 'puntTouchbacks', 'blockedPunts',
-      'pancakeBlocks', 'penalties', 'tackles', 'assistedTackles', 'totalTackles',
-      'tacklesForLoss', 'quarterbackSacks', 'interceptions', 'passesDefended',
-      'forcedFumbles', 'fumbleRecoveries', 'defensiveTouchdowns', 'sacks', 'rushing20Plus',
-      'fumbles', 'redZoneAttempts', 'redZoneCompletions', 'thirdDownAttempts', 'thirdDownCompletions',
-      'rushes20Plus', 'catches20Plus'
+      'passingYards',
+      'passingTouchdowns',
+      'passingInterceptions',
+      'completions',
+      'passingAttempts',
+      'rushingYards',
+      'rushingTouchdowns',
+      'rushingAttempts',
+      'rushingFirstDowns',
+      'receivingYards',
+      'receivingTouchdowns',
+      'receptions',
+      'receivingTargets',
+      'receivingFirstDowns',
+      'kickoffReturnYards',
+      'kickoffReturns',
+      'kickoffReturnTouchdowns',
+      'puntReturnYards',
+      'puntReturns',
+      'puntReturnTouchdowns',
+      'totalYards',
+      'totalTouchdowns',
+      'fieldGoalsMade',
+      'fieldGoalAttempts',
+      'extraPointsMade',
+      'extraPointAttempts',
+      'kickoffYards',
+      'kickoffs',
+      'kickoffTouchbacks',
+      'inside20Kicks',
+      'inside10Kicks',
+      'fieldGoals0_29',
+      'fieldGoals30_39',
+      'fieldGoals40_49',
+      'fieldGoals50Plus',
+      'totalKickingPoints',
+      'puntingYards',
+      'punts',
+      'puntsInside20',
+      'puntTouchbacks',
+      'blockedPunts',
+      'pancakeBlocks',
+      'penalties',
+      'tackles',
+      'assistedTackles',
+      'totalTackles',
+      'tacklesForLoss',
+      'quarterbackSacks',
+      'interceptions',
+      'passesDefended',
+      'forcedFumbles',
+      'fumbleRecoveries',
+      'defensiveTouchdowns',
+      'sacks',
+      'rushing20Plus',
+      'fumbles',
+      'redZoneAttempts',
+      'redZoneCompletions',
+      'thirdDownAttempts',
+      'thirdDownCompletions',
+      'rushes20Plus',
+      'catches20Plus',
     ];
 
-    accumulativeStats.forEach(stat => {
+    accumulativeStats.forEach((stat) => {
       if (newStats[stat] !== undefined) {
         updateData[stat] = (existingStats[stat] || 0) + newStats[stat];
       }
     });
 
     // 평균 계산이 필요한 스탯들
-    if (updateData.passingAttempts > 0 && updateData.completions !== undefined) {
-      updateData.completionPercentage = Math.round((updateData.completions / updateData.passingAttempts) * 100 * 10) / 10;
+    if (
+      updateData.passingAttempts > 0 &&
+      updateData.completions !== undefined
+    ) {
+      updateData.completionPercentage =
+        Math.round(
+          (updateData.completions / updateData.passingAttempts) * 100 * 10,
+        ) / 10;
     }
 
-    if (updateData.rushingAttempts > 0 && updateData.rushingYards !== undefined) {
-      updateData.yardsPerCarry = Math.round((updateData.rushingYards / updateData.rushingAttempts) * 10) / 10;
+    if (
+      updateData.rushingAttempts > 0 &&
+      updateData.rushingYards !== undefined
+    ) {
+      updateData.yardsPerCarry =
+        Math.round(
+          (updateData.rushingYards / updateData.rushingAttempts) * 10,
+        ) / 10;
     }
 
     if (updateData.receptions > 0 && updateData.receivingYards !== undefined) {
-      updateData.yardsPerReception = Math.round((updateData.receivingYards / updateData.receptions) * 10) / 10;
+      updateData.yardsPerReception =
+        Math.round((updateData.receivingYards / updateData.receptions) * 10) /
+        10;
     }
 
-    if (updateData.fieldGoalAttempts > 0 && updateData.fieldGoalsMade !== undefined) {
-      updateData.fieldGoalPercentage = Math.round((updateData.fieldGoalsMade / updateData.fieldGoalAttempts) * 100 * 10) / 10;
+    if (
+      updateData.fieldGoalAttempts > 0 &&
+      updateData.fieldGoalsMade !== undefined
+    ) {
+      updateData.fieldGoalPercentage =
+        Math.round(
+          (updateData.fieldGoalsMade / updateData.fieldGoalAttempts) * 100 * 10,
+        ) / 10;
     }
 
-    if (updateData.extraPointAttempts > 0 && updateData.extraPointsMade !== undefined) {
-      updateData.extraPointPercentage = Math.round((updateData.extraPointsMade / updateData.extraPointAttempts) * 100 * 10) / 10;
+    if (
+      updateData.extraPointAttempts > 0 &&
+      updateData.extraPointsMade !== undefined
+    ) {
+      updateData.extraPointPercentage =
+        Math.round(
+          (updateData.extraPointsMade / updateData.extraPointAttempts) *
+            100 *
+            10,
+        ) / 10;
     }
 
     if (updateData.punts > 0 && updateData.puntingYards !== undefined) {
-      updateData.puntAverage = Math.round((updateData.puntingYards / updateData.punts) * 10) / 10;
+      updateData.puntAverage =
+        Math.round((updateData.puntingYards / updateData.punts) * 10) / 10;
     }
 
     // 최대값 업데이트
-    const maxStats = ['longestPass', 'longestRush', 'longestReception', 'longestFieldGoal', 'longestPunt'];
-    maxStats.forEach(stat => {
+    const maxStats = [
+      'longestPass',
+      'longestRush',
+      'longestReception',
+      'longestFieldGoal',
+      'longestPunt',
+    ];
+    maxStats.forEach((stat) => {
       if (newStats[stat] !== undefined) {
         updateData[stat] = Math.max(existingStats[stat] || 0, newStats[stat]);
       }
@@ -221,15 +332,26 @@ export class StatsManagementService {
   /**
    * 커리어 기록 업데이트
    */
-  private updateCareerRecords(updateData: any, careerStats: any, newStats: any, season: string) {
+  private updateCareerRecords(
+    updateData: any,
+    careerStats: any,
+    newStats: any,
+    season: string,
+  ) {
     // 시즌 최고 야드 기록 체크
-    if (newStats.totalYards && newStats.totalYards > (careerStats.bestSeasonYards || 0)) {
+    if (
+      newStats.totalYards &&
+      newStats.totalYards > (careerStats.bestSeasonYards || 0)
+    ) {
       updateData.bestSeasonYards = newStats.totalYards;
       updateData.bestSeasonYear = season;
     }
 
     // 시즌 최다 터치다운 기록 체크
-    if (newStats.totalTouchdowns && newStats.totalTouchdowns > (careerStats.mostTouchdownsInSeason || 0)) {
+    if (
+      newStats.totalTouchdowns &&
+      newStats.totalTouchdowns > (careerStats.mostTouchdownsInSeason || 0)
+    ) {
       updateData.mostTouchdownsInSeason = newStats.totalTouchdowns;
     }
   }
@@ -238,7 +360,9 @@ export class StatsManagementService {
    * 특정 선수의 게임별 스탯 조회
    */
   async getPlayerGameStats(playerNumber: number, season?: string) {
-    const player = await this.playerModel.findOne({ jerseyNumber: playerNumber });
+    const player = await this.playerModel.findOne({
+      jerseyNumber: playerNumber,
+    });
     if (!player) {
       throw new Error(`등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`);
     }
@@ -256,7 +380,9 @@ export class StatsManagementService {
    * 특정 선수의 시즌 스탯 조회
    */
   async getPlayerSeasonStats(playerNumber: number, season?: string) {
-    const player = await this.playerModel.findOne({ jerseyNumber: playerNumber });
+    const player = await this.playerModel.findOne({
+      jerseyNumber: playerNumber,
+    });
     if (!player) {
       throw new Error(`등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`);
     }
@@ -273,7 +399,9 @@ export class StatsManagementService {
    * 특정 선수의 커리어 스탯 조회
    */
   async getPlayerCareerStats(playerNumber: number) {
-    const player = await this.playerModel.findOne({ jerseyNumber: playerNumber });
+    const player = await this.playerModel.findOne({
+      jerseyNumber: playerNumber,
+    });
     if (!player) {
       throw new Error(`등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`);
     }
@@ -284,7 +412,12 @@ export class StatsManagementService {
   /**
    * 리그별 랭킹 조회 (시즌 기준)
    */
-  async getSeasonRankings(season: string, league: string, position?: string, sortBy: string = 'totalYards') {
+  async getSeasonRankings(
+    season: string,
+    league: string,
+    position?: string,
+    sortBy: string = 'totalYards',
+  ) {
     const query: any = { season, league };
     if (position) {
       query.position = position;
@@ -335,7 +468,7 @@ export class StatsManagementService {
     gameDate: Date,
     homeTeam: string,
     awayTeam: string,
-    playersStats: Array<{ playerNumber: number; analyzedStats: any }>
+    playersStats: Array<{ playerNumber: number; analyzedStats: any }>,
   ) {
     const results: Array<{
       success: boolean;
@@ -352,18 +485,18 @@ export class StatsManagementService {
           gameDate,
           homeTeam,
           awayTeam,
-          playerStat.analyzedStats
+          playerStat.analyzedStats,
         );
         results.push({
           success: true,
           playerNumber: playerStat.playerNumber,
-          data: result
+          data: result,
         });
       } catch (error) {
         results.push({
           success: false,
           playerNumber: playerStat.playerNumber,
-          error: error.message
+          error: error.message,
         });
       }
     }

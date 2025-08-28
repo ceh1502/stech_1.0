@@ -15,7 +15,10 @@ import { TeamModule } from '../team/team.module';
       },
       fileFilter: (req, file, cb) => {
         // JSON 파일만 허용
-        if (file.mimetype === 'application/json' || file.originalname.toLowerCase().endsWith('.json')) {
+        if (
+          file.mimetype === 'application/json' ||
+          file.originalname.toLowerCase().endsWith('.json')
+        ) {
           cb(null, true);
         } else {
           cb(new Error('JSON 파일만 업로드 가능합니다'), false);
