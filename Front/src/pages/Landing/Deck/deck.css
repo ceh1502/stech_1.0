@@ -1,0 +1,128 @@
+.deckContainer {
+    width: 100%;
+    background: linear-gradient(to bottom, rgba(5, 9, 214, 0.7) 50px, transparent 100px);
+}
+
+.deckheader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 50px auto 50px auto;
+}
+.react-pdf__Page__textContent {
+    display: none !important;
+}
+
+.decklogoandtitle {
+    display: flex;
+    align-items: center;
+}
+
+.deckheaderlogo {
+    width: 230px;
+    height: auto;
+    margin-right: 20px;
+}
+
+.decktitle {
+    font-size: 30px;
+    font-weight: bold;
+    color: #000;
+}
+
+.deckmain {
+    display: flex;
+    justify-content: center; /* 가로 중앙 */
+    margin: 40px 0;
+}
+
+.pdfViewer {
+    width: 1200px;
+    height: 675px;
+    overflow-y: auto; /* 내부 스크롤 */
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.react-pdf__Page {
+    margin: 0 !important; /* 페이지 여백 제거 */
+    padding: 0 !important;
+}
+
+.react-pdf__Page__canvas {
+    display: block;
+    margin: 0 auto; /* 캔버스 중앙 */
+}
+
+.deckmessage p {
+    max-width: 1200px;
+    margin: 70px auto 100px auto;
+    color: #000;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+@media (max-width: 1024px) {
+    .firstRow {
+        padding: 0 20px;
+        margin-bottom: 60px;
+    }
+
+    .crewName {
+        width: 120px;
+        font-size: 20px;
+    }
+
+    .crewPosition {
+        font-size: 18px;
+    }
+
+    .team1 {
+        font-size: 32px;
+    }
+
+    .team2 {
+        font-size: 24px;
+    }
+
+    .intro1 {
+        font-size: 18px;
+    }
+
+    .intro2 {
+        font-size: 16px;
+    }
+
+    .overview {
+        flex-direction: column;
+        align-items: center;
+    }
+    .teamOverview {
+        width: 100%;
+        align-items: center;
+    }
+    .teamIntro {
+        width: 100%;
+        align-items: center;
+    }
+    .overviewContainer {
+        padding-bottom: 100px;
+    }
+    .overview {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        padding: 0 20px;
+    }
+    .secondLow {
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    .memberContainer img {
+        width: 12rem;
+        height: 12rem;
+    }
+}
