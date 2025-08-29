@@ -7,9 +7,14 @@ import { PlayerService } from './player.service';
 import { ClipAnalyzerService } from './clip-analyzer.service';
 import { QbAnalyzerController } from './qb-analyzer.controller';
 import { QbAnalyzerService } from './qb-analyzer.service';
+import { RbAnalyzerService } from './analyzers/rb-analyzer.service';
+import { WrAnalyzerService } from './analyzers/wr-analyzer.service';
+import { TeAnalyzerService } from './analyzers/te-analyzer.service';
+import { KAnalyzerService } from './analyzers/k-analyzer.service';
 import { StatsManagementService } from '../common/services/stats-management.service';
 import { TeamModule } from '../team/team.module';
 import { Player, PlayerSchema } from '../schemas/player.schema';
+import { NewPlayer, NewPlayerSchema } from '../schemas/new-player.schema';
 import { Team, TeamSchema } from '../schemas/team.schema';
 import { GameStats, GameStatsSchema } from '../schemas/game-stats.schema';
 import { SeasonStats, SeasonStatsSchema } from '../schemas/season-stats.schema';
@@ -19,6 +24,7 @@ import { CareerStats, CareerStatsSchema } from '../schemas/career-stats.schema';
   imports: [
     MongooseModule.forFeature([
       { name: Player.name, schema: PlayerSchema },
+      { name: NewPlayer.name, schema: NewPlayerSchema },
       { name: Team.name, schema: TeamSchema },
       { name: GameStats.name, schema: GameStatsSchema },
       { name: SeasonStats.name, schema: SeasonStatsSchema },
@@ -32,6 +38,10 @@ import { CareerStats, CareerStatsSchema } from '../schemas/career-stats.schema';
     // PlayerNewService,
     ClipAnalyzerService,
     QbAnalyzerService,
+    RbAnalyzerService,
+    WrAnalyzerService,
+    TeAnalyzerService,
+    KAnalyzerService,
     StatsManagementService,
   ],
   exports: [PlayerService /*, PlayerNewService*/],

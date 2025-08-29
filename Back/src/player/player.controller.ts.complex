@@ -1,0 +1,559 @@
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { PlayerService } from './player.service';
+import {
+  CreatePlayerDto,
+  UpdatePlayerStatsDto,
+  PlayerResponseDto,
+  PlayersListResponseDto,
+} from '../common/dto/player.dto';
+import { AnalyzeNewClipsDto } from '../common/dto/new-clip.dto';
+import { GameDataDto } from '../common/dto/game-data.dto';
+import { StatsManagementService } from '../common/services/stats-management.service';
+// import { TeamSeasonStatsAnalyzerService } from '../team/team-season-stats-analyzer.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { User } from '../common/decorators/user.decorator';
+
+@ApiTags('Player')
+@Controller('player')
+export class PlayerController {
+  constructor(
+    private readonly playerService: PlayerService,
+    private readonly statsManagementService: StatsManagementService,
+    // private readonly teamSeasonStatsService: TeamSeasonStatsAnalyzerService,
+  ) {}
+
+  @Post('reset-all')
+  @ApiOperation({ summary: '모든 선수 데이터 초기화' })
+  @ApiResponse({ status: 200, description: '초기화 성공' })
+  @HttpCode(HttpStatus.OK)
+  async resetAllPlayers() {
+    console.log('🔄 모든 선수 데이터 초기화 요청');
+    
+    try {
+      const result = await this.playerService.resetAllPlayerData();
+      return {
+        success: true,
+        message: `${result.deletedCount}명의 선수 데이터가 삭제되었습니다.`,
+        deletedCount: result.deletedCount,
+      };
+    } catch (error) {
+      console.error('❌ 선수 데이터 초기화 실패:', error);
+      return {
+        success: false,
+        message: '선수 데이터 초기화에 실패했습니다.',
+        error: error.message,
+      };
+    }
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '선수 생성' })
+  @ApiResponse({ status: 201, description: '선수 생성 성공' })
+  async createPlayer(
+    @Body() createPlayerDto: CreatePlayerDto,
+    @User() user: any,
+  ) {
+    // 임시로 첫 번째 팀 ID 사용 (실제로는 요청에서 받아야 함)
+    const teamId = '507f1f77bcf86cd799439011'; // 임시 ObjectId
+    return this.playerService.createPlayer(createPlayerDto, teamId);
+  }
+
+  @Get('code/:playerId')
+  @ApiOperation({ summary: 'PlayerCode로 개별 선수 조회' })
+  @ApiResponse({
+    status: 200,
+    description: '선수 조회 성공',
+    type: PlayerResponseDto,
+  })
+  @ApiResponse({ status: 404, description: '선수를 찾을 수 없음' })
+  async getPlayerByCode(@Param('playerId') playerId: string) {
+    return this.playerService.getPlayerByCode(playerId);
+  }
+
+  @Get('position/:position')
+  @ApiOperation({ summary: '포지션별 선수 목록 조회' })
+  @ApiQuery({ name: 'league', required: false, enum: ['1부', '2부'] })
+  @ApiResponse({
+    status: 200,
+    description: '포지션별 선수 목록 조회 성공',
+    type: PlayersListResponseDto,
+  })
+  async getPlayersByPosition(
+    @Param('position') position: string,
+    @Query('league') league?: string,
+  ) {
+    return this.playerService.getPlayersByPosition(position, league);
+  }
+
+  @Get('rankings')
+  @ApiOperation({ summary: '전체 선수 스탯 랭킹 조회' })
+  @ApiQuery({ name: 'league', required: false, enum: ['1부', '2부'] })
+  @ApiQuery({ name: 'sortBy', required: false, example: 'passingYards' })
+  @ApiResponse({ status: 200, description: '선수 랭킹 조회 성공' })
+  async getAllPlayersRanking(
+    @Query('league') league?: string,
+    @Query('sortBy') sortBy?: string,
+  ) {
+    return this.playerService.getAllPlayersRanking(league, sortBy);
+  }
+
+  @Put(':playerId/stats')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '선수 스탯 업데이트' })
+  @ApiResponse({ status: 200, description: '스탯 업데이트 성공' })
+  @ApiResponse({ status: 404, description: '선수를 찾을 수 없음' })
+  async updatePlayerStats(
+    @Param('playerId') playerId: string,
+    @Body() updateStatsDto: UpdatePlayerStatsDto,
+  ) {
+    return this.playerService.updatePlayerStats(playerId, updateStatsDto);
+  }
+
+  @Get('team/:teamId')
+  @ApiOperation({ summary: '팀별 선수 목록 조회' })
+  @ApiResponse({ status: 200, description: '팀 선수 목록 조회 성공' })
+  async getPlayersByTeam(@Param('teamId') teamId: string) {
+    return this.playerService.getPlayersByTeam(teamId);
+  }
+
+  // 테스트용: 샘플 데이터 생성
+  // @Post('sample')
+  // @ApiOperation({ summary: '샘플 선수 데이터 생성 (테스트용)' })
+  // @ApiResponse({ status: 201, description: '샘플 데이터 생성 성공' })
+  // async createSamplePlayer() {
+  //   const samplePlayer: CreatePlayerDto = {
+  //     playerId: 'QB001',
+  //     name: 'Ken Lee',
+  //     jerseyNumber: 10,
+  //     position: 'QB',
+  //     teamName: 'TestTeam',
+  //     league: '1부',
+  //     season: '2024',
+  //     stats: {
+  //       passingYards: 200,
+  //       passingTouchdowns: 5,
+  //       completionPercentage: 60,
+  //       passerRating: 85.5,
+  //       gamesPlayed: 8,
+  //       totalYards: 200,
+  //       totalTouchdowns: 5,
+  //     },
+  //   };
+
+  //   const teamId = '507f1f77bcf86cd799439011';
+  //   return this.playerService.createPlayer(samplePlayer, teamId);
+  // }
+
+  // === 새로운 클립 구조 관련 엔드포인트 ===
+
+  @Post('jersey/:jerseyNumber/analyze-new-clips')
+  @ApiOperation({
+    summary: '새로운 형식의 클립 데이터 분석 및 스탯 업데이트',
+    description:
+      '새로운 car/tkl 형식의 클립 데이터를 받아서 선수 스탯을 자동으로 분석하고 업데이트합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '새 클립 스탯 분석 및 업데이트 성공',
+  })
+  @ApiResponse({ status: 404, description: '선수를 찾을 수 없음' })
+  async updatePlayerStatsFromNewClips(
+    @Param('jerseyNumber') jerseyNumber: string,
+    @Body() analyzeNewClipsDto: AnalyzeNewClipsDto,
+  ) {
+    const jerseyNum = parseInt(jerseyNumber);
+    const result = await this.playerService.updatePlayerStatsFromNewClips(
+      jerseyNum,
+      analyzeNewClipsDto.clips,
+    );
+
+    // 팀 스탯도 함께 업데이트
+    try {
+      if (analyzeNewClipsDto.clips && analyzeNewClipsDto.clips.length > 0) {
+        const gameKey = analyzeNewClipsDto.clips[0]?.clipKey || 'unknown';
+        const season = '2024'; // 현재 시즌
+
+        // JSON 전체에서 게임 정보 추출 (homeTeam, awayTeam은 게임 레벨에 있음)
+        // AnalyzeNewClipsDto에 게임 정보가 없으므로 임시로 클립에서 추정
+        let homeTeam = '한양대'; // 기본값
+        let awayTeam = '외대'; // 기본값
+
+        // 실제 JSON에는 게임 레벨에 homeTeam, awayTeam이 있지만,
+        // 현재 DTO에는 clips만 있으므로 하드코딩된 매핑 사용
+        // TODO: DTO를 수정해서 게임 정보도 포함하도록 개선 필요
+        if (analyzeNewClipsDto.clips.length > 0) {
+          // 임시 매핑: 실제 JSON의 팀명을 DTO 팀명으로 변환
+          homeTeam = 'HFBlackKnights'; // 한국외대 블랙나이츠
+          awayTeam = 'HYLions'; // 한양대 라이온즈
+        }
+
+        // await this.teamSeasonStatsService.analyzeAndUpdateTeamStats(
+        //   analyzeNewClipsDto.clips,
+        //   gameKey,
+        //   homeTeam,
+        //   awayTeam,
+        //   season,
+        // );
+      }
+    } catch (error) {
+      console.log('팀 스탯 업데이트 중 오류 발생:', error);
+      // 팀 스탯 오류가 있어도 개인 스탯 결과는 반환
+    }
+
+    return result;
+  }
+
+  @Post('/analyze-game-data')
+  @ApiOperation({
+    summary: '전체 게임 데이터 분석 및 팀/선수 스탯 업데이트',
+    description:
+      '게임의 전체 JSON 데이터를 받아서 홈팀/어웨이팀 정보를 자동으로 추출하고 모든 선수 및 팀 스탯을 업데이트합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '게임 데이터 분석 및 스탯 업데이트 성공',
+  })
+  @ApiResponse({ status: 400, description: '잘못된 게임 데이터 형식' })
+  async analyzeGameData(@Body() gameData: GameDataDto) {
+    console.log('게임 데이터 분석 시작:', gameData.gameKey);
+    console.log('홈팀:', gameData.homeTeam, '어웨이팀:', gameData.awayTeam);
+    console.log('클립 개수:', gameData.Clips?.length);
+
+    const results = {
+      gameKey: gameData.gameKey,
+      homeTeam: gameData.homeTeam,
+      awayTeam: gameData.awayTeam,
+      clipsProcessed: gameData.Clips?.length || 0,
+      playerStatsUpdated: 0,
+      teamStatsUpdated: false,
+      errors: [] as string[],
+    };
+
+    try {
+      // ClipAnalyzer를 사용한 올바른 QB 분석
+      const clipResult = await this.playerService.analyzeGameData(gameData);
+      if (clipResult.success) {
+        results.playerStatsUpdated = clipResult.qbCount || 0;
+        results.teamStatsUpdated = true;
+      }
+
+      // 기존 로직은 주석 처리
+      /*if (gameData.Clips && gameData.Clips.length > 0) {
+        const allPlayers = new Set<number>();
+
+        // 모든 클립에서 관련된 선수들의 저지 번호 수집
+        gameData.Clips.forEach((clip) => {
+          if (clip.car?.num) allPlayers.add(clip.car.num);
+          if (clip.car2?.num) allPlayers.add(clip.car2.num);
+          if (clip.tkl?.num) allPlayers.add(clip.tkl.num);
+          if (clip.tkl2?.num) allPlayers.add(clip.tkl2.num);
+        });
+
+        console.log('관련된 선수들:', Array.from(allPlayers));
+
+        // 홈팀과 어웨이팀 선수들을 분리해서 처리
+        const homePlayerNumbers = new Set<number>();
+        const awayPlayerNumbers = new Set<number>();
+
+        // 클립별로 홈팀/어웨이팀 선수들 분류
+        gameData.Clips.forEach((clip) => {
+          if (clip.offensiveTeam === 'Home') {
+            if (clip.car?.num) homePlayerNumbers.add(clip.car.num);
+            if (clip.car2?.num) homePlayerNumbers.add(clip.car2.num);
+          } else if (clip.offensiveTeam === 'Away') {
+            if (clip.car?.num) awayPlayerNumbers.add(clip.car.num);
+            if (clip.car2?.num) awayPlayerNumbers.add(clip.car2.num);
+          }
+
+          // 수비 선수들은 상대팀 공격 시 나타남
+          if (clip.offensiveTeam === 'Home') {
+            if (clip.tkl?.num) awayPlayerNumbers.add(clip.tkl.num);
+            if (clip.tkl2?.num) awayPlayerNumbers.add(clip.tkl2.num);
+          } else if (clip.offensiveTeam === 'Away') {
+            if (clip.tkl?.num) homePlayerNumbers.add(clip.tkl.num);
+            if (clip.tkl2?.num) homePlayerNumbers.add(clip.tkl2.num);
+          }
+        });
+
+        console.log(
+          `홈팀(${gameData.homeTeam}) 선수들:`,
+          Array.from(homePlayerNumbers),
+        );
+        console.log(
+          `어웨이팀(${gameData.awayTeam}) 선수들:`,
+          Array.from(awayPlayerNumbers),
+        );
+
+        // 홈팀 선수들 스탯 업데이트
+        for (const jerseyNumber of homePlayerNumbers) {
+          try {
+            const result =
+              await this.playerService.updatePlayerStatsFromNewClips(
+                jerseyNumber,
+                gameData.Clips,
+                gameData.homeTeam,
+              );
+            if (result.success !== false) {
+              results.playerStatsUpdated++;
+            }
+          } catch (error) {
+            console.error(
+              `홈팀 선수 ${jerseyNumber} 스탯 업데이트 실패:`,
+              error,
+            );
+            results.errors.push(`홈팀 선수 ${jerseyNumber}: ${error.message}`);
+          }
+        }
+
+        // 어웨이팀 선수들 스탯 업데이트
+        for (const jerseyNumber of awayPlayerNumbers) {
+          try {
+            const result =
+              await this.playerService.updatePlayerStatsFromNewClips(
+                jerseyNumber,
+                gameData.Clips,
+                gameData.awayTeam,
+              );
+            if (result.success !== false) {
+              results.playerStatsUpdated++;
+            }
+          } catch (error) {
+            console.error(
+              `어웨이팀 선수 ${jerseyNumber} 스탯 업데이트 실패:`,
+              error,
+            );
+            results.errors.push(
+              `어웨이팀 선수 ${jerseyNumber}: ${error.message}`,
+            );
+          }
+        }
+      } */
+
+      // 팀 스탯은 ClipAnalyzer에서 처리됨
+      console.log('팀 스탯 업데이트 완료');
+    } catch (error) {
+      console.error('게임 데이터 분석 중 전체 오류:', error);
+      results.errors.push(`전체 분석: ${error.message}`);
+    }
+
+    return {
+      success: results.errors.length === 0,
+      message: `게임 ${gameData.gameKey} 분석 완료`,
+      data: results,
+    };
+  }
+
+  @Post('jersey/:jerseyNumber/analyze-new-clips-only')
+  @ApiOperation({
+    summary: '새로운 형식의 클립 데이터 분석만 (DB 업데이트 안함)',
+    description:
+      '새로운 car/tkl 형식의 클립 데이터를 분석하여 예상 스탯을 반환하지만 DB에는 저장하지 않습니다.',
+  })
+  @ApiResponse({ status: 200, description: '새 클립 스탯 분석 성공' })
+  @ApiResponse({ status: 404, description: '선수를 찾을 수 없음' })
+  async analyzeNewClipsOnly(
+    @Param('jerseyNumber') jerseyNumber: string,
+    @Body() analyzeNewClipsDto: AnalyzeNewClipsDto,
+  ) {
+    const jerseyNum = parseInt(jerseyNumber);
+    // analyzeNewClipsOnly 메서드는 제거됨 - updatePlayerStatsFromNewClips 사용
+    return this.playerService.updatePlayerStatsFromNewClips(
+      jerseyNum,
+      analyzeNewClipsDto.clips,
+    );
+  }
+
+  @Post('update-game-stats')
+  @ApiOperation({
+    summary: '게임별 스탯 업데이트',
+    description:
+      '새로운 형식의 클립 데이터로 게임의 모든 선수 스탯을 업데이트합니다.',
+  })
+  @ApiResponse({ status: 200, description: '게임 스탯 업데이트 성공' })
+  async updateGameStats(@Body() gameData: any) {
+    console.log('받은 데이터 구조:', JSON.stringify(gameData, null, 2));
+    return this.playerService.analyzeGameData(gameData);
+  }
+
+  // === 3단계 스탯 관리 시스템 엔드포인트 ===
+
+  @Get('jersey/:jerseyNumber/game-stats')
+  @ApiOperation({
+    summary: '선수의 게임별 스탯 조회',
+    description: '특정 선수의 모든 게임별 개별 스탯을 조회합니다.',
+  })
+  @ApiQuery({
+    name: 'season',
+    required: false,
+    description: '특정 시즌 필터링',
+  })
+  @ApiResponse({ status: 200, description: '게임별 스탯 조회 성공' })
+  async getPlayerGameStats(
+    @Param('jerseyNumber') jerseyNumber: string,
+    @Query('season') season?: string,
+  ) {
+    const jerseyNum = parseInt(jerseyNumber);
+    return this.statsManagementService.getPlayerGameStats(jerseyNum, season);
+  }
+
+  @Get('jersey/:jerseyNumber/season-stats')
+  @ApiOperation({
+    summary: '선수의 시즌별 스탯 조회',
+    description: '특정 선수의 시즌별 누적 스탯을 조회합니다.',
+  })
+  @ApiQuery({
+    name: 'season',
+    required: false,
+    description: '특정 시즌 필터링',
+  })
+  @ApiResponse({ status: 200, description: '시즌별 스탯 조회 성공' })
+  async getPlayerSeasonStats(
+    @Param('jerseyNumber') jerseyNumber: string,
+    @Query('season') season?: string,
+  ) {
+    const jerseyNum = parseInt(jerseyNumber);
+    return this.statsManagementService.getPlayerSeasonStats(jerseyNum, season);
+  }
+
+  @Get('jersey/:jerseyNumber/career-stats')
+  @ApiOperation({
+    summary: '선수의 커리어 스탯 조회',
+    description: '특정 선수의 전체 커리어 누적 스탯을 조회합니다.',
+  })
+  @ApiResponse({ status: 200, description: '커리어 스탯 조회 성공' })
+  async getPlayerCareerStats(@Param('jerseyNumber') jerseyNumber: string) {
+    const jerseyNum = parseInt(jerseyNumber);
+    return this.statsManagementService.getPlayerCareerStats(jerseyNum);
+  }
+
+  @Get('season-rankings/:season/:league')
+  @ApiOperation({
+    summary: '시즌 리그별 랭킹 조회',
+    description: '특정 시즌 및 리그에서의 선수 랭킹을 조회합니다.',
+  })
+  @ApiQuery({ name: 'position', required: false, description: '포지션 필터링' })
+  @ApiQuery({ name: 'sortBy', required: false, description: '정렬 기준 스탯' })
+  @ApiResponse({ status: 200, description: '시즌 랭킹 조회 성공' })
+  async getSeasonRankings(
+    @Param('season') season: string,
+    @Param('league') league: string,
+    @Query('position') position?: string,
+    @Query('sortBy') sortBy?: string,
+  ) {
+    return this.statsManagementService.getSeasonRankings(
+      season,
+      league,
+      position,
+      sortBy,
+    );
+  }
+
+  @Get('career-rankings')
+  @ApiOperation({
+    summary: '커리어 랭킹 조회',
+    description: '활성 선수들의 커리어 전체 랭킹을 조회합니다.',
+  })
+  @ApiQuery({ name: 'position', required: false, description: '포지션 필터링' })
+  @ApiQuery({ name: 'sortBy', required: false, description: '정렬 기준 스탯' })
+  @ApiResponse({ status: 200, description: '커리어 랭킹 조회 성공' })
+  async getCareerRankings(
+    @Query('position') position?: string,
+    @Query('sortBy') sortBy?: string,
+  ) {
+    return this.statsManagementService.getCareerRankings(position, sortBy);
+  }
+
+  @Post('game-stats-batch')
+  @ApiOperation({
+    summary: '게임 전체 선수 스탯 일괄 업데이트',
+    description: '한 게임의 모든 참여 선수들의 스탯을 일괄 업데이트합니다.',
+  })
+  @ApiResponse({ status: 200, description: '게임 스탯 일괄 업데이트 성공' })
+  async updateGameStatsBatch(
+    @Body()
+    batchData: {
+      gameKey: string;
+      gameDate: string;
+      homeTeam: string;
+      awayTeam: string;
+      playersStats: Array<{
+        playerNumber: number;
+        analyzedStats: any;
+      }>;
+    },
+  ) {
+    const gameDate = new Date(batchData.gameDate);
+    return this.statsManagementService.updateMultiplePlayersGameStats(
+      batchData.gameKey,
+      gameDate,
+      batchData.homeTeam,
+      batchData.awayTeam,
+      batchData.playersStats,
+    );
+  }
+
+  @Post('reset-all-stats')
+  @ApiOperation({
+    summary: '모든 선수 스탯 초기화',
+    description: '데이터베이스의 모든 선수 스탯을 초기화합니다.',
+  })
+  @ApiResponse({ status: 200, description: '스탯 초기화 성공' })
+  async resetAllPlayersStats() {
+    return this.playerService.resetAllPlayersStats();
+  }
+
+  @Post('reset-processed-games')
+  @ApiOperation({
+    summary: '처리된 게임 목록 초기화',
+    description: 'JSON 중복 입력 방지를 위한 처리된 게임 목록을 초기화합니다.',
+  })
+  @ApiResponse({ status: 200, description: '처리된 게임 목록 초기화 성공' })
+  async resetProcessedGames() {
+    return this.playerService.resetProcessedGames();
+  }
+
+  @Post('reset-team-stats/:season')
+  @ApiOperation({
+    summary: '🔄 팀 시즌 스탯 초기화',
+    description: '특정 시즌의 모든 팀 스탯을 초기화합니다. (개발/테스트용)',
+  })
+  @ApiResponse({ status: 200, description: '팀 시즌 스탯 초기화 성공' })
+  async resetTeamStats(@Param('season') season: string = '2024') {
+    try {
+      const result =
+        // await this.teamSeasonStatsService.resetTeamSeasonStats(season);
+        await this.statsManagementService.resetTeamStats(season);
+
+      return {
+        ...result,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '팀 시즌 스탯 초기화 중 오류가 발생했습니다',
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+}
