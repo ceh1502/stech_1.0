@@ -63,6 +63,18 @@ export class PlayerStats {
   rbLongestRush?: number;
 
   @Prop({ default: 0 })
+  rbFrontRushYard?: number;
+
+  @Prop({ default: 0 })
+  rbBackRushYard?: number;
+
+  @Prop({ default: 0 })
+  rbFumbles?: number;
+
+  @Prop({ default: 0 })
+  rbFumblesLost?: number;
+
+  @Prop({ default: 0 })
   rbReceivingYards?: number;
 
   @Prop({ default: 0 })
