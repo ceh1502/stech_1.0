@@ -1,37 +1,34 @@
-.serviceHomeContainer{
+.serviceHomeContainer {
   height: 100%;
   width: 100%;
 }
-.serviceHomeHeader{
-  padding-top:6.875rem;
-  padding-bottom: 5rem;
+.serviceHomeHeader {
+  margin: 1rem auto 1rem auto;
   display: flex;
   color: white;
   justify-content: center;
   align-items: center;
   font-family: Noto Sans KR;
-  font-size: 2rem; /*추후 변경 -> 2.5rem;*/
+  font-size: 28px; /*추후 변경 -> 2.5rem;*/
   font-weight: 600;
   line-height: normal;
   letter-spacing: 0.375rem;
-  gap: 30px;
+  gap: 3rem;
 }
-
 
 .serviceHomeLogo {
-  width:16rem;
-  height:3.75rem;
-  
+  width: 16rem;
+  height: 3.75rem;
 }
 
-.tutorialContainer{
+.tutorialContainer {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 0 10.625rem 0 10.625rem;
 }
 
-.tutorialVideo{
-  width: 80rem;
-  height: 45rem;
+.tutorialVideo {
+  width: 100%;
+  height: 30rem;
 }

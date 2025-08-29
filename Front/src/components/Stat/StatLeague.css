@@ -1,14 +1,14 @@
-.statTeamContainer{
-  color: #FFFFFF;
+.statTeamContainer {
+  color: #ffffff;
   width: 100%;
-  padding-left:3.75rem;
-  padding-right:3.75rem;
+  padding-left: 3.75rem;
+  padding-right: 3.75rem;
 }
 
 .tournament-header {
   display: flex;
   align-items: center;
-  padding-top:4.063rem;
+  padding-top: 4.063rem;
 }
 .dropdown-group {
   display: flex;
@@ -16,65 +16,64 @@
 }
 
 .dropdown-container {
-  display:flex;
+  display: flex;
   align-items: center;
-  justify-content: center;  
-  color: #C2C2C2;
+  justify-content: center;
+  color: #c2c2c2;
   font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
 }
 
-.dropdown-trigger{
+.dropdown-trigger {
   width: 4.375rem;
   height: 1.25rem;
-  display:flex;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1rem 0.75rem;
-  border-radius:0.5rem;
-  border: 1px solid var(--Gray-100, #E4E7E9);
-  background: rgba(110, 110, 110, 0.20);
+  border-radius: 0.5rem;
+  border: 1px solid var(--Gray-100, #e4e7e9);
+  background: rgba(110, 110, 110, 0.2);
 }
 
-.dropdown-arrow{
+.dropdown-arrow {
   width: 1rem;
   height: 1rem;
-  color: #C2C2C2;
+  color: #c2c2c2;
 }
-
 
 .groups-container {
-  display:flex;
-  justify-content: space-between;;
-  gap:1.25rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1.25rem;
   padding-top: 3.125rem;
-
 }
-.group-section{
-  width:45.625rem;
+.group-section {
+  width: 45.625rem;
 }
-.no-group-img{
+.no-group-img {
   width: 100%;
 }
 
-
-.group-header, .playoffs-header, .final-header, .promotion-header {
+.group-header,
+.playoffs-header,
+.final-header,
+.promotion-header {
   display: flex;
   align-items: center;
-  font-size:1.25rem;
-  border-bottom: 1px solid #FFFFFF;
+  font-size: 1.25rem;
+  border-bottom: 1px solid #ffffff;
   padding-bottom: 1rem;
-  color:#f5f5f5;
+  color: #f5f5f5;
   font-weight: 700;
 }
-
 
 .group-standings {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap:1.25rem;
+  gap: 1.25rem;
 }
 
 /* 헤더 행 */
@@ -82,7 +81,7 @@
   display: grid;
   grid-template-columns: 3.75rem 3.75rem 1fr 3.75rem 3.75rem 3.75rem 5rem 3.75rem 3.75rem;
   font-weight: bold;
-  color: #A5A5A5;
+  color: #a5a5a5;
   padding-top: 0.5rem;
 }
 
@@ -91,22 +90,21 @@
   display: grid;
   grid-template-columns: 3.75rem 3.75rem 1fr 3.75rem 3.75rem 3.75rem 5rem 3.75rem 3.75rem;
   border-radius: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.40);
-  transition: background-color 0.2s;
+  background-color: rgba(255, 255, 255, 0.4);
+  transition: transform-color 0.2s;
 }
 
 .standings-row.rank-1st {
-  border: 3px solid #D5A11E;
+  border: 3px solid #d5a11e;
 }
 
 .standings-row.rank-2nd {
-  border: 3px solid #FFF;
+  border: 3px solid #fff;
 }
 
 .standings-row.rank-3rd {
-  border: 3px solid #CD7F32;
+  border: 3px solid #cd7f32;
 }
-
 
 /* 각 셀 공통 스타일 */
 .standings-cell {
@@ -115,14 +113,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #A5A5A5;
+  color: #a5a5a5;
 }
 
 /* 순위 셀 */
 .rank-cell {
   font-weight: bold;
   font-size: 18px;
-  color:#ffffff;
+  color: #ffffff;
 }
 
 /* 로고 셀 */
@@ -130,24 +128,23 @@
   padding: 0.5rem;
 }
 
-
 .team-logo {
   width: 1.563rem; /* 25px */
   height: 1.563rem;
-  overflow: hidden; 
-  display:flex;
+  overflow: hidden;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
-.team-logo-img.svg-logo{
+.team-logo-img.svg-logo {
   width: 4rem;
-  height: 4rem;             
-  object-fit: cover;       
-  object-position: center;   
+  height: 4rem;
+  object-fit: cover;
+  object-position: center;
 }
-.team-logo-img.png-logo{
-width:100%;
-height: 100%;
+.team-logo-img.png-logo {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   object-position: center;
 }
@@ -157,90 +154,92 @@ height: 100%;
   justify-content: flex-start;
   font-weight: 500;
   padding-left: 0.75rem;
-  color:#ffffff;
+  color: #ffffff;
 }
 .team-cell.title {
-  color:#a5a5a5;
+  color: #a5a5a5;
 }
 
 /* 통계 셀 */
 .stat-cell {
   font-weight: 500;
-    color:#ffffff;
-
+  color: #ffffff;
 }
 
-.match-row, .match-header {
-  display:grid;
+.match-row,
+.match-header {
+  display: grid;
   grid-template-columns: 12.5rem 2fr 1.5fr 10rem;
 }
 
-.match-header div, .match-row div{
-  text-align:center;
+.match-header div,
+.match-row div {
+  text-align: center;
   vertical-align: middle;
 }
 
 .match-teams {
-  display:flex;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .team-vs {
   display: grid;
-  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   column-gap: 1.25rem;
-
 }
 
-.match-score{
-  justify-self: center;  /* 그리드 셀에서 가운데 */
-  width:3.75rem;
-  height:1.375rem;
+.match-score {
+  justify-self: center; /* 그리드 셀에서 가운데 */
+  width: 3.75rem;
+  height: 1.375rem;
   flex-shrink: 0;
   background: #363636;
-  font-size:0.875rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  display:flex;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.match-row{
+.match-row {
   width: 100%;
   height: 3.75rem;
   border-radius: 0.5rem;
-  border: 0.015rem solid #6E6E6E;
-  background: rgba(255, 255, 255, 0.40);
-  color: #FFF;
+  border: 0.015rem solid #6e6e6e;
+  background: rgba(255, 255, 255, 0.4);
+  color: #fff;
 
-  font-family: Inter;
+  font-family: 'Noto Sans', sans-serif;
   font-size: 1rem;
   font-style: normal;
   font-weight: 700;
   line-height: normal;
 }
 
-
-.match-list{
-  display:flex;
+.match-list {
+  display: flex;
   flex-direction: column;
-  gap:1.25rem;
+  gap: 1.25rem;
 }
 
-.matches-container,.promotion-matches-container{
-  padding-top:6.25rem;
+.matches-container,
+.promotion-matches-container {
+  padding-top: 6.25rem;
 }
 
-.match-header{
+.match-header {
   padding: 0.75rem 0;
   text-align: center;
   align-items: center;
   justify-content: center;
-  color: #A5A5A5;
+  color: #a5a5a5;
 }
-.match-round, .match-location, .match-date {
+.match-round,
+.match-location,
+.match-date {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -248,24 +247,25 @@ height: 100%;
 
 .home-team {
   display: flex;
-  gap:0.625rem;
+  gap: 0.625rem;
   align-items: center;
   justify-content: flex-end;
 }
 
-.away-team{
-  display:flex;
+.away-team {
+  display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap:0.625rem;
+  gap: 0.625rem;
 }
 
-
-.promotion-matches-container  .match-row, .match-row.minor, .standings-row.minor{
-  background: rgba(110, 110, 110, 0.20);
+.promotion-matches-container .match-row,
+.match-row.minor,
+.standings-row.minor {
+  background: rgba(110, 110, 110, 0.2);
 }
 .promotion-matches-container {
-  padding-bottom:6.25rem;
+  padding-bottom: 6.25rem;
 }
 
 .dropdown-group {
@@ -279,8 +279,8 @@ height: 100%;
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;  
-  color: #C2C2C2;
+  justify-content: center;
+  color: #c2c2c2;
   font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
@@ -294,9 +294,9 @@ height: 100%;
   justify-content: space-between;
   padding: 1rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid #E4E7E9;
-  background: rgba(110, 110, 110, 0.20);
-  color: #C2C2C2;
+  border: 1px solid #e4e7e9;
+  background: rgba(110, 110, 110, 0.2);
+  color: #c2c2c2;
   font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
@@ -327,7 +327,7 @@ height: 100%;
 .dropdown-arrow {
   width: 1rem;
   height: 1rem;
-  color: #C2C2C2;
+  color: #c2c2c2;
   transition: transform 0.2s ease;
   flex-shrink: 0;
 }
@@ -363,12 +363,12 @@ height: 100%;
   padding: 0.5rem 0.75rem;
   background: none;
   border: none;
-  color: #C2C2C2;
+  color: #c2c2c2;
   font-size: 0.875rem;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: transform-color 0.15s ease;
 }
 
 .dropdown-option:hover {
@@ -397,7 +397,6 @@ height: 100%;
 
 /* 스크롤바 스타일링 */
 
-
 .dropdown-menu::-webkit-scrollbar-track {
   background: #1a1a1a;
 }
@@ -410,7 +409,6 @@ height: 100%;
 .dropdown-menu::-webkit-scrollbar-thumb:hover {
   background: #888;
 }
-
 
 /* 접근성 개선 */
 .dropdown-trigger:focus {
@@ -438,33 +436,32 @@ height: 100%;
     transform: translateY(0);
   }
 }
-.bracket-container{
+.bracket-container {
   padding-top: 3.75rem;
   display: flex;
   justify-content: space-between;
   height: 31rem;
-  width:100%;
+  width: 100%;
 }
 
-
-.knockout-team-container{
+.knockout-team-container {
   width: 15.25rem;
   height: 6.25rem;
-  display:flex;
+  display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.knockout-team-header{
-  display:flex;
+.knockout-team-header {
+  display: flex;
   font-size: 0.563rem;
   font-weight: 700;
 }
-.knockout-team{
+.knockout-team {
   display: flex;
   gap: 0.5rem;
 }
-.knockout-team-name-section{
+.knockout-team-name-section {
   padding-left: 1rem;
   display: flex;
   gap: 0.8rem;
@@ -472,61 +469,59 @@ height: 100%;
   height: 2.25rem;
   align-items: center;
   background-color: #6e6e6e;
-  color:#f5f5f5;
+  color: #f5f5f5;
   font-size: 0.8rem;
 }
-.knockout-team-score{
+.knockout-team-score {
   width: 2.25rem;
   height: 2.25rem;
   background-color: #f5f5f5;
   justify-self: center;
-  display:flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   color: #000;
 }
-.QF-container{
+.QF-container {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 0.938rem;
-
 }
-.line{
+.line {
   height: 11.875rem;
   width: 15.25rem;
   display: flex;
 }
-.padding-section{
+.padding-section {
   height: 6.688rem;
   width: 7rem;
 }
-.right-section{
+.right-section {
   width: 7.5rem;
   border-left: 2px solid #fff;
-  display:flex;
+  display: flex;
   flex-direction: column;
 }
-.up-section{
+.up-section {
   border-bottom: 0.5px solid #fff;
   height: 5.938rem;
   width: 100%;
-
 }
 
-.down-section{
+.down-section {
   border-top: 0.5px solid #fff;
   height: 5.938rem;
   width: 100%;
 }
 
-.SF-container{
-  display:flex;
+.SF-container {
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding-bottom:1rem;
+  padding-bottom: 1rem;
 }
-.line-container{
+.line-container {
   width: 6.5rem;
   display: flex;
   flex-direction: column;
@@ -534,103 +529,101 @@ height: 100%;
   align-items: center;
 }
 
-.trophy-img-box{
-
+.trophy-img-box {
   height: 6.25rem;
   width: 6.25rem;
   overflow: hidden;
 }
-.trophyImg{
+.trophyImg {
   height: 100%;
-  width:100%;
+  width: 100%;
 }
-.F-container{
-  height:100%;
-  display:flex;
+.F-container {
+  height: 100%;
+  display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: flex-end;
 }
 
-.final-row{
-  display:flex;
+.final-row {
+  display: flex;
   flex-direction: column;
   gap: 4.25rem;
   align-items: flex-end;
   justify-content: flex-end;
 }
 
-.bracket-container2{
+.bracket-container2 {
   padding-top: 3.75rem;
-  padding-left:18.75rem;
+  padding-left: 18.75rem;
   padding-right: 18.75rem;
   display: grid;
   grid-template-rows: 1fr 1fr 1fr;
-  align-content:flex-end;
+  align-content: flex-end;
   height: 31rem;
-  width:100%;
+  width: 100%;
 }
 
-.row1{
+.row1 {
   display: flex;
   justify-content: center;
   align-items: flex-end;
 }
-.row2{
-  display:flex;
+.row2 {
+  display: flex;
   justify-content: flex-end;
 }
-.row3{
-  display:flex;
+.row3 {
+  display: flex;
   justify-content: flex-start;
 }
 
-.line-container{
-  width:  18.75rem;
+.line-container {
+  width: 18.75rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding-left: 3.438rem;
   padding-right: 3.438rem;
-
 }
-.empty-space{
-  width:9.375rem;
+.empty-space {
+  width: 9.375rem;
 }
-.trophy-img-box2{
+.trophy-img-box2 {
   justify-self: baseline;
-  height:11.25rem;
+  height: 11.25rem;
   width: 11.25rem;
 }
 
-.upper{
+.upper {
   height: 3.125rem;
-  display:flex;
+  display: flex;
 }
-.upper-left{
-  width:9.375rem;
+.upper-left {
+  width: 9.375rem;
   height: 100%;
-  border-right:0.5px solid #fff;
+  border-right: 0.5px solid #fff;
 }
-.upper-right{
-  width:9.375rem;
-  height:100%;
-  border-left:0.5px solid #fff;
+.upper-right {
+  width: 9.375rem;
+  height: 100%;
+  border-left: 0.5px solid #fff;
 }
-.down{
+.down {
   height: 3.125rem;
-  width:100%;
+  width: 100%;
   border-top: 2px solid #fff;
-} 
+}
 
 .knockout-team-name-section.s1st {
-  border: 2px solid #D5A11E;
+  border: 2px solid #d5a11e;
 }
 
 .knockout-team-name-section.s2nd {
-  border: 2px solid #FFF;
+  border: 2px solid #fff;
 }
 
 .knockout-team-name-section.s3rd {
-  border: 2px solid #CD7F32;
+  border: 2px solid #cd7f32;
 }
