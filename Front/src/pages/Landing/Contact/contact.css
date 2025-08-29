@@ -1,14 +1,10 @@
 .contactContainer {
     width: 100%;
-    background: linear-gradient(
-        to bottom,
-        rgba(5, 9, 214, 0.7) 50px,
-        transparent 100px
-    );
+    background: linear-gradient(to bottom, rgba(5, 9, 214, 0.7) 50px, transparent 100px);
 }
 
 .contactSection {
-    padding: 20px 20px;
+    margin: 50px auto 100px auto;
     text-align: center;
 }
 
@@ -16,7 +12,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 50px;
 }
 
 .contactHeader h1 {
@@ -33,8 +29,8 @@
 .contactLinks {
     display: flex;
     justify-content: center;
-    gap: 15px;
-    margin-bottom: 40px;
+    gap: 25px;
+    margin-bottom: 60px;
 }
 
 .contacticon {
@@ -43,14 +39,17 @@
 }
 
 .contactLink {
-    background-color: #0711D9;
+    background-color: #0711d9;
+    opacity: 0.8;
     color: #fff;
-    padding: 12px 12px;
+    padding: 15px 20px;
     border-radius: 15px;
     text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 5px;
+    text-align: center;
+    font-size: 1em;
+    gap: 10px;
 }
 
 .contactForm {
@@ -61,19 +60,19 @@
 .ContactformGroup {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
 }
 
 .inputRow {
     display: flex;
-    gap: 20px;
+    gap: 25px;
 }
 
 .inputWrapper {
     flex: 1;
     text-align: left;
     background-color: #333;
-    padding: 10px 20px;
+    padding: 20px;
     border-radius: 20px;
 }
 
@@ -102,13 +101,11 @@
     padding: 10px 0;
     box-sizing: border-box;
     height: 150px;
-    padding-bottom: 10px; 
+    padding-bottom: 10px;
     border: 1px solid #555;
     border-radius: 5px;
     padding: 15px;
 }
-
-
 
 .inputWrapper input::placeholder,
 .inputWrapper textarea::placeholder {
@@ -116,7 +113,7 @@
 }
 
 .contactsubmitButton {
-    background-color: #0711D9;
+    background-color: #0711d9;
     color: #fff;
     padding: 15px 40px;
     border: none;
@@ -126,15 +123,19 @@
     margin-top: 50px;
 }
 
+.faqSection {
+    margin: 50px auto 100px auto;
+    text-align: center;
+}
 .faqContent {
     background-image: url('../../../assets/images/png/ContactPng/FAQheader.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    
+
     position: relative;
     padding: 50px 20px;
-    
+
     max-width: 1000px;
     margin: 0 auto;
     text-align: center;
@@ -166,7 +167,7 @@
     position: relative;
     z-index: 2;
     color: #fff;
-    font-size: 1.0em;
+    font-size: 1em;
     margin: 0px;
 }
 
@@ -194,7 +195,7 @@
 }
 
 .faqHeader.expanded .faqNumber {
-    color: #F77705;
+    color: #f77705;
 }
 
 .faqHeader h4 {
@@ -206,12 +207,12 @@
 }
 
 .faqHeader.expanded h4 {
-    color: #F77705;
+    color: #f77705;
 }
 
 .faqHeader:hover .faqNumber,
 .faqHeader:hover h4 {
-    color: #F77705;
+    color: #f77705;
 }
 
 .toggleIcon {

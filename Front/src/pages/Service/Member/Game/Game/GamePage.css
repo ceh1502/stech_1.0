@@ -1,7 +1,7 @@
 /* 다크 배경에 맞춘 헤더 */
 .stechHeader {
   padding: 3.75rem 3.75rem 0 3.75rem;
-  background: #111214;
+  background: #141414;
   color: #e5e7eb;
 }
 
@@ -76,19 +76,19 @@
 .filterButton:hover {
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
-  border-color: #6E6E6E;
+  border-color: #6e6e6e;
 }
 
 .resetButton {
   width: 6.25rem;
-  border-color: #1A58E0;
-  background: #1A58E0;
+  border-color: #1a58e0;
+  background: #1a58e0;
 }
 
 /* ───────── New Video 버튼 ───────── */
 .newVideoButton {
   border-radius: 1.25rem;
-  background: #1A58E0;
+  background: #1a58e0;
   width: 8.438rem;
   height: 3.444rem;
   font-size: 1.125rem;
@@ -108,10 +108,14 @@
 }
 
 /* Date picker 래퍼 */
-.datePickerWrap { position: relative; }
+.datePickerWrap {
+  position: relative;
+}
 
 /* TYPE 드롭다운 */
-.typePickerWrap { position: relative; }
+.typePickerWrap {
+  position: relative;
+}
 .typeDropdown {
   position: absolute;
   top: calc(100% + 4px);
@@ -132,10 +136,14 @@
   color: #e5e7eb;
   cursor: pointer;
 }
-.typeItem:hover { background: #2a2b30; }
+.typeItem:hover {
+  background: #2a2b30;
+}
 
 /* ───── OPPS 메가 드롭다운 ───── */
-.oppsPickerWrap { position: relative; }
+.oppsPickerWrap {
+  position: relative;
+}
 
 .oppsMega {
   position: absolute;
@@ -178,7 +186,9 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-.oppsTeams { width: 350px; }
+.oppsTeams {
+  width: 350px;
+}
 .oppsItem {
   width: 100%;
   display: flex;
@@ -192,9 +202,11 @@
   cursor: pointer;
   font-size: 14px;
 }
-.oppsItem:hover { background: rgba(255, 255, 255, 0.06); }
+.oppsItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
 
-.opps-team-logo-img-box{
+.opps-team-logo-img-box {
   width: 1.25rem;
   height: 1.25rem;
   flex: 0 0 1.25rem; /* 통일 */
@@ -218,7 +230,7 @@
 }
 
 /* ====== 게임 리스트 ====== */
-.game-container{
+.game-container {
   display: flex;
   flex-direction: column;
   padding-left: 3.75rem;
@@ -226,53 +238,61 @@
   margin-top: 1.5rem;
 }
 
-.game-header{
+.game-header {
   width: 100%;
   height: 5rem;
   display: grid;
-  grid-template-columns: 10rem minmax(18rem,1.6fr) minmax(12rem,1fr) 8rem 6rem;
+  grid-template-columns: 10rem minmax(18rem, 1.6fr) minmax(12rem, 1fr) 8rem 6rem;
   color: white;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
-.game-header-cell{ justify-self: center; }
+.game-header-cell {
+  justify-self: center;
+}
 
-.game-list{
-  display:flex;
+.game-list {
+  display: flex;
   flex-direction: column;
-  gap:1.25rem;
+  gap: 1.25rem;
 }
 
-.game-card{
+.game-card {
   width: 100%;
   height: 3.75rem;
   border-radius: 0.5rem;
-  border: 0.236px solid #6E6E6E;
-  background: rgba(110, 110, 110, 0.20);
+  border: 0.236px solid #6e6e6e;
+  background: rgba(110, 110, 110, 0.2);
   color: white;
   display: grid;
-  grid-template-columns: 10rem minmax(18rem,1.6fr) minmax(12rem,1fr) 8rem 6rem;
+  grid-template-columns: 10rem minmax(18rem, 1.6fr) minmax(12rem, 1fr) 8rem 6rem;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform .08s, box-shadow .12s;
+  transition: transform 0.08s, box-shadow 0.12s;
 }
 .game-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0,0,0,.24);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.24);
 }
-.game-card>div{ justify-self:center; }
+.game-card > div {
+  justify-self: center;
+}
 
-.game-results{
+.game-results {
   display: grid;
-  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   column-gap: 1.25rem;
 }
 
 .game-team.left,
-.game-team.right { display:flex; align-items: center; gap: .5rem; }
+.game-team.right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 .game-team-logo {
   width: 1.563rem; /* 25px */
@@ -295,28 +315,35 @@
   object-position: center;
 }
 
-.game-score{
+.game-score {
   justify-self: center;
-  width:3.75rem;
-  height:1.375rem;
+  width: 3.75rem;
+  height: 1.375rem;
   flex-shrink: 0;
   background: #363636;
-  font-size:0.875rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  display:flex;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.reportY{ color:#1A58E0; }
-.reportN{ color:#ff2b6e; }
+.reportY {
+  color: #1a58e0;
+}
+.reportN {
+  color: #ff2b6e;
+}
 
 /* 반응형 컬럼 축소 */
 @media (max-width: 1080px) {
-  .game-header, .game-card {
+  .game-header,
+  .game-card {
     grid-template-columns: 8rem 1.4fr 1fr 6.5rem 5.5rem;
   }
 }
 @media (max-width: 760px) {
-  .filterGroup { display: none; }
+  .filterGroup {
+    display: none;
+  }
 }

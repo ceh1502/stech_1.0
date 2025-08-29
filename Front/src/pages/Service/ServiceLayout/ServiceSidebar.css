@@ -6,10 +6,8 @@
     height: 100vh;
     width: 300px;
     background-color: #000000;
-    border-right: 1px solid rgba(79, 70, 229, 0.1);
     display: flex;
     flex-direction: column;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(79, 70, 229, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     user-select: none;
     animation: sidebarSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
@@ -39,8 +37,8 @@
     justify-content: center;
     padding-bottom: 20px;
     cursor: pointer;
-    width: 180px;
-    overflow:hidden;
+    width: 130px;
+    overflow: hidden;
 }
 
 .stech-logo {
@@ -59,56 +57,40 @@
 .authSection {
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 .logoutButton,
 .loginButton {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 15px;
     padding: 10px 16px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 16px;
+    font-weight: 600;
     width: 100%;
-    justify-content: center;
+    justify-content: start;
     position: relative;
     overflow: hidden;
+    background: #1a58e0;
+    color: #ffffff;
 }
 
-.logoutButton {
-    background: rgba(249, 115, 22, 0.1);
-    border: 1px solid rgba(249, 115, 22, 0.3);
-    color: #fed7aa;
-}
-
-.loginButton {
-    background: rgba(79, 70, 229, 0.1);
-    border: 1px solid rgba(79, 70, 229, 0.3);
-    color: #a5b4fc;
-}
-
-.logoutButton:hover {
-    background: rgba(249, 115, 22, 0.2);
-    border-color: rgba(249, 115, 22, 0.5);
-    color: #fef3c7;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
-}
-
+.logoutButton:hover,
 .loginButton:hover {
-    background: rgba(79, 70, 229, 0.2);
-    border-color: rgba(79, 70, 229, 0.5);
-    color: #c7d2fe;
+    background: #1a58e0;
+    opacity: 0.5;
+    color: #fffff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    box-shadow: #1a58e0;
 }
 
 .logoutIcon,
 .loginIcon {
-    font-size: 18px;
+    font-size: 20px;
     transition: transform 0.3s ease;
 }
 
@@ -157,10 +139,10 @@
 .sectionTitle {
     font-size: 11px;
     font-weight: 600;
-    color: #bcbec2;
+    color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 8px 16px 8px 32px;
+    padding: 8px 16px 20px 20px;
 }
 
 .navMenu {
@@ -181,10 +163,12 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 14px 16px;
-    color: #9ca3af;
+    width: 250px;
+    padding-left: 20px;
+    height: 45px;
+    color: #6e6e6e;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 8px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 14px;
     font-weight: 500;
@@ -221,24 +205,24 @@
 /* 호버 효과 */
 .navLink:hover,
 .navLinkHovered {
-    color: #e5e7eb;
-    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    background: #6e6e6e;
     transform: translateX(4px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* 활성 상태 */
 .navLinkActive {
-    background-color: rgb(100, 100, 100, 0.4);
+    background-color: #6e6e6e;
     color: #ffffff;
     transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
     animation: pulseGlow 3s ease-in-out infinite;
 }
 
 .navLinkActive:hover {
     transform: translateX(6px) scale(1.02);
-    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.4);
 }
 
 /* 클릭 효과 */
@@ -265,7 +249,7 @@
 }
 
 .navLinkActive .navIcon {
-    color: #f5f5f5;
+    color: #ffffff;
 }
 
 .navLabel {
@@ -276,9 +260,8 @@
 
 .navLinkActive .navLabel {
     font-weight: 600;
-    color: #f5f5f5;
+    color: #ffffff;
 }
-
 
 /* 호버 툴팁 */
 .navTooltip {
@@ -336,18 +319,18 @@
 }
 
 .sidebarFooter .navLink {
-    color: #a0a2a8;
+    color: #6e6e6e;
     font-size: 13px;
 }
 
 .sidebarFooter .navLink:hover {
-    color: #d1d5db;
+    color: #6e6e6e;
     background: rgba(255, 255, 255, 0.03);
 }
 
 .sidebarFooter .navLinkActive {
-    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
-    color: #f3f4f6;
+    background: #6e6e6e;
+    color: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -393,10 +376,10 @@
 @keyframes pulseGlow {
     0%,
     100% {
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
     }
     50% {
-        box-shadow: 0 4px 20px rgba(79, 70, 229, 0.5);
+        box-shadow: 0 4px 20px rgba(255, 255, 255, 0.5);
     }
 }
 
@@ -422,20 +405,20 @@
 }
 
 .sidebarNav::-webkit-scrollbar-thumb {
-    background: rgba(79, 70, 229, 0.3);
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 2px;
-    transition: background 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
 .sidebarNav::-webkit-scrollbar-thumb:hover {
-    background: rgba(79, 70, 229, 0.5);
+    background: rgba(255, 255, 255, 0.5);
 }
 
 /* ===== 접근성 ===== */
 .navLink:focus,
 .logoutButton:focus,
 .loginButton:focus {
-    outline: 2px solid #4f46e5;
+    outline: 2px solid #fffff;
     outline-offset: 2px;
     box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
@@ -479,8 +462,9 @@
     list-style: none;
     padding: 0;
     margin-left: 40px;
-    border-left:2px solid #4f46e5;
+    border-left: 2px solid #ffffff;
     overflow: hidden;
+    border-radius: 8px;
     animation: slideDown 0.3s ease-out;
 }
 
@@ -513,7 +497,7 @@
     gap: 10px;
     padding-top: 12px;
     padding-bottom: 12px;
-    padding-left:15%;
+    padding-left: 15%;
     text-decoration: none;
     color: #9ca3af;
     transition: all 0.3s ease;
@@ -547,25 +531,25 @@
 }
 
 .submenuLinkActive {
-    background-color: rgba(79, 70, 229, 0.3) !important;
+    background-color: rgba(110, 110, 110, 0.5) !important;
     color: #ffffff !important;
-    padding-right:20px;
-    display:flex;
+    padding-right: 20px;
+    display: flex;
     font-weight: 500;
 }
 
 .submenuLinkActive:hover {
-    background-color: rgba(79, 70, 229, 0.4) !important;
+    background-color: rgba(110, 110, 110, 0.5) !important;
 }
 
 /* 메인 메뉴 활성 상태 (하위 메뉴 있을 때) */
 .navLinkActive.expandableMenu {
-    background-color: rgba(79, 70, 229, 0.2);
+    background-color: rgba(110, 110, 110, 1);
     color: #fff;
 }
 
 /* 호버 효과 (하위 메뉴 있을 때) */
 .navLinkHovered.expandableMenu {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(110, 110, 110, 0.5);
     color: #fff;
 }

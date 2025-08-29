@@ -1,4 +1,3 @@
-
 .profile-manage-container {
   width: 100%;
   max-width: 1000px;
@@ -13,8 +12,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-    border-radius: 10px;
-    background-color: #363636;
+  border-radius: 10px;
+  background-color: #363636;
 }
 
 .manage-label {
@@ -29,7 +28,6 @@
   gap: 12px;
 }
 
-
 .excel-upload-btn {
   background-color: #ff7b00;
   color: white;
@@ -38,7 +36,7 @@
   border-radius: 6px;
   font-size: 14px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .excel-upload-btn:hover {
