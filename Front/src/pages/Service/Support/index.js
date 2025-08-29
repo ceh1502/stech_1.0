@@ -1,7 +1,3 @@
-
-
-const SupportPage= () => {
-
-}
+const SupportPage = () => {};
 
 export default SupportPage;
