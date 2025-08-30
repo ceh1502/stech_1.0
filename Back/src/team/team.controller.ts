@@ -19,6 +19,7 @@ import {
 import { TeamService } from './team.service';
 import { TeamStatsAnalyzerService } from './team-stats-analyzer.service';
 import { TeamSeasonStatsAnalyzerService } from './team-season-stats-analyzer.service';
+import { TeamStatsAggregatorService } from './team-stats-aggregator.service';
 import { CreateTeamDto, UpdateTeamDto } from '../common/dto/team.dto';
 import { TeamStatsSuccessDto, TeamStatsErrorDto } from './dto/team-stats.dto';
 import { TeamRankingResponseDto } from './dto/team-season-stats.dto';
@@ -32,6 +33,7 @@ export class TeamController {
     private readonly teamService: TeamService,
     private readonly teamStatsService: TeamStatsAnalyzerService,
     private readonly teamSeasonStatsService: TeamSeasonStatsAnalyzerService,
+    private readonly teamStatsAggregatorService: TeamStatsAggregatorService,
   ) {}
 
   @Post()
@@ -321,6 +323,32 @@ export class TeamController {
         success: false,
         message: '팀 시즌 스탯 조회 중 오류가 발생했습니다',
         data: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
+  @Post('season-stats/aggregate/:season')
+  @ApiOperation({
+    summary: '🏆 팀 시즌 스탯 집계',
+    description: '선수별 스탯을 팀별로 집계하여 팀 시즌 스탯을 업데이트합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '✅ 팀 시즌 스탯 집계 성공',
+  })
+  async aggregateTeamStats(@Param('season') season: string) {
+    try {
+      const result = await this.teamStatsAggregatorService.aggregateTeamStats(season);
+      return {
+        ...result,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '팀 시즌 스탯 집계 중 오류가 발생했습니다',
+        error: error.message,
         timestamp: new Date().toISOString(),
       };
     }

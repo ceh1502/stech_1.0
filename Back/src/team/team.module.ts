@@ -4,6 +4,7 @@ import { TeamController } from './team.controller';
 import { TeamService } from './team.service';
 import { TeamStatsAnalyzerService } from './team-stats-analyzer.service';
 import { TeamSeasonStatsAnalyzerService } from './team-season-stats-analyzer.service';
+import { TeamStatsAggregatorService } from './team-stats-aggregator.service';
 import { Team, TeamSchema } from '../schemas/team.schema';
 import { Player, PlayerSchema } from '../schemas/player.schema';
 import { TeamStats, TeamStatsSchema } from '../schemas/team-stats.schema';
@@ -26,11 +27,13 @@ import {
     TeamService,
     TeamStatsAnalyzerService,
     TeamSeasonStatsAnalyzerService,
+    TeamStatsAggregatorService,
   ],
   exports: [
     TeamService,
     TeamStatsAnalyzerService,
     TeamSeasonStatsAnalyzerService,
+    TeamStatsAggregatorService,
   ],
 })
 export class TeamModule {}
