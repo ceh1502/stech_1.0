@@ -11,6 +11,7 @@ import { OlAnalyzerService } from './analyzers/ol-analyzer.service';
 import { DlAnalyzerService } from './analyzers/dl-analyzer.service';
 import { LbAnalyzerService } from './analyzers/lb-analyzer.service';
 import { DbAnalyzerService } from './analyzers/db-analyzer.service';
+import { TeamStatsAggregatorService } from '../team/team-stats-aggregator.service';
 
 // 클립 데이터 인터페이스
 export interface ClipData {
@@ -79,6 +80,7 @@ export class ClipAnalyzerService {
     private dlAnalyzer: DlAnalyzerService,
     private lbAnalyzer: LbAnalyzerService,
     private dbAnalyzer: DbAnalyzerService,
+    private teamStatsAggregator: TeamStatsAggregatorService,
   ) {}
 
   /**
@@ -132,6 +134,16 @@ export class ClipAnalyzerService {
     results.push(...dbResult.results);
     
     console.log(`\n✅ 게임 분석 완료 - ${qbResult.qbCount}명의 QB, ${rbResult.rbCount}명의 RB, ${wrResult.wrCount}명의 WR, ${teResult.teCount}명의 TE, ${kResult.kCount}명의 K, ${pResult.pCount}명의 P, ${olResult.olCount}명의 OL, ${dlResult.dlCount}명의 DL, ${lbResult.lbCount}명의 LB, ${dbResult.dbCount}명의 DB 처리됨`);
+    
+    // 게임 분석 완료 후 팀 스탯 자동 집계
+    console.log('\n🏆 팀 스탯 자동 집계 시작...');
+    try {
+      await this.teamStatsAggregator.aggregateTeamStats('2024');
+      console.log('✅ 팀 스탯 자동 집계 완료');
+    } catch (error) {
+      console.error('❌ 팀 스탯 자동 집계 실패:', error);
+    }
+
     return {
       success: true,
       message: `${qbResult.qbCount}명의 QB, ${rbResult.rbCount}명의 RB, ${wrResult.wrCount}명의 WR, ${teResult.teCount}명의 TE, ${kResult.kCount}명의 K, ${pResult.pCount}명의 P, ${olResult.olCount}명의 OL, ${dlResult.dlCount}명의 DL, ${lbResult.lbCount}명의 LB, ${dbResult.dbCount}명의 DB 스탯이 업데이트되었습니다.`,

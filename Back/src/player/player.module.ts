@@ -18,12 +18,14 @@ import { LbAnalyzerService } from './analyzers/lb-analyzer.service';
 import { DbAnalyzerService } from './analyzers/db-analyzer.service';
 import { StatsManagementService } from '../common/services/stats-management.service';
 import { TeamModule } from '../team/team.module';
+import { TeamStatsAggregatorService } from '../team/team-stats-aggregator.service';
 import { Player, PlayerSchema } from '../schemas/player.schema';
 import { NewPlayer, NewPlayerSchema } from '../schemas/new-player.schema';
 import { Team, TeamSchema } from '../schemas/team.schema';
 import { GameStats, GameStatsSchema } from '../schemas/game-stats.schema';
 import { SeasonStats, SeasonStatsSchema } from '../schemas/season-stats.schema';
 import { CareerStats, CareerStatsSchema } from '../schemas/career-stats.schema';
+import { TeamSeasonStats, TeamSeasonStatsSchema } from '../schemas/team-season-stats.schema';
 
 @Module({
   imports: [
@@ -34,6 +36,7 @@ import { CareerStats, CareerStatsSchema } from '../schemas/career-stats.schema';
       { name: GameStats.name, schema: GameStatsSchema },
       { name: SeasonStats.name, schema: SeasonStatsSchema },
       { name: CareerStats.name, schema: CareerStatsSchema },
+      { name: TeamSeasonStats.name, schema: TeamSeasonStatsSchema },
     ]),
     TeamModule,
   ],
@@ -53,6 +56,7 @@ import { CareerStats, CareerStatsSchema } from '../schemas/career-stats.schema';
     LbAnalyzerService,
     DbAnalyzerService,
     StatsManagementService,
+    TeamStatsAggregatorService,
   ],
   exports: [PlayerService /*, PlayerNewService*/],
 })
