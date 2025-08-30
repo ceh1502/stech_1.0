@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import StatTeam from '../../../../../components/Stat/StatTeam';
 import { TEAMS } from '../../../../../data/TEAMS';
-import {MOCKSTATTEAM} from '../../../../../data/mockStatTeam';
 
 const LeagueTeamPage = () => {
   const [teamStatsData, setTeamStatsData] = useState([]);
@@ -91,11 +90,11 @@ const LeagueTeamPage = () => {
           }
         } else {
           console.error('팀 스탯 데이터 조회 실패:', response.status);
-          setTeamStatsData([]);
+          // API 실패 시 목업 데이터 사용 (선택사항)
         }
       } catch (error) {
         console.error('팀 스탯 API 호출 에러:', error);
-        setTeamStatsData([]);
+        // API 오류 시 목업 데이터 사용 (선택사항)
       } finally {
         setLoading(false);
       }
@@ -105,7 +104,30 @@ const LeagueTeamPage = () => {
   }, []);
 
   if (loading) {
-    return <div>팀 스탯 로딩 중...</div>;
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '200px' 
+      }}>
+        팀 스탯 로딩 중...
+      </div>
+    );
+  }
+
+  // 데이터가 없는 경우 처리
+  if (!teamStatsData || teamStatsData.length === 0) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '200px' 
+      }}>
+        팀 스탯 데이터가 없습니다.
+      </div>
+    );
   }
 
   return (
@@ -113,5 +135,6 @@ const LeagueTeamPage = () => {
       <StatTeam data={teamStatsData} teams={TEAMS}/>
     </div>
   );
-}
-export default LeagueTeamPage;  
+};
+
+export default LeagueTeamPage;
