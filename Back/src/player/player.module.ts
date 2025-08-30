@@ -19,6 +19,7 @@ import { DbAnalyzerService } from './analyzers/db-analyzer.service';
 import { StatsManagementService } from '../common/services/stats-management.service';
 import { TeamModule } from '../team/team.module';
 import { TeamStatsAggregatorService } from '../team/team-stats-aggregator.service';
+import { TeamClipAnalyzerService } from '../team/team-clip-analyzer.service';
 import { Player, PlayerSchema } from '../schemas/player.schema';
 import { NewPlayer, NewPlayerSchema } from '../schemas/new-player.schema';
 import { Team, TeamSchema } from '../schemas/team.schema';
@@ -57,6 +58,7 @@ import { TeamSeasonStats, TeamSeasonStatsSchema } from '../schemas/team-season-s
     DbAnalyzerService,
     StatsManagementService,
     TeamStatsAggregatorService,
+    TeamClipAnalyzerService,
   ],
   exports: [PlayerService /*, PlayerNewService*/],
 })
