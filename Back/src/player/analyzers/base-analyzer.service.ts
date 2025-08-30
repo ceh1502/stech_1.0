@@ -108,7 +108,7 @@ export abstract class BaseAnalyzerService {
   }
 
   /**
-   * 공통: 선수 데이터베이스 저장
+   * 멀티포지션 지원: 선수 데이터베이스 저장
    */
   protected async savePlayerStats(
     jerseyNumber: number,
@@ -117,63 +117,70 @@ export abstract class BaseAnalyzerService {
     stats: any,
   ): Promise<any> {
     try {
-      const playerId = `${position}_${teamName}_${jerseyNumber}`;
-      console.log(`💾 선수 저장/업데이트 시도: playerId = ${playerId}`);
+      const playerId = `${teamName}_${jerseyNumber}`;
+      console.log(`💾 선수 저장/업데이트 시도: playerId = ${playerId}, position = ${position}`);
       
-      // 기존 선수 찾기 - 먼저 playerId로, 그 다음 팀명+등번호로
-      let existingPlayer = await this.playerModel.findOne({ playerId });
-      
-      if (!existingPlayer) {
-        // playerId로 못 찾으면 팀명+등번호로 찾기 (멀티 포지션 지원)
-        existingPlayer = await this.playerModel.findOne({ 
-          teamName, 
-          jerseyNumber 
-        });
-        
-        if (existingPlayer) {
-          console.log(`🔄 기존 선수 발견 (${existingPlayer.position} -> ${position} 스탯 추가): ${existingPlayer.name}`);
-        }
-      }
+      // 팀명+등번호로 기존 선수 찾기 (멀티포지션 지원)
+      let existingPlayer = await this.playerModel.findOne({ 
+        teamName, 
+        jerseyNumber 
+      });
 
       if (existingPlayer) {
-        // 기존 선수 스탯 업데이트 (기존 값에 추가)
-        console.log(`🔄 기존 선수 업데이트: ${playerId}`);
+        console.log(`🔄 기존 선수 발견 (멀티포지션 스탯 추가): ${existingPlayer.name}`);
         
-        const updatedStats = { ...existingPlayer.stats };
+        // 포지션이 기존 리스트에 없으면 추가
+        if (!existingPlayer.positions.includes(position)) {
+          existingPlayer.positions.push(position);
+          console.log(`📍 새 포지션 추가: ${position} -> 총 포지션: ${existingPlayer.positions.join(', ')}`);
+        }
         
-        // 각 스탯 값을 기존 값에 추가
+        // 해당 포지션의 스탯을 추가/업데이트
+        if (!existingPlayer.stats[position]) {
+          existingPlayer.stats[position] = {};
+        }
+        
+        // 포지션별 스탯 업데이트
+        const positionStats = existingPlayer.stats[position] || {};
         for (const [key, value] of Object.entries(stats)) {
           if (typeof value === 'number') {
-            updatedStats[key] = (updatedStats[key] || 0) + value;
+            positionStats[key] = (positionStats[key] || 0) + value;
           } else {
-            updatedStats[key] = value;
+            positionStats[key] = value;
           }
         }
         
-        existingPlayer.stats = updatedStats;
+        existingPlayer.stats[position] = positionStats;
+        existingPlayer.stats.totalGamesPlayed = (existingPlayer.stats.totalGamesPlayed || 0) + (stats.gamesPlayed || 0);
+        
         await existingPlayer.save();
-
-        console.log(`✅ ${position} 선수 업데이트 성공: ${playerId}`);
+        console.log(`✅ ${position} 선수 멀티포지션 스탯 업데이트 성공`);
 
         return {
           success: true,
-          message: `${position} ${jerseyNumber}번 (${teamName}) 스탯 업데이트 완료`,
+          message: `${jerseyNumber}번 (${teamName}) ${position} 포지션 스탯 업데이트 완료`,
           player: existingPlayer.name,
         };
       } else {
         // 새 선수 생성
-        console.log(`🆕 새 ${position} 선수 생성: ${playerId}`);
+        console.log(`🆕 새 선수 생성: ${playerId}`);
         console.log(`📊 저장할 스탯:`, stats);
         
+        const initialStats = {
+          [position]: stats,
+          totalGamesPlayed: stats.gamesPlayed || 0
+        };
+        
         const newPlayer = new this.playerModel({
-          name: `${position} ${jerseyNumber}번`,
+          name: `${jerseyNumber}번`,
           playerId,
-          position,
+          positions: [position],
+          primaryPosition: position,
           teamName,
           jerseyNumber,
           league: '1부',
           season: '2024',
-          stats,
+          stats: initialStats,
         });
 
         await newPlayer.save();
@@ -181,7 +188,7 @@ export abstract class BaseAnalyzerService {
 
         return {
           success: true,
-          message: `${position} ${jerseyNumber}번 (${teamName}) 신규 선수 생성 및 스탯 저장 완료`,
+          message: `${jerseyNumber}번 (${teamName}) 신규 선수 생성 및 ${position} 스탯 저장 완료`,
           player: newPlayer.name,
         };
       }

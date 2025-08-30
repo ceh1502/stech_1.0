@@ -3,311 +3,225 @@ import { Document, Types } from 'mongoose';
 
 export type PlayerDocument = Player & Document;
 
-// 포지션별 스탯 인터페이스
+// 포지션별 스탯 구조
+@Schema()
+export class QBStats {
+  @Prop({ default: 0 }) passingYards?: number;
+  @Prop({ default: 0 }) passingTouchdowns?: number;
+  @Prop({ default: 0 }) passingCompletions?: number;
+  @Prop({ default: 0 }) passingAttempts?: number;
+  @Prop({ default: 0 }) passingInterceptions?: number;
+  @Prop({ default: 0 }) completionPercentage?: number;
+  @Prop({ default: 0 }) passerRating?: number;
+  @Prop({ default: 0 }) longestPass?: number;
+  @Prop({ default: 0 }) sacks?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+  // 러싱도 할 수 있음
+  @Prop({ default: 0 }) rushingYards?: number;
+  @Prop({ default: 0 }) rushingTouchdowns?: number;
+  @Prop({ default: 0 }) rushingAttempts?: number;
+  @Prop({ default: 0 }) yardsPerCarry?: number;
+  @Prop({ default: 0 }) longestRush?: number;
+}
+
+@Schema()
+export class RBStats {
+  @Prop({ default: 0 }) rbRushingYards?: number;
+  @Prop({ default: 0 }) rbRushingTouchdowns?: number;
+  @Prop({ default: 0 }) rbRushingAttempts?: number;
+  @Prop({ default: 0 }) rbYardsPerCarry?: number;
+  @Prop({ default: 0 }) rbLongestRush?: number;
+  @Prop({ default: 0 }) fumbles?: number;
+  @Prop({ default: 0 }) fumblesLost?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+  // 스페셜팀
+  @Prop({ default: 0 }) kickReturns?: number;
+  @Prop({ default: 0 }) kickReturnYards?: number;
+  @Prop({ default: 0 }) yardsPerKickReturn?: number;
+  @Prop({ default: 0 }) puntReturns?: number;
+  @Prop({ default: 0 }) puntReturnYards?: number;
+  @Prop({ default: 0 }) yardsPerPuntReturn?: number;
+  @Prop({ default: 0 }) returnTouchdowns?: number;
+}
+
+@Schema()
+export class WRStats {
+  @Prop({ default: 0 }) wrReceivingTargets?: number;
+  @Prop({ default: 0 }) wrReceptions?: number;
+  @Prop({ default: 0 }) wrReceivingYards?: number;
+  @Prop({ default: 0 }) wrYardsPerReception?: number;
+  @Prop({ default: 0 }) wrReceivingTouchdowns?: number;
+  @Prop({ default: 0 }) wrLongestReception?: number;
+  @Prop({ default: 0 }) wrReceivingFirstDowns?: number;
+  @Prop({ default: 0 }) fumbles?: number;
+  @Prop({ default: 0 }) fumblesLost?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+  // 러싱도 할 수 있음
+  @Prop({ default: 0 }) wrRushingAttempts?: number;
+  @Prop({ default: 0 }) wrRushingYards?: number;
+  @Prop({ default: 0 }) wrYardsPerCarry?: number;
+  @Prop({ default: 0 }) wrRushingTouchdowns?: number;
+  @Prop({ default: 0 }) wrLongestRush?: number;
+  // 스페셜팀
+  @Prop({ default: 0 }) kickReturns?: number;
+  @Prop({ default: 0 }) kickReturnYards?: number;
+  @Prop({ default: 0 }) yardsPerKickReturn?: number;
+  @Prop({ default: 0 }) puntReturns?: number;
+  @Prop({ default: 0 }) puntReturnYards?: number;
+  @Prop({ default: 0 }) yardsPerPuntReturn?: number;
+  @Prop({ default: 0 }) returnTouchdowns?: number;
+}
+
+@Schema()
+export class TEStats {
+  @Prop({ default: 0 }) teReceivingTargets?: number;
+  @Prop({ default: 0 }) teReceptions?: number;
+  @Prop({ default: 0 }) teReceivingYards?: number;
+  @Prop({ default: 0 }) teYardsPerReception?: number;
+  @Prop({ default: 0 }) teReceivingTouchdowns?: number;
+  @Prop({ default: 0 }) teLongestReception?: number;
+  @Prop({ default: 0 }) teReceivingFirstDowns?: number;
+  @Prop({ default: 0 }) fumbles?: number;
+  @Prop({ default: 0 }) fumblesLost?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+  // 러싱도 할 수 있음
+  @Prop({ default: 0 }) teRushingAttempts?: number;
+  @Prop({ default: 0 }) frontRushYard?: number;
+  @Prop({ default: 0 }) backRushYard?: number;
+  @Prop({ default: 0 }) teRushingYards?: number;
+  @Prop({ default: 0 }) teYardsPerCarry?: number;
+  @Prop({ default: 0 }) teRushingTouchdowns?: number;
+  @Prop({ default: 0 }) teLongestRush?: number;
+}
+
+@Schema()
+export class KStats {
+  @Prop({ default: 0 }) fieldGoalsMade?: number;
+  @Prop({ default: 0 }) fieldGoalsAttempted?: number;
+  @Prop({ default: 0 }) fieldGoalPercentage?: number;
+  @Prop({ default: 0 }) longestFieldGoal?: number;
+  @Prop({ default: 0 }) extraPointsMade?: number;
+  @Prop({ default: 0 }) extraPointsAttempted?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+}
+
+@Schema()
+export class PStats {
+  @Prop({ default: 0 }) puntCount?: number;
+  @Prop({ default: 0 }) puntYards?: number;
+  @Prop({ default: 0 }) averagePuntYard?: number;
+  @Prop({ default: 0 }) longestPunt?: number;
+  @Prop({ default: 0 }) touchbacks?: number;
+  @Prop({ default: 0 }) touchbackPercentage?: number;
+  @Prop({ default: 0 }) inside20?: number;
+  @Prop({ default: 0 }) inside20Percentage?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+}
+
+@Schema()
+export class OLStats {
+  @Prop({ default: 0 }) penalties?: number;
+  @Prop({ default: 0 }) sacksAllowed?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+}
+
+@Schema()
+export class DLStats {
+  @Prop({ default: 0 }) tackles?: number;
+  @Prop({ default: 0 }) tfl?: number;
+  @Prop({ default: 0 }) sacks?: number;
+  @Prop({ default: 0 }) interceptions?: number;
+  @Prop({ default: 999 }) forcedFumbles?: number;
+  @Prop({ default: 999 }) fumbleRecoveries?: number;
+  @Prop({ default: 999 }) fumbleRecoveryYards?: number;
+  @Prop({ default: 999 }) passesDefended?: number;
+  @Prop({ default: 999 }) interceptionYards?: number;
+  @Prop({ default: 999 }) defensiveTouchdowns?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+}
+
+@Schema()
+export class LBStats {
+  @Prop({ default: 0 }) tackles?: number;
+  @Prop({ default: 0 }) tfl?: number;
+  @Prop({ default: 0 }) sacks?: number;
+  @Prop({ default: 0 }) interceptions?: number;
+  @Prop({ default: 999 }) forcedFumbles?: number;
+  @Prop({ default: 999 }) fumbleRecoveries?: number;
+  @Prop({ default: 999 }) fumbleRecoveryYards?: number;
+  @Prop({ default: 999 }) passesDefended?: number;
+  @Prop({ default: 999 }) interceptionYards?: number;
+  @Prop({ default: 999 }) defensiveTouchdowns?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+}
+
+@Schema()
+export class DBStats {
+  @Prop({ default: 0 }) tackles?: number;
+  @Prop({ default: 0 }) tfl?: number;
+  @Prop({ default: 0 }) sacks?: number;
+  @Prop({ default: 0 }) interceptions?: number;
+  @Prop({ default: 999 }) forcedFumbles?: number;
+  @Prop({ default: 999 }) fumbleRecoveries?: number;
+  @Prop({ default: 999 }) fumbleRecoveryYards?: number;
+  @Prop({ default: 999 }) passesDefended?: number;
+  @Prop({ default: 999 }) interceptionYards?: number;
+  @Prop({ default: 999 }) defensiveTouchdowns?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+}
+
+@Schema()
+export class DefensiveStats {
+  @Prop({ default: 0 }) tackles?: number;
+  @Prop({ default: 0 }) sacks?: number;
+  @Prop({ default: 0 }) interceptions?: number;
+  @Prop({ default: 0 }) passesDefended?: number;
+  @Prop({ default: 0 }) forcedFumbles?: number;
+  @Prop({ default: 0 }) fumbleRecoveries?: number;
+  @Prop({ default: 0 }) defensiveTouchdowns?: number;
+  @Prop({ default: 0 }) gamesPlayed?: number;
+}
+
+// 멀티포지션을 위한 통합 스탯 클래스
 @Schema()
 export class PlayerStats {
-  // Quarterback 스탯
-  @Prop({ default: 0 })
-  passingYards?: number;
-
-  @Prop({ default: 0 })
-  passingTouchdowns?: number;
-
-  @Prop({ default: 0 })
-  passingCompletions?: number;
-
-  @Prop({ default: 0 })
-  passingAttempts?: number;
-
-  @Prop({ default: 0 })
-  passingInterceptions?: number;
-
-  @Prop({ default: 0 })
-  completionPercentage?: number;
-
-  @Prop({ default: 0 })
-  passerRating?: number;
-
-  // Running Back 스탯
-  @Prop({ default: 0 })
-  rushingYards?: number;
-
-  @Prop({ default: 0 })
-  rushingTouchdowns?: number;
-
-  @Prop({ default: 0 })
-  rushingAttempts?: number;
-
-  @Prop({ default: 0 })
-  yardsPerCarry?: number;
-
-  @Prop({ default: 0 })
-  longestRush?: number;
-
-  @Prop({ default: 0 })
-  rushingFirstDowns?: number;
-
-  // Receiver 스탯 (WR, TE)
-  @Prop({ default: 0 })
-  receivingYards?: number;
-
-  @Prop({ default: 0 })
-  receivingTouchdowns?: number;
-
-  @Prop({ default: 0 })
-  receptions?: number;
-
-  @Prop({ default: 0 })
-  receivingTargets?: number;
-
-  @Prop({ default: 0 })
-  yardsPerReception?: number;
-
-  @Prop({ default: 0 })
-  longestReception?: number;
-
-  @Prop({ default: 0 })
-  receivingFirstDowns?: number;
-
-  // Kicker 스탯
-  @Prop({ default: 0 })
-  fieldGoalsMade?: number;
-
-  @Prop({ default: 0 })
-  fieldGoalsAttempted?: number;
-
-  @Prop({ default: 0 })
-  fieldGoalPercentage?: number;
-
-  @Prop({ default: 0 })
-  longestFieldGoal?: number;
-
-  @Prop({ default: 0 })
-  extraPointsMade?: number;
-
-  @Prop({ default: 0 })
-  extraPointsAttempted?: number;
-
-  // Punter 스탯
-  @Prop({ default: 0 })
-  puntingYards?: number;
-
-  @Prop({ default: 0 })
-  puntingAttempts?: number;
-
-  @Prop({ default: 0 })
-  puntingAverage?: number;
-
-  @Prop({ default: 0 })
-  longestPunt?: number;
-
-  @Prop({ default: 0 })
-  puntsInside20?: number;
-
-  // Defensive 스탯
-  @Prop({ default: 0 })
-  tackles?: number;
-
-  @Prop({ default: 0 })
-  sacks?: number;
-
-  @Prop({ default: 0 })
-  interceptions?: number;
-
-  @Prop({ default: 0 })
-  passesDefended?: number;
-
-  @Prop({ default: 0 })
-  forcedFumbles?: number;
-
-  @Prop({ default: 0 })
-  fumbleRecoveries?: number;
-
-  @Prop({ default: 0 })
-  defensiveTouchdowns?: number;
-
-  // RB 전용 필드들
-  @Prop({ default: 0 })
-  rbFrontRushYard?: number;
-
-  @Prop({ default: 0 })
-  rbBackRushYard?: number;
-
-  @Prop({ default: 0 })
-  rbRushingAttempts?: number;
-
-  @Prop({ default: 0 })
-  rbRushingYards?: number;
-
-  @Prop({ default: 0 })
-  rbYardsPerCarry?: number;
-
-  @Prop({ default: 0 })
-  rbRushingTouchdowns?: number;
-
-  @Prop({ default: 0 })
-  rbLongestRush?: number;
+  // 포지션별 개별 스탯 객체들
+  @Prop({ type: QBStats, default: null })
+  QB?: QBStats;
 
-  @Prop({ default: 0 })
-  rbFumbles?: number;
-
-  @Prop({ default: 0 })
-  rbFumblesLost?: number;
-
-  // RB 리시빙 스탯
-  @Prop({ default: 0 })
-  rbReceivingTargets?: number;
-
-  @Prop({ default: 0 })
-  rbReceptions?: number;
-
-  @Prop({ default: 0 })
-  rbReceivingYards?: number;
-
-  @Prop({ default: 0 })
-  rbYardsPerReception?: number;
-
-  @Prop({ default: 0 })
-  rbReceivingTouchdowns?: number;
-
-  @Prop({ default: 0 })
-  rbLongestReception?: number;
-
-  @Prop({ default: 0 })
-  rbReceivingFirstDowns?: number;
-
-  // RB 스페셜팀 스탯
-  @Prop({ default: 0 })
-  rbKickReturns?: number;
-
-  @Prop({ default: 0 })
-  rbKickReturnYards?: number;
-
-  @Prop({ default: 0 })
-  rbYardsPerKickReturn?: number;
-
-  @Prop({ default: 0 })
-  rbPuntReturns?: number;
-
-  @Prop({ default: 0 })
-  rbPuntReturnYards?: number;
-
-  @Prop({ default: 0 })
-  rbYardsPerPuntReturn?: number;
-
-  @Prop({ default: 0 })
-  rbReturnTouchdowns?: number;
-
-  // WR 리시빙 스탯
-  @Prop({ default: 0 })
-  wrReceivingTargets?: number;
-
-  @Prop({ default: 0 })
-  wrReceptions?: number;
-
-  @Prop({ default: 0 })
-  wrReceivingYards?: number;
-
-  @Prop({ default: 0 })
-  wrYardsPerReception?: number;
-
-  @Prop({ default: 0 })
-  wrReceivingTouchdowns?: number;
-
-  @Prop({ default: 0 })
-  wrLongestReception?: number;
-
-  @Prop({ default: 0 })
-  wrReceivingFirstDowns?: number;
+  @Prop({ type: RBStats, default: null })
+  RB?: RBStats;
 
-  // WR 러싱 스탯
-  @Prop({ default: 0 })
-  wrRushingAttempts?: number;
-
-  @Prop({ default: 0 })
-  wrRushingYards?: number;
-
-  @Prop({ default: 0 })
-  wrYardsPerCarry?: number;
-
-  @Prop({ default: 0 })
-  wrRushingTouchdowns?: number;
-
-  @Prop({ default: 0 })
-  wrLongestRush?: number;
-
-  // WR 스페셜팀 스탯
-  @Prop({ default: 0 })
-  wrKickReturns?: number;
-
-  @Prop({ default: 0 })
-  wrKickReturnYards?: number;
-
-  @Prop({ default: 0 })
-  wrYardsPerKickReturn?: number;
-
-  @Prop({ default: 0 })
-  wrPuntReturns?: number;
-
-  @Prop({ default: 0 })
-  wrPuntReturnYards?: number;
-
-  @Prop({ default: 0 })
-  wrYardsPerPuntReturn?: number;
-
-  @Prop({ default: 0 })
-  wrReturnTouchdowns?: number;
-
-  // TE 리시빙 스탯
-  @Prop({ default: 0 })
-  teReceivingTargets?: number;
-
-  @Prop({ default: 0 })
-  teReceptions?: number;
-
-  @Prop({ default: 0 })
-  teReceivingYards?: number;
-
-  @Prop({ default: 0 })
-  teYardsPerReception?: number;
-
-  @Prop({ default: 0 })
-  teReceivingTouchdowns?: number;
+  @Prop({ type: WRStats, default: null })
+  WR?: WRStats;
 
-  @Prop({ default: 0 })
-  teLongestReception?: number;
-
-  // TE 러싱 스탯
-  @Prop({ default: 0 })
-  teRushingAttempts?: number;
+  @Prop({ type: TEStats, default: null })
+  TE?: TEStats;
 
-  @Prop({ default: 0 })
-  teRushingYards?: number;
-
-  @Prop({ default: 0 })
-  teYardsPerCarry?: number;
+  @Prop({ type: KStats, default: null })
+  K?: KStats;
 
-  @Prop({ default: 0 })
-  teRushingTouchdowns?: number;
+  @Prop({ type: PStats, default: null })
+  P?: PStats;
 
-  @Prop({ default: 0 })
-  teLongestRush?: number;
+  @Prop({ type: OLStats, default: null })
+  OL?: OLStats;
 
-  @Prop({ default: 0 })
-  fumbles?: number;
+  @Prop({ type: DLStats, default: null })
+  DL?: DLStats;
 
-  // 공통 스탯
-  @Prop({ default: 0 })
-  totalYards?: number;
+  @Prop({ type: LBStats, default: null })
+  LB?: LBStats;
 
-  @Prop({ default: 0 })
-  totalTouchdowns?: number;
+  @Prop({ type: DBStats, default: null })
+  DB?: DBStats;
 
-  @Prop({ default: 0 })
-  gamesPlayed?: number;
+  @Prop({ type: DefensiveStats, default: null })
+  Defense?: DefensiveStats;
 
+  // 공통 정보
   @Prop({ default: 0 })
-  gamesStarted?: number;
+  totalGamesPlayed?: number;
 }
 
 @Schema({ timestamps: true, autoIndex: false })
@@ -318,8 +232,8 @@ export class Player {
   @Prop({ required: true, trim: true })
   name: string;
 
-  @Prop({ required: true, trim: true })
-  position: string;
+  @Prop({ required: true, type: [String] }) // 배열로 변경하여 멀티포지션 지원
+  positions: string[];
 
   @Prop({ trim: true })
   studentId: string;
@@ -339,7 +253,7 @@ export class Player {
   @Prop({ required: true })
   jerseyNumber: number;
 
-  // 새로 추가된 스탯 필드
+  // 멀티포지션 스탯 필드
   @Prop({ type: PlayerStats, default: () => ({}) })
   stats: PlayerStats;
 
@@ -350,6 +264,10 @@ export class Player {
   // 시즌 정보 추가
   @Prop({ default: '2024' })
   season: string;
+
+  // 주 포지션 (기본 포지션)
+  @Prop({ trim: true })
+  primaryPosition?: string;
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);
@@ -357,7 +275,7 @@ export const PlayerSchema = SchemaFactory.createForClass(Player);
 // 인덱스 설정
 PlayerSchema.index({ playerId: 1 });
 PlayerSchema.index({ teamId: 1 });
-PlayerSchema.index({ teamName: 1, jerseyNumber: 1, position: 1 }, { unique: true }); // 중복 방지
+PlayerSchema.index({ teamName: 1, jerseyNumber: 1 }, { unique: true }); // 한 팀에서 같은 등번호는 하나만 (멀티포지션 지원)
 
 // 가상 필드: 속한 팀 정보
 PlayerSchema.virtual('team', {

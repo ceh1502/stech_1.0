@@ -157,9 +157,9 @@ export class PlayerService {
     };
   }
 
-  // 포지션별 선수 목록 조회
+  // 포지션별 선수 목록 조회 (멀티포지션 지원)
   async getPlayersByPosition(position: string, league?: string) {
-    const query: any = { position };
+    const query: any = { positions: position }; // 배열에서 position 찾기
     if (league) {
       query.league = league;
     }
@@ -167,7 +167,7 @@ export class PlayerService {
     const players = await this.playerModel
       .find(query)
       .populate('teamId', 'teamName')
-      .sort({ 'stats.totalYards': -1 }); // 총 야드수 기준 정렬
+      .sort({ 'stats.totalGamesPlayed': -1 }); // 총 게임 수 기준 정렬
 
     return {
       success: true,
@@ -175,26 +175,60 @@ export class PlayerService {
     };
   }
 
-  // 전체 선수 랭킹 조회
+  // 전체 선수 랭킹 조회 (멀티포지션 지원)
   async getAllPlayersRanking(league?: string, sortBy?: string) {
     const query: any = {};
     if (league) {
       query.league = league;
     }
 
-    let sortOption: any = { 'stats.totalYards': -1 }; // 기본 정렬
-    if (sortBy) {
-      sortOption = { [`stats.${sortBy}`]: -1 };
-    }
-
     const players = await this.playerModel
       .find(query)
-      .populate('teamId', 'teamName')
-      .sort(sortOption);
+      .populate('teamId', 'teamName');
+
+    // 멀티포지션 선수를 각 포지션별로 분리하여 반환
+    const expandedPlayers = [];
+    
+    for (const player of players) {
+      // stats 구조 확인 및 변환
+      const playerStats = player.stats || {};
+      
+      for (const position of player.positions) {
+        // 포지션별 스탯 가져오기
+        let positionStats = {};
+        
+        // stats 구조가 포지션별로 분리되어 있는지 확인
+        if (playerStats[position]) {
+          // 예: stats.RB, stats.WR 형태
+          positionStats = playerStats[position];
+        } else if (playerStats.totalGamesPlayed !== undefined) {
+          // 포지션별 스탯이 없으면 전체 stats 사용 (하위 호환성)
+          positionStats = playerStats;
+        }
+        
+        // 각 포지션별로 별도의 선수 객체 생성
+        expandedPlayers.push({
+          _id: `${player._id}_${position}`,
+          playerId: player.playerId,
+          name: player.name,
+          position: position,
+          positions: player.positions,
+          primaryPosition: player.primaryPosition,
+          teamName: player.teamName,
+          teamId: player.teamId,
+          jerseyNumber: player.jerseyNumber,
+          league: player.league,
+          season: player.season,
+          stats: positionStats,
+          createdAt: (player as any).createdAt,
+          updatedAt: (player as any).updatedAt,
+        });
+      }
+    }
 
     return {
       success: true,
-      data: players,
+      data: expandedPlayers,
     };
   }
 
