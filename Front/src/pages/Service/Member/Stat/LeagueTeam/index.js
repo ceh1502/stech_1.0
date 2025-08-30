@@ -53,29 +53,29 @@ const LeagueTeamPage = () => {
               rushing_yards_per_game: item.gamesPlayed > 0 ? (item.rushingYards / item.gamesPlayed).toFixed(1) : 0,
               rushing_td: item.rushingTouchdowns || 0,
               
-              // 패스 관련
-              "pass_completions-attempts": `${item.passCompletions || 0}-${item.passAttempts || 0}`,
+              // 패스 관련  
+              "pass_completions-attempts": item.passCompletionAttempts || "0-0",
               passing_yards: item.passingYards || 0,
-              passing_yards_per_passing_attempts: item.passAttempts > 0 ? (item.passingYards / item.passAttempts).toFixed(1) : 0,
+              passing_yards_per_passing_attempts: item.yardsPerPassAttempt || 0,
               passing_yards_per_game: item.gamesPlayed > 0 ? (item.passingYards / item.gamesPlayed).toFixed(1) : 0,
               passing_td: item.passingTouchdowns || 0,
               interceptions: item.interceptions || 0,
               
               // 스페셜팀 관련
               total_punt_yards: item.totalPuntYards || 0,
-              average_punt_yards: item.totalPunts > 0 ? (item.totalPuntYards / item.totalPunts).toFixed(1) : 0,
-              touchback_percentage: item.totalPunts > 0 ? ((item.puntTouchbacks / item.totalPunts) * 100).toFixed(1) : 0,
-              "field_goal_completions-attempts": `${item.fieldGoalMakes || 0}-${item.fieldGoalAttempts || 0}`,
-              yards_per_kick_return: item.kickReturns > 0 ? (item.kickReturnYards / item.kickReturns).toFixed(1) : 0,
-              yards_per_punt_return: item.puntReturns > 0 ? (item.puntReturnYards / item.puntReturns).toFixed(1) : 0,
-              total_return_yards: (item.kickReturnYards || 0) + (item.puntReturnYards || 0),
+              average_punt_yards: item.averagePuntYards || 0,
+              touchback_percentage: item.puntTouchbackPercentage || 0,
+              "field_goal_completions-attempts": item.fieldGoalStats || "0-0",
+              yards_per_kick_return: 999, // 아직 구현 안함
+              yards_per_punt_return: 999, // 아직 구현 안함  
+              total_return_yards: 999, // 아직 구현 안함
               
               // 기타
-              "fumble-turnover": `${item.fumbles || 0}-${item.fumblesLost || 0}`,
-              turnover_per_game: item.gamesPlayed > 0 ? (item.totalTurnovers / item.gamesPlayed).toFixed(1) : 0,
-              turnover_rate: ((item.opponentTurnovers || 0) - (item.totalTurnovers || 0)),
-              "penalty-pen_yards": `${item.penalties || 0}-${item.penaltyYards || 0}`,
-              pen_yards_per_game: item.gamesPlayed > 0 ? (item.penaltyYards / item.gamesPlayed).toFixed(1) : 0,
+              "fumble-turnover": 999, // 아직 구현 안함
+              turnover_per_game: 999, // 아직 구현 안함
+              turnover_rate: 999, // 아직 구현 안함
+              "penalty-pen_yards": item.penaltyStats || "0-0",
+              pen_yards_per_game: item.penaltyYardsPerGame || 0,
               
               // 원본 데이터 유지
               season: item.season,

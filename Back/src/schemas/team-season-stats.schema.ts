@@ -97,6 +97,12 @@ export class TeamSeasonStats {
   @Prop({ default: 0 })
   penaltyYards: number; // 총 페널티 야드
 
+  @Prop({ default: 0 })
+  extraPointsMade: number; // 엑스트라 포인트 성공
+
+  @Prop({ default: 0 })
+  safeties: number; // 세이프티 득점
+
   // 처리된 게임 목록 (중복 방지용)
   @Prop({ type: [String], default: [] })
   processedGames: string[];
