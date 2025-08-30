@@ -6,6 +6,11 @@ import { RbAnalyzerService } from './analyzers/rb-analyzer.service';
 import { WrAnalyzerService } from './analyzers/wr-analyzer.service';
 import { TeAnalyzerService } from './analyzers/te-analyzer.service';
 import { KAnalyzerService } from './analyzers/k-analyzer.service';
+import { PAnalyzerService } from './analyzers/p-analyzer.service';
+import { OlAnalyzerService } from './analyzers/ol-analyzer.service';
+import { DlAnalyzerService } from './analyzers/dl-analyzer.service';
+import { LbAnalyzerService } from './analyzers/lb-analyzer.service';
+import { DbAnalyzerService } from './analyzers/db-analyzer.service';
 
 // 클립 데이터 인터페이스
 export interface ClipData {
@@ -69,6 +74,11 @@ export class ClipAnalyzerService {
     private wrAnalyzer: WrAnalyzerService,
     private teAnalyzer: TeAnalyzerService,
     private kAnalyzer: KAnalyzerService,
+    private pAnalyzer: PAnalyzerService,
+    private olAnalyzer: OlAnalyzerService,
+    private dlAnalyzer: DlAnalyzerService,
+    private lbAnalyzer: LbAnalyzerService,
+    private dbAnalyzer: DbAnalyzerService,
   ) {}
 
   /**
@@ -101,15 +111,40 @@ export class ClipAnalyzerService {
     const kResult = await this.analyzeKClips(gameData.Clips, gameData);
     results.push(...kResult.results);
     
-    console.log(`\n✅ 게임 분석 완료 - ${qbResult.qbCount}명의 QB, ${rbResult.rbCount}명의 RB, ${wrResult.wrCount}명의 WR, ${teResult.teCount}명의 TE, ${kResult.kCount}명의 K 처리됨`);
+    // 펀터 분석
+    const pResult = await this.analyzePClips(gameData.Clips, gameData);
+    results.push(...pResult.results);
+    
+    // OL 분석
+    const olResult = await this.analyzeOLClips(gameData.Clips, gameData);
+    results.push(...olResult.results);
+    
+    // DL 분석
+    const dlResult = await this.analyzeDLClips(gameData.Clips, gameData);
+    results.push(...dlResult.results);
+    
+    // LB 분석
+    const lbResult = await this.analyzeLBClips(gameData.Clips, gameData);
+    results.push(...lbResult.results);
+    
+    // DB 분석
+    const dbResult = await this.analyzeDBClips(gameData.Clips, gameData);
+    results.push(...dbResult.results);
+    
+    console.log(`\n✅ 게임 분석 완료 - ${qbResult.qbCount}명의 QB, ${rbResult.rbCount}명의 RB, ${wrResult.wrCount}명의 WR, ${teResult.teCount}명의 TE, ${kResult.kCount}명의 K, ${pResult.pCount}명의 P, ${olResult.olCount}명의 OL, ${dlResult.dlCount}명의 DL, ${lbResult.lbCount}명의 LB, ${dbResult.dbCount}명의 DB 처리됨`);
     return {
       success: true,
-      message: `${qbResult.qbCount}명의 QB, ${rbResult.rbCount}명의 RB, ${wrResult.wrCount}명의 WR, ${teResult.teCount}명의 TE, ${kResult.kCount}명의 K 스탯이 업데이트되었습니다.`,
+      message: `${qbResult.qbCount}명의 QB, ${rbResult.rbCount}명의 RB, ${wrResult.wrCount}명의 WR, ${teResult.teCount}명의 TE, ${kResult.kCount}명의 K, ${pResult.pCount}명의 P, ${olResult.olCount}명의 OL, ${dlResult.dlCount}명의 DL, ${lbResult.lbCount}명의 LB, ${dbResult.dbCount}명의 DB 스탯이 업데이트되었습니다.`,
       qbCount: qbResult.qbCount,
       rbCount: rbResult.rbCount,
       wrCount: wrResult.wrCount,
       teCount: teResult.teCount,
       kCount: kResult.kCount,
+      pCount: pResult.pCount,
+      olCount: olResult.olCount,
+      dlCount: dlResult.dlCount,
+      lbCount: lbResult.lbCount,
+      dbCount: dbResult.dbCount,
       results,
     };
   }
@@ -226,6 +261,132 @@ export class ClipAnalyzerService {
     console.log(`🦶 키커 분석 서비스 호출 중...`);
     const result = await this.kAnalyzer.analyzeClips(kClips, gameData);
     console.log(`🦶 키커 분석 서비스 결과:`, result);
+    
+    return result;
+  }
+
+  /**
+   * 펀터 클립들 분석
+   */
+  private async analyzePClips(clips: ClipData[], gameData: GameData): Promise<any> {
+    console.log(`🦶 펀터 클립 필터링 시작 - 전체 ${clips.length}개 클립`);
+    
+    // 펀터 클립들만 필터링 (PUNT playType)
+    const pClips = clips.filter(clip => 
+      clip.playType?.toUpperCase() === 'PUNT'
+    );
+
+    console.log(`🦶 펀터 클립 필터링 완료 - ${pClips.length}개 펀터 클립 발견`);
+
+    if (pClips.length === 0) {
+      console.log('⚠️ 펀터 클립이 없어서 분석을 건너뜁니다.');
+      return { pCount: 0, results: [] };
+    }
+
+    console.log(`🦶 펀터 분석 서비스 호출 중...`);
+    const result = await this.pAnalyzer.analyzeClips(pClips, gameData);
+    console.log(`🦶 펀터 분석 서비스 결과:`, result);
+    
+    return result;
+  }
+
+  /**
+   * OL 클립들 분석
+   */
+  private async analyzeOLClips(clips: ClipData[], gameData: GameData): Promise<any> {
+    console.log(`🛡️ OL 클립 필터링 시작 - 전체 ${clips.length}개 클립`);
+    
+    // OL 클립들만 필터링 (OL 포지션이 있거나 NONE/SACK playType)
+    const olClips = clips.filter(clip => 
+      (clip.car?.pos === 'OL' || clip.car2?.pos === 'OL') ||
+      (clip.playType?.toUpperCase() === 'NONE' || clip.playType?.toUpperCase() === 'SACK')
+    );
+
+    console.log(`🛡️ OL 클립 필터링 완료 - ${olClips.length}개 OL 클립 발견`);
+
+    if (olClips.length === 0) {
+      console.log('⚠️ OL 클립이 없어서 분석을 건너뜁니다.');
+      return { olCount: 0, results: [] };
+    }
+
+    console.log(`🛡️ OL 분석 서비스 호출 중...`);
+    const result = await this.olAnalyzer.analyzeClips(olClips, gameData);
+    console.log(`🛡️ OL 분석 서비스 결과:`, result);
+    
+    return result;
+  }
+
+  /**
+   * DL 클립들 분석
+   */
+  private async analyzeDLClips(clips: ClipData[], gameData: GameData): Promise<any> {
+    console.log(`⚔️ DL 클립 필터링 시작 - 전체 ${clips.length}개 클립`);
+    
+    // DL 클립들만 필터링 (tkl/tkl2에 DL이 있는 클립)
+    const dlClips = clips.filter(clip => 
+      clip.tkl?.pos === 'DL' || clip.tkl2?.pos === 'DL'
+    );
+
+    console.log(`⚔️ DL 클립 필터링 완료 - ${dlClips.length}개 DL 클립 발견`);
+
+    if (dlClips.length === 0) {
+      console.log('⚠️ DL 클립이 없어서 분석을 건너뜁니다.');
+      return { dlCount: 0, results: [] };
+    }
+
+    console.log(`⚔️ DL 분석 서비스 호출 중...`);
+    const result = await this.dlAnalyzer.analyzeClips(dlClips, gameData);
+    console.log(`⚔️ DL 분석 서비스 결과:`, result);
+    
+    return result;
+  }
+
+  /**
+   * LB 클립들 분석
+   */
+  private async analyzeLBClips(clips: ClipData[], gameData: GameData): Promise<any> {
+    console.log(`🛡️ LB 클립 필터링 시작 - 전체 ${clips.length}개 클립`);
+    
+    // LB 클립들만 필터링 (tkl/tkl2에 LB가 있는 클립)
+    const lbClips = clips.filter(clip => 
+      clip.tkl?.pos === 'LB' || clip.tkl2?.pos === 'LB'
+    );
+
+    console.log(`🛡️ LB 클립 필터링 완료 - ${lbClips.length}개 LB 클립 발견`);
+
+    if (lbClips.length === 0) {
+      console.log('⚠️ LB 클립이 없어서 분석을 건너뜁니다.');
+      return { lbCount: 0, results: [] };
+    }
+
+    console.log(`🛡️ LB 분석 서비스 호출 중...`);
+    const result = await this.lbAnalyzer.analyzeClips(lbClips, gameData);
+    console.log(`🛡️ LB 분석 서비스 결과:`, result);
+    
+    return result;
+  }
+
+  /**
+   * DB 클립들 분석
+   */
+  private async analyzeDBClips(clips: ClipData[], gameData: GameData): Promise<any> {
+    console.log(`🚨 DB 클립 필터링 시작 - 전체 ${clips.length}개 클립`);
+    
+    // DB 클립들만 필터링 (tkl/tkl2에 DB가 있는 클립)
+    const dbClips = clips.filter(clip => 
+      clip.tkl?.pos === 'DB' || clip.tkl2?.pos === 'DB'
+    );
+
+    console.log(`🚨 DB 클립 필터링 완료 - ${dbClips.length}개 DB 클립 발견`);
+
+    if (dbClips.length === 0) {
+      console.log('⚠️ DB 클립이 없어서 분석을 건너뜁니다.');
+      return { dbCount: 0, results: [] };
+    }
+
+    console.log(`🚨 DB 분석 서비스 호출 중...`);
+    const result = await this.dbAnalyzer.analyzeClips(dbClips, gameData);
+    console.log(`🚨 DB 분석 서비스 결과:`, result);
     
     return result;
   }
@@ -374,56 +535,72 @@ export class ClipAnalyzerService {
       });
 
       if (!player) {
-        // 새 QB 선수 생성
+        // 새 QB 선수 생성 (멀티포지션 구조)
         console.log(`🆕 새 QB 선수 생성: ${qbStats.jerseyNumber}번 (${qbStats.teamName})`);
         
         player = new this.playerModel({
-          playerId: `QB${qbStats.jerseyNumber}_${qbStats.teamName}`,
-          name: `QB${qbStats.jerseyNumber}번`,
+          playerId: `${qbStats.teamName}_${qbStats.jerseyNumber}`,
+          name: `${qbStats.jerseyNumber}번`,
           jerseyNumber: qbStats.jerseyNumber,
-          position: 'QB',
+          positions: ['QB'],
+          primaryPosition: 'QB',
           teamName: qbStats.teamName,
           league: '1부',
           season: '2024',
           stats: {
-            gamesPlayed: qbStats.gamesPlayed,
-            passingAttempts: qbStats.passingAttempts,
-            passingCompletions: qbStats.passingCompletions,
-            completionPercentage: qbStats.completionPercentage,
-            passingYards: qbStats.passingYards,
-            passingTouchdowns: qbStats.passingTouchdowns,
-            passingInterceptions: qbStats.passingInterceptions,
-            // longestPass field removed from schema
-            sacks: qbStats.sacks,
-            rushingAttempts: qbStats.rushingAttempts,
-            rushingYards: qbStats.rushingYards,
-            yardsPerCarry: qbStats.yardsPerCarry,
-            rushingTouchdowns: qbStats.rushingTouchdowns,
-            longestRush: qbStats.longestRush,
-            fumbles: qbStats.fumbles,
+            QB: {
+              gamesPlayed: qbStats.gamesPlayed,
+              passingAttempts: qbStats.passingAttempts,
+              passingCompletions: qbStats.passingCompletions,
+              completionPercentage: qbStats.completionPercentage,
+              passingYards: qbStats.passingYards,
+              passingTouchdowns: qbStats.passingTouchdowns,
+              passingInterceptions: qbStats.passingInterceptions,
+              longestPass: qbStats.longestPass,
+              sacks: qbStats.sacks,
+              rushingAttempts: qbStats.rushingAttempts,
+              rushingYards: qbStats.rushingYards,
+              yardsPerCarry: qbStats.yardsPerCarry,
+              rushingTouchdowns: qbStats.rushingTouchdowns,
+              longestRush: qbStats.longestRush,
+            },
+            totalGamesPlayed: qbStats.gamesPlayed,
           },
         });
       } else {
-        // 기존 선수 업데이트
+        // 기존 선수 업데이트 (멀티포지션 구조)
         console.log(`🔄 기존 QB 선수 업데이트: ${player.name}`);
         
-        player.stats.gamesPlayed = (player.stats.gamesPlayed || 0) + qbStats.gamesPlayed;
-        player.stats.passingAttempts = (player.stats.passingAttempts || 0) + qbStats.passingAttempts;
-        player.stats.passingCompletions = (player.stats.passingCompletions || 0) + qbStats.passingCompletions;
-        player.stats.completionPercentage = player.stats.passingAttempts > 0 ? 
-          Math.round((player.stats.passingCompletions / player.stats.passingAttempts) * 100) : 0;
-        player.stats.passingYards = (player.stats.passingYards || 0) + qbStats.passingYards;
-        player.stats.passingTouchdowns = (player.stats.passingTouchdowns || 0) + qbStats.passingTouchdowns;
-        player.stats.passingInterceptions = (player.stats.passingInterceptions || 0) + qbStats.passingInterceptions;
-        // longestPass field doesn't exist in schema, using longestReception for now
-        player.stats.sacks = (player.stats.sacks || 0) + qbStats.sacks;
-        player.stats.rushingAttempts = (player.stats.rushingAttempts || 0) + qbStats.rushingAttempts;
-        player.stats.rushingYards = (player.stats.rushingYards || 0) + qbStats.rushingYards;
-        player.stats.yardsPerCarry = player.stats.rushingAttempts > 0 ? 
-          Math.round((player.stats.rushingYards / player.stats.rushingAttempts) * 100) / 100 : 0;
-        player.stats.rushingTouchdowns = (player.stats.rushingTouchdowns || 0) + qbStats.rushingTouchdowns;
-        player.stats.longestRush = Math.max(player.stats.longestRush || 0, qbStats.longestRush);
-        player.stats.fumbles = (player.stats.fumbles || 0) + qbStats.fumbles;
+        // QB 포지션이 없으면 추가
+        if (!player.positions.includes('QB')) {
+          player.positions.push('QB');
+        }
+        
+        // QB 스탯 초기화
+        if (!player.stats.QB) {
+          player.stats.QB = {};
+        }
+        
+        const qbStatsData = player.stats.QB;
+        qbStatsData.gamesPlayed = (qbStatsData.gamesPlayed || 0) + qbStats.gamesPlayed;
+        qbStatsData.passingAttempts = (qbStatsData.passingAttempts || 0) + qbStats.passingAttempts;
+        qbStatsData.passingCompletions = (qbStatsData.passingCompletions || 0) + qbStats.passingCompletions;
+        qbStatsData.completionPercentage = qbStatsData.passingAttempts > 0 ? 
+          Math.round((qbStatsData.passingCompletions / qbStatsData.passingAttempts) * 100) : 0;
+        qbStatsData.passingYards = (qbStatsData.passingYards || 0) + qbStats.passingYards;
+        qbStatsData.passingTouchdowns = (qbStatsData.passingTouchdowns || 0) + qbStats.passingTouchdowns;
+        qbStatsData.passingInterceptions = (qbStatsData.passingInterceptions || 0) + qbStats.passingInterceptions;
+        qbStatsData.sacks = (qbStatsData.sacks || 0) + qbStats.sacks;
+        qbStatsData.rushingAttempts = (qbStatsData.rushingAttempts || 0) + qbStats.rushingAttempts;
+        qbStatsData.rushingYards = (qbStatsData.rushingYards || 0) + qbStats.rushingYards;
+        qbStatsData.yardsPerCarry = qbStatsData.rushingAttempts > 0 ? 
+          Math.round((qbStatsData.rushingYards / qbStatsData.rushingAttempts) * 100) / 100 : 0;
+        qbStatsData.rushingTouchdowns = (qbStatsData.rushingTouchdowns || 0) + qbStats.rushingTouchdowns;
+        qbStatsData.longestRush = Math.max(qbStatsData.longestRush || 0, qbStats.longestRush);
+        qbStatsData.longestPass = Math.max(qbStatsData.longestPass || 0, qbStats.longestPass);
+        
+        // 총 게임 수 업데이트
+        player.stats.totalGamesPlayed = (player.stats.totalGamesPlayed || 0) + qbStats.gamesPlayed;
       }
 
       await player.save();
@@ -432,7 +609,7 @@ export class ClipAnalyzerService {
         player: {
           name: player.name,
           jerseyNumber: player.jerseyNumber,
-          position: player.position,
+          positions: player.positions,
           teamName: player.teamName,
           stats: qbStats,
         },

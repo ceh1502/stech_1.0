@@ -92,8 +92,6 @@ export class WrAnalyzerService extends BaseAnalyzerService {
           wrReceivingFirstDowns: wrStats.receivingFirstDowns,
           // 러싱 스탯
           wrRushingAttempts: wrStats.rushingAttempts,
-          frontRushYard: wrStats.frontRushYard,
-          backRushYard: wrStats.backRushYard,
           wrRushingYards: wrStats.rushingYards,
           wrYardsPerCarry: wrStats.yardsPerCarry,
           wrRushingTouchdowns: wrStats.rushingTouchdowns,
@@ -101,13 +99,13 @@ export class WrAnalyzerService extends BaseAnalyzerService {
           fumbles: wrStats.fumbles,
           fumblesLost: wrStats.fumblesLost,
           // 스페셜팀 스탯
-          wrKickReturns: wrStats.kickoffReturn,
-          wrKickReturnYards: wrStats.kickoffReturnYard,
-          wrYardsPerKickReturn: wrStats.yardPerKickoffReturn,
-          wrPuntReturns: wrStats.puntReturn,
-          wrPuntReturnYards: wrStats.puntReturnYard,
-          wrYardsPerPuntReturn: wrStats.yardPerPuntReturn,
-          wrReturnTouchdowns: wrStats.returnTouchdown,
+          kickReturns: wrStats.kickoffReturn,
+          kickReturnYards: wrStats.kickoffReturnYard,
+          yardsPerKickReturn: wrStats.yardPerKickoffReturn,
+          puntReturns: wrStats.puntReturn,
+          puntReturnYards: wrStats.puntReturnYard,
+          yardsPerPuntReturn: wrStats.yardPerPuntReturn,
+          returnTouchdowns: wrStats.returnTouchdown,
         }
       );
 

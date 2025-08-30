@@ -55,7 +55,7 @@ export class StatsManagementService {
           gameDate: gameDate,
           homeTeam: homeTeam,
           awayTeam: awayTeam,
-          position: player.position,
+          position: player.primaryPosition || player.positions?.[0] || 'Unknown',
           gamesPlayed: 1,
           ...analyzedStats,
         },
@@ -69,7 +69,7 @@ export class StatsManagementService {
     // 시즌 스탯 업데이트
     await this.updateSeasonStats(
       player._id as Types.ObjectId,
-      player.position,
+      player.primaryPosition || player.positions?.[0] || 'Unknown',
       player.league,
       player.season,
       analyzedStats,
@@ -79,7 +79,7 @@ export class StatsManagementService {
     // 커리어 스탯 업데이트
     await this.updateCareerStats(
       player._id as Types.ObjectId,
-      player.position,
+      player.primaryPosition || player.positions?.[0] || 'Unknown',
       player.season,
       analyzedStats,
     );

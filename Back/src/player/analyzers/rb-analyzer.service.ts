@@ -75,8 +75,6 @@ export class RbAnalyzerService extends BaseAnalyzerService {
         {
           gamesPlayed: rbStats.gamesPlayed,
           rbRushingAttempts: rbStats.rushingAttempts,
-          frontRushYard: rbStats.frontRushYard,
-          backRushYard: rbStats.backRushYard,
           rbRushingYards: rbStats.rushingYards,
           rbYardsPerCarry: rbStats.yardsPerCarry,
           rbRushingTouchdowns: rbStats.rushingTouchdowns,
@@ -84,13 +82,13 @@ export class RbAnalyzerService extends BaseAnalyzerService {
           fumbles: rbStats.fumbles,
           fumblesLost: rbStats.fumblesLost,
           // 스페셜팀 스탯
-          rbKickReturns: rbStats.kickoffReturn,
-          rbKickReturnYards: rbStats.kickoffReturnYard,
-          rbYardsPerKickReturn: rbStats.yardPerKickoffReturn,
-          rbPuntReturns: rbStats.puntReturn,
-          rbPuntReturnYards: rbStats.puntReturnYard,
-          rbYardsPerPuntReturn: rbStats.yardPerPuntReturn,
-          rbReturnTouchdowns: rbStats.returnTouchdown,
+          kickReturns: rbStats.kickoffReturn,
+          kickReturnYards: rbStats.kickoffReturnYard,
+          yardsPerKickReturn: rbStats.yardPerKickoffReturn,
+          puntReturns: rbStats.puntReturn,
+          puntReturnYards: rbStats.puntReturnYard,
+          yardsPerPuntReturn: rbStats.yardPerPuntReturn,
+          returnTouchdowns: rbStats.returnTouchdown,
         }
       );
 

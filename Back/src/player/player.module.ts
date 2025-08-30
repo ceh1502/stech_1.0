@@ -11,6 +11,11 @@ import { RbAnalyzerService } from './analyzers/rb-analyzer.service';
 import { WrAnalyzerService } from './analyzers/wr-analyzer.service';
 import { TeAnalyzerService } from './analyzers/te-analyzer.service';
 import { KAnalyzerService } from './analyzers/k-analyzer.service';
+import { PAnalyzerService } from './analyzers/p-analyzer.service';
+import { OlAnalyzerService } from './analyzers/ol-analyzer.service';
+import { DlAnalyzerService } from './analyzers/dl-analyzer.service';
+import { LbAnalyzerService } from './analyzers/lb-analyzer.service';
+import { DbAnalyzerService } from './analyzers/db-analyzer.service';
 import { StatsManagementService } from '../common/services/stats-management.service';
 import { TeamModule } from '../team/team.module';
 import { Player, PlayerSchema } from '../schemas/player.schema';
@@ -42,6 +47,11 @@ import { CareerStats, CareerStatsSchema } from '../schemas/career-stats.schema';
     WrAnalyzerService,
     TeAnalyzerService,
     KAnalyzerService,
+    PAnalyzerService,
+    OlAnalyzerService,
+    DlAnalyzerService,
+    LbAnalyzerService,
+    DbAnalyzerService,
     StatsManagementService,
   ],
   exports: [PlayerService /*, PlayerNewService*/],

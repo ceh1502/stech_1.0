@@ -29,7 +29,7 @@ async function getTeamsInfo() {
     for (const player of samplePlayers) {
       console.log(`\n👤 ${player.name} (#${player.jerseyNumber})`);
       console.log(`   PlayerId: ${player.playerId}`);
-      console.log(`   포지션: ${player.position}`);
+      console.log(`   포지션: ${player.positions?.join(', ') || '없음'}`);
       console.log(`   팀: ${(player.teamId as any).teamName}`);
       console.log(`   API 호출: curl http://localhost:3000/player/code/${player.playerId}`);
     }
