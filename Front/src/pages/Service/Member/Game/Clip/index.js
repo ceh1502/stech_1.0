@@ -11,18 +11,39 @@ import Clipdata from "./clipdata.png";
 /* ========== 공용 드롭다운 (이 페이지 내부 구현) ========== */
 function Dropdown({ label, summary, isOpen, onToggle, onClose, width = 220, children }) {
   const ref = useRef(null);
+  
   useEffect(() => {
     const onClickOutside = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) onClose?.();
+      if (ref.current && !ref.current.contains(e.target)) {
+        console.log('Clicking outside, closing dropdown'); // 디버깅용
+        onClose?.();
+      }
     };
-    const onKey = (e) => e.key === "Escape" && onClose?.();
-    document.addEventListener("mousedown", onClickOutside);
-    document.addEventListener("keydown", onKey);
+    
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        console.log('Escape key pressed, closing dropdown'); // 디버깅용
+        onClose?.();
+      }
+    };
+    
+    if (isOpen) {
+      document.addEventListener("mousedown", onClickOutside);
+      document.addEventListener("keydown", onKey);
+    }
+    
     return () => {
       document.removeEventListener("mousedown", onClickOutside);
       document.removeEventListener("keydown", onKey);
     };
-  }, [onClose]);
+  }, [onClose, isOpen]); // isOpen 의존성 추가
+
+  const handleToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Toggle clicked, current state:', isOpen); // 디버깅용
+    onToggle();
+  };
 
   return (
     <div className="ff-dropdown" ref={ref}>
@@ -31,7 +52,7 @@ function Dropdown({ label, summary, isOpen, onToggle, onClose, width = 220, chil
         className={`ff-dd-btn ${isOpen ? "open" : ""}`}
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        onClick={onToggle}
+        onClick={handleToggle}
       >
         <span className="ff-dd-label">{summary || label}</span>
         <span className="ff-dd-icon">▾</span>
@@ -44,6 +65,7 @@ function Dropdown({ label, summary, isOpen, onToggle, onClose, width = 220, chil
     </div>
   );
 }
+
 
 /* ========== 표시 라벨/상반 항목 ========== */
 const PT_LABEL = { RUN: "런", PASS: "패스" }; // 화면 표기용
@@ -126,6 +148,10 @@ export default function ClipPage() {
   // 드롭다운 상태
   const [openMenu, setOpenMenu] = useState(null); // 'team'|'quarter'|'playType'|'significant'|null
   const closeAll = () => setOpenMenu(null);
+
+    const handleMenuToggle = (menuName) => {
+    setOpenMenu(openMenu === menuName ? null : menuName);
+  };
 
   // 홈/원정 → 팀 드롭다운 옵션
   const teamOptions = useMemo(() => {
@@ -226,7 +252,7 @@ const onClickClip = (c) => {
                   label="공격팀"
                   summary={teamSummary}
                   isOpen={openMenu === "team"}
-                  onToggle={() => setOpenMenu(openMenu === "team" ? null : "team")}
+                  onToggle={() => handleMenuToggle('team')}
                   onClose={closeAll}
                   width={240}
                 >
@@ -259,7 +285,7 @@ const onClickClip = (c) => {
                   label="쿼터"
                   summary={quarterSummary}
                   isOpen={openMenu === "quarter"}
-                  onToggle={() => setOpenMenu(openMenu === "quarter" ? null : "quarter")}
+                  onToggle={() => handleMenuToggle('quarter')}
                   onClose={closeAll}
                   width={200}
                 >
@@ -291,7 +317,7 @@ const onClickClip = (c) => {
                   label="유형"
                   summary={playTypeSummary}
                   isOpen={openMenu === "playType"}
-                  onToggle={() => setOpenMenu(openMenu === "playType" ? null : "playType")}
+                  onToggle={() => handleMenuToggle('playType')}
                   onClose={closeAll}
                   width={200}
                 >
@@ -329,7 +355,7 @@ const onClickClip = (c) => {
                   label="중요플레이"
                   summary={significantSummary}
                   isOpen={openMenu === "significant"}
-                  onToggle={() => setOpenMenu(openMenu === "significant" ? null : "significant")}
+                  onToggle={() => handleFilterChange('significant')}
                   onClose={closeAll}
                   width={260}
                 >
