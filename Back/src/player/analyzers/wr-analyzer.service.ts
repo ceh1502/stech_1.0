@@ -32,6 +32,8 @@ export interface WRStats {
   puntReturnYard: number;
   yardPerPuntReturn: number;
   returnTouchdown: number;
+  puntReturnTouchdowns: number;
+  longestPuntReturn: number;
 }
 
 @Injectable()
@@ -215,6 +217,20 @@ export class WrAnalyzerService extends BaseAnalyzerService {
       if (hasPunt) {
         wrStats.puntReturn++;
         wrStats.puntReturnYard += gainYard;
+        
+        // 가장 긴 펀트 리턴 업데이트
+        if (gainYard > (wrStats.longestPuntReturn || 0)) {
+          wrStats.longestPuntReturn = gainYard;
+          console.log(`   🟡 WR 펀트 리턴: ${gainYard}야드 (신기록!)`);
+        } else {
+          console.log(`   🟡 WR 펀트 리턴: ${gainYard}야드`);
+        }
+        
+        // 펀트 리턴 터치다운 처리
+        if (significantPlays.includes('TOUCHDOWN')) {
+          wrStats.puntReturnTouchdowns = (wrStats.puntReturnTouchdowns || 0) + 1;
+          console.log(`   🏆 WR 펀트 리턴 터치다운!`);
+        }
       }
     }
 
@@ -308,6 +324,8 @@ export class WrAnalyzerService extends BaseAnalyzerService {
       puntReturnYard: 0,
       yardPerPuntReturn: 0,
       returnTouchdown: 0,
+      puntReturnTouchdowns: 0,
+      longestPuntReturn: 0,
     };
   }
 
