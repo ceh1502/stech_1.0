@@ -30,7 +30,9 @@ const LeagueTeamPage = () => {
               HICowboys: "홍익대 카우보이스",
               SSCrusaders: "숭실대 크루세이더스",
               HYLions: "한양대 라이온스",
-              HFBlackKnights: "한국외국어대 블랙나이츠"
+              HFBlackKnights: "한국외국어대 블랙나이츠",
+              GSDragons: "경성대 드래곤스",
+              DSBlueDolphons: "동서대 블루돌핀스"
             };
 
             // 백엔드 데이터를 프론트엔드 형식으로 변환
@@ -66,14 +68,14 @@ const LeagueTeamPage = () => {
               average_punt_yards: item.averagePuntYards || 0,
               touchback_percentage: item.puntTouchbackPercentage || 0,
               "field_goal_completions-attempts": item.fieldGoalStats || "0-0",
-              yards_per_kick_return: 999, // 아직 구현 안함
-              yards_per_punt_return: 999, // 아직 구현 안함  
-              total_return_yards: 999, // 아직 구현 안함
+              yards_per_kick_return: item.averageKickReturnYards || 0,
+              yards_per_punt_return: item.averagePuntReturnYards || 0,  
+              total_return_yards: item.totalReturnYards || 0,
               
               // 기타
-              "fumble-turnover": 999, // 아직 구현 안함
-              turnover_per_game: 999, // 아직 구현 안함
-              turnover_rate: 999, // 아직 구현 안함
+              "fumble-turnover": item.fumbleStats || "0-0",
+              turnover_per_game: item.turnoversPerGame || 0,
+              turnover_rate: item.turnoverRate || 0,
               "penalty-pen_yards": item.penaltyStats || "0-0",
               pen_yards_per_game: item.penaltyYardsPerGame || 0,
               
