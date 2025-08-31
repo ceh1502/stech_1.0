@@ -1,17 +1,25 @@
 // src/pages/Service/Member/Game/Clip/index.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useParams, useNavigate } from "react-router-dom";
-import "./ClipPage.css";
-import { TEAMS } from "../../../../../data/TEAMS";
-import { useClipFilter } from "../../../../../hooks/useClipFilter";
-import UploadVideoModal from "../../../../../components/UploadVideoModal";
-import defaultLogo from "../../../../../assets/images/logos/Stechlogo.svg";
-import Clipdata from "./clipdata.png";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
+import './ClipPage.css';
+import { TEAMS } from '../../../../../data/TEAMS';
+import { useClipFilter } from '../../../../../hooks/useClipFilter';
+import UploadVideoModal from '../../../../../components/UploadVideoModal';
+import defaultLogo from '../../../../../assets/images/logos/Stechlogo.svg';
+import Clipdata from './clipdata.png';
 
 /* ========== 공용 드롭다운 (이 페이지 내부 구현) ========== */
-function Dropdown({ label, summary, isOpen, onToggle, onClose, width = 220, children }) {
+function Dropdown({
+  label,
+  summary,
+  isOpen,
+  onToggle,
+  onClose,
+  width = 220,
+  children,
+}) {
   const ref = useRef(null);
-  
+
   useEffect(() => {
     const onClickOutside = (e) => {
       if (ref.current && !ref.current.contains(e.target)) {
@@ -19,22 +27,22 @@ function Dropdown({ label, summary, isOpen, onToggle, onClose, width = 220, chil
         onClose?.();
       }
     };
-    
+
     const onKey = (e) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         console.log('Escape key pressed, closing dropdown'); // 디버깅용
         onClose?.();
       }
     };
-    
+
     if (isOpen) {
-      document.addEventListener("mousedown", onClickOutside);
-      document.addEventListener("keydown", onKey);
+      document.addEventListener('mousedown', onClickOutside);
+      document.addEventListener('keydown', onKey);
     }
-    
+
     return () => {
-      document.removeEventListener("mousedown", onClickOutside);
-      document.removeEventListener("keydown", onKey);
+      document.removeEventListener('mousedown', onClickOutside);
+      document.removeEventListener('keydown', onKey);
     };
   }, [onClose, isOpen]); // isOpen 의존성 추가
 
@@ -49,7 +57,7 @@ function Dropdown({ label, summary, isOpen, onToggle, onClose, width = 220, chil
     <div className="ff-dropdown" ref={ref}>
       <button
         type="button"
-        className={`ff-dd-btn ${isOpen ? "open" : ""}`}
+        className={`ff-dd-btn ${isOpen ? 'open' : ''}`}
         aria-haspopup="menu"
         aria-expanded={isOpen}
         onClick={handleToggle}
@@ -66,35 +74,52 @@ function Dropdown({ label, summary, isOpen, onToggle, onClose, width = 220, chil
   );
 }
 
-
 /* ========== 표시 라벨/상반 항목 ========== */
-const PT_LABEL = { RUN: "런", PASS: "패스" }; // 화면 표기용
-const PLAY_TYPES = { RUN: "RUN", PASS: "PASS" }; // 필터 저장/비교용
+export const PT_LABEL = {
+  RUN: '런',
+  PASS: '패스',
+  PASS_INCOMPLETE: '패스 실패',
+  KICKOFF: '킥오프',
+  PUNT: '펀트',
+  PAT: 'PAT',
+  TWOPT: '2PT',
+  FIELDGOAL: 'FG',
+};
+const PLAY_TYPES = {
+  RUN: 'RUN',
+  PASS: 'PASS',
+  PASS_INCOMPLETE: 'PASS_INCOMPLETE',
+  KICKOFF: 'KICKOFF',
+  PUNT: 'PUNT',
+  PAT: 'PAT',
+  TWOPT: 'TWOPT',
+  FIELDGOAL: 'FIELDGOAL',
+}; // 필터 저장/비교용
 
 const SIGNIFICANT_PLAYS = {
-  TOUCHDOWN: "터치다운",
-  TWOPTCONVGOOD: "2PT 성공",
-  TWOPTCONVNOGOOD: "2PT 실패",
-  PATSUCCESS: "PAT 성공",
-  PATFAIL: "PAT 실패",
-  FIELDGOALGOOD: "FG 성공",
-  FIELDGOALNOGOOD: "FG 실패",
-  PENALTY: "페널티",
-  SACK: "색",
-  TFL: "TFL",
-  FUMBLE: "펌블",
-  INTERCEPTION: "인터셉트",
-  TURNOVER: "턴오버",
-  SAFETY: "세이프티",
+  TOUCHDOWN: '터치다운',
+  TWOPTCONVGOOD: '2PT 성공',
+  TWOPTCONVNOGOOD: '2PT 실패',
+  PATSUCCESS: 'PAT 성공',
+  PATFAIL: 'PAT 실패',
+  FIELDGOALGOOD: 'FG 성공',
+  FIELDGOALNOGOOD: 'FG 실패',
+  PENALTY: '페널티',
+  SACK: '색',
+  TFL: 'TFL',
+  FUMBLE: '펌블',
+  INTERCEPTION: '인터셉트',
+  TURNOVER: '턴오버',
+  SAFETY: '세이프티',
 };
 
 const OPPOSITES = {
-  "2PT 성공": "2PT 실패",
-  "2PT 실패": "2PT 성공",
-  "PAT 성공": "PAT 실패",
-  "PAT 실패": "PAT 성공",
-  "FG 성공": "FG 실패",
-  "FG 실패": "FG 성공",
+  '2PT 성공': '2PT 실패',
+  '2PT 실패': '2PT 성공',
+  'PAT 성공': 'PAT 실패',
+  'PAT 실패': 'PAT 성공',
+  'FG 성공': 'FG 실패',
+  'FG 실패': 'FG 성공',
 };
 
 /* TEAMS에서 이름/영문/코드로 팀 찾기(느슨 매칭) */
@@ -105,8 +130,8 @@ const findTeamMeta = (raw) => {
     TEAMS.find(
       (t) =>
         String(t.name).toLowerCase() === norm ||
-        String(t.enName || "").toLowerCase() === norm ||
-        String(t.code || "").toLowerCase() === norm
+        String(t.enName || '').toLowerCase() === norm ||
+        String(t.code || '').toLowerCase() === norm,
     ) || { name: raw }
   );
 };
@@ -117,13 +142,13 @@ export default function ClipPage() {
   const navigate = useNavigate();
 
   /* ===== 내 팀 (고정 표기) — GamePage와 동일한 방식 ===== */
-  const MY_TEAM_NAME = "한양대학교 라이온스";
+  const MY_TEAM_NAME = '한양대학교 라이온스';
   const selfTeam = useMemo(
     () => TEAMS.find((t) => t.name === MY_TEAM_NAME) || TEAMS[0] || null,
-    []
+    [],
   );
   const logoSrc = selfTeam?.logo || defaultLogo;
-  const label = selfTeam?.name || "Choose Team";
+  const label = selfTeam?.name || 'Choose Team';
 
   /* 업로드 모달 상태 */
   const [showUpload, setShowUpload] = useState(false);
@@ -139,9 +164,9 @@ export default function ClipPage() {
     // TODO: 실제 API로 대체
     setGame({
       gameKey,
-      homeTeam: "Hanyang Lions",
-      awayTeam: "Yonsei Eagles",
-      date: "2024-10-01",
+      homeTeam: 'Hanyang Lions',
+      awayTeam: 'Yonsei Eagles',
+      date: '2024-10-01',
     });
   }, [game, gameKey]);
 
@@ -149,7 +174,7 @@ export default function ClipPage() {
   const [openMenu, setOpenMenu] = useState(null); // 'team'|'quarter'|'playType'|'significant'|null
   const closeAll = () => setOpenMenu(null);
 
-    const handleMenuToggle = (menuName) => {
+  const handleMenuToggle = (menuName) => {
     setOpenMenu(openMenu === menuName ? null : menuName);
   };
 
@@ -158,10 +183,14 @@ export default function ClipPage() {
     const home = findTeamMeta(game?.homeTeam);
     const away = findTeamMeta(game?.awayTeam);
     const arr = [];
-    if (home?.name) arr.push({ value: home.name, label: home.name, logo: home.logo });
-    if (away?.name) arr.push({ value: away.name, label: away.name, logo: away.logo });
+    if (home?.name)
+      arr.push({ value: home.name, label: home.name, logo: home.logo });
+    if (away?.name)
+      arr.push({ value: away.name, label: away.name, logo: away.logo });
     // 중복 제거
-    return arr.filter((v, i, a) => a.findIndex((x) => x.value === v.value) === i);
+    return arr.filter(
+      (v, i, a) => a.findIndex((x) => x.value === v.value) === i,
+    );
   }, [game?.homeTeam, game?.awayTeam]);
 
   /* ========== 예시 클립 데이터(실제 API로 교체) ========== */
@@ -169,24 +198,104 @@ export default function ClipPage() {
   useEffect(() => {
     if (!teamOptions.length) return;
     setRawClips([
-      { id: "p1", quarter: 1, clipUrl:'https://res.cloudinary.com/dhmq7d7no/video/upload/v1753534853/IMG_3313_r3dhah.mov' , playType: "KICKOFF", significantPlay: [], offensiveTeam: "한양대 라이온스" },
-      { id: "p2", quarter: 1, playType: "RUN",     down: 1, yardsToGo: 10, significantPlay: ["TFL"],              offensiveTeam: "한양대 라이온스" },
-      { id: "p3", quarter: 1, playType: "PASS",    down: 3, yardsToGo: 7,  significantPlay: ["색"],               offensiveTeam: "한양대 라이온스" },
+      {
+        id: 'p1',
+        quarter: 1,
+        clipUrl:
+          'https://res.cloudinary.com/dhmq7d7no/video/upload/v1753534853/IMG_3313_r3dhah.mov',
+        playType: 'KICKOFF',
+        significantPlay: [],
+        offensiveTeam: '한양대 라이온스',
+      },
+      {
+        id: 'p2',
+        quarter: 1,
+        playType: 'RUN',
+        down: 1,
+        yardsToGo: 10,
+        significantPlay: ['TFL'],
+        offensiveTeam: '한양대 라이온스',
+      },
+      {
+        id: 'p3',
+        quarter: 1,
+        playType: 'PASS',
+        down: 3,
+        yardsToGo: 7,
+        significantPlay: ['색'],
+        offensiveTeam: '한양대 라이온스',
+      },
       // Q2
-      { id: "p4", quarter: 2, playType: "PASS",    down: 2, yardsToGo: 5,  significantPlay: ["인터셉트", "턴오버"], offensiveTeam: "한양대 라이온스" },
-      { id: "p5", quarter: 2, playType: "RUN",     down: 1, yardsToGo: 10, significantPlay: ["펌블", "턴오버"],     offensiveTeam: "연세대 이글스" },
-      { id: "p6", quarter: 2, playType: "PASS",    down: 3, yardsToGo: 12, significantPlay: ["터치다운", "PAT 성공"], offensiveTeam: "한양대 라이온스" },
+      {
+        id: 'p4',
+        quarter: 2,
+        playType: 'PASS',
+        down: 2,
+        yardsToGo: 5,
+        significantPlay: ['인터셉트', '턴오버'],
+        offensiveTeam: '한양대 라이온스',
+      },
+      {
+        id: 'p5',
+        quarter: 2,
+        playType: 'RUN',
+        down: 1,
+        yardsToGo: 10,
+        significantPlay: ['펌블', '턴오버'],
+        offensiveTeam: '연세대 이글스',
+      },
+      {
+        id: 'p6',
+        quarter: 2,
+        playType: 'PASS',
+        down: 3,
+        yardsToGo: 12,
+        significantPlay: ['터치다운', 'PAT 성공'],
+        offensiveTeam: '한양대 라이온스',
+      },
       // Q3
-      { id: "p7", quarter: 3, playType: "RUN",     down: 2, yardsToGo: 3,  significantPlay: ["2PT 실패"],         offensiveTeam: "연세대 이글스" },
-      { id: "p8", quarter: 3, playType: "PASS",    down: 1, yardsToGo: 10, significantPlay: ["페널티"],           offensiveTeam: "연세대 이글스" },
+      {
+        id: 'p7',
+        quarter: 3,
+        playType: 'RUN',
+        down: 2,
+        yardsToGo: 3,
+        significantPlay: ['2PT 실패'],
+        offensiveTeam: '연세대 이글스',
+      },
+      {
+        id: 'p8',
+        quarter: 3,
+        playType: 'PASS',
+        down: 1,
+        yardsToGo: 10,
+        significantPlay: ['페널티'],
+        offensiveTeam: '연세대 이글스',
+      },
       // Q4
-      { id: "p9", quarter: 4, playType: "PASS",    down: 3, yardsToGo: 8,  significantPlay: ["FG 성공"],          offensiveTeam: "한양대 라이온스" },
-      { id: "p10",quarter: 4, playType: "RUN",     down: 4, yardsToGo: 1,  significantPlay: ["세이프티"],         offensiveTeam: "연세대 이글스" },
+      {
+        id: 'p9',
+        quarter: 4,
+        playType: 'PASS',
+        down: 3,
+        yardsToGo: 8,
+        significantPlay: ['FG 성공'],
+        offensiveTeam: '한양대 라이온스',
+      },
+      {
+        id: 'p10',
+        quarter: 4,
+        playType: 'RUN',
+        down: 4,
+        yardsToGo: 1,
+        significantPlay: ['세이프티'],
+        offensiveTeam: '연세대 이글스',
+      },
     ]);
   }, [teamOptions]);
 
   /* ========== 훅 사용 (필터/클립/요약/초기화/네비) ========== */
-  const persistKey = `clipFilters:${game?.gameKey || gameKey || "default"}`;
+  const persistKey = `clipFilters:${game?.gameKey || gameKey || 'default'}`;
   const {
     filters,
     setFilters,
@@ -207,25 +316,28 @@ export default function ClipPage() {
   /* 버튼 요약 텍스트 */
   const teamSummary = summaries.team;
   const quarterSummary = summaries.quarter;
-  const playTypeSummary = filters.playType ? PT_LABEL[filters.playType] : "유형";
+  const playTypeSummary = filters.playType
+    ? PT_LABEL[filters.playType]
+    : '유형';
   const significantSummary = summaries.significant;
-  const clearSignificant = () => setFilters((prev) => ({ ...prev, significantPlay: [] }));
+  const clearSignificant = () =>
+    setFilters((prev) => ({ ...prev, significantPlay: [] }));
 
   /* 리스트 클릭 → 비디오 플레이어로 이동 */
-const onClickClip = (c) => {
-  const normalized = clips.map((p) => ({
-    ...p,
-    id: String(p.id ?? p.ClipKey),
-    videoUrl: p.videoUrl ?? p.clipUrl ?? p.ClipUrl ?? null,
-  }));
+  const onClickClip = (c) => {
+    const normalized = clips.map((p) => ({
+      ...p,
+      id: String(p.id ?? p.ClipKey),
+      videoUrl: p.videoUrl ?? p.clipUrl ?? p.ClipUrl ?? null,
+    }));
 
-  navigate("/service/video", {
-    state: {
-      filteredPlaysData: normalized,
-      initialPlayId: String(c.id ?? c.ClipKey),
-    },
-  });
-};
+    navigate('/service/video', {
+      state: {
+        filteredPlaysData: normalized,
+        initialPlayId: String(c.id ?? c.ClipKey),
+      },
+    });
+  };
   return (
     <div className="clip-root">
       {/* ===== 헤더 ===== */}
@@ -237,7 +349,9 @@ const onClickClip = (c) => {
               <img
                 src={logoSrc}
                 alt={label}
-                className={`header-team-logo-img ${logoSrc?.endsWith(".svg") ? "svg-logo" : "png-logo"}`}
+                className={`header-team-logo-img ${
+                  logoSrc?.endsWith('.svg') ? 'svg-logo' : 'png-logo'
+                }`}
               />
             </div>
             <span className="header-team-name">{label}</span>
@@ -251,15 +365,15 @@ const onClickClip = (c) => {
                 <Dropdown
                   label="공격팀"
                   summary={teamSummary}
-                  isOpen={openMenu === "team"}
+                  isOpen={openMenu === 'team'}
                   onToggle={() => handleMenuToggle('team')}
                   onClose={closeAll}
                   width={240}
                 >
                   <button
-                    className={`ff-dd-item ${!filters.team ? "selected" : ""}`}
+                    className={`ff-dd-item ${!filters.team ? 'selected' : ''}`}
                     onClick={() => {
-                      handleFilterChange("team", null);
+                      handleFilterChange('team', null);
                       closeAll();
                     }}
                   >
@@ -268,13 +382,17 @@ const onClickClip = (c) => {
                   {teamOptions.map((opt) => (
                     <button
                       key={opt.value}
-                      className={`ff-dd-item ${filters.team === opt.value ? "selected" : ""}`}
+                      className={`ff-dd-item ${
+                        filters.team === opt.value ? 'selected' : ''
+                      }`}
                       onClick={() => {
-                        handleFilterChange("team", opt.value);
+                        handleFilterChange('team', opt.value);
                         closeAll();
                       }}
                     >
-                      {opt.logo && <img className="ff-dd-avatar" src={opt.logo} alt="" />}
+                      {opt.logo && (
+                        <img className="ff-dd-avatar" src={opt.logo} alt="" />
+                      )}
                       {opt.label || opt.value}
                     </button>
                   ))}
@@ -284,15 +402,17 @@ const onClickClip = (c) => {
                 <Dropdown
                   label="쿼터"
                   summary={quarterSummary}
-                  isOpen={openMenu === "quarter"}
+                  isOpen={openMenu === 'quarter'}
                   onToggle={() => handleMenuToggle('quarter')}
                   onClose={closeAll}
                   width={200}
                 >
                   <button
-                    className={`ff-dd-item ${!filters.quarter ? "selected" : ""}`}
+                    className={`ff-dd-item ${
+                      !filters.quarter ? 'selected' : ''
+                    }`}
                     onClick={() => {
-                      handleFilterChange("quarter", null);
+                      handleFilterChange('quarter', null);
                       closeAll();
                     }}
                   >
@@ -301,9 +421,11 @@ const onClickClip = (c) => {
                   {[1, 2, 3, 4].map((q) => (
                     <button
                       key={q}
-                      className={`ff-dd-item ${filters.quarter === q ? "selected" : ""}`}
+                      className={`ff-dd-item ${
+                        filters.quarter === q ? 'selected' : ''
+                      }`}
                       onClick={() => {
-                        handleFilterChange("quarter", q);
+                        handleFilterChange('quarter', q);
                         closeAll();
                       }}
                     >
@@ -316,46 +438,44 @@ const onClickClip = (c) => {
                 <Dropdown
                   label="유형"
                   summary={playTypeSummary}
-                  isOpen={openMenu === "playType"}
+                  isOpen={openMenu === 'playType'}
                   onToggle={() => handleMenuToggle('playType')}
                   onClose={closeAll}
                   width={200}
                 >
                   <button
-                    className={`ff-dd-item ${!filters.playType ? "selected" : ""}`}
+                    className={`ff-dd-item ${
+                      !filters.playType ? 'selected' : ''
+                    }`}
                     onClick={() => {
-                      handleFilterChange("playType", null);
+                      handleFilterChange('playType', null);
                       closeAll();
                     }}
                   >
                     전체
                   </button>
-                  <button
-                    className={`ff-dd-item ${filters.playType === PLAY_TYPES.RUN ? "selected" : ""}`}
-                    onClick={() => {
-                      handleFilterChange("playType", PLAY_TYPES.RUN);
-                      closeAll();
-                    }}
-                  >
-                    {PT_LABEL.RUN}
-                  </button>
-                  <button
-                    className={`ff-dd-item ${filters.playType === PLAY_TYPES.PASS ? "selected" : ""}`}
-                    onClick={() => {
-                      handleFilterChange("playType", PLAY_TYPES.PASS);
-                      closeAll();
-                    }}
-                  >
-                    {PT_LABEL.PASS}
-                  </button>
+                  {Object.entries(PLAY_TYPES).map(([code, label]) => (
+                    <button
+                      key={code}
+                      className={`ff-dd-item ${
+                        filters.playType === code ? 'selected' : ''
+                      }`}
+                      onClick={() => {
+                        handleFilterChange('playType', code);
+                        closeAll();
+                      }}
+                    >
+                      {PT_LABEL.label}
+                    </button>
+                  ))}
                 </Dropdown>
 
                 {/* SIGNIFICANT (다중선택) */}
                 <Dropdown
                   label="중요플레이"
                   summary={significantSummary}
-                  isOpen={openMenu === "significant"}
-                  onToggle={() => handleFilterChange('significant')}
+                  isOpen={openMenu === 'significant'}
+                  onToggle={() => handleMenuToggle('significant')}
                   onClose={closeAll}
                   width={260}
                 >
@@ -367,8 +487,10 @@ const onClickClip = (c) => {
                       return (
                         <button
                           key={label}
-                          className={`ff-dd-item ${selected ? "selected" : ""}`}
-                          onClick={() => handleFilterChange("significantPlay", label)}
+                          className={`ff-dd-item ${selected ? 'selected' : ''}`}
+                          onClick={() =>
+                            handleFilterChange('significantPlay', label)
+                          }
                         >
                           {label}
                         </button>
@@ -386,7 +508,11 @@ const onClickClip = (c) => {
                 </Dropdown>
 
                 {/* RESET */}
-                <button type="button" className="resetButton" onClick={clearAllFilters}>
+                <button
+                  type="button"
+                  className="resetButton"
+                  onClick={clearAllFilters}
+                >
                   초기화
                 </button>
               </div>
@@ -399,7 +525,9 @@ const onClickClip = (c) => {
                       <div
                         key={`${filter.category}-${filter.value}-${i}`}
                         className="filterChip"
-                        onClick={() => removeFilter(filter.category, filter.value)}
+                        onClick={() =>
+                          removeFilter(filter.category, filter.value)
+                        }
                       >
                         <div className="filterChipText">{filter.label}</div>
                         <span className="filterChipClose">✕</span>
@@ -415,7 +543,10 @@ const onClickClip = (c) => {
             </div>
 
             {/* 업로드 모달 버튼 */}
-            <button className="newVideoButton" onClick={() => setShowUpload(true)}>
+            <button
+              className="newVideoButton"
+              onClick={() => setShowUpload(true)}
+            >
               경기 업로드
             </button>
           </div>
@@ -442,18 +573,22 @@ const onClickClip = (c) => {
               </div>
               <div className="clip-rows">
                 <div className="clip-row1">
-                  {c.playType === "KICKOFF" ? (
+                  {c.playType === 'KICKOFF' ? (
                     <div className="clip-down">킥오프</div>
                   ) : (
                     <div className="clip-down">
-                      {typeof c.down === "number" ? c.down : c.down} & {c.yardsToGo ?? 0}
+                      {typeof c.down === 'number' ? c.down : c.down} &{' '}
+                      {c.yardsToGo ?? 0}
                     </div>
                   )}
-                  <div className="clip-type">#{PT_LABEL[c.playType] || c.playType}</div>
+                  <div className="clip-type">
+                    #{PT_LABEL[c.playType] || c.playType}
+                  </div>
                 </div>
                 <div className="clip-row2">
                   <div className="clip-oT">{c.offensiveTeam}</div>
-                  {Array.isArray(c.significantPlay) && c.significantPlay.length > 0 ? (
+                  {Array.isArray(c.significantPlay) &&
+                  c.significantPlay.length > 0 ? (
                     <div className="clip-sig">
                       {c.significantPlay.map((t, idx) => (
                         <span key={`${c.id}-sig-${idx}`}>#{t}</span>
@@ -466,7 +601,9 @@ const onClickClip = (c) => {
               </div>
             </div>
           ))}
-          {clips.length === 0 && <div className="empty">일치하는 플레이가 없습니다.</div>}
+          {clips.length === 0 && (
+            <div className="empty">일치하는 플레이가 없습니다.</div>
+          )}
         </div>
 
         <div className="clip-data">
