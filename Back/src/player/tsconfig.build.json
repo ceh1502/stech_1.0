@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "dist", 
+    "test",
+    "**/*spec.ts",
+    "**/*.bak/**",
+    "src/**/*.bak/**",
+    "src/auth.bak/**",
+    "src/team.bak/**", 
+    "src/video.bak/**",
+    "scripts/**/*.ts"
+  ]
+}
+EOF < /dev/null

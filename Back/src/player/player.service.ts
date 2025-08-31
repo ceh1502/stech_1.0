@@ -157,9 +157,9 @@ export class PlayerService {
     };
   }
 
-  // 포지션별 선수 목록 조회
+  // 포지션별 선수 목록 조회 (멀티포지션 지원)
   async getPlayersByPosition(position: string, league?: string) {
-    const query: any = { position };
+    const query: any = { positions: position }; // 배열에서 position 찾기
     if (league) {
       query.league = league;
     }
@@ -167,7 +167,7 @@ export class PlayerService {
     const players = await this.playerModel
       .find(query)
       .populate('teamId', 'teamName')
-      .sort({ 'stats.totalYards': -1 }); // 총 야드수 기준 정렬
+      .sort({ 'stats.totalGamesPlayed': -1 }); // 총 게임 수 기준 정렬
 
     return {
       success: true,
@@ -175,26 +175,60 @@ export class PlayerService {
     };
   }
 
-  // 전체 선수 랭킹 조회
+  // 전체 선수 랭킹 조회 (멀티포지션 지원)
   async getAllPlayersRanking(league?: string, sortBy?: string) {
     const query: any = {};
     if (league) {
       query.league = league;
     }
 
-    let sortOption: any = { 'stats.totalYards': -1 }; // 기본 정렬
-    if (sortBy) {
-      sortOption = { [`stats.${sortBy}`]: -1 };
-    }
-
     const players = await this.playerModel
       .find(query)
-      .populate('teamId', 'teamName')
-      .sort(sortOption);
+      .populate('teamId', 'teamName');
+
+    // 멀티포지션 선수를 각 포지션별로 분리하여 반환
+    const expandedPlayers = [];
+    
+    for (const player of players) {
+      // stats 구조 확인 및 변환
+      const playerStats = player.stats || {};
+      
+      for (const position of player.positions) {
+        // 포지션별 스탯 가져오기
+        let positionStats = {};
+        
+        // stats 구조가 포지션별로 분리되어 있는지 확인
+        if (playerStats[position]) {
+          // 예: stats.RB, stats.WR 형태
+          positionStats = playerStats[position];
+        } else if (playerStats.totalGamesPlayed !== undefined) {
+          // 포지션별 스탯이 없으면 전체 stats 사용 (하위 호환성)
+          positionStats = playerStats;
+        }
+        
+        // 각 포지션별로 별도의 선수 객체 생성
+        expandedPlayers.push({
+          _id: `${player._id}_${position}`,
+          playerId: player.playerId,
+          name: player.name,
+          position: position,
+          positions: player.positions,
+          primaryPosition: player.primaryPosition,
+          teamName: player.teamName,
+          teamId: player.teamId,
+          jerseyNumber: player.jerseyNumber,
+          league: player.league,
+          season: player.season,
+          stats: positionStats,
+          createdAt: (player as any).createdAt,
+          updatedAt: (player as any).updatedAt,
+        });
+      }
+    }
 
     return {
       success: true,
-      data: players,
+      data: expandedPlayers,
     };
   }
 
@@ -328,13 +362,53 @@ export class PlayerService {
         );
         break;
       case 'RB':
+        console.log(
+          `🏃 RB ${player.jerseyNumber}번 분석 시작 - ${player.name} (${player.teamName})`,
+        );
+        analyzedStats = this.analyzeRBStats(
+          playerClips,
+          player.jerseyNumber,
+          player.name,
+          player.teamName,
+        );
+        break;
       case 'WR':
+        console.log(
+          `🎯 WR ${player.jerseyNumber}번 분석 시작 - ${player.name} (${player.teamName})`,
+        );
+        analyzedStats = this.analyzeWRStats(
+          playerClips,
+          player.jerseyNumber,
+          player.name,
+          player.teamName,
+        );
+        break;
       case 'TE':
+        console.log(
+          `🎯 TE ${player.jerseyNumber}번 분석 시작 - ${player.name} (${player.teamName})`,
+        );
+        analyzedStats = this.analyzeTEStats(
+          playerClips,
+          player.jerseyNumber,
+          player.name,
+          player.teamName,
+        );
+        break;
+      case 'K':
+        console.log(
+          `🦶 K ${player.jerseyNumber}번 분석 시작 - ${player.name} (${player.teamName})`,
+        );
+        analyzedStats = this.analyzeKStats(
+          playerClips,
+          player.jerseyNumber,
+          player.name,
+          player.teamName,
+        );
+        break;
       case 'DB':
       case 'LB':
       case 'DL':
       case 'OL':
-      case 'K':
       case 'P':
         console.log(
           `⚠️ ${position} ${player.jerseyNumber}번 분석 건너뜀 - ${player.name} (${player.teamName})`,
@@ -578,6 +652,467 @@ export class PlayerService {
     // 🏈 원하시는 한 줄 요약 출력
     console.log(
       `🏈 ${teamName} ${jerseyNumber}번 QB: 패스시도 ${passingAttempts}회, 패스성공 ${passingCompletions}회, 성공률 ${completionPercentage}%, 패싱야드 ${passingYards}야드`,
+    );
+
+    return finalStats;
+  }
+
+  /**
+   * RB 스탯 분석 메서드
+   */
+  private analyzeRBStats(
+    clips: any[],
+    jerseyNumber: number,
+    playerName: string,
+    teamName: string,
+  ) {
+    let rushingAttempts = 0;
+    let frontRushYard = 0;
+    let backRushYard = 0;
+    let rushingTouchdowns = 0;
+    let longestRush = 0;
+    let fumbles = 0;
+    let fumblesLost = 0;
+
+    console.log(
+      `🏃 ${playerName} ${jerseyNumber}번 RB 통계 계산 시작 (${clips.length}개 클립)`,
+    );
+
+    for (const clip of clips) {
+      const isPlayerInCar = clip.car?.num === jerseyNumber;
+      const isPlayerInCar2 = clip.car2?.num === jerseyNumber;
+
+      if (!isPlayerInCar && !isPlayerInCar2) continue;
+
+      // RUN 플레이만 처리
+      if (clip.playType === 'RUN') {
+        rushingAttempts++;
+        const gainYard = clip.gainYard || 0;
+
+        // TFL이나 SAFETY가 있으면 BackRushYard, 없으면 FrontRushYard
+        const hasTFL = clip.significantPlays?.includes('TFL');
+        const hasSAFETY = clip.significantPlays?.includes('SAFETY');
+
+        if (hasTFL || hasSAFETY) {
+          backRushYard += gainYard;
+          console.log(`  📉 BackRushYard: +${gainYard} (TFL/SAFETY) 총 ${backRushYard}야드`);
+        } else {
+          frontRushYard += gainYard;
+          console.log(`  📈 FrontRushYard: +${gainYard} 총 ${frontRushYard}야드`);
+        }
+
+        // 최장 러싱 업데이트
+        if (gainYard > longestRush) {
+          longestRush = gainYard;
+          console.log(`  🏃 새로운 최장 러싱: ${longestRush}야드`);
+        }
+
+        console.log(`  ✅ 러싱 시도: +1 (총 ${rushingAttempts}회)`);
+      }
+
+      // significantPlays 확인
+      const hasSignificantPlay =
+        clip.significantPlays &&
+        Array.isArray(clip.significantPlays) &&
+        clip.significantPlays.some((play) => play !== null);
+
+      if (hasSignificantPlay) {
+        const plays = clip.significantPlays.filter((play) => play !== null);
+
+        for (const play of plays) {
+          // 러싱 터치다운
+          if (play === 'TOUCHDOWN' && clip.playType === 'RUN') {
+            rushingTouchdowns++;
+            console.log(`  🎯 러싱 터치다운: 총 ${rushingTouchdowns}회`);
+          }
+          // 펌블
+          else if (play === 'FUMBLE') {
+            fumbles++;
+            console.log(`  💨 펌블: 총 ${fumbles}회`);
+          }
+          // 펌블 로스트 (상대방이 회수)
+          else if (play === 'FUMBLE_LOST') {
+            fumblesLost++;
+            console.log(`  ❌ 펌블 로스트: 총 ${fumblesLost}회`);
+          }
+        }
+      }
+    }
+
+    // Total rushing yards = FrontRushYard - BackRushYard
+    const totalRushingYards = frontRushYard - backRushYard;
+    
+    // Yards per carry 계산
+    const yardsPerCarry = rushingAttempts > 0 ? 
+      Math.round((totalRushingYards / rushingAttempts) * 100) / 100 : 0;
+
+    const finalStats = {
+      gamesPlayed: 1,
+      rbRushingAttempts: rushingAttempts,
+      rbFrontRushYard: frontRushYard,
+      rbBackRushYard: backRushYard,
+      rbRushingYards: totalRushingYards,
+      rbYardsPerCarry: yardsPerCarry,
+      rbRushingTouchdowns: rushingTouchdowns,
+      rbLongestRush: longestRush,
+      rbFumbles: fumbles,
+      rbFumblesLost: fumblesLost,
+    };
+
+    // 한 줄 요약 출력
+    console.log(
+      `🏃 ${teamName} ${jerseyNumber}번 RB: 러싱시도 ${rushingAttempts}회, 러싱야드 ${totalRushingYards}야드 (Front: ${frontRushYard}, Back: ${backRushYard}), 평균 ${yardsPerCarry}야드`,
+    );
+
+    return finalStats;
+  }
+
+  /**
+   * WR 스탯 분석 메서드
+   */
+  private analyzeWRStats(
+    clips: any[],
+    jerseyNumber: number,
+    playerName: string,
+    teamName: string,
+  ) {
+    // 리시빙 스탯
+    let receivingTargets = 0;
+    let receptions = 0;
+    let receivingYards = 0;
+    let receivingTouchdowns = 0;
+    let longestReception = 0;
+    let receivingFirstDowns = 0;
+    
+    // 러싱 스탯
+    let rushingAttempts = 0;
+    let rushingYards = 0;
+    let rushingTouchdowns = 0;
+    let longestRush = 0;
+    
+    // 스페셜팀 스탯
+    let kickoffReturn = 0;
+    let kickoffReturnYard = 0;
+    let puntReturn = 0;
+    let puntReturnYard = 0;
+    let returnTouchdown = 0;
+    
+    // 펌블
+    let fumbles = 0;
+    let fumblesLost = 0;
+
+    console.log(`🎯 ${playerName} ${jerseyNumber}번 WR 통계 계산 시작 (${clips.length}개 클립)`);
+
+    for (const clip of clips) {
+      const isPlayerInCar = clip.car?.num === jerseyNumber;
+      const isPlayerInCar2 = clip.car2?.num === jerseyNumber;
+
+      if (!isPlayerInCar && !isPlayerInCar2) continue;
+
+      const gainYard = clip.gainYard || 0;
+      const significantPlays = clip.significantPlays || [];
+
+      // PASS 플레이 처리 (타겟/리시빙)
+      if (clip.playType === 'PASS') {
+        receivingTargets++;
+        
+        if (!significantPlays.includes('INCOMPLETE')) {
+          receptions++;
+          receivingYards += gainYard;
+          console.log(`  🎯 리시빙: ${gainYard}야드 (총 ${receptions}캐치, ${receivingYards}야드)`);
+          
+          if (gainYard > longestReception) {
+            longestReception = gainYard;
+          }
+        } else {
+          console.log(`  ❌ 타겟만 (미완성 패스) 총 ${receivingTargets}타겟`);
+        }
+      }
+
+      // RUN 플레이 처리
+      if (clip.playType === 'RUN') {
+        rushingAttempts++;
+        rushingYards += gainYard;
+        console.log(`  🏃 러싱: ${gainYard}야드 (총 ${rushingAttempts}시도, ${rushingYards}야드)`);
+        
+        if (gainYard > longestRush) {
+          longestRush = gainYard;
+        }
+      }
+
+      // 스페셜팀 리턴 처리
+      if (clip.playType === 'RETURN') {
+        const hasKickoff = significantPlays.some(play => play === 'KICKOFF');
+        const hasPunt = significantPlays.some(play => play === 'PUNT');
+
+        if (hasKickoff) {
+          kickoffReturn++;
+          kickoffReturnYard += gainYard;
+          console.log(`  🟡 킥오프 리턴: ${gainYard}야드 (총 ${kickoffReturn}회, ${kickoffReturnYard}야드)`);
+        }
+
+        if (hasPunt) {
+          puntReturn++;
+          puntReturnYard += gainYard;
+          console.log(`  🟡 펀트 리턴: ${gainYard}야드 (총 ${puntReturn}회, ${puntReturnYard}야드)`);
+        }
+      }
+
+      // significantPlays 처리
+      for (const play of significantPlays) {
+        if (play === 'TOUCHDOWN') {
+          if (clip.playType === 'PASS') {
+            receivingTouchdowns++;
+            console.log(`  🏈 리시빙 터치다운: 총 ${receivingTouchdowns}회`);
+          } else if (clip.playType === 'RUN') {
+            rushingTouchdowns++;
+            console.log(`  🏈 러싱 터치다운: 총 ${rushingTouchdowns}회`);
+          } else if (clip.playType === 'RETURN') {
+            returnTouchdown++;
+            console.log(`  🏈 리턴 터치다운: 총 ${returnTouchdown}회`);
+          }
+        } else if (play === 'FIRSTDOWN' && clip.playType === 'PASS') {
+          receivingFirstDowns++;
+          console.log(`  🚩 리시빙 퍼스트다운: 총 ${receivingFirstDowns}회`);
+        } else if (play === 'FUMBLE') {
+          fumbles++;
+          console.log(`  💨 펌블: 총 ${fumbles}회`);
+        } else if (play === 'FUMBLERECDEF') {
+          fumblesLost++;
+          console.log(`  ❌ 펌블 잃음: 총 ${fumblesLost}회`);
+        }
+      }
+    }
+
+    // 평균 계산
+    const yardsPerReception = receptions > 0 ? Math.round((receivingYards / receptions) * 10) / 10 : 0;
+    const yardsPerCarry = rushingAttempts > 0 ? Math.round((rushingYards / rushingAttempts) * 10) / 10 : 0;
+    const yardPerKickoffReturn = kickoffReturn > 0 ? Math.round((kickoffReturnYard / kickoffReturn) * 10) / 10 : 0;
+    const yardPerPuntReturn = puntReturn > 0 ? Math.round((puntReturnYard / puntReturn) * 10) / 10 : 0;
+
+    const finalStats = {
+      gamesPlayed: 1,
+      // 리시빙 스탯
+      wrReceivingTargets: receivingTargets,
+      wrReceptions: receptions,
+      wrReceivingYards: receivingYards,
+      wrYardsPerReception: yardsPerReception,
+      wrReceivingTouchdowns: receivingTouchdowns,
+      wrLongestReception: longestReception,
+      wrReceivingFirstDowns: receivingFirstDowns,
+      // 러싱 스탯
+      wrRushingAttempts: rushingAttempts,
+      wrRushingYards: rushingYards,
+      wrYardsPerCarry: yardsPerCarry,
+      wrRushingTouchdowns: rushingTouchdowns,
+      wrLongestRush: longestRush,
+      // 스페셜팀 스탯
+      wrKickReturns: kickoffReturn,
+      wrKickReturnYards: kickoffReturnYard,
+      wrYardsPerKickReturn: yardPerKickoffReturn,
+      wrPuntReturns: puntReturn,
+      wrPuntReturnYards: puntReturnYard,
+      wrYardsPerPuntReturn: yardPerPuntReturn,
+      wrReturnTouchdowns: returnTouchdown,
+      // 펌블
+      fumbles: fumbles,
+      fumblesLost: fumblesLost,
+    };
+
+    console.log(
+      `🎯 ${teamName} ${jerseyNumber}번 WR: 타겟 ${receivingTargets}회, 캐치 ${receptions}회, 리시빙 ${receivingYards}야드, 러싱 ${rushingYards}야드, 리턴 ${kickoffReturn + puntReturn}회`
+    );
+
+    return finalStats;
+  }
+
+  /**
+   * TE 스탯 분석 메서드
+   */
+  private analyzeTEStats(
+    clips: any[],
+    jerseyNumber: number,
+    playerName: string,
+    teamName: string,
+  ) {
+    // 리시빙 스탯
+    let receivingTargets = 0;
+    let receptions = 0;
+    let receivingYards = 0;
+    let receivingTouchdowns = 0;
+    let longestReception = 0;
+    
+    // 러싱 스탯
+    let rushingAttempts = 0;
+    let rushingYards = 0;
+    let rushingTouchdowns = 0;
+    let longestRush = 0;
+    
+    // 펌블
+    let fumbles = 0;
+    let fumblesLost = 0;
+
+    console.log(`🎯 ${playerName} ${jerseyNumber}번 TE 통계 계산 시작 (${clips.length}개 클립)`);
+
+    for (const clip of clips) {
+      const isPlayerInCar = clip.car?.num === jerseyNumber;
+      const isPlayerInCar2 = clip.car2?.num === jerseyNumber;
+
+      if (!isPlayerInCar && !isPlayerInCar2) continue;
+
+      const gainYard = clip.gainYard || 0;
+      const significantPlays = clip.significantPlays || [];
+
+      // PASS 플레이 처리 (타겟/리시빙)
+      if (clip.playType === 'PASS') {
+        receivingTargets++;
+        
+        if (!significantPlays.includes('INCOMPLETE')) {
+          receptions++;
+          receivingYards += gainYard;
+          console.log(`  🎯 리시빙: ${gainYard}야드 (총 ${receptions}캐치, ${receivingYards}야드)`);
+          
+          if (gainYard > longestReception) {
+            longestReception = gainYard;
+          }
+        } else {
+          console.log(`  ❌ 타겟만 (미완성 패스) 총 ${receivingTargets}타겟`);
+        }
+      }
+
+      // RUN 플레이 처리
+      if (clip.playType === 'RUN') {
+        rushingAttempts++;
+        rushingYards += gainYard;
+        console.log(`  🏃 러싱: ${gainYard}야드 (총 ${rushingAttempts}시도, ${rushingYards}야드)`);
+        
+        if (gainYard > longestRush) {
+          longestRush = gainYard;
+        }
+      }
+
+      // significantPlays 처리
+      for (const play of significantPlays) {
+        if (play === 'TOUCHDOWN') {
+          if (clip.playType === 'PASS') {
+            receivingTouchdowns++;
+            console.log(`  🏈 리시빙 터치다운: 총 ${receivingTouchdowns}회`);
+          } else if (clip.playType === 'RUN') {
+            rushingTouchdowns++;
+            console.log(`  🏈 러싱 터치다운: 총 ${rushingTouchdowns}회`);
+          }
+        } else if (play === 'FUMBLE') {
+          fumbles++;
+          console.log(`  💨 펌블: 총 ${fumbles}회`);
+        } else if (play === 'FUMBLERECDEF') {
+          fumblesLost++;
+          console.log(`  ❌ 펌블 잃음: 총 ${fumblesLost}회`);
+        }
+      }
+    }
+
+    // 평균 계산
+    const yardsPerReception = receptions > 0 ? Math.round((receivingYards / receptions) * 10) / 10 : 0;
+    const yardsPerCarry = rushingAttempts > 0 ? Math.round((rushingYards / rushingAttempts) * 10) / 10 : 0;
+
+    const finalStats = {
+      gamesPlayed: 1,
+      // 리시빙 스탯
+      teReceivingTargets: receivingTargets,
+      teReceptions: receptions,
+      teReceivingYards: receivingYards,
+      teYardsPerReception: yardsPerReception,
+      teReceivingTouchdowns: receivingTouchdowns,
+      teLongestReception: longestReception,
+      // 러싱 스탯
+      teRushingAttempts: rushingAttempts,
+      teRushingYards: rushingYards,
+      teYardsPerCarry: yardsPerCarry,
+      teRushingTouchdowns: rushingTouchdowns,
+      teLongestRush: longestRush,
+      // 펌블
+      fumbles: fumbles,
+      fumblesLost: fumblesLost,
+    };
+
+    console.log(
+      `🎯 ${teamName} ${jerseyNumber}번 TE: 타겟 ${receivingTargets}회, 캐치 ${receptions}회, 리시빙 ${receivingYards}야드, 러싱 ${rushingYards}야드`
+    );
+
+    return finalStats;
+  }
+
+  /**
+   * K(키커) 스탯 분석 메서드
+   */
+  private analyzeKStats(
+    clips: any[],
+    jerseyNumber: number,
+    playerName: string,
+    teamName: string,
+  ) {
+    let fieldGoalsAttempted = 0;
+    let fieldGoalsMade = 0;
+    let longestFieldGoal = 0;
+    let extraPointsAttempted = 0;
+    let extraPointsMade = 0;
+
+    console.log(`🦶 ${playerName} ${jerseyNumber}번 K 통계 계산 시작 (${clips.length}개 클립)`);
+
+    for (const clip of clips) {
+      const isPlayerInCar = clip.car?.num === jerseyNumber && clip.car?.pos === 'K';
+      const isPlayerInCar2 = clip.car2?.num === jerseyNumber && clip.car2?.pos === 'K';
+
+      if (!isPlayerInCar && !isPlayerInCar2) continue;
+
+      const gainYard = clip.gainYard || 0;
+      const significantPlays = clip.significantPlays || [];
+
+      // FG 플레이 처리
+      if (clip.playType === 'FG') {
+        fieldGoalsAttempted++;
+        const actualDistance = gainYard + 17; // 실제 필드골 거리
+        
+        if (significantPlays.includes('FIELDGOAL_GOOD')) {
+          fieldGoalsMade++;
+          if (actualDistance > longestFieldGoal) {
+            longestFieldGoal = actualDistance;
+          }
+          console.log(`  🎯 필드골 성공: ${actualDistance}야드`);
+        } else {
+          console.log(`  ❌ 필드골 실패: ${actualDistance}야드`);
+        }
+      }
+
+      // PAT 플레이 처리
+      if (clip.playType === 'PAT') {
+        extraPointsAttempted++;
+        
+        if (significantPlays.includes('PAT_GOOD')) {
+          extraPointsMade++;
+          console.log(`  ✅ PAT 성공`);
+        } else {
+          console.log(`  ❌ PAT 실패`);
+        }
+      }
+    }
+
+    // 필드골 성공률 계산
+    const fieldGoalPercentage = fieldGoalsAttempted > 0 ?
+      Math.round((fieldGoalsMade / fieldGoalsAttempted) * 100) : 0;
+
+    const finalStats = {
+      gamesPlayed: 1,
+      fieldGoalsAttempted,
+      fieldGoalsMade,
+      fieldGoalPercentage,
+      longestFieldGoal,
+      extraPointsAttempted,
+      extraPointsMade,
+    };
+
+    console.log(
+      `🦶 ${teamName} ${jerseyNumber}번 K: 필드골 ${fieldGoalsMade}/${fieldGoalsAttempted} (${fieldGoalPercentage}%), 최장 ${longestFieldGoal}야드, PAT ${extraPointsMade}/${extraPointsAttempted}`
     );
 
     return finalStats;

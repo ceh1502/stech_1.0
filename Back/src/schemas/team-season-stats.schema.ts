@@ -92,10 +92,38 @@ export class TeamSeasonStats {
   opponentTurnovers: number; // 상대방 턴오버 수
 
   @Prop({ default: 0 })
+  turnoverRatio: number; // 턴오버 비율 (상대 턴오버 - 자신 턴오버)
+
+  @Prop({ default: 0 })
   penalties: number; // 총 페널티 수
 
   @Prop({ default: 0 })
   penaltyYards: number; // 총 페널티 야드
+
+  @Prop({ default: 0 })
+  extraPointsMade: number; // 엑스트라 포인트 성공
+
+  @Prop({ default: 0 })
+  safeties: number; // 세이프티 득점
+
+  // 협회 데이터
+  @Prop({ default: 0 })
+  totalSoloTackles: number; // 총 솔로 태클 수
+  
+  @Prop({ default: 0 })
+  totalComboTackles: number; // 총 콤보 태클 수
+  
+  @Prop({ default: 0 })
+  totalAtt: number; // 총 ATT (SACK + SOLO + COMBO)
+  
+  @Prop({ default: 0 })
+  longestInterception: number; // 가장 긴 인터셉션 야드
+  
+  @Prop({ default: 0 })
+  puntReturnTouchdowns: number; // 펀트 리턴 터치다운
+  
+  @Prop({ default: 0 })
+  longestPuntReturn: number; // 가장 긴 펀트 리턴
 
   // 처리된 게임 목록 (중복 방지용)
   @Prop({ type: [String], default: [] })

@@ -18,6 +18,7 @@ import { NewPlayerModule } from './player/new-player.module';
     }),
     MongooseModule.forRoot(
       process.env.MONGODB_URI || 'mongodb://localhost:27017/stech',
+      { autoIndex: false },
     ),
     ThrottlerModule.forRoot([
       {

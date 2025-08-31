@@ -303,58 +303,9 @@ export default function StatTeam({data, teams = []}) {
     });
   };
 
-  // 필터 + 파생지표 계산 + 정렬
+  // 필터 + 정렬
   const sortedTeams = useMemo(() => {
-    const source = Array.isArray(data) ? data : []; // ✅ safety guard
-
-    // 백엔드 응답을 프론트엔드 컴포넌트가 기대하는 형태로 변환
-    // const mappedData = source.map(item => ({
-    //     team: BACKEND_TO_FRONTEND_TEAM[item.teamName] || item.teamName, // 팀명 매핑
-    //     division: "1부", // 기본값 (실제로는 팀별로 설정 필요)
-
-    //     // 득점/경기 관련
-    //     points_per_game: item.pointsPerGame,
-    //     total_points: item.totalPoints,
-    //     total_touchdowns: item.totalTouchdowns,
-    //     total_yards: item.totalYards,
-    //     yards_per_game: item.yardsPerGame,
-
-    //     // 러시 관련
-    //     rushing_attempts: item.rushingAttempts,
-    //     rushing_yards: item.rushingYards,
-    //     yards_per_carry: item.yardsPerCarry,
-    //     rushing_yards_per_game: item.rushingYardsPerGame,
-    //     rushing_td: item.rushingTouchdowns,
-
-    //     // 패스 관련
-    //     "pass_completions-attempts": item.passCompletionAttempts,
-    //     passing_yards: item.passingYards,
-    //     passing_yards_per_passing_attempts: item.yardsPerPassAttempt,
-    //     passing_yards_per_game: item.passingYardsPerGame,
-    //     passing_td: item.passingTouchdowns,
-    //     interceptions: item.interceptions,
-
-    //     // 스페셜팀 관련
-    //     total_punt_yards: item.totalPuntYards,
-    //     average_punt_yards: item.averagePuntYards,
-    //     touchback_percentage: item.puntTouchbackPercentage,
-    //     "field_goal_completions-attempts": item.fieldGoalStats,
-    //     yards_per_kick_return: item.averageKickReturnYards,
-    //     yards_per_punt_return: item.averagePuntReturnYards,
-    //     total_return_yards: item.totalReturnYards,
-
-    //     // 기타
-    //     "fumble-turnover": item.fumbleStats,
-    //     turnover_per_game: item.turnoversPerGame,
-    //     turnover_rate: item.turnoversPerGame, // 같은 값 사용
-    //     "penalty-pen_yards": item.penaltyStats,
-    //     pen_yards_per_game: item.penaltyYardsPerGame,
-
-    //     // 기본 정보
-    //     id: item.teamName,
-    //     season: item.season,
-    //     gamesPlayed: item.gamesPlayed
-    // }));
+    const source = Array.isArray(data) ? data : [];
 
     const rows = source.filter((d) => {
       if (league !== "전체") {

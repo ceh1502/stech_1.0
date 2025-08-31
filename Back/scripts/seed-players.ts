@@ -138,7 +138,7 @@ async function seedDatabase() {
           stats: {} // 기본 빈 스탯
         });
         
-        console.log(`✅ 선수 생성: ${player.name} (#${player.jerseyNumber}) - ${player.position} (${team.teamName})`);
+        console.log(`✅ 선수 생성: ${player.name} (#${player.jerseyNumber}) - ${player.positions?.join(', ') || '없음'} (${team.teamName})`);
       }
     }
     
