@@ -16,6 +16,11 @@ export interface DBStats {
   passesDefended: number;
   interceptionYards: number;
   defensiveTouchdowns: number;
+  // 협회 데이터
+  soloTackles: number;
+  comboTackles: number;
+  att: number;
+  longestInterception: number;
 }
 
 @Injectable()
@@ -70,6 +75,11 @@ export class DbAnalyzerService extends BaseAnalyzerService {
           passesDefended: dbStats.passesDefended,
           interceptionYards: dbStats.interceptionYards,
           defensiveTouchdowns: dbStats.defensiveTouchdowns,
+          // 협회 데이터
+          soloTackles: dbStats.soloTackles,
+          comboTackles: dbStats.comboTackles,
+          att: dbStats.att,
+          longestInterception: dbStats.longestInterception,
         }
       );
 
@@ -121,6 +131,22 @@ export class DbAnalyzerService extends BaseAnalyzerService {
     const playType = clip.playType?.toUpperCase();
     const significantPlays = clip.significantPlays || [];
 
+    // 협회 데이터: 태클 타입 처리 (RUN, PASS 플레이에서)
+    if (playType === 'RUN' || playType === 'PASS') {
+      const hasTkl = clip.tkl?.pos === 'DB';
+      const hasTkl2 = clip.tkl2?.pos === 'DB';
+      
+      if (hasTkl && hasTkl2) {
+        // 콤보 태클 (두 명 다 DB)
+        dbStats.comboTackles++;
+        console.log(`   🤝 DB 콤보 태클!`);
+      } else if (hasTkl || hasTkl2) {
+        // 솔로 태클 (한 명만 DB)
+        dbStats.soloTackles++;
+        console.log(`   🎯 DB 솔로 태클!`);
+      }
+    }
+
     // 태클 수 처리 (PASS, RUN, SACK 플레이에서)
     if (playType === 'PASS' || playType === 'RUN' || playType === 'SACK') {
       dbStats.tackles++;
@@ -133,16 +159,65 @@ export class DbAnalyzerService extends BaseAnalyzerService {
       console.log(`   ⚡ DB TFL!`);
     }
 
-    // 색 처리 (playType과 significantPlay 둘 다 SACK일 때)
-    if (playType === 'SACK' && significantPlays.includes('SACK')) {
-      dbStats.sacks++;
-      console.log(`   💥 DB 색!`);
+    // 색 처리 (significantPlay에 SACK이 있을 때)
+    if (significantPlays.includes('SACK')) {
+      const hasTkl = clip.tkl?.pos === 'DB';
+      const hasTkl2 = clip.tkl2?.pos === 'DB';
+      
+      if (hasTkl && hasTkl2) {
+        // 두 명이 함께 색한 경우 각자 0.5씩
+        dbStats.sacks += 0.5;
+        console.log(`   💥 DB 색! (0.5 - 공동)`);
+      } else {
+        // 혼자 색한 경우 1.0
+        dbStats.sacks++;
+        console.log(`   💥 DB 색!`);
+      }
     }
 
     // 인터셉션 처리 (NOPASS이고 significantPlay에 INTERCEPT가 있을 때)
     if (playType === 'NOPASS' && significantPlays.includes('INTERCEPT')) {
       dbStats.interceptions++;
       console.log(`   🛡️ DB 인터셉션!`);
+    }
+    
+    // 인터셉션 야드 처리 (RETURN 플레이에서 TURNOVER가 있을 때)
+    if (playType === 'RETURN' && significantPlays.includes('TURNOVER')) {
+      const returnYards = Math.abs(clip.gainYard || 0);
+      dbStats.interceptionYards += returnYards;
+      
+      // 가장 긴 인터셉션 업데이트
+      if (returnYards > dbStats.longestInterception) {
+        dbStats.longestInterception = returnYards;
+        console.log(`   🏃 DB 인터셉션 리턴: ${returnYards}야드 (신기록!)`);
+      } else {
+        console.log(`   🏃 DB 인터셉션 리턴: ${returnYards}야드`);
+      }
+    }
+
+    // 강제 펌블 처리 (FUMBLE이 있을 때 tkl 필드에 있는 수비수)
+    if (significantPlays.includes('FUMBLE')) {
+      dbStats.forcedFumbles++;
+      console.log(`   💪 DB 강제 펌블!`);
+    }
+
+    // 펌블 리커버리 처리 (RETURN 플레이에서 FUMBLERECDEF && TURNOVER가 있을 때)
+    if (playType === 'RETURN' && significantPlays.includes('FUMBLERECDEF') && significantPlays.includes('TURNOVER')) {
+      dbStats.fumbleRecoveries++;
+      dbStats.fumbleRecoveryYards += Math.abs(clip.gainYard || 0);
+      console.log(`   🟢 DB 펌블 리커버리: ${Math.abs(clip.gainYard || 0)}야드`);
+    }
+
+    // 패스 디펜드 처리 (NOPASS 플레이에서 tkl 필드에 수비수가 있을 때)
+    if (playType === 'NOPASS') {
+      dbStats.passesDefended++;
+      console.log(`   🛡️ DB 패스 디펜드!`);
+    }
+
+    // 수비 터치다운 처리 (RETURN 플레이에서 TURNOVER && TOUCHDOWN이 있을 때)
+    if (playType === 'RETURN' && significantPlays.includes('TURNOVER') && significantPlays.includes('TOUCHDOWN')) {
+      dbStats.defensiveTouchdowns++;
+      console.log(`   🏆 DB 수비 터치다운!`);
     }
   }
 
@@ -152,6 +227,9 @@ export class DbAnalyzerService extends BaseAnalyzerService {
   private calculateFinalStats(dbStats: DBStats): void {
     // 게임 수는 1로 설정 (하나의 게임 데이터이므로)
     dbStats.gamesPlayed = 1;
+    
+    // ATT 계산 (SACK + SOLO + COMBO)
+    dbStats.att = dbStats.sacks + dbStats.soloTackles + dbStats.comboTackles;
   }
 
   /**
@@ -169,12 +247,17 @@ export class DbAnalyzerService extends BaseAnalyzerService {
       tfl: 0,
       sacks: 0,
       interceptions: 0,
-      forcedFumbles: 999,
-      fumbleRecoveries: 999,
-      fumbleRecoveryYards: 999,
-      passesDefended: 999,
-      interceptionYards: 999,
-      defensiveTouchdowns: 999,
+      forcedFumbles: 0,
+      fumbleRecoveries: 0,
+      fumbleRecoveryYards: 0,
+      passesDefended: 0,
+      interceptionYards: 0,
+      defensiveTouchdowns: 0,
+      // 협회 데이터
+      soloTackles: 0,
+      comboTackles: 0,
+      att: 0,
+      longestInterception: 0,
     };
   }
 

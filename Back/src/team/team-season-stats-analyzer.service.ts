@@ -393,6 +393,28 @@ export class TeamSeasonStatsAnalyzerService {
             stats.puntTouchbacks++;
           }
           break;
+          
+        case 'PENALTY.HOME':
+          // NONE 플레이타입일 때만 페널티 처리
+          if (clip.playType?.toUpperCase() === 'NONE') {
+            // 공격팀이 홈이고 페널티가 홈이면 공격팀 페널티
+            if (clip.offensiveTeam === 'Home') {
+              stats.penalties++;
+              stats.penaltyYards += clip.start?.yard || 0;
+            }
+          }
+          break;
+          
+        case 'PENALTY.AWAY':
+          // NONE 플레이타입일 때만 페널티 처리  
+          if (clip.playType?.toUpperCase() === 'NONE') {
+            // 공격팀이 어웨이고 페널티가 어웨이면 공격팀 페널티
+            if (clip.offensiveTeam === 'Away') {
+              stats.penalties++;
+              stats.penaltyYards += clip.start?.yard || 0;
+            }
+          }
+          break;
       }
     });
   }
@@ -411,12 +433,32 @@ export class TeamSeasonStatsAnalyzerService {
     clip.significantPlays.forEach((play) => {
       switch (play) {
         case 'Fumble recovered by def': // 우리가 상대방 펌블을 회수
-          // 수비팀 입장에서는 펌블 회수만 카운팅 (상대방 턴오버는 별도)
+          // 수비팀 입장에서 상대방 턴오버 획득
+          stats.opponentTurnovers++;
           break;
 
         case 'Intercept':
           // 상대방 공격 클립에서 Intercept가 있으면 우리 팀이 인터셉트를 한 것
           stats.interceptions++;
+          stats.opponentTurnovers++;
+          break;
+          
+        case 'Turn Over':
+          // 단독 TURNOVER (4th down 실패 등) - 상대팀이 공격 중 턴오버를 당함
+          if (
+            !clip.significantPlays.includes('Intercept') &&
+            !clip.significantPlays.includes('Fumble recovered by def')
+          ) {
+            stats.opponentTurnovers++;
+          }
+          break;
+          
+        case 'PENALTY.HOME':
+          // 수비 중 상대팀 페널티 (우리팀이 수비일 때 상대팀 페널티는 우리 스탯에 영향 없음)
+          break;
+          
+        case 'PENALTY.AWAY': 
+          // 수비 중 상대팀 페널티 (우리팀이 수비일 때 상대팀 페널티는 우리 스탯에 영향 없음)
           break;
       }
     });
@@ -574,13 +616,13 @@ export class TeamSeasonStatsAnalyzerService {
       fumbleStats: `${stats.fumbles}-${stats.fumblesLost}`,
       turnoversPerGame:
         Math.round((stats.totalTurnovers / gamesPlayed) * 10) / 10,
-      turnoverRate: this.calculateTurnoverRate(
-        stats.totalTurnovers,
-        stats.passAttempts,
-        stats.rushingAttempts,
-        stats.totalPunts,
-        stats.kickReturns,
-      ),
+      turnoverRate: (() => {
+        const opponentTurnovers = stats.opponentTurnovers || 0;
+        const totalTurnovers = stats.totalTurnovers || 0;
+        const result = opponentTurnovers - totalTurnovers;
+        console.log(`🔍 turnoverRate 계산: opponent(${opponentTurnovers}) - our(${totalTurnovers}) = ${result}`);
+        return result;
+      })(),
       turnoverDifferential: this.calculateTurnoverDifferential(
         stats.totalTurnovers,
         stats.opponentTurnovers,
@@ -592,7 +634,7 @@ export class TeamSeasonStatsAnalyzerService {
   }
 
   /**
-   * 턴오버 비율 계산 (총 공격 기회 대비)
+   * 턴오버 비율 계산 (상대방 턴오버 - 우리 턴오버)
    */
   private calculateTurnoverRate(
     turnovers: number,
@@ -601,10 +643,9 @@ export class TeamSeasonStatsAnalyzerService {
     punts: number,
     kicks: number,
   ): number {
-    const totalOpportunities = passAttempts + rushAttempts + punts + kicks;
-    if (totalOpportunities === 0) return 0;
-
-    return Math.round((turnovers / totalOpportunities) * 100 * 10) / 10;
+    console.log('⚠️ calculateTurnoverRate 메서드가 여전히 호출되고 있습니다! 이는 사용되지 말아야 합니다.');
+    // 이 메서드는 이제 사용하지 않음 - convertToDto에서 직접 계산
+    return 0;
   }
 
   /**
