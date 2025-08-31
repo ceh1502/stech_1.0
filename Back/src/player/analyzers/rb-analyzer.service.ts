@@ -15,6 +15,8 @@ export interface RBStats {
   longestRush: number;
   fumbles: number;
   fumblesLost: number; // FUMBLERECDEF가 있을 때
+  rushingFumbles: number; // 러싱 플레이에서의 펌블
+  rushingFumblesLost: number; // 러싱 플레이에서의 펌블 로스트
   // 스페셜팀 스탯
   kickoffReturn: number;
   kickoffReturnYard: number;
@@ -23,6 +25,8 @@ export interface RBStats {
   puntReturnYard: number;
   yardPerPuntReturn: number;
   returnTouchdown: number;
+  puntReturnTouchdowns: number;
+  longestPuntReturn: number;
 }
 
 @Injectable()
@@ -81,6 +85,8 @@ export class RbAnalyzerService extends BaseAnalyzerService {
           rbLongestRush: rbStats.longestRush,
           fumbles: rbStats.fumbles,
           fumblesLost: rbStats.fumblesLost,
+          rbRushingFumbles: rbStats.rushingFumbles,
+          rbRushingFumblesLost: rbStats.rushingFumblesLost,
           // 스페셜팀 스탯
           kickReturns: rbStats.kickoffReturn,
           kickReturnYards: rbStats.kickoffReturnYard,
@@ -129,21 +135,27 @@ export class RbAnalyzerService extends BaseAnalyzerService {
       }
 
       const rbStats = rbStatsMap.get(rbKey);
-      this.processPlay(clip, rbStats);
+      this.processPlay(clip, rbStats, gameData);
     }
   }
 
   /**
    * 개별 플레이 처리
    */
-  private processPlay(clip: ClipData, rbStats: RBStats): void {
+  private processPlay(clip: ClipData, rbStats: RBStats, gameData: GameData): void {
     const playType = clip.playType?.toUpperCase();
     const gainYard = clip.gainYard || 0;
     const significantPlays = clip.significantPlays || [];
 
     // RUN 플레이 처리
     if (playType === 'RUN') {
-      rbStats.rushingAttempts++;
+      // FUMBLERECOFF 체크 (펌블 후 다시 리커버리한 경우)
+      const hasFumbleRecOff = significantPlays.includes('FUMBLERECOFF');
+      
+      if (!hasFumbleRecOff) {
+        // 일반적인 러싱 플레이
+        rbStats.rushingAttempts++;
+      }
 
       // TFL(Tackle For Loss)나 SAFETY 체크
       const hasTFL = significantPlays.some(play => play === 'TFL');
@@ -163,6 +175,20 @@ export class RbAnalyzerService extends BaseAnalyzerService {
       if (gainYard > rbStats.longestRush) {
         rbStats.longestRush = gainYard;
       }
+      
+      // 펌블 처리
+      if (significantPlays.includes('FUMBLE')) {
+        rbStats.rushingFumbles++;
+        rbStats.fumbles++;
+        console.log(`   🏈 러싱 플레이에서 펌블 발생`);
+        
+        // 펌블 로스트 처리 (FUMBLERECDEF가 있으면)
+        if (significantPlays.includes('FUMBLERECDEF')) {
+          rbStats.rushingFumblesLost++;
+          rbStats.fumblesLost++;
+          console.log(`   🔴 러싱 플레이에서 펌블 로스트`);
+        }
+      }
     }
 
     // 스페셜팀 리턴 처리 (playType이 RETURN이고 significantPlays에 KICKOFF/PUNT가 있을 때)
@@ -179,15 +205,31 @@ export class RbAnalyzerService extends BaseAnalyzerService {
       if (hasPunt) {
         rbStats.puntReturn++;
         rbStats.puntReturnYard += gainYard;
-        console.log(`   🟡 펀트 리턴: ${gainYard}야드`);
+        
+        // 가장 긴 펀트 리턴 업데이트
+        if (gainYard > (rbStats.longestPuntReturn || 0)) {
+          rbStats.longestPuntReturn = gainYard;
+          console.log(`   🟡 펀트 리턴: ${gainYard}야드 (신기록!)`);
+        } else {
+          console.log(`   🟡 펀트 리턴: ${gainYard}야드`);
+        }
+        
+        // 펀트 리턴 터치다운 처리
+        if (significantPlays.includes('TOUCHDOWN')) {
+          rbStats.puntReturnTouchdowns = (rbStats.puntReturnTouchdowns || 0) + 1;
+          console.log(`   🏆 펀트 리턴 터치다운!`);
+        }
       }
     }
 
-    // FUMBLERECDEF 처리 (펌블을 잃었을 때)
-    if (significantPlays.includes('FUMBLERECDEF')) {
-      rbStats.fumblesLost++;
-      console.log(`   🔴 펌블 잃음`);
+    // RETURN 플레이에서 펌블 리커버리 처리
+    if (playType === 'RETURN' && significantPlays.includes('FUMBLERECDEF')) {
+      // RETURN 플레이에서 FUMBLERECDEF는 수비팀의 펌블 리커버리
+      console.log(`   🟢 RETURN 플레이에서 펌블 리커버리`);
     }
+
+    // 수비수 강제 펌블 처리 (tkl 필드 확인)
+    this.processDefensiveFumbleForces(clip, gameData);
 
     // 공통 significantPlays 처리 (터치다운, 펌블 등)
     this.processSignificantPlays(clip, rbStats, playType);
@@ -250,6 +292,8 @@ export class RbAnalyzerService extends BaseAnalyzerService {
       longestRush: 0,
       fumbles: 0,
       fumblesLost: 0,
+      rushingFumbles: 0,
+      rushingFumblesLost: 0,
       // 스페셜팀 스탯 초기화
       kickoffReturn: 0,
       kickoffReturnYard: 0,
@@ -258,7 +302,29 @@ export class RbAnalyzerService extends BaseAnalyzerService {
       puntReturnYard: 0,
       yardPerPuntReturn: 0,
       returnTouchdown: 0,
+      puntReturnTouchdowns: 0,
+      longestPuntReturn: 0,
     };
+  }
+
+  /**
+   * 수비수의 강제 펌블 처리 (RB 클립에서 tkl 필드의 수비수)
+   */
+  private processDefensiveFumbleForces(clip: ClipData, gameData: GameData): void {
+    // FUMBLE이 있고 tkl 필드에 수비수가 있으면 강제 펌블로 기록
+    if (!clip.significantPlays?.includes('FUMBLE')) return;
+
+    const defensiveTeam = clip.offensiveTeam === 'Home' ? 'Away' : 'Home';
+    
+    // tkl 필드의 수비수들 처리
+    const tacklers = [clip.tkl, clip.tkl2].filter(t => t?.num && t?.pos);
+    
+    for (const tackler of tacklers) {
+      if (tackler.pos && ['DL', 'LB', 'DB'].includes(tackler.pos)) {
+        console.log(`   💪 ${tackler.pos} ${tackler.num}번이 펌블 강제 유도`);
+        // 수비수 강제 펌블 스탯은 해당 수비수 분석기에서 처리됨
+      }
+    }
   }
 
   /**

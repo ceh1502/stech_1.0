@@ -75,7 +75,15 @@ export class TeamClipAnalyzerService {
       penaltyYards: 0,
       extraPointsMade: 0,
       safeties: 0,
-      processedGames: []
+      processedGames: [],
+      turnoverRatio: 0,
+      // 협회 데이터
+      totalSoloTackles: 0,
+      totalComboTackles: 0,
+      totalAtt: 0,
+      longestInterception: 0,
+      puntReturnTouchdowns: 0,
+      longestPuntReturn: 0
     };
   }
 
@@ -164,22 +172,36 @@ export class TeamClipAnalyzerService {
             
           case 'INTERCEPT':
           case 'INTERCEPTION':
-            offensiveTeamStats.interceptions++;
+            defensiveTeamStats.interceptions++;
             defensiveTeamStats.opponentTurnovers++;
+            offensiveTeamStats.totalTurnovers++;
             break;
             
           case 'FUMBLE':
             offensiveTeamStats.fumbles++;
             break;
             
-          case 'PENALTYH.HOME':
+          case 'FUMBLERECDEF':
+            // 수비팀이 펌블을 리커버리한 경우
+            if (clip.playType === 'RETURN') {
+              // RETURN 플레이에서 FUMBLERECDEF는 수비팀의 펌블 리커버리
+              defensiveTeamStats.opponentTurnovers++;
+            } else {
+              // 일반 플레이에서 FUMBLERECDEF는 공격팀의 펌블 로스트
+              offensiveTeamStats.fumblesLost++;
+              offensiveTeamStats.totalTurnovers++;
+              defensiveTeamStats.opponentTurnovers++;
+            }
+            break;
+            
+          case 'PENALTY.HOME':
             if (clip.playType === 'NONE') {
               homeTeamStats.penalties++;
               homeTeamStats.penaltyYards += clip.start?.yard || 0;
             }
             break;
             
-          case 'PENALTYH.AWAY':
+          case 'PENALTY.AWAY':
             if (clip.playType === 'NONE') {
               awayTeamStats.penalties++;
               awayTeamStats.penaltyYards += clip.start?.yard || 0;
@@ -188,16 +210,56 @@ export class TeamClipAnalyzerService {
         }
       }
     }
+    
+    // 협회 데이터: 수비 태클 집계 (RUN, PASS 플레이에서)
+    if (clip.playType === 'RUN' || clip.playType === 'PASS') {
+      const defensivePositions = [];
+      if (clip.tkl?.pos && ['DL', 'LB', 'DB'].includes(clip.tkl.pos)) {
+        defensivePositions.push(clip.tkl.pos);
+      }
+      if (clip.tkl2?.pos && ['DL', 'LB', 'DB'].includes(clip.tkl2.pos)) {
+        defensivePositions.push(clip.tkl2.pos);
+      }
+      
+      if (defensivePositions.length === 2) {
+        // 콤보 태클 (두 명의 수비수)
+        defensiveTeamStats.totalComboTackles++;
+      } else if (defensivePositions.length === 1) {
+        // 솔로 태클 (한 명의 수비수)
+        defensiveTeamStats.totalSoloTackles++;
+      }
+    }
+    
+    // 협회 데이터: 인터셉션 야드 집계
+    if (clip.playType === 'RETURN' && clip.significantPlays?.includes('TURNOVER')) {
+      const returnYards = Math.abs(clip.gainYard || 0);
+      if (returnYards > defensiveTeamStats.longestInterception) {
+        defensiveTeamStats.longestInterception = returnYards;
+      }
+    }
 
-    // 리턴 야드 처리
-    if (clip.playType === 'PUNT' && clip.gainYard < 0) {
-      // 펀트 리턴 (디펜스 팀)
-      defensiveTeamStats.puntReturnYards += Math.abs(clip.gainYard);
-      defensiveTeamStats.puntReturns++;
-    } else if (clip.playType === 'KICKOFF' && clip.gainYard > 0) {
-      // 킥오프 리턴 (디펜스 팀)
-      defensiveTeamStats.kickReturnYards += clip.gainYard;
-      defensiveTeamStats.kickReturns++;
+    // 리턴 야드 처리 (RETURN 플레이에서)
+    if (clip.playType === 'RETURN') {
+      if (clip.significantPlays?.includes('PUNT')) {
+        // 펀트 리턴 (디펜스 팀)
+        const returnYards = clip.gainYard || 0;
+        defensiveTeamStats.puntReturnYards += returnYards;
+        defensiveTeamStats.puntReturns++;
+        
+        // 가장 긴 펀트 리턴 업데이트
+        if (returnYards > defensiveTeamStats.longestPuntReturn) {
+          defensiveTeamStats.longestPuntReturn = returnYards;
+        }
+        
+        // 펀트 리턴 터치다운 처리
+        if (clip.significantPlays?.includes('TOUCHDOWN')) {
+          defensiveTeamStats.puntReturnTouchdowns++;
+        }
+      } else if (clip.significantPlays?.includes('KICKOFF')) {
+        // 킥오프 리턴 (디펜스 팀)
+        defensiveTeamStats.kickReturnYards += clip.gainYard || 0;
+        defensiveTeamStats.kickReturns++;
+      }
     }
   }
 
@@ -208,13 +270,30 @@ export class TeamClipAnalyzerService {
     // 총 득점도 이미 클립 분석에서 실시간으로 계산됨 (TOUCHDOWN+6, FIELDGOALGOOD+3, etc.)
     // teamStats.totalPoints는 이미 설정됨
     
-    // 총 턴오버 = 인터셉트 + 펌블 로스트
-    teamStats.totalTurnovers = teamStats.interceptions + teamStats.fumblesLost;
+    // 총 턴오버는 이미 클립 분석에서 실시간으로 계산됨 (INTERCEPT, FUMBLERECDEF)
+    // teamStats.totalTurnovers는 이미 설정됨
+    
+    // 턴오버 비율 계산 (자신의 턴오버 / 상대방의 턴오버)
+    teamStats.turnoverRatio = teamStats.opponentTurnovers > 0 
+      ? (teamStats.opponentTurnovers - teamStats.totalTurnovers) 
+      : -teamStats.totalTurnovers;
+    
+    // 협회 데이터 최종 계산
+    teamStats.totalAtt = teamStats.totalSoloTackles + teamStats.totalComboTackles + (teamStats.sacks || 0);
     
     console.log(`📊 ${teamStats.teamName} 최종 스탯:`);
     console.log(`   총 득점: ${teamStats.totalPoints} (TD: ${teamStats.totalTouchdowns}×6 + FG: ${teamStats.fieldGoalMakes}×3 + XP: ${teamStats.extraPointsMade}×1 + Safety: ${teamStats.safeties}×2)`);
     console.log(`   총 전진야드: ${teamStats.totalYards} (패싱: ${teamStats.passingYards} + 러싱: ${teamStats.rushingYards})`);
+    console.log(`   턴오버: ${teamStats.totalTurnovers} (인터셉트: ${teamStats.interceptions}, 펌블로스트: ${teamStats.fumblesLost})`);
+    console.log(`   상대 턴오버: ${teamStats.opponentTurnovers}, 턴오버 비율: ${teamStats.turnoverRatio}`);
     console.log(`   경기 수: ${teamStats.gamesPlayed}`);
+    
+    // 협회 데이터 출력
+    console.log(`\n🏛️ 협회 데이터: ${teamStats.teamName}`);
+    console.log(`   ATT: ${teamStats.totalAtt} (SOLO: ${teamStats.totalSoloTackles} + COMBO: ${teamStats.totalComboTackles} + SACK: ${teamStats.sacks || 0})`);
+    console.log(`   가장 긴 인터셉션: ${teamStats.longestInterception}야드`);
+    console.log(`   펀트 리턴 터치다운: ${teamStats.puntReturnTouchdowns}`);
+    console.log(`   가장 긴 펀트 리턴: ${teamStats.longestPuntReturn}야드`);
   }
 
   private async saveTeamStats(teamStats: any): Promise<any> {
@@ -262,6 +341,25 @@ export class TeamClipAnalyzerService {
         existingTeamStats.penaltyYards += teamStats.penaltyYards;
         existingTeamStats.extraPointsMade += teamStats.extraPointsMade;
         existingTeamStats.safeties += teamStats.safeties;
+        
+        // 협회 데이터 누적
+        existingTeamStats.totalSoloTackles += teamStats.totalSoloTackles;
+        existingTeamStats.totalComboTackles += teamStats.totalComboTackles;
+        existingTeamStats.totalAtt += teamStats.totalAtt;
+        existingTeamStats.puntReturnTouchdowns += teamStats.puntReturnTouchdowns;
+        
+        // 최대값 갱신
+        if (teamStats.longestInterception > existingTeamStats.longestInterception) {
+          existingTeamStats.longestInterception = teamStats.longestInterception;
+        }
+        if (teamStats.longestPuntReturn > existingTeamStats.longestPuntReturn) {
+          existingTeamStats.longestPuntReturn = teamStats.longestPuntReturn;
+        }
+        
+        // 턴오버 비율은 다시 계산 (누적값 기준)
+        existingTeamStats.turnoverRatio = existingTeamStats.opponentTurnovers > 0 
+          ? (existingTeamStats.opponentTurnovers - existingTeamStats.totalTurnovers) 
+          : -existingTeamStats.totalTurnovers;
       }
 
       await existingTeamStats.save();

@@ -42,6 +42,8 @@ export class RBStats {
   @Prop({ default: 0 }) puntReturnYards?: number;
   @Prop({ default: 0 }) yardsPerPuntReturn?: number;
   @Prop({ default: 0 }) returnTouchdowns?: number;
+  @Prop({ default: 0 }) puntReturnTouchdowns?: number;
+  @Prop({ default: 0 }) longestPuntReturn?: number;
 }
 
 @Schema()
@@ -70,6 +72,8 @@ export class WRStats {
   @Prop({ default: 0 }) puntReturnYards?: number;
   @Prop({ default: 0 }) yardsPerPuntReturn?: number;
   @Prop({ default: 0 }) returnTouchdowns?: number;
+  @Prop({ default: 0 }) puntReturnTouchdowns?: number;
+  @Prop({ default: 0 }) longestPuntReturn?: number;
 }
 
 @Schema()
@@ -131,13 +135,18 @@ export class DLStats {
   @Prop({ default: 0 }) tfl?: number;
   @Prop({ default: 0 }) sacks?: number;
   @Prop({ default: 0 }) interceptions?: number;
-  @Prop({ default: 999 }) forcedFumbles?: number;
-  @Prop({ default: 999 }) fumbleRecoveries?: number;
-  @Prop({ default: 999 }) fumbleRecoveryYards?: number;
-  @Prop({ default: 999 }) passesDefended?: number;
-  @Prop({ default: 999 }) interceptionYards?: number;
-  @Prop({ default: 999 }) defensiveTouchdowns?: number;
+  @Prop({ default: 0 }) forcedFumbles?: number;
+  @Prop({ default: 0 }) fumbleRecoveries?: number;
+  @Prop({ default: 0 }) fumbleRecoveryYards?: number;
+  @Prop({ default: 0 }) passesDefended?: number;
+  @Prop({ default: 0 }) interceptionYards?: number;
+  @Prop({ default: 0 }) defensiveTouchdowns?: number;
   @Prop({ default: 0 }) gamesPlayed?: number;
+  // 협회 데이터
+  @Prop({ default: 0 }) soloTackles?: number;
+  @Prop({ default: 0 }) comboTackles?: number;
+  @Prop({ default: 0 }) att?: number;
+  @Prop({ default: 0 }) longestInterception?: number;
 }
 
 @Schema()
@@ -146,13 +155,18 @@ export class LBStats {
   @Prop({ default: 0 }) tfl?: number;
   @Prop({ default: 0 }) sacks?: number;
   @Prop({ default: 0 }) interceptions?: number;
-  @Prop({ default: 999 }) forcedFumbles?: number;
-  @Prop({ default: 999 }) fumbleRecoveries?: number;
-  @Prop({ default: 999 }) fumbleRecoveryYards?: number;
-  @Prop({ default: 999 }) passesDefended?: number;
-  @Prop({ default: 999 }) interceptionYards?: number;
-  @Prop({ default: 999 }) defensiveTouchdowns?: number;
+  @Prop({ default: 0 }) forcedFumbles?: number;
+  @Prop({ default: 0 }) fumbleRecoveries?: number;
+  @Prop({ default: 0 }) fumbleRecoveryYards?: number;
+  @Prop({ default: 0 }) passesDefended?: number;
+  @Prop({ default: 0 }) interceptionYards?: number;
+  @Prop({ default: 0 }) defensiveTouchdowns?: number;
   @Prop({ default: 0 }) gamesPlayed?: number;
+  // 협회 데이터
+  @Prop({ default: 0 }) soloTackles?: number;
+  @Prop({ default: 0 }) comboTackles?: number;
+  @Prop({ default: 0 }) att?: number;
+  @Prop({ default: 0 }) longestInterception?: number;
 }
 
 @Schema()
@@ -161,13 +175,18 @@ export class DBStats {
   @Prop({ default: 0 }) tfl?: number;
   @Prop({ default: 0 }) sacks?: number;
   @Prop({ default: 0 }) interceptions?: number;
-  @Prop({ default: 999 }) forcedFumbles?: number;
-  @Prop({ default: 999 }) fumbleRecoveries?: number;
-  @Prop({ default: 999 }) fumbleRecoveryYards?: number;
-  @Prop({ default: 999 }) passesDefended?: number;
-  @Prop({ default: 999 }) interceptionYards?: number;
-  @Prop({ default: 999 }) defensiveTouchdowns?: number;
+  @Prop({ default: 0 }) forcedFumbles?: number;
+  @Prop({ default: 0 }) fumbleRecoveries?: number;
+  @Prop({ default: 0 }) fumbleRecoveryYards?: number;
+  @Prop({ default: 0 }) passesDefended?: number;
+  @Prop({ default: 0 }) interceptionYards?: number;
+  @Prop({ default: 0 }) defensiveTouchdowns?: number;
   @Prop({ default: 0 }) gamesPlayed?: number;
+  // 협회 데이터
+  @Prop({ default: 0 }) soloTackles?: number;
+  @Prop({ default: 0 }) comboTackles?: number;
+  @Prop({ default: 0 }) att?: number;
+  @Prop({ default: 0 }) longestInterception?: number;
 }
 
 @Schema()
