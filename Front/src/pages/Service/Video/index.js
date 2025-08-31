@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { IoPlayCircleOutline, IoPauseCircleOutline, IoClose } from 'react-icons/io5';
 import { HiOutlineMenuAlt3 } from 'react-icons/hi';
 import './index.css';
+import { useVideoSettings } from '../../../hooks/useVideoSetting'; // Adjust path as needed
 
 /**
  * VideoPlayer
@@ -69,16 +70,10 @@ const getOrdinal = (n) => {
   return 'th';
 };
 
-// 시간 기반 건너뛰기 설정
-const SKIP_TIME = 1; // 10초
-const HOTKEYS = {
-    FORWARD: 'd',
-    BACKWARD: 'a',
-};
-
 export default function VideoPlayer() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { settings } = useVideoSettings(); // Import settings from the hook
 
   // ---- nav state 수신 ----
   const initialPlayId = location.state?.initialPlayId || location.state?.initialClipId || null;
@@ -125,6 +120,15 @@ export default function VideoPlayer() {
     if (initialPlayId) selectPlay(String(initialPlayId));
     else setSelectedId(normalized[0].id);
   }, [normalized, initialPlayId, selectPlay]);
+
+  // Sync playback rate with settings
+  useEffect(() => {
+        const video = videoRef.current;
+
+    if (videoRef.current) {
+      video.playbackRate = settings.playbackRate;
+    }
+  }, [settings.playbackRate]);
 
   // ---- 비디오 이벤트 바인딩 ----
   useEffect(() => {
@@ -186,10 +190,10 @@ export default function VideoPlayer() {
       const video = videoRef.current;
       if (!video || hasError || duration === 0) return;
       
-      const newTime = Math.max(0, Math.min(duration, video.currentTime + (dir > 0 ? SKIP_TIME : -SKIP_TIME)));
+      const newTime = Math.max(0, Math.min(duration, video.currentTime + (dir > 0 ? settings.skipTime : -settings.skipTime)));
       video.currentTime = newTime;
     },
-    [duration, hasError]
+    [duration, hasError, settings.skipTime]
   );
   
   // ---- 타임라인 ----
@@ -215,14 +219,9 @@ export default function VideoPlayer() {
       const tl = timelineRef.current;
       if (!video || !tl || hasError || duration === 0) return;
       
-      // Removed isDragging state as it's not used
-      // setIsDragging(true);
-
       handleTimelineClick(e);
       const onMove = (me) => handleTimelineClick(me);
       const onUp = () => {
-        // Removed isDragging state as it's not used
-        // setIsDragging(false);
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
       };
@@ -233,27 +232,31 @@ export default function VideoPlayer() {
   );
 
   // ---- 키보드 ----
-  useEffect(() => {
+   useEffect(() => {
     const onKey = (e) => {
       const tag = e.target?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
       
-      const key = e.key; // Removed .toUpperCase()
+      const key = e.key.toUpperCase();
+
+      // settings 객체와 hotkeys가 확실히 존재할 때만 단축키를 비교합니다.
+      const backwardKey = settings?.hotkeys?.backward?.toUpperCase();
+      const forwardKey = settings?.hotkeys?.forward?.toUpperCase();
+
       if (key === ' ' && !e.repeat) {
         e.preventDefault();
         togglePlay();
-      } else if (key === HOTKEYS.BACKWARD.toLowerCase()) {
+      } else if (backwardKey && key === backwardKey) {
         e.preventDefault();
         stepTime(-1);
-      } else if (key === HOTKEYS.FORWARD.toLowerCase()) {
+      } else if (forwardKey && key === forwardKey) {
         e.preventDefault();
         stepTime(1);
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [togglePlay, stepTime]);
-
+  }, [togglePlay, stepTime, settings]); 
   // ---- 포맷터 ----
   const formatTime = (sec) => {
     if (isNaN(sec) || sec === null) return '0:00';
@@ -368,18 +371,18 @@ export default function VideoPlayer() {
               <button
                 className="videoFrameStepButton"
                 onClick={() => stepTime(-1)}
-                disabled={hasError || currentTime < SKIP_TIME}
-                title={`Previous ${SKIP_TIME} Seconds (${HOTKEYS.BACKWARD})`}
+                disabled={hasError || currentTime < settings.skipTime}
+                title={`Previous ${settings.skipTime} Seconds (${settings.hotkeys.backward.toUpperCase()})`}
               >
-                ◀ -{SKIP_TIME}초
+                ◀ -{settings.skipTime}초
               </button>
               <button
                 className="videoFrameStepButton"
                 onClick={() => stepTime(1)}
-                disabled={hasError || currentTime + SKIP_TIME > duration}
-                title={`Next ${SKIP_TIME} Seconds (${HOTKEYS.FORWARD})`}
+                disabled={hasError || currentTime + settings.skipTime > duration}
+                title={`Next ${settings.skipTime} Seconds (${settings.hotkeys.forward.toUpperCase()})`}
               >
-                +{SKIP_TIME}초 ▶
+                +{settings.skipTime}초 ▶
               </button>
             </div>
           </div>
@@ -401,12 +404,12 @@ export default function VideoPlayer() {
           </div>
 
           <div className="videoControlsHint">
-            <span>Space: Play/Pause | {HOTKEYS.BACKWARD} {HOTKEYS.FORWARD}: {SKIP_TIME}초 Step</span>
+            <span>Space: Play/Pause | {settings.hotkeys.backward.toUpperCase()} {settings.hotkeys.forward.toUpperCase()}: {settings.skipTime}초 Step</span>
           </div>
         </div>
       </div>
 
-      {/* 사이드 모달: 필터링된(=넘겨받은) 클립 목록 */}
+      {/* 사이드 클립 목록 모달 */}
       <div className={`videoSideModal ${isModalOpen ? 'open' : ''}`}>
         <div className="videoModalHeader">
           <h3>Clips</h3>
