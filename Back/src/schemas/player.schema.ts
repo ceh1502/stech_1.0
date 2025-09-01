@@ -187,6 +187,14 @@ export class DBStats {
   @Prop({ default: 0 }) comboTackles?: number;
   @Prop({ default: 0 }) att?: number;
   @Prop({ default: 0 }) longestInterception?: number;
+  // 스페셜팀
+  @Prop({ default: 0 }) kickReturns?: number;
+  @Prop({ default: 0 }) kickReturnYards?: number;
+  @Prop({ default: 0 }) yardsPerKickReturn?: number;
+  @Prop({ default: 0 }) puntReturns?: number;
+  @Prop({ default: 0 }) puntReturnYards?: number;
+  @Prop({ default: 0 }) yardsPerPuntReturn?: number;
+  @Prop({ default: 0 }) returnTouchdowns?: number;
 }
 
 @Schema()
