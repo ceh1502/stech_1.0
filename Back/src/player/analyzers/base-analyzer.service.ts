@@ -129,6 +129,12 @@ export abstract class BaseAnalyzerService {
       if (existingPlayer) {
         console.log(`🔄 기존 선수 발견 (멀티포지션 스탯 추가): ${existingPlayer.name}`);
         
+        // DB 스페셜팀 스탯 디버깅
+        if (position === 'DB') {
+          console.log(`🐛 DB 저장할 스탯:`, stats);
+          console.log(`🐛 DB 기존 포지션 스탯:`, existingPlayer.stats[position]);
+        }
+        
         // 포지션이 기존 리스트에 없으면 추가
         if (!existingPlayer.positions.includes(position)) {
           existingPlayer.positions.push(position);
@@ -142,6 +148,8 @@ export abstract class BaseAnalyzerService {
         
         // 포지션별 스탯 업데이트
         const positionStats = existingPlayer.stats[position] || {};
+        
+        // 새로운 스탯 필드들을 모두 명시적으로 설정
         for (const [key, value] of Object.entries(stats)) {
           if (typeof value === 'number') {
             positionStats[key] = (positionStats[key] || 0) + value;
@@ -155,6 +163,12 @@ export abstract class BaseAnalyzerService {
         
         await existingPlayer.save();
         console.log(`✅ ${position} 선수 멀티포지션 스탯 업데이트 성공`);
+        
+        // DB 스페셜팀 저장 확인
+        if (position === 'DB') {
+          const saved = await this.playerModel.findOne({ teamName, jerseyNumber });
+          console.log(`🐛 DB 저장 후 확인:`, saved?.stats?.DB);
+        }
 
         return {
           success: true,
@@ -167,7 +181,7 @@ export abstract class BaseAnalyzerService {
         console.log(`📊 저장할 스탯:`, stats);
         
         const initialStats = {
-          [position]: stats,
+          [position]: { ...stats },  // 스프레드로 명시적 복사
           totalGamesPlayed: stats.gamesPlayed || 0
         };
         
@@ -185,6 +199,12 @@ export abstract class BaseAnalyzerService {
 
         await newPlayer.save();
         console.log(`✅ ${position} 선수 저장 성공: ${playerId}`);
+        
+        // DB 스페셜팀 저장 확인 (신규)
+        if (position === 'DB') {
+          const saved = await this.playerModel.findOne({ teamName, jerseyNumber });
+          console.log(`🐛 DB 신규 저장 후 확인:`, saved?.stats?.DB);
+        }
 
         return {
           success: true,

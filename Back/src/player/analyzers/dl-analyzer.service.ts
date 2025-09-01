@@ -147,10 +147,16 @@ export class DlAnalyzerService extends BaseAnalyzerService {
       }
     }
 
-    // 태클 수 처리 (PASS, RUN, SACK 플레이에서)
+    // 태클 수 처리
+    // 1. PASS, RUN, SACK 플레이에서 태클
+    // 2. FUMBLE이 있으면 무조건 태클 (펀블 유도 = 태클)
     if (playType === 'PASS' || playType === 'RUN' || playType === 'SACK') {
       dlStats.tackles++;
       console.log(`   🏈 DL 태클! (${playType})`);
+    } else if (significantPlays.includes('FUMBLE')) {
+      // FUMBLE이 있으면 playType에 관계없이 태클 추가
+      dlStats.tackles++;
+      console.log(`   🏈 DL 태클! (FUMBLE 유도)`);
     }
 
     // TFL 처리 (PASS, RUN 플레이에서 TFL significantPlay가 있을 때)
@@ -173,6 +179,10 @@ export class DlAnalyzerService extends BaseAnalyzerService {
         dlStats.sacks++;
         console.log(`   💥 DL 색!`);
       }
+      
+      // SACK일 때 자동으로 TFL 추가
+      dlStats.tfl++;
+      console.log(`   ⚡ DL SACK-TFL 자동 추가!`);
     }
 
     // 인터셉션 처리 (NOPASS이고 significantPlay에 INTERCEPT가 있을 때)
@@ -181,8 +191,8 @@ export class DlAnalyzerService extends BaseAnalyzerService {
       console.log(`   🛡️ DL 인터셉션!`);
     }
     
-    // 인터셉션 야드 처리 (RETURN 플레이에서 TURNOVER가 있을 때)
-    if (playType === 'RETURN' && significantPlays.includes('TURNOVER')) {
+    // 인터셉션 야드 처리 (RETURN 플레이에서 TURNOVER가 있고 FUMBLERECDEF가 없을 때)
+    if (playType === 'RETURN' && significantPlays.includes('TURNOVER') && !significantPlays.includes('FUMBLERECDEF')) {
       const returnYards = Math.abs(clip.gainYard || 0);
       dlStats.interceptionYards += returnYards;
       
@@ -208,8 +218,8 @@ export class DlAnalyzerService extends BaseAnalyzerService {
       console.log(`   🟢 DL 펌블 리커버리: ${Math.abs(clip.gainYard || 0)}야드`);
     }
 
-    // 패스 디펜드 처리 (NOPASS 플레이에서 tkl 필드에 수비수가 있을 때)  
-    if (playType === 'NOPASS') {
+    // 패스 디펜드 처리 (NOPASS 플레이에서 INTERCEPT가 아닐 때만)
+    if (playType === 'NOPASS' && !significantPlays.includes('INTERCEPT')) {
       dlStats.passesDefended++;
       console.log(`   🛡️ DL 패스 디펜드!`);
     }

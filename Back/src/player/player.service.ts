@@ -226,6 +226,29 @@ export class PlayerService {
       }
     }
 
+    // DB 스페셜팀 스탯 디버깅
+    const dbPlayers = expandedPlayers.filter(p => p.position === 'DB');
+    if (dbPlayers.length > 0) {
+      console.log('🐛 원본 DB 선수 stats 구조:', players.filter(p => p.positions.includes('DB')).map(p => ({
+        name: p.name,
+        positions: p.positions,
+        dbStats: p.stats?.DB,
+        totalStats: p.stats
+      })));
+      
+      console.log('🐛 API 응답 - DB 선수들:', dbPlayers.map(p => ({
+        name: p.name,
+        position: p.position,
+        kickReturns: p.stats?.kickReturns,
+        kickReturnYards: p.stats?.kickReturnYards,
+        yardsPerKickReturn: p.stats?.yardsPerKickReturn,
+        puntReturns: p.stats?.puntReturns,
+        puntReturnYards: p.stats?.puntReturnYards,
+        yardsPerPuntReturn: p.stats?.yardsPerPuntReturn,
+        returnTouchdowns: p.stats?.returnTouchdowns,
+      })));
+    }
+
     return {
       success: true,
       data: expandedPlayers,
