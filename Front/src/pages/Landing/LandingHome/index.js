@@ -3,7 +3,7 @@ import './index.css';
 import { usePageTitle } from '../../../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
 import img from './images/headimg.png';
-import Header from './Header';
+import MainHeader from './MainHeader';
 import Footer from './Footer';
 import ChungAng from './images/ChungAng-Blue-Dragons.png';
 import Dongguk from './images/Dongguk-Tuskers.png';
@@ -32,7 +32,7 @@ const LandingPage = () => {
         <div className="landing-page-container" style={{ width: '100%' }}>
             {/* Section 1: Hero */}
             <section className="section hero-section">
-                <Header style={{ zIndex: '2' }} />
+                <MainHeader style={{ zIndex: '2' }} />
                 <div className="hero-container">
                     <div className="hero-content">
                         <div className="hero-text">
@@ -40,10 +40,13 @@ const LandingPage = () => {
                             <div className="h1-header2">하나가 되는 순간</div>
                         </div>
                         <p>
-                            코치와 분석가들은 더 이상 수작업에 의존하지 않아도 됩니다.<br />
-                            Stech은 경기 영상을 업로드하는 것만으로 선수의 움직임과 전술 흐름을 인식하고,<br />
+                            코치와 분석가들은 더 이상 수작업에 의존하지 않아도 됩니다.
+                            <br />
+                            Stech은 경기 영상을 업로드하는 것만으로 선수의 움직임과 전술 흐름을 인식하고,
+                            <br />
                             효율적이고 정확한 분석 결과를 제공합니다. 데이터 기반의 의사결정을 가능하게 <br />
-                            하는 Stech. 스포츠 현장에서 전략과 퍼포먼스의 차이를 만드세요.<br />
+                            하는 Stech. 스포츠 현장에서 전략과 퍼포먼스의 차이를 만드세요.
+                            <br />
                         </p>
                         <div className="link">
                             <button className="toServiceButton">
@@ -116,10 +119,14 @@ const LandingPage = () => {
                         <h2>분석의 과정</h2>
                         <p>
                             특수 카메라도, 복잡한 설치도 필요 없습니다. 스마트폰, 캠코더, 중계 영상 등<br />
-                            어떤 사이드라인 영상이든 Stech에 업로드하세요. SAMURAI 2.0으로<br />
-                            구동되는 Stech의 AI가 자동으로 영상을 분석해 선수 한 명 한 명을<br />
-                            추적하고, 움직임을 기록하며, 스냅부터 휘슬까지 핵심 플레이를 식별합니다.<br />
-                            수 시간 걸리던 필름 분석을 단 몇 분으로 줄이고, 이제 코칭에 더 많은 시간을<br />
+                            어떤 사이드라인 영상이든 Stech에 업로드하세요. SAMURAI 2.0으로
+                            <br />
+                            구동되는 Stech의 AI가 자동으로 영상을 분석해 선수 한 명 한 명을
+                            <br />
+                            추적하고, 움직임을 기록하며, 스냅부터 휘슬까지 핵심 플레이를 식별합니다.
+                            <br />
+                            수 시간 걸리던 필름 분석을 단 몇 분으로 줄이고, 이제 코칭에 더 많은 시간을
+                            <br />
                             집중하세요.
                         </p>
                     </div>
@@ -130,7 +137,8 @@ const LandingPage = () => {
             <section className="section key-features-section">
                 <span className="gradient-text-default">핵심 기능</span>
                 <div className="key-features-description">
-                    지역 라이벌전이든, 플레이오프 진출이든 ― Stech은 첫 스냅 전에 이미<br />
+                    지역 라이벌전이든, 플레이오프 진출이든 ― Stech은 첫 스냅 전에 이미
+                    <br />
                     당신이 이기고, 대응하고, 이끌 수 있도록 전략적 인사이트를 제공합니다.
                 </div>
                 <div className="features-content">
@@ -151,16 +159,19 @@ const LandingPage = () => {
             {/* Section 5: AI-Powered Reports */}
             <section className="section ai-reports-section">
                 <span className="gradient-text-default">
-                    경기 전 전략 준비를 위한<br />
+                    경기 전 전략 준비를 위한
+                    <br />
                     AI 기반 게임 리포트
                 </span>
                 <div className="ai-reports-description">
-                    첫 휘슬이 울리기 전,<br />
+                    첫 휘슬이 울리기 전,
+                    <br />
                     당신의 팀에 전략적 우위를 제공하는 리포트
                 </div>
                 <div className="report-content">
                     <div className="feature-item" style={{ width: '440px', height: '120px' }}>
-                        선수 및 포지션 유닛을 위한<br />
+                        선수 및 포지션 유닛을 위한
+                        <br />
                         실행 가능한 인사이트 제공
                     </div>
                     <div className="report-main-image">

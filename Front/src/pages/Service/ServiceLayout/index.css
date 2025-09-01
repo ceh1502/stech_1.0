@@ -36,7 +36,7 @@ main > .serviceHeader {
     width: 100%;
     height: 56px; /* 예시 높이 */
     /* 필요하면 배경·보더 */
-    background: #111214;
+    background: #141414;
     border-bottom: 1px solid #1f2023;
 }
 
@@ -46,8 +46,7 @@ main > .routesBody {
     overflow-y: auto; /* 스크롤(선택) */
 }
 
-
 .flex-1 {
     flex: 1; /* 남은 공간 전부 차지 */
-  background-color: #111214;
+    background-color: #141414;
 }

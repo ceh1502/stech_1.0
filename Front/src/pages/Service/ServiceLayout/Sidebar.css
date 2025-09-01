@@ -57,7 +57,7 @@
     background: rgba(79, 70, 229, 0.1);
     border: 1px solid rgba(79, 70, 229, 0.3);
     border-radius: 8px;
-    color: #a5b4fc;
+    color: #ffffff;
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 14px;
@@ -248,7 +248,7 @@
 .sidebarNav::-webkit-scrollbar-thumb {
     background: rgba(79, 70, 229, 0.3);
     border-radius: 2px;
-    transition: background 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
 .sidebarNav::-webkit-scrollbar-thumb:hover {

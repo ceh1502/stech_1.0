@@ -1,11 +1,6 @@
-
 .mainContainer {
     width: 100%;
-    background: linear-gradient(
-        to bottom,
-        rgba(5, 9, 214, 0.7) 50px,
-        transparent 100px
-    );
+    background: linear-gradient(to bottom, rgba(5, 9, 214, 0.7) 50px, transparent 100px);
 }
 
 .memberContainer {
@@ -67,7 +62,7 @@
 }
 
 .overviewContainer {
-    padding-bottom: 50px !important;
+    padding: 100px !important;
 }
 
 .overview {
@@ -103,8 +98,7 @@
 
 .team2 {
     color: #000;
-    font-family: Pretendard;
-    font-size: 32px;
+    font-size: 30px;
     font-style: normal;
     font-weight: 700;
     line-height: 20px;
@@ -143,38 +137,40 @@
 }
 
 .historyContainer {
-  display: flex;
-  justify-content: center;
-  gap: 150px;
+    display: flex;
+    justify-content: center;
+    gap: 150px;
+    padding-bottom: 100px;
 }
 
 .firstColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
 }
 
 .firstColumn img {
-  width: 400px;
-  height: auto;
-  border-radius: 10px;
+    width: 400px;
+    height: auto;
+    border-radius: 10px;
 }
 
 .secondColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  color: #1A58E0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: rgba(25, 33, 172, 1);
 }
 
 .secondColumn tt {
-  font-weight: bold;
-  font-size: 25px;
-  margin: 80px 0 0 0;
+    font-weight: bold;
+    font-size: 25px;
+    margin: 60px 0 0 0;
 }
 
 .secondColumn td {
     font-size: 20px;
+    padding-bottom: 60px;
 }
 
 @media (max-width: 1024px) {
@@ -238,4 +234,3 @@
         height: 12rem;
     }
 }
-

@@ -1,7 +1,7 @@
 /* ===== 필터 바 ===== */
 .filterContainer {
   padding: 1.25rem 3.75rem 0 3.75rem;
-  background: #111214;
+  background: #141414;
   color: #e5e7eb;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -151,7 +151,7 @@
 /* ===== 리스트 ===== */
 .clip-list {
   padding: 1.25rem 3.75rem 2rem 3.75rem;
-  background: #111214;
+  background: #141414;
   color: #e5e7eb;
   display: flex;
   flex-direction: column;
@@ -207,14 +207,14 @@
 .quarter-name {
   width: 2rem;
   color: #fff;
-  font-family: Inter;
+  font-family: 'Noto Sans', sans-serif;
   font-size: 1.5rem;
   font-style: normal;
   font-weight: 500;
 }
 .clip-down {
   color: #ee7b1a;
-  font-family: Inter;
+  font-family: 'Noto Sans', sans-serif;
   font-size: 0.875rem;
   font-style: normal;
   font-weight: 500;
@@ -222,20 +222,20 @@
 
 .clip-type {
   color: #1dac78;
-  font-family: Inter;
+  font-family: 'Noto Sans', sans-serif;
   font-size: 0.875rem;
   font-style: normal;
   font-weight: 500;
 }
 .clip-oT {
-  font-family: Inter;
+  font-family: 'Noto Sans', sans-serif;
   font-size: 0.875rem;
   font-style: normal;
   font-weight: 500;
 }
 .clip-sig {
   color: #1a58e0;
-  font-family: Inter;
+  font-family: 'Noto Sans', sans-serif;
   font-size: 0.875rem;
   font-style: normal;
   font-weight: 500;
@@ -262,7 +262,7 @@
   justify-self: center;
   color: #fff;
   text-align: center;
-  font-family: Inter;
+  font-family: 'Noto Sans', sans-serif;
   font-size: 1.25rem;
   font-style: normal;
   font-weight: 600;
@@ -282,7 +282,7 @@
 
 .playcall-team-name {
   color: #fff;
-  font-family: Inter;
+  font-family: 'Noto Sans', sans-serif;
   font-size: 1rem;
   font-style: normal;
   font-weight: 700;
@@ -318,11 +318,16 @@
 }
 
 /* 동적 바 */
-.bar { height: 100%; border-radius: 0.25rem; }
-.bar-run { background-color: #1DAC78; }
-.bar-pass { background-color: #05F; }
-
-
+.bar {
+  height: 100%;
+  border-radius: 0.25rem;
+}
+.bar-run {
+  background-color: #1dac78;
+}
+.bar-pass {
+  background-color: #05f;
+}
 
 .clip-teamstats {
   width: 41.25rem;

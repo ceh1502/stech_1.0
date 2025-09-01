@@ -1,11 +1,11 @@
-import React  from 'react';
+import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import './Header.css'; // Assuming you have a separate CSS file for Header styles
 import Logo from './images/stech.png';
 
 const Header = () => {
     return (
-        <div className="headerBox">
+        <div className="MainheaderBox">
             <div className="logoBox">
                 <Link to="/">
                     <img src={Logo} alt="Logo" className="logoImg" />

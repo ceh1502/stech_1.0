@@ -1,23 +1,23 @@
-import React, {useState} from "react";
-import {useNavigate, NavLink, useLocation} from "react-router-dom";
-import "./ServiceSidebar.css";
-import {useAuth} from "../../../context/AuthContext";
-import Logo from "../../../assets/images/logos/stech.png";
-import {CiLogin, CiLogout} from "react-icons/ci";
+import React, { useState } from 'react';
+import { useNavigate, NavLink, useLocation } from 'react-router-dom';
+import './ServiceSidebar.css';
+import { useAuth } from '../../../context/AuthContext';
+import Logo from '../../../assets/images/logos/stech.png';
+import { CiLogin, CiLogout } from 'react-icons/ci';
 import {
   GoHome,
   GoLightBulb,
   GoChevronDown,
   GoChevronRight,
-} from "react-icons/go";
-import {BsPlayBtn} from "react-icons/bs";
-import {BiSolidBarChartAlt2} from "react-icons/bi";
-import {MdOutlineSupportAgent, MdOutlineQuiz} from "react-icons/md";
-import {IoSettingsOutline} from "react-icons/io5";
-import {CgProfile} from "react-icons/cg";
+} from 'react-icons/go';
+import { BsPlayBtn } from 'react-icons/bs';
+import { BiSolidBarChartAlt2 } from 'react-icons/bi';
+import { MdOutlineSupportAgent, MdOutlineQuiz } from 'react-icons/md';
+import { IoSettingsOutline } from 'react-icons/io5';
+import { CgProfile } from 'react-icons/cg';
 
 const ServiceSidebar = () => {
-  const {isAuthenticated, logout} = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [hoveredItem, setHoveredItem] = useState(null);
@@ -28,47 +28,47 @@ const ServiceSidebar = () => {
   //Description 수정
   const guestMenuItems = [
     {
-      path: "/service",
-      label: "홈",
+      path: '/service',
+      label: '홈',
       icon: <GoHome />,
-      description: "Dashboard overview",
+      description: 'Dashboard overview',
     },
     {
-      path: "/service/guest/game",
-      label: "경기",
+      path: '/service/guest/game',
+      label: '경기',
       icon: <BsPlayBtn />,
-      description: "Video analysis",
+      description: 'Video analysis',
     },
     {
-      path: "/service/guest/clip",
-      label: "경기클립",
+      path: '/service/guest/clip',
+      label: '경기클립',
       icon: <BsPlayBtn />,
-      description: "Performance analytics",
+      description: 'Performance analytics',
     },
     {
-      path: "/service/guest/stat/league",
-      label: "스탯",
+      path: '/service/guest/stat/league',
+      label: '스탯',
       icon: <BiSolidBarChartAlt2 />,
-      description: "AI recommendations",
+      description: 'AI recommendations',
       hasSubmenu: true,
       submenu: [
         {
-          path: "/service/guest/stat/league",
-          label: "리그 순위",
+          path: '/service/guest/stat/league',
+          label: '리그 순위',
           icon: <BiSolidBarChartAlt2 />,
-          description: "League rankings",
+          description: 'League rankings',
         },
         {
-          path: "/service/guest/stat/team",
-          label: "리그 팀 순위",
+          path: '/service/guest/stat/team',
+          label: '리그 팀 순위',
           icon: <BiSolidBarChartAlt2 />,
-          description: "Team rankings",
+          description: 'Team rankings',
         },
         {
-          path: "/service/guest/stat/position",
-          label: "리그 포지션 순위",
+          path: '/service/guest/stat/position',
+          label: '리그 포지션 순위',
           icon: <BiSolidBarChartAlt2 />,
-          description: "Position rankings",
+          description: 'Position rankings',
         },
       ],
     },
@@ -77,93 +77,93 @@ const ServiceSidebar = () => {
   // 추가 메뉴 아이템 (member) - 하위 메뉴 포함
   const memberMenuItems = [
     {
-      path: "/service",
-      label: "홈",
+      path: '/service/member',
+      label: '홈',
       icon: <GoHome />,
-      description: "Dashboard overview",
+      description: 'Dashboard overview',
     },
     {
-      path: "/service/game",
-      label: "소속팀 경기",
+      path: '/service/game',
+      label: '소속팀 경기',
       icon: <BsPlayBtn />,
-      description: "Video analysis",
+      description: 'Video analysis',
     },
     {
-      path: "/service/stat/league",
-      label: "스탯",
+      path: '/service/stat/league',
+      label: '스탯',
       icon: <BiSolidBarChartAlt2 />,
-      description: "Performance analytics",
+      description: 'Performance analytics',
       hasSubmenu: true,
       submenu: [
         {
-          path: "/service/stat/league",
-          label: "리그 순위",
+          path: '/service/stat/league',
+          label: '리그 순위',
           icon: <BiSolidBarChartAlt2 />,
-          description: "League rankings",
+          description: 'League rankings',
         },
         {
-          path: "/service/stat/team",
-          label: "리그 팀 순위",
+          path: '/service/stat/team',
+          label: '리그 팀 순위',
           icon: <BiSolidBarChartAlt2 />,
-          description: "Team rankings",
+          description: 'Team rankings',
         },
         {
-          path: "/service/stat/position",
-          label: "리그 포지션 순위",
+          path: '/service/stat/position',
+          label: '리그 포지션 순위',
           icon: <BiSolidBarChartAlt2 />,
-          description: "Position rankings",
+          description: 'Position rankings',
         },
       ],
     },
     {
-      path: "/service/highlight",
-      label: "경기 하이라이트",
+      path: '/service/highlight',
+      label: '경기 하이라이트',
       icon: <BsPlayBtn />,
-      description: "Video analysis",
+      description: 'Video analysis',
     },
     {
-      path: "/service/suggestion",
-      label: "Stech 제안",
+      path: '/service/suggestion',
+      label: 'Stech 제안',
       icon: <GoLightBulb />,
-      description: "AI recommendations",
-      badge: "βeta", // 베타 태그 추가
+      description: 'AI recommendations',
+      badge: 'βeta', // 베타 태그 추가
     },
   ];
 
   // Footer Items
   const memberFooterItems = [
     {
-      path: "/service/faq",
-      label: "FAQ",
+      path: '/service/faq',
+      label: 'FAQ',
       icon: <MdOutlineQuiz />,
-      description: "Frequently Asked Questions",
+      description: 'Frequently Asked Questions',
     },
     {
-      path: "/service/support",
-      label: "문의하기",
+      path: '/service/support',
+      label: '문의하기',
       icon: <MdOutlineSupportAgent />,
-      description: "Get help",
+      description: 'Get help',
       modal: true,
     },
     {
-      path: "/service/profile",
-      label: "내 페이지",
+      path: '/service/profile',
+      label: '내 페이지',
       icon: <CgProfile />,
-      description: "Profile Settings",
+      description: 'Profile Settings',
     },
     {
-      path: "/service/settings",
-      label: "시스템 설정",
+      path: '/service/settings',
+      label: '시스템 설정',
       icon: <IoSettingsOutline />,
-      description: "Settings",
+      description: 'Settings',
     },
   ];
   const guestFooterItems = [
     {
-      path: "/service/support",
-      label: "문의하기",
+      path: '/service/support',
+      label: '문의하기',
       icon: <MdOutlineSupportAgent />,
-      description: "Get help",
+      description: 'Get help',
     },
   ];
 
@@ -175,13 +175,13 @@ const ServiceSidebar = () => {
       logout();
     } finally {
       setIsLoading(false);
-      navigate("/service");
+      navigate('/service');
     }
   };
 
   // 로그인 핸들러
   const handleLogin = () => {
-    navigate("/auth");
+    navigate('/auth');
   };
 
   // 다른 메뉴 클릭 시 스탯 메뉴 닫기
@@ -223,15 +223,12 @@ const ServiceSidebar = () => {
       const isExpanded = expandedMenus[item.path];
       const isActive = location.pathname === item.path || isSubmenuActive(item);
 
-
-
-
       return (
         <li key={item.path} className="navItem">
           {/* 상위 메뉴 */}
           <div
-            className={`navLink ${isActive ? "navLinkActive" : ""} ${
-              hoveredItem === item.path ? "navLinkHovered" : ""
+            className={`navLink ${isActive ? 'navLinkActive' : ''} ${
+              hoveredItem === item.path ? 'navLinkHovered' : ''
             } expandableMenu`}
             onMouseEnter={() => setHoveredItem(item.path)}
             onMouseLeave={() => setHoveredItem(null)}
@@ -256,8 +253,8 @@ const ServiceSidebar = () => {
                 <li key={subItem.path} className="submenuItem">
                   <NavLink
                     to={subItem.path}
-                    className={({isActive}) =>
-                      `submenuLink ${isActive ? "submenuLinkActive" : ""}`
+                    className={({ isActive }) =>
+                      `submenuLink ${isActive ? 'submenuLinkActive' : ''}`
                     }
                     title={subItem.description}
                   >
@@ -285,10 +282,10 @@ const ServiceSidebar = () => {
       >
         <NavLink
           to={item.path}
-          end={item.path === "/service"}
-          className={({isActive}) => {
-            let cls = `navLink ${isActive ? "navLinkActive" : ""}`;
-            if (hoveredItem === item.path) cls += " navLinkHovered";
+          end={item.path === '/service'}
+          className={({ isActive }) => {
+            let cls = `navLink ${isActive ? 'navLinkActive' : ''}`;
+            if (hoveredItem === item.path) cls += ' navLinkHovered';
             return cls;
           }}
           title={item.description}
@@ -320,22 +317,22 @@ const ServiceSidebar = () => {
             className="stech-logo"
             src={Logo}
             alt="STECH Logo"
-            onClick={() => navigate("/service")}
+            onClick={() => navigate('/service')}
           />
         </div>
 
         <div className="authSection">
-          {!isAuthenticated ? (
+          {isAuthenticated ? (
             <button
               onClick={handleLogout}
-              className={`logoutButton ${isLoading ? "loading" : ""}`}
+              className={`logoutButton ${isLoading ? 'loading' : ''}`}
               disabled={isLoading}
             >
               <div className="logoutIcon">
                 {isLoading ? <div className="spinner" /> : <CiLogout />}
               </div>
               <span className="logoutText">
-                {isLoading ? "Logging out..." : "Logout"}
+                {isLoading ? 'Logging out...' : 'Logout'}
               </span>
             </button>
           ) : (
@@ -343,7 +340,7 @@ const ServiceSidebar = () => {
               <div className="loginIcon">
                 <CiLogin />
               </div>
-              <span className="loginText">Login</span>
+              <span className="loginText">로그아웃</span>
             </button>
           )}
         </div>
@@ -369,7 +366,7 @@ const ServiceSidebar = () => {
       <div className="sidebarFooter">
         <div className="menuSection">
           <div className="sectionTitle">Support</div>
-          {!isAuthenticated ? (
+          {isAuthenticated ? (
             <ul className="navMenu">
               {memberFooterItems.map((item) => renderMenuItem(item))}
             </ul>
