@@ -1,6 +1,6 @@
 import {createPortal} from "react-dom";
 import {useEffect} from "react";
-import Logo from "../assets/images/logos/stech2.png";
+import Logo from "../assets/images/logos/stech.png";
 import {IoCloseCircleOutline} from "react-icons/io5";
 
 /** Customer Support 모달 */

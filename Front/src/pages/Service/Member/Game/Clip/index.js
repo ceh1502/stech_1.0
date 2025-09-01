@@ -6,7 +6,6 @@ import { TEAMS } from '../../../../../data/TEAMS';
 import { useClipFilter } from '../../../../../hooks/useClipFilter';
 import UploadVideoModal from '../../../../../components/UploadVideoModal';
 import defaultLogo from '../../../../../assets/images/logos/Stechlogo.svg';
-import Clipdata from './clipdata.png';
 
 /* ========== 공용 드롭다운 (이 페이지 내부 구현) ========== */
 function Dropdown({
@@ -66,7 +65,7 @@ function Dropdown({
         <span className="ff-dd-icon">▾</span>
       </button>
       {isOpen && (
-        <div className="ff-dd-menu" role="menu" style={{ width }}>
+        <div className="ff-dd-menu" role="menu">
           {children}
         </div>
       )}
@@ -94,8 +93,7 @@ const PLAY_TYPES = {
   PAT: 'PAT',
   TWOPT: 'TWOPT',
   FIELDGOAL: 'FIELDGOAL',
-}; // 필터 저장/비교용
-
+};
 const SIGNIFICANT_PLAYS = {
   TOUCHDOWN: '터치다운',
   TWOPTCONVGOOD: '2PT 성공',
@@ -122,6 +120,35 @@ const OPPOSITES = {
   'FG 실패': 'FG 성공',
 };
 
+const normalizeTeamStats = (s) => {
+  if (!s) {
+    return {
+      teamName: '',
+      totalYards: 0,
+      passingYards: 0,
+      rushingYards: 0,
+      thirdDownPct: 0,
+      turnovers: 0,
+      penaltyYards: 0,
+    };
+  }
+  const thirdDownPct =
+    s.thirdDownPercentage ?? s.thirdDownPct ??
+    (s.thirdDownAttempts ? Math.round(((s.thirdDownMade || 0) / s.thirdDownAttempts) * 100) : 0);
+
+  const turnovers = s.turnovers ?? ((s.interceptions || 0) + (s.fumblesLost || 0));
+
+  return {
+    teamName: s.teamName ?? '',
+    totalYards: s.totalYards ?? 0,
+    passingYards: s.passingYards ?? s.passYards ?? 0,
+    rushingYards: s.rushingYards ?? s.rushYards ?? 0,
+    thirdDownPct,
+    turnovers,
+    penaltyYards: s.penaltyYards ?? 0,
+  };
+};
+
 /* TEAMS에서 이름/영문/코드로 팀 찾기(느슨 매칭) */
 const findTeamMeta = (raw) => {
   if (!raw) return null;
@@ -140,6 +167,11 @@ export default function ClipPage() {
   const { gameKey } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+
+
+  const [teamStats, setTeamStats] = useState(null); // {home, away}
+const [statsLoading, setStatsLoading] = useState(false);
+const [statsError, setStatsError] = useState(null);
 
   /* ===== 내 팀 (고정 표기) — GamePage와 동일한 방식 ===== */
   const MY_TEAM_NAME = '한양대학교 라이온스';
@@ -164,12 +196,44 @@ export default function ClipPage() {
     // TODO: 실제 API로 대체
     setGame({
       gameKey,
-      homeTeam: 'Hanyang Lions',
-      awayTeam: 'Yonsei Eagles',
+      home: '한양대 라이온스',
+      away: '연세대 이글스',
       date: '2024-10-01',
     });
   }, [game, gameKey]);
 
+
+  useEffect(() => {
+  const key = game?.gameKey || gameKey;
+  if (!key) return;
+
+  let abort = false;
+  setStatsLoading(true);
+  setStatsError(null);
+
+
+  fetch(`/api/team/stats/${encodeURIComponent(key)}`)
+    .then((r) => {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    })
+    .then((json) => {
+      if (abort) return;
+      const payload = json?.data || json;
+      setTeamStats({
+        home: normalizeTeamStats(payload?.homeTeamStats),
+        away: normalizeTeamStats(payload?.awayTeamStats),
+      });
+    })
+    .catch((err) => {
+      if (!abort) setStatsError(err);
+    })
+    .finally(() => {
+      if (!abort) setStatsLoading(false);
+    });
+
+  return () => { abort = true; };
+}, [game?.gameKey, gameKey]);
   // 드롭다운 상태
   const [openMenu, setOpenMenu] = useState(null); // 'team'|'quarter'|'playType'|'significant'|null
   const closeAll = () => setOpenMenu(null);
@@ -177,11 +241,13 @@ export default function ClipPage() {
   const handleMenuToggle = (menuName) => {
     setOpenMenu(openMenu === menuName ? null : menuName);
   };
+  const homeMeta = useMemo(() => findTeamMeta(game?.home), [game?.home]);
+  const awayMeta = useMemo(() => findTeamMeta(game?.away), [game?.away]);
 
   // 홈/원정 → 팀 드롭다운 옵션
   const teamOptions = useMemo(() => {
-    const home = findTeamMeta(game?.homeTeam);
-    const away = findTeamMeta(game?.awayTeam);
+    const home = homeMeta;
+    const away = awayMeta;
     const arr = [];
     if (home?.name)
       arr.push({ value: home.name, label: home.name, logo: home.logo });
@@ -191,7 +257,9 @@ export default function ClipPage() {
     return arr.filter(
       (v, i, a) => a.findIndex((x) => x.value === v.value) === i,
     );
-  }, [game?.homeTeam, game?.awayTeam]);
+  }, [homeMeta, awayMeta]);
+
+
 
   /* ========== 예시 클립 데이터(실제 API로 교체) ========== */
   const [rawClips, setRawClips] = useState([]);
@@ -338,6 +406,37 @@ export default function ClipPage() {
       },
     });
   };
+
+    const rpStats = useMemo(() => {
+  const calc = (teamName, apiStat) => {
+    if (!teamName) return { runPct: 0, passPct: 0, run: 0, pass: 0 };
+
+    const arr = clips.filter(
+      (c) =>
+        c.offensiveTeam === teamName &&
+        (c.playType === 'RUN' ||
+         c.playType === 'PASS' ||
+         c.playType === 'PASS_INCOMPLETE')
+    );
+
+    const run = arr.filter((c) => c.playType === 'RUN').length;
+    const pass = arr.length - run;
+    const total = run + pass;
+
+    if (total > 0) {
+      const runPct = Math.round((run / total) * 100);
+      return { runPct, passPct: 100 - runPct, run, pass };
+    }
+
+    return { runPct: 0, passPct: 0, run: 0, pass: 0 };
+  };
+
+  return {
+    home: calc(homeMeta?.name, teamStats?.home),
+    away: calc(awayMeta?.name, teamStats?.away),
+  };
+}, [clips, homeMeta?.name, awayMeta?.name, teamStats]);
+
   return (
     <div className="clip-root">
       {/* ===== 헤더 ===== */}
@@ -368,7 +467,6 @@ export default function ClipPage() {
                   isOpen={openMenu === 'team'}
                   onToggle={() => handleMenuToggle('team')}
                   onClose={closeAll}
-                  width={240}
                 >
                   <button
                     className={`ff-dd-item ${!filters.team ? 'selected' : ''}`}
@@ -405,7 +503,6 @@ export default function ClipPage() {
                   isOpen={openMenu === 'quarter'}
                   onToggle={() => handleMenuToggle('quarter')}
                   onClose={closeAll}
-                  width={200}
                 >
                   <button
                     className={`ff-dd-item ${
@@ -441,7 +538,6 @@ export default function ClipPage() {
                   isOpen={openMenu === 'playType'}
                   onToggle={() => handleMenuToggle('playType')}
                   onClose={closeAll}
-                  width={200}
                 >
                   <button
                     className={`ff-dd-item ${
@@ -465,7 +561,7 @@ export default function ClipPage() {
                         closeAll();
                       }}
                     >
-                      {PT_LABEL.label}
+                      {PT_LABEL[code] || code}
                     </button>
                   ))}
                 </Dropdown>
@@ -477,7 +573,6 @@ export default function ClipPage() {
                   isOpen={openMenu === 'significant'}
                   onToggle={() => handleMenuToggle('significant')}
                   onClose={closeAll}
-                  width={260}
                 >
                   <div className="ff-dd-section">
                     {Object.values(SIGNIFICANT_PLAYS).map((label) => {
@@ -516,30 +611,6 @@ export default function ClipPage() {
                   초기화
                 </button>
               </div>
-
-              {/* 활성 필터 칩 */}
-              {activeFilters.length > 0 ? (
-                <div className="activeFiltersSection">
-                  <div className="activeFiltersContainer">
-                    {activeFilters.map((filter, i) => (
-                      <div
-                        key={`${filter.category}-${filter.value}-${i}`}
-                        className="filterChip"
-                        onClick={() =>
-                          removeFilter(filter.category, filter.value)
-                        }
-                      >
-                        <div className="filterChipText">{filter.label}</div>
-                        <span className="filterChipClose">✕</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="activeFiltersSection">
-                  <div className="nonActiveFiltersContainer" />
-                </div>
-              )}
             </div>
 
             {/* 업로드 모달 버튼 */}
@@ -611,52 +682,100 @@ export default function ClipPage() {
             <div className="clip-playcall-header">플레이콜 비율</div>
             <div className="clip-playcall-content">
               <div className="playcall-team">
-                <div className="playcall-team-name">연세대 이글스</div>
+                <div className="playcall-team-name">{homeMeta.name}</div>
                 <div className="pc-run">
                   <div className="pc-row1">
                     <div>런</div>
-                    <div> 32%</div>
+                    <div>{rpStats.home.runPct}%</div>
                   </div>
                   <div className="pc-row2">
-                    <div className="run1"></div>
+                   <div className="bar bar-run" style={{ width: `${rpStats.home.runPct}%` }} />
                   </div>
                 </div>
                 <div className="pc-pass">
                   <div className="pc-row1">
                     <div>패스</div>
-                    <div> 68%</div>
+                    <div>{rpStats.home.passPct}%</div>
                   </div>
                   <div className="pc-row2">
-                    <div className="pass1"></div>
+                    <div className="bar bar-pass" style={{ width: `${rpStats.home.passPct}%` }} />
                   </div>
                 </div>
               </div>
               <div className="playcall-team">
-                <div className="playcall-team-name">한양대 라이온스</div>
+                <div className="playcall-team-name">{awayMeta.name}</div>
                 <div className="pc-run">
                   <div className="pc-row1">
                     <div>런</div>
-                    <div> 55%</div>
+                     <div>{rpStats.away.runPct}%</div>
                   </div>
                   <div className="pc-row2">
-                    <div className="run2"></div>
+                     <div className="bar bar-run" style={{ width: `${rpStats.away.runPct}%` }} />
                   </div>
                 </div>
                 <div className="pc-pass">
                   <div className="pc-row1">
                     <div>패스</div>
-                    <div> 45%</div>
+                    <div>{rpStats.away.passPct}%</div>
                   </div>
                   <div className="pc-row2">
-                    <div className="pass2"></div>
+                    <div className="bar bar-pass" style={{ width: `${rpStats.away.passPct}%` }} />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="clip-data2">
-            <img src={Clipdata} alt="clipdata2" />
-          </div>
+         <div className="clip-teamstats">
+  <div className="tsc-header">
+    <div className="tsc-team tsc-left">
+      {homeMeta?.logo && <img className="tsc-logo" src={homeMeta.logo} alt={homeMeta?.name} />}
+      <span className="tsc-pill">{homeMeta?.name || teamStats?.home?.teamName || '홈팀'}</span>
+    </div>
+    <div className="tsc-team tsc-right">
+      {awayMeta?.logo && <img className="tsc-logo" src={awayMeta.logo} alt={awayMeta?.name} />}
+      <span className="tsc-pill">{awayMeta?.name || teamStats?.away?.teamName || '원정팀'}</span>
+    </div>
+  </div>
+
+  {statsLoading && <div className="tsc-loading">팀 스탯 불러오는 중…</div>}
+  {statsError && !statsLoading && <div className="tsc-error">팀 스탯을 불러올 수 없어요.</div>}
+
+  {teamStats && !statsLoading && (
+    <>
+      <div className="tsc-row">
+        <div>{teamStats.home.totalYards}</div>
+        <div className="tsc-label">총 야드</div>
+        <div>{teamStats.away.totalYards}</div>
+      </div>
+      <div className="tsc-row">
+        <div>{teamStats.home.passingYards}</div>
+        <div className="tsc-label">패싱 야드</div>
+        <div>{teamStats.away.passingYards}</div>
+      </div>
+      <div className="tsc-row">
+        <div>{teamStats.home.rushingYards}</div>
+        <div className="tsc-label">러싱 야드</div>
+        <div>{teamStats.away.rushingYards}</div>
+      </div>
+      <div className="tsc-row">
+        <div>{teamStats.home.thirdDownPct}%</div>
+        <div className="tsc-label">3rd Down %</div>
+        <div>{teamStats.away.thirdDownPct}%</div>
+      </div>
+      <div className="tsc-row">
+        <div>{teamStats.home.turnovers}</div>
+        <div className="tsc-label">턴오버</div>
+        <div>{teamStats.away.turnovers}</div>
+      </div>
+      <div className="tsc-row">
+        <div>{teamStats.home.penaltyYards}</div>
+        <div className="tsc-label">페널티 야드</div>
+        <div>{teamStats.away.penaltyYards}</div>
+      </div>
+    </>
+  )}
+</div>
+
           <div className="clip-datas"></div>
         </div>
       </div>

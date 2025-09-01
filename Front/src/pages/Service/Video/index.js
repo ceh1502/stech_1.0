@@ -1,19 +1,19 @@
+// src/components/VideoPlayer.js
+
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IoPlayCircleOutline, IoPauseCircleOutline, IoClose } from 'react-icons/io5';
 import { HiOutlineMenuAlt3 } from 'react-icons/hi';
 import './index.css';
+import { useVideoSettings } from '../../../hooks/useVideoSetting'; // Adjust path as needed
 
 /**
  * VideoPlayer
  * - ClipPage(또는 다른 페이지)에서 state로 넘긴 clips(원본 스키마)와 initialPlayId를 사용
  * - 스키마(ClipKey, ClipUrl, Quarter, Down, RemainYard, ... )를 내부 표준 형태로 정규화 후 사용
  * - 좌측(또는 사이드) 목록에서 클릭 시 선택 클립 재생
- * - 타임라인 클릭/드래그, Space/←/→ 단축키, ±10프레임 스텝
+ * - 타임라인 클릭/드래그, Space/←/→ 단축키, ±10초 스텝
  */
-
-const FRAME_RATE_DEFAULT = 30;
-const FRAME_STEP = 10;
 
 // PlayType 표기 보정(원문 그대로 써도 되지만, UI 표기를 깔끔히 하려면 맵핑)
 const prettyPlayType = (raw) => {
@@ -30,30 +30,15 @@ const normalizeClips = (clips = []) =>
     const startScoreArr = c?.StartScore || c?.startScore;
     const startScore = Array.isArray(startScoreArr) ? startScoreArr[0] : null;
 
-    const id =
-      c?.id ?? c?.ClipKey ?? c?.clipKey ?? c?.key ?? `idx-${idx}`;
-
-    const url =
-      c?.videoUrl ?? c?.clipUrl ?? c?.ClipUrl ?? null;
-
+    const id = c?.id ?? c?.ClipKey ?? c?.clipKey ?? c?.key ?? `idx-${idx}`;
+    const url = c?.videoUrl ?? c?.clipUrl ?? c?.ClipUrl ?? null;
     const quarter = Number(c?.quarter ?? c?.Quarter) || 1;
-
     const downRaw = c?.down ?? c?.Down;
-    const down =
-      typeof downRaw === "number"
-        ? downRaw
-        : parseInt(downRaw, 10) || null;
-
-    const yardsToGo =
-      c?.yardsToGo ?? c?.RemainYard ?? c?.remainYard ?? null;
-
+    const down = typeof downRaw === "number" ? downRaw : parseInt(downRaw, 10) || null;
+    const yardsToGo = c?.yardsToGo ?? c?.RemainYard ?? c?.remainYard ?? null;
     const playType = c?.playType ?? c?.PlayType ?? null;
-
-    const offensiveTeam =
-      c?.offensiveTeam ?? c?.OffensiveTeam ?? null;
-
-    const significant =
-      Array.isArray(c?.significantPlay)
+    const offensiveTeam = c?.offensiveTeam ?? c?.OffensiveTeam ?? null;
+    const significant = Array.isArray(c?.significantPlay)
         ? c.significantPlay
         : Array.isArray(c?.SignificantPlays)
         ? c.SignificantPlays.map((sp) => sp?.label || sp?.key).filter(Boolean)
@@ -70,17 +55,14 @@ const normalizeClips = (clips = []) =>
       playType,
       startYard: c?.startYard ?? c?.StartYard ?? null,
       endYard: c?.endYard ?? c?.EndYard ?? null,
-      carriers: Array.isArray(c?.carriers)
-        ? c.carriers
-        : Array.isArray(c?.Carrier)
-        ? c.Carrier
-        : [],
+      carriers: Array.isArray(c?.carriers) ? c.carriers : Array.isArray(c?.Carrier) ? c.Carrier : [],
       significant,
       scoreHome: startScore?.Home ?? c?.scoreHome ?? 0,
       scoreAway: startScore?.Away ?? c?.scoreAway ?? 0,
       raw: c,
     };
   });
+
 const getOrdinal = (n) => {
   if (n === 1) return 'st';
   if (n === 2) return 'nd';
@@ -91,91 +73,81 @@ const getOrdinal = (n) => {
 export default function VideoPlayer() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { settings } = useVideoSettings(); // Import settings from the hook
 
   // ---- nav state 수신 ----
-  const navClips = location.state?.clips || location.state?.filteredPlaysData || [];
-  const teamMeta = location.state?.teamMeta || null; // {homeName, awayName, homeLogo, awayLogo}
   const initialPlayId = location.state?.initialPlayId || location.state?.initialClipId || null;
+  const teamMeta = location.state?.teamMeta || null;
 
   // ---- 데이터 정규화 ----
-  const normalized = useMemo(() => normalizeClips(navClips), [navClips]);
+  const normalized = useMemo(() => {
+    const navClips = location.state?.clips || location.state?.filteredPlaysData || [];
+    return normalizeClips(navClips);
+  }, [location.state?.clips, location.state?.filteredPlaysData]);
 
   // ---- refs & state ----
   const videoRef = useRef(null);
   const timelineRef = useRef(null);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [frameRate] = useState(FRAME_RATE_DEFAULT);
   const [duration, setDuration] = useState(0);
-  const [totalFrames, setTotalFrames] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [currentFrame, setCurrentFrame] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
 
   // ---- 유틸 ----
   const selected = useMemo(
     () => normalized.find((p) => p.id === selectedId) || normalized[0] || null,
     [normalized, selectedId]
   );
-
   const videoUrl = selected?.videoUrl || null;
   const hasNoVideo = !!selected && !selected.videoUrl;
-
   const isPlaySelected = useCallback((id) => id === selectedId, [selectedId]);
 
   const selectPlay = useCallback((id) => {
     setSelectedId(id);
-    // 재생 상태 리셋
     setIsPlaying(false);
     setHasError(false);
     setIsLoading(true);
     setCurrentTime(0);
-    setCurrentFrame(0);
     setDuration(0);
-    setTotalFrames(0);
-    // 실제 src는 effect에서 주입
   }, []);
 
-  // ---- 최초 선택 ----
   useEffect(() => {
     if (!normalized.length) return;
     if (initialPlayId) selectPlay(String(initialPlayId));
     else setSelectedId(normalized[0].id);
   }, [normalized, initialPlayId, selectPlay]);
 
+  // Sync playback rate with settings
+  useEffect(() => {
+        const video = videoRef.current;
+
+    if (videoRef.current) {
+      video.playbackRate = settings.playbackRate;
+    }
+  }, [settings.playbackRate]);
+
   // ---- 비디오 이벤트 바인딩 ----
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !videoUrl) return;
 
-    // src 교체 & 로드
     if (video.src !== videoUrl) {
       video.src = videoUrl;
       video.load();
     }
 
     const onLoadedMetadata = () => {
-      const d = video.duration || 0;
-      setDuration(d);
-      const frames = Math.max(0, Math.floor(d * frameRate));
-      setTotalFrames(frames);
+      setDuration(video.duration || 0);
       setIsLoading(false);
       setHasError(false);
       setCurrentTime(video.currentTime || 0);
-      setCurrentFrame(Math.round((video.currentTime || 0) * frameRate));
     };
 
-    const onTimeUpdate = () => {
-      const t = video.currentTime || 0;
-      setCurrentTime(t);
-      setCurrentFrame(Math.round(t * frameRate));
-    };
-
+    const onTimeUpdate = () => setCurrentTime(video.currentTime || 0);
     const onEnded = () => setIsPlaying(false);
     const onError = () => {
       setHasError(true);
@@ -199,9 +171,9 @@ export default function VideoPlayer() {
       video.removeEventListener('canplay', onCanPlay);
       video.removeEventListener('loadstart', onLoadStart);
     };
-  }, [videoUrl, frameRate]);
+  }, [videoUrl]);
 
-  // ---- 컨트롤 ----
+  // ---- 컨트롤: 시간 기준 건너뛰기 ----
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video || hasError || !selected) return;
@@ -213,26 +185,17 @@ export default function VideoPlayer() {
     }
   }, [isPlaying, hasError, selected]);
 
-  const stepFrame = useCallback(
+  const stepTime = useCallback(
     (dir) => {
       const video = videoRef.current;
-      if (!video || hasError || totalFrames === 0) return;
-      const currentVideoFrame = Math.round((video.currentTime || 0) * frameRate);
-      const targetFrame = Math.max(0, Math.min(totalFrames - 1, currentVideoFrame + (dir > 0 ? FRAME_STEP : -FRAME_STEP)));
-      const targetTime = targetFrame / frameRate;
-
-      const wasPlaying = !video.paused;
-      if (wasPlaying) video.pause();
-      video.currentTime = targetTime;
-      if (wasPlaying) {
-        setTimeout(() => {
-          video.play().catch(() => {});
-        }, 50);
-      }
+      if (!video || hasError || duration === 0) return;
+      
+      const newTime = Math.max(0, Math.min(duration, video.currentTime + (dir > 0 ? settings.skipTime : -settings.skipTime)));
+      video.currentTime = newTime;
     },
-    [frameRate, totalFrames, hasError]
+    [duration, hasError, settings.skipTime]
   );
-
+  
   // ---- 타임라인 ----
   const handleTimelineClick = useCallback(
     (e) => {
@@ -241,7 +204,7 @@ export default function VideoPlayer() {
       if (!video || !tl || hasError || duration === 0) return;
       const rect = tl.getBoundingClientRect();
       const x = e.clientX - rect.left;
-      const padding = 10; // CSS 패딩과 맞추기
+      const padding = 10;
       const trackWidth = rect.width - padding * 2;
       const rel = Math.max(0, Math.min(trackWidth, x - padding));
       const pct = rel / trackWidth;
@@ -255,13 +218,10 @@ export default function VideoPlayer() {
       const video = videoRef.current;
       const tl = timelineRef.current;
       if (!video || !tl || hasError || duration === 0) return;
-
-      setIsDragging(true);
+      
       handleTimelineClick(e);
-
       const onMove = (me) => handleTimelineClick(me);
       const onUp = () => {
-        setIsDragging(false);
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
       };
@@ -272,41 +232,45 @@ export default function VideoPlayer() {
   );
 
   // ---- 키보드 ----
-  useEffect(() => {
+   useEffect(() => {
     const onKey = (e) => {
       const tag = e.target?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      if (e.key === ' ') {
+      
+      const key = e.key.toUpperCase();
+
+      // settings 객체와 hotkeys가 확실히 존재할 때만 단축키를 비교합니다.
+      const backwardKey = settings?.hotkeys?.backward?.toUpperCase();
+      const forwardKey = settings?.hotkeys?.forward?.toUpperCase();
+
+      if (key === ' ' && !e.repeat) {
         e.preventDefault();
         togglePlay();
-      } else if (e.key === 'ArrowLeft') {
+      } else if (backwardKey && key === backwardKey) {
         e.preventDefault();
-        stepFrame(-1);
-      } else if (e.key === 'ArrowRight') {
+        stepTime(-1);
+      } else if (forwardKey && key === forwardKey) {
         e.preventDefault();
-        stepFrame(1);
+        stepTime(1);
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [togglePlay, stepFrame]);
-
+  }, [togglePlay, stepTime, settings]); 
   // ---- 포맷터 ----
   const formatTime = (sec) => {
-    if (!sec && sec !== 0) return '0:00';
+    if (isNaN(sec) || sec === null) return '0:00';
     const m = Math.floor(sec / 60);
     const s = Math.floor(sec % 60);
     const cs = Math.floor((sec % 1) * 100);
     return `${m}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`;
   };
-  const formatFrame = (f) => String(f || 0).padStart(4, '0');
 
   // ---- UI 도우미 ----
   const homeName = teamMeta?.homeName || 'Home';
   const awayName = teamMeta?.awayName || 'Away';
   const homeLogo = teamMeta?.homeLogo || null;
   const awayLogo = teamMeta?.awayLogo || null;
-
   const scoreHome = selected?.scoreHome ?? 0;
   const scoreAway = selected?.scoreAway ?? 0;
   const quarter = selected?.quarter ?? 1;
@@ -402,29 +366,23 @@ export default function VideoPlayer() {
               <span className="videoDuration">{formatTime(duration)}</span>
             </div>
 
-            <div className="videoFrameInfo">
-              <span className="videoFrameLabel">Frame:</span>
-              <span className="videoCurrentFrame">{formatFrame(currentFrame)}</span>
-              <span className="videoFrameDivider">/</span>
-              <span className="videoTotalFrames">{formatFrame(totalFrames)}</span>
-            </div>
-
+            {/* 초 기반 건너뛰기 버튼 */}
             <div className="videoFrameNavigation">
               <button
                 className="videoFrameStepButton"
-                onClick={() => stepFrame(-1)}
-                disabled={hasError || currentFrame < FRAME_STEP}
-                title="Previous 10 Frames (←)"
+                onClick={() => stepTime(-1)}
+                disabled={hasError || currentTime < settings.skipTime}
+                title={`Previous ${settings.skipTime} Seconds (${settings.hotkeys.backward.toUpperCase()})`}
               >
-                ◀ -10F
+                ◀ -{settings.skipTime}초
               </button>
               <button
                 className="videoFrameStepButton"
-                onClick={() => stepFrame(1)}
-                disabled={hasError || currentFrame > totalFrames - FRAME_STEP}
-                title="Next 10 Frames (→)"
+                onClick={() => stepTime(1)}
+                disabled={hasError || currentTime + settings.skipTime > duration}
+                title={`Next ${settings.skipTime} Seconds (${settings.hotkeys.forward.toUpperCase()})`}
               >
-                +10F ▶
+                +{settings.skipTime}초 ▶
               </button>
             </div>
           </div>
@@ -435,37 +393,23 @@ export default function VideoPlayer() {
               <div className="videoTimelineTrack">
                 <div
                   className="videoTimelineProgress"
-                  style={{ width: totalFrames > 0 ? `${(currentFrame / totalFrames) * 100}%` : '0%' }}
+                  style={{ width: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%' }}
                 />
                 <div
                   className="videoTimelineHandle"
-                  style={{ left: totalFrames > 0 ? `${(currentFrame / totalFrames) * 100}%` : '0%' }}
+                  style={{ left: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%' }}
                 />
-              </div>
-
-              {/* 프레임 마커(간격 20개 이내) */}
-              <div className="videoFrameMarkers">
-                {Array.from({ length: Math.min(20, Math.floor(totalFrames / frameRate)) }, (_, i) => {
-                  const frameNumber = Math.floor((i / Math.min(20, Math.floor(totalFrames / frameRate))) * totalFrames);
-                  const position = (frameNumber / totalFrames) * 100;
-                  return (
-                    <div key={i} className="videoFrameMarker" style={{ left: `${position}%` }}>
-                      <div className="videoFrameTick" />
-                      <span className="videoFrameNumber">{formatFrame(frameNumber)}</span>
-                    </div>
-                  );
-                })}
               </div>
             </div>
           </div>
 
           <div className="videoControlsHint">
-            <span>Space: Play/Pause | ← →: 10 Frame Step</span>
+            <span>Space: Play/Pause | {settings.hotkeys.backward.toUpperCase()} {settings.hotkeys.forward.toUpperCase()}: {settings.skipTime}초 Step</span>
           </div>
         </div>
       </div>
 
-      {/* 사이드 모달: 필터링된(=넘겨받은) 클립 목록 */}
+      {/* 사이드 클립 목록 모달 */}
       <div className={`videoSideModal ${isModalOpen ? 'open' : ''}`}>
         <div className="videoModalHeader">
           <h3>Clips</h3>

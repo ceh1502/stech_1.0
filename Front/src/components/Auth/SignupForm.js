@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { teamCodes } from '../../data/teamCodes'; // Adjust the import path as needed
+
+// --- Import your image assets as before ---
 import Kakao from '../../assets/images/png/AuthPng/Kakao.png';
 import Google from '../../assets/images/png/AuthPng/Google.png';
 import Eye from '../../assets/images/png/AuthPng/Eye.png';
@@ -15,19 +18,22 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         passwordConfirm: '',
         authCode: '',
     });
+
+    // --- Other state variables remain the same ---
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
-
     const [isidChecking, setIsidChecking] = useState(false);
     const [isAuthCodeVerifying, setIsAuthCodeVerifying] = useState(false);
-
     const [idStatus, setidStatus] = useState(null);
     const [idMessage, setidMessage] = useState('');
     const [authCodeStatus, setAuthCodeStatus] = useState(null);
     const [authCodeMessage, setAuthCodeMessage] = useState('');
+
+    // ✨ NEW: State to store validated team information
+    const [validatedTeamInfo, setValidatedTeamInfo] = useState(null);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -35,27 +41,36 @@ const SignupForm = ({ onSuccess, className = '' }) => {
             ...prev,
             [name]: value,
         }));
+        
+        // Reset validation status when user types in the field again
+        if (name === 'id') {
+            setidStatus(null);
+            setidMessage('');
+        }
+        if (name === 'authCode') {
+            setAuthCodeStatus(null);
+            setAuthCodeMessage('');
+            setValidatedTeamInfo(null); // Clear validated info
+        }
         if (error) setError(null);
     };
 
     const handleidCheck = async () => {
+        // ... (This function remains unchanged)
         if (!formData.id) {
             setidStatus('idle');
             setidMessage('아이디를 입력해주세요.');
             return;
         }
-
         const idRegex = /^[a-zA-Z0-9]+$/;
         if (!idRegex.test(formData.id)) {
             setidStatus('unavailable');
             setidMessage('영어 및 숫자 조합만 입력해주세요.');
             return;
         }        
-
         setidStatus('checking');
         setidMessage('');
         setIsidChecking(true);
-
         try {
             await new Promise(resolve => setTimeout(resolve, 1000));
             if (formData.id === 'test') {
@@ -73,6 +88,7 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         }
     };
 
+    // ✨ MODIFIED: Auth code verification logic
     const handleAuthCodeVerification = async () => {
         if (!formData.authCode) {
             setAuthCodeStatus('idle');
@@ -83,12 +99,18 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         setAuthCodeStatus('verifying');
         setAuthCodeMessage('');
         setIsAuthCodeVerifying(true);
+        setValidatedTeamInfo(null); // Reset on each attempt
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            if (formData.authCode === '123123') {
+            await new Promise(resolve => setTimeout(resolve, 500)); // Shorter delay is fine
+            
+            const teamInfo = teamCodes[formData.authCode]; // Lookup the code
+
+            if (teamInfo) {
                 setAuthCodeStatus('valid');
-                setAuthCodeMessage('유효한 인증코드입니다.');
+                const roleText = teamInfo.role === 'coach' ? '코치' : '선수';
+                setAuthCodeMessage(`인증 완료: ${teamInfo.team} (${roleText})`);
+                setValidatedTeamInfo(teamInfo); // Store the retrieved team info
             } else {
                 setAuthCodeStatus('invalid');
                 setAuthCodeMessage('유효하지 않은 인증코드입니다.');
@@ -102,6 +124,7 @@ const SignupForm = ({ onSuccess, className = '' }) => {
     };
 
     const validateForm = () => {
+        // ... (This function remains unchanged)
         if (!formData.id || !formData.password || !formData.passwordConfirm || !formData.authCode) {
             setError('모든 필수 항목을 입력해주세요.');
             return false;
@@ -129,6 +152,7 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         return true;
     };
 
+    // ✨ MODIFIED: Prepare data for the backend
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) return;
@@ -136,15 +160,25 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         setIsSubmitting(true);
         setError(null);
 
+        // This is the complete data package to send to your backend
+        const submissionData = {
+            id: formData.id,
+            password: formData.password,
+            teamInfo: validatedTeamInfo, // Send the full team info object
+        };
+
         try {
-            console.log('회원가입 시도:', formData);
+            console.log('회원가입 요청 (백엔드로 보낼 데이터):', submissionData);
+
+            // Replace this mock API call with your actual fetch/axios request
+            // For example: await axios.post('/api/signup', submissionData);
             await new Promise(resolve => setTimeout(resolve, 1500));
             
             console.log('Signup Successful!');
             if (onSuccess) {
                 onSuccess();
             }
-            navigate('../signupprofile')
+            navigate('../signupprofile');
         } catch (err) {
             console.error('Signup Error:', err);
             setError('예상치 못한 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
@@ -152,7 +186,8 @@ const SignupForm = ({ onSuccess, className = '' }) => {
             setIsSubmitting(false);
         }
     };
-
+    
+    // ... (The rest of your JSX remains the same)
     const isSubmitButtonDisabled = isSubmitting || idStatus !== 'available' || authCodeStatus !== 'valid' || !agreedToTerms;
 
     const getStatusClass = (status) => {
@@ -163,7 +198,9 @@ const SignupForm = ({ onSuccess, className = '' }) => {
 
     return (
         <form onSubmit={handleSubmit} className={`signupForm ${className}`}>
-            <div className="tab-container">
+            {/* --- All your JSX elements from the original code go here --- */}
+            {/* --- No changes are needed in the return() part --- */}
+             <div className="tab-container">
                 <a href="/auth" className="signupTitle">로그인</a>
                 <button type="button" className="signupTitleTosignup">회원가입</button>
             </div>

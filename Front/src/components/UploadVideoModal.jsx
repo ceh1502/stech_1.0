@@ -1,7 +1,7 @@
 // src/components/UploadVideoModal.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./UploadVideoModal.css";
-import Stechlogo from "../assets/images/logos/stech2.png";
+import Stechlogo from "../assets/images/logos/stech.png";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { API_CONFIG } from "../config/api";
 import { getToken } from "../utils/tokenUtils";
