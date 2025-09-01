@@ -1,7 +1,7 @@
 import React from 'react';
 import './index.css';
 import {useNavigate } from 'react-router-dom';
-import  logo from '../../../../assets/images/logos/stech2.png';
+import  logo from '../../../../assets/images/logos/stech.png';
 
 
 const MemberHomePage = () => {
