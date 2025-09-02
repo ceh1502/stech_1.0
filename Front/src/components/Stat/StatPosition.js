@@ -310,11 +310,17 @@ const statColumns = {
   K: {
     스페셜팀: [
       {key: "games", label: "경기 수"},
-      {key: "field_goal", label: "필드골 성공-시도"},
-      {key: "field_goal_percentage", label: "필드골 성공률"},
-      {key: "longest_field_goal", label: "가장 긴 필드골"},
       {key: "extra_points_attempted", label: "PAT 시도"},
       {key: "extra_points_made", label: "PAT 성공"},
+      {key: "field_goal", label: "필드골 성공-시도"},
+      {key: "field_goal_percentage", label: "필드골 성공률"},
+      {key: '1-19' ,label: '1-19'},
+      {key: '20-29' ,label: '20-29'},
+      {key: '30-39' ,label: '30-39'},
+      {key: '40-49' ,label: '40-49'},
+      {key: '50_plus', label: '50+'},
+      {key: "longest_field_goal", label: "가장 긴 필드골"},
+     
     ],
   },
   P: {
