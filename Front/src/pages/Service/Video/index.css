@@ -937,6 +937,17 @@ color:white;
 
 }
 
+.videoPlaysList {
+  color:white;
+}
+
+.vid-clip-row1, .vid-clip-row2{
+min-width: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: space-evenly;}
+
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);

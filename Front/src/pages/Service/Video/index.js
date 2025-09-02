@@ -794,13 +794,13 @@ function PlayerCore({ stateData }) {
                     <div>{p.quarter}Q</div>
                   </div>
                   <div className="clip-rows">
-                    <div className="clip-row1">
+                    <div className="vid-clip-row1">
                       <div className="clip-down">{getDownDisplay(p)}</div>
                       <div className="clip-type">
                         #{PT_LABEL[p.playType] || p.playType}
                       </div>
                     </div>
-                    <div className="clip-row2">
+                    <div className="vid-clip-row2">
                       <div className="clip-oT">{p.offensiveTeam}</div>
                       {Array.isArray(p.significant) &&
                       p.significant.length > 0 ? (
