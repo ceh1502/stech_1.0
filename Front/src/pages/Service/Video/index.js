@@ -14,12 +14,11 @@ import {
   IoClose,
 } from 'react-icons/io5';
 import { HiOutlineMenuAlt3 } from 'react-icons/hi';
-import { FaPencilAlt, FaStickyNote } from 'react-icons/fa'; // FaStickyNote import 추가
+import { FaPencilAlt, FaStickyNote } from 'react-icons/fa';
 import './index.css';
 import { useVideoSettings } from '../../../hooks/useVideoSetting';
-// 경로 수정 필요 - MagicPencil과 VideoMemo 컴포넌트 경로 확인
-// import MagicPencil from '../MagicPencil/MagicPencil';
-// import VideoMemo from '../VideoMemo/VideoMemo';
+import MagicPencil from '../../../components/MagicPencil/MagicPencil';
+import VideoMemo from '../../../components/VideoMemo/VideoMemo';
 
 // PlayType 표기 보정
 const prettyPlayType = (raw) => {
@@ -86,19 +85,16 @@ export default function VideoPlayer() {
   const location = useLocation();
   const { settings } = useVideoSettings();
 
-  // nav state 수신
   const initialPlayId =
     location.state?.initialPlayId || location.state?.initialClipId || null;
   const teamMeta = location.state?.teamMeta || null;
 
-  // 데이터 정규화
   const normalized = useMemo(() => {
     const navClips =
       location.state?.clips || location.state?.filteredPlaysData || [];
     return normalizeClips(navClips);
   }, [location.state?.clips, location.state?.filteredPlaysData]);
 
-  // refs & state
   const videoRef = useRef(null);
   const timelineRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -109,12 +105,10 @@ export default function VideoPlayer() {
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
 
-  // 매직펜슬과 메모 state - 함수 컴포넌트 내부로 이동
   const [showMagicPencil, setShowMagicPencil] = useState(false);
   const [showMemo, setShowMemo] = useState(false);
   const [memos, setMemos] = useState({});
 
-  // 유틸
   const selected = useMemo(
     () => normalized.find((p) => p.id === selectedId) || normalized[0] || null,
     [normalized, selectedId],
@@ -138,7 +132,6 @@ export default function VideoPlayer() {
     else setSelectedId(normalized[0].id);
   }, [normalized, initialPlayId, selectPlay]);
 
-  // Sync playback rate with settings
   useEffect(() => {
     const video = videoRef.current;
     if (videoRef.current) {
@@ -146,7 +139,6 @@ export default function VideoPlayer() {
     }
   }, [settings.playbackRate]);
 
-  // 비디오 이벤트 바인딩
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !videoUrl) return;
@@ -189,7 +181,6 @@ export default function VideoPlayer() {
     };
   }, [videoUrl]);
 
-  // 컨트롤: 시간 기준 건너뛰기
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
     if (!video || hasError || !selected) return;
@@ -222,7 +213,6 @@ export default function VideoPlayer() {
     [duration, hasError, settings.skipTime],
   );
 
-  // 타임라인
   const handleTimelineClick = useCallback(
     (e) => {
       const video = videoRef.current;
@@ -257,7 +247,6 @@ export default function VideoPlayer() {
     [duration, hasError, handleTimelineClick],
   );
 
-  // 키보드
   useEffect(() => {
     const onKey = (e) => {
       const tag = e.target?.tagName;
@@ -282,7 +271,6 @@ export default function VideoPlayer() {
     return () => document.removeEventListener('keydown', onKey);
   }, [togglePlay, stepTime, settings]);
 
-  // 포맷터
   const formatTime = (sec) => {
     if (isNaN(sec) || sec === null) return '0:00';
     const m = Math.floor(sec / 60);
@@ -291,7 +279,6 @@ export default function VideoPlayer() {
     return `${m}:${String(s).padStart(2, '0')}.${String(cs).padStart(2, '0')}`;
   };
 
-  // UI 도우미
   const homeName = teamMeta?.homeName || 'Home';
   const awayName = teamMeta?.awayName || 'Away';
   const homeLogo = teamMeta?.homeLogo || null;
@@ -305,12 +292,10 @@ export default function VideoPlayer() {
   return (
     <div className="videoPlayerPage">
       <div className="videoContainer">
-        {/* 뒤로가기 */}
         <button className="videoBackButton" onClick={() => navigate(-1)}>
           <IoClose size={24} />
         </button>
 
-        {/* 모달 토글 */}
         <button
           className="videoModalToggleButton"
           onClick={() => setIsModalOpen((o) => !o)}
@@ -318,7 +303,6 @@ export default function VideoPlayer() {
           <HiOutlineMenuAlt3 size={24} />
         </button>
 
-        {/* 점수판 - 중앙 유지 */}
         <div className="videoScoreboard">
           <div className="scoreTeam leftTeam">
             {awayLogo ? (
@@ -354,9 +338,7 @@ export default function VideoPlayer() {
           </div>
         </div>
 
-        {/* 플로팅 도구 버튼들 - 스코어보드 외부 */}
         <div className="floatingToolButtons">
-          {/* 메모 버튼 */}
           <button
             className="floatingToolBtn memoBtn"
             onClick={() => setShowMemo(true)}
@@ -366,7 +348,6 @@ export default function VideoPlayer() {
             {memos[selectedId] && <span className="memoIndicator"></span>}
           </button>
 
-          {/* 매직펜슬 버튼 */}
           <button
             className="floatingToolBtn magicPencilBtn"
             onClick={() => setShowMagicPencil(true)}
@@ -377,7 +358,6 @@ export default function VideoPlayer() {
           </button>
         </div>
 
-        {/* 비디오 영역 - 기존 코드 유지 */}
         <div className="videoScreen">
           <div className="videoPlaceholder">
             <div className="videoContent">
@@ -422,33 +402,193 @@ export default function VideoPlayer() {
           </div>
         </div>
 
-        {/* 나머지 코드는 동일... */}
-        {/* 하단 컨트롤, 사이드 모달 등 기존 코드 유지 */}
+        <div className="videoEditorControls">
+          <div className="videoControlsTop">
+            <button
+              className="videoPlayButton"
+              onClick={togglePlay}
+              disabled={hasError || !selected || hasNoVideo}
+            >
+              {isPlaying ? (
+                <IoPauseCircleOutline size={32} />
+              ) : (
+                <IoPlayCircleOutline size={32} />
+              )}
+            </button>
+
+            <div className="videoTimeInfo">
+              <span className="videoCurrentTime">
+                {formatTime(currentTime)}
+              </span>
+              <span className="videoTimeDivider">/</span>
+              <span className="videoDuration">{formatTime(duration)}</span>
+            </div>
+
+            <div className="videoFrameNavigation">
+              <button
+                className="videoFrameStepButton"
+                onClick={() => stepTime(-1)}
+                disabled={hasError || currentTime < settings.skipTime}
+                title={`Previous ${settings.skipTime} Seconds`}
+              >
+                ◀ -{settings.skipTime}초
+              </button>
+              <button
+                className="videoFrameStepButton"
+                onClick={() => stepTime(1)}
+                disabled={
+                  hasError || currentTime + settings.skipTime > duration
+                }
+                title={`Next ${settings.skipTime} Seconds`}
+              >
+                +{settings.skipTime}초 ▶
+              </button>
+            </div>
+          </div>
+
+          <div className="videoTimelineContainer">
+            <div
+              ref={timelineRef}
+              className="videoTimeline"
+              onMouseDown={handleMouseDown}
+            >
+              <div className="videoTimelineTrack">
+                <div
+                  className="videoTimelineProgress"
+                  style={{
+                    width:
+                      duration > 0
+                        ? `${(currentTime / duration) * 100}%`
+                        : '0%',
+                  }}
+                />
+                <div
+                  className="videoTimelineHandle"
+                  style={{
+                    left:
+                      duration > 0
+                        ? `${(currentTime / duration) * 100}%`
+                        : '0%',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="videoControlsHint">
+            <span>
+              Space: Play/Pause | {settings.hotkeys?.backward?.toUpperCase()}{' '}
+              {settings.hotkeys?.forward?.toUpperCase()}: {settings.skipTime}초
+              Step
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* 매직펜슬과 메모 컴포넌트는 실제 경로에 맞게 import 후 사용 */}
-      {/* <MagicPencil
+      <div className={`videoSideModal ${isModalOpen ? 'open' : ''}`}>
+        <div className="videoModalHeader">
+          <h3>Clips</h3>
+          <button
+            className="videoCloseButton"
+            onClick={() => setIsModalOpen(false)}
+          >
+            <IoClose size={20} />
+          </button>
+        </div>
+
+        <div className="videoModalContent">
+          <div className="videoMatchInfo">
+            <div className="videoMatchTeams">
+              {awayLogo ? (
+                <img src={awayLogo} alt={awayName} className="videoTeamLogos" />
+              ) : (
+                <div className="videoTeamLogos placeholder">{awayName[0]}</div>
+              )}
+              <span>{`${homeName} VS ${awayName}`}</span>
+              {homeLogo ? (
+                <img src={homeLogo} alt={homeName} className="videoTeamLogos" />
+              ) : (
+                <div className="videoTeamLogos placeholder">{homeName[0]}</div>
+              )}
+            </div>
+          </div>
+
+          <div className="videoPlaysList">
+            {normalized.map((p) => (
+              <div
+                key={p.id}
+                className={`videoPlayCard ${
+                  isPlaySelected(p.id) ? 'selected' : ''
+                }`}
+                onClick={() => selectPlay(p.id)}
+              >
+                <div className="videoPlayInfo">
+                  <div className="videoPlayBasicInfo">
+                    <span className="videoQuarter">{p.quarter}Q</span>
+                    <span className="videoDown">
+                      {typeof p.down === 'number'
+                        ? `${p.down}${getOrdinal(p.down)} & ${p.yardsToGo ?? 0}`
+                        : '—'}
+                    </span>
+                    <span className="videoPlayerNumber">
+                      {p.offensiveTeam || ''}
+                    </span>
+                  </div>
+
+                  <div className="videoPlayTags">
+                    {p.playType && (
+                      <span className="videoPT">
+                        #{prettyPlayType(p.playType)}
+                      </span>
+                    )}
+                    {Array.isArray(p.significant) &&
+                      p.significant.map((t, i) => (
+                        <span
+                          key={`${p.id}-sig-${i}`}
+                          className="videoSignificantTag"
+                        >
+                          #{t}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+
+                <IoPlayCircleOutline className="videoPlayIcon" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {isModalOpen && (
+        <div
+          className="videoModalOverlay"
+          onClick={() => setIsModalOpen(false)}
+        />
+      )}
+
+      <MagicPencil
         videoElement={videoRef.current}
         isVisible={showMagicPencil && !isPlaying}
         onClose={() => setShowMagicPencil(false)}
-      /> */}
+      />
 
-      {/* <VideoMemo
+      <VideoMemo
         isVisible={showMemo}
         onClose={() => setShowMemo(false)}
         clipId={selectedId}
         memos={memos}
         onSaveMemo={(id, content) => {
-          setMemos(prev => ({ ...prev, [id]: content }));
+          setMemos((prev) => ({ ...prev, [id]: content }));
         }}
         clipInfo={{
           quarter,
           down,
           yardsToGo: ytg,
           playType: selected?.playType,
-          time: formatTime(currentTime)
+          time: formatTime(currentTime),
         }}
-      /> */}
+      />
     </div>
   );
 }

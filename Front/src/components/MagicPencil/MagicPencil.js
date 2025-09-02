@@ -1,5 +1,7 @@
+// src/components/MagicPencil/MagicPencil.js
+
 import React, { useEffect, useRef, useState } from 'react';
-import { fabric } from 'fabric';
+import { Canvas, PencilBrush, FabricImage } from 'fabric';
 import {
   FaPencilAlt,
   FaHighlighter,
@@ -22,30 +24,37 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
   const [history, setHistory] = useState([]);
   const [historyStep, setHistoryStep] = useState(-1);
 
-  // 색상 프리셋
   const colorPresets = [
-    '#FF0000', // 빨강
-    '#0066FF', // 파랑
-    '#FFD700', // 노랑
-    '#00FF00', // 초록
-    '#FF8C00', // 주황
-    '#9400D3', // 보라
-    '#000000', // 검정
-    '#FFFFFF', // 흰색
+    '#FF0000',
+    '#0066FF',
+    '#FFD700',
+    '#00FF00',
+    '#FF8C00',
+    '#9400D3',
+    '#000000',
+    '#FFFFFF',
   ];
 
-  // 지우개 크기
   const eraserSizes = {
     small: 10,
     medium: 20,
     large: 40,
   };
 
-  // 캔버스 초기화
+  // 히스토리 저장 함수를 별도로 정의
+  const saveToHistory = (canvas) => {
+    const currentState = JSON.stringify(canvas.toJSON());
+    setHistory((prev) => {
+      const newHistory = [...prev.slice(0, historyStep + 1), currentState];
+      return newHistory;
+    });
+    setHistoryStep((prev) => prev + 1);
+  };
+
   useEffect(() => {
     if (!isVisible || !canvasRef.current) return;
 
-    const canvas = new fabric.Canvas(canvasRef.current, {
+    const canvas = new Canvas(canvasRef.current, {
       width: videoElement?.offsetWidth || 800,
       height: videoElement?.offsetHeight || 450,
       backgroundColor: 'transparent',
@@ -53,7 +62,6 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
 
     fabricRef.current = canvas;
 
-    // 비디오 프레임을 배경으로 캡처
     if (videoElement) {
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = videoElement.videoWidth;
@@ -62,24 +70,38 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
       ctx.drawImage(videoElement, 0, 0);
 
       const dataURL = tempCanvas.toDataURL();
-      fabric.Image.fromURL(dataURL, (img) => {
-        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-          scaleX: canvas.width / img.width,
-          scaleY: canvas.height / img.height,
-        });
+
+      FabricImage.fromURL(dataURL).then((img) => {
+        img.scaleToWidth(canvas.width);
+        img.scaleToHeight(canvas.height);
+        canvas.backgroundImage = img;
+        canvas.renderAll();
+
+        // 초기 상태 저장
+        saveToHistory(canvas);
       });
     }
 
-    // 히스토리 저장
-    canvas.on('path:created', saveHistory);
-    canvas.on('object:modified', saveHistory);
+    // 이벤트 리스너 - path:created 이벤트에서만 히스토리 저장
+    const handlePathCreated = () => {
+      saveToHistory(canvas);
+    };
+
+    const handleObjectModified = () => {
+      saveToHistory(canvas);
+    };
+
+    canvas.on('path:created', handlePathCreated);
+    canvas.on('object:modified', handleObjectModified);
 
     return () => {
+      // 클린업
+      canvas.off('path:created', handlePathCreated);
+      canvas.off('object:modified', handleObjectModified);
       canvas.dispose();
     };
   }, [isVisible, videoElement]);
 
-  // 도구 선택
   const selectTool = (tool) => {
     const canvas = fabricRef.current;
     if (!canvas) return;
@@ -88,26 +110,35 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
     canvas.isDrawingMode = false;
     canvas.selection = false;
 
+    // 모든 객체의 선택 가능 여부 초기화
+    canvas.forEachObject((obj) => {
+      obj.selectable = false;
+      obj.evented = false;
+    });
+
     switch (tool) {
       case 'pencil':
         canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-        canvas.freeDrawingBrush.width = brushSize;
-        canvas.freeDrawingBrush.color = brushColor;
+        const pencilBrush = new PencilBrush(canvas);
+        pencilBrush.width = brushSize;
+        pencilBrush.color = brushColor;
+        canvas.freeDrawingBrush = pencilBrush;
         break;
 
       case 'highlighter':
         canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-        canvas.freeDrawingBrush.width = brushSize * 4;
-        canvas.freeDrawingBrush.color = brushColor + '60'; // 투명도 추가
+        const highlighter = new PencilBrush(canvas);
+        highlighter.width = brushSize * 4;
+        highlighter.color = brushColor + '60';
+        canvas.freeDrawingBrush = highlighter;
         break;
 
       case 'eraser':
         canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-        canvas.freeDrawingBrush.width = eraserSizes[eraserSize];
-        canvas.freeDrawingBrush.color = '#FFFFFF';
+        const eraser = new PencilBrush(canvas);
+        eraser.width = eraserSizes[eraserSize];
+        eraser.color = 'rgba(0,0,0,1)';
+        canvas.freeDrawingBrush = eraser;
         canvas.freeDrawingBrush.globalCompositeOperation = 'destination-out';
         break;
 
@@ -121,27 +152,24 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
     }
   };
 
-  // 색상 변경
   const changeColor = (color) => {
     setBrushColor(color);
     const canvas = fabricRef.current;
-    if (canvas && canvas.freeDrawingBrush) {
+    if (canvas && canvas.freeDrawingBrush && currentTool !== 'eraser') {
       canvas.freeDrawingBrush.color =
         currentTool === 'highlighter' ? color + '60' : color;
     }
   };
 
-  // 브러시 크기 변경
   const changeBrushSize = (size) => {
     setBrushSize(size);
     const canvas = fabricRef.current;
-    if (canvas && canvas.freeDrawingBrush) {
+    if (canvas && canvas.freeDrawingBrush && currentTool !== 'eraser') {
       canvas.freeDrawingBrush.width =
         currentTool === 'highlighter' ? size * 4 : size;
     }
   };
 
-  // 지우개 크기 변경
   const changeEraserSize = (size) => {
     setEraserSize(size);
     const canvas = fabricRef.current;
@@ -150,68 +178,46 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
     }
   };
 
-  // 히스토리 저장
-  const saveHistory = () => {
-    const canvas = fabricRef.current;
-    if (!canvas) return;
-
-    const currentState = JSON.stringify(canvas.toJSON());
-    const newHistory = history.slice(0, historyStep + 1);
-    newHistory.push(currentState);
-    setHistory(newHistory);
-    setHistoryStep(newHistory.length - 1);
-  };
-
-  // 실행 취소
   const undo = () => {
     const canvas = fabricRef.current;
     if (!canvas || historyStep <= 0) return;
 
     const newStep = historyStep - 1;
-    canvas.loadFromJSON(history[newStep], () => {
+    const state = JSON.parse(history[newStep]);
+
+    canvas.loadFromJSON(state).then(() => {
       canvas.renderAll();
       setHistoryStep(newStep);
     });
   };
 
-  // 다시 실행
   const redo = () => {
     const canvas = fabricRef.current;
     if (!canvas || historyStep >= history.length - 1) return;
 
     const newStep = historyStep + 1;
-    canvas.loadFromJSON(history[newStep], () => {
+    const state = JSON.parse(history[newStep]);
+
+    canvas.loadFromJSON(state).then(() => {
       canvas.renderAll();
       setHistoryStep(newStep);
     });
   };
 
-  // 캔버스 초기화
   const clearCanvas = () => {
     const canvas = fabricRef.current;
     if (!canvas) return;
 
-    canvas.clear();
-    // 비디오 배경 다시 설정
-    if (videoElement) {
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = videoElement.videoWidth;
-      tempCanvas.height = videoElement.videoHeight;
-      const ctx = tempCanvas.getContext('2d');
-      ctx.drawImage(videoElement, 0, 0);
+    // 모든 그려진 객체 제거 (배경 이미지는 유지)
+    const objects = canvas.getObjects();
+    objects.forEach((obj) => {
+      canvas.remove(obj);
+    });
 
-      const dataURL = tempCanvas.toDataURL();
-      fabric.Image.fromURL(dataURL, (img) => {
-        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-          scaleX: canvas.width / img.width,
-          scaleY: canvas.height / img.height,
-        });
-      });
-    }
-    saveHistory();
+    canvas.renderAll();
+    saveToHistory(canvas);
   };
 
-  // PNG로 저장
   const saveAsPNG = () => {
     const canvas = fabricRef.current;
     if (!canvas) return;
@@ -219,7 +225,7 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
     const dataURL = canvas.toDataURL({
       format: 'png',
       quality: 1,
-      multiplier: 2, // 고해상도
+      multiplier: 2,
     });
 
     const link = document.createElement('a');
@@ -229,6 +235,13 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
     link.click();
   };
 
+  // 초기 도구 설정
+  useEffect(() => {
+    if (fabricRef.current && isVisible) {
+      selectTool('pencil');
+    }
+  }, [isVisible]);
+
   if (!isVisible) return null;
 
   return (
@@ -236,14 +249,11 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
       <div className="magicPencilContainer">
         <canvas ref={canvasRef} className="magicPencilCanvas" />
 
-        {/* 도구 패널 */}
         <div className="magicPencilTools">
-          {/* 닫기 버튼 */}
           <button className="mpCloseBtn" onClick={onClose}>
             ✕
           </button>
 
-          {/* 도구 선택 */}
           <div className="mpToolGroup">
             <button
               className={`mpTool ${currentTool === 'select' ? 'active' : ''}`}
@@ -277,7 +287,6 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
             </button>
           </div>
 
-          {/* 색상 선택 */}
           <div className="mpColorGroup">
             {colorPresets.map((color) => (
               <button
@@ -289,7 +298,6 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
             ))}
           </div>
 
-          {/* 크기 조절 */}
           {currentTool !== 'eraser' && (
             <div className="mpSizeGroup">
               <label>굵기:</label>
@@ -304,7 +312,6 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
             </div>
           )}
 
-          {/* 지우개 크기 */}
           {currentTool === 'eraser' && (
             <div className="mpEraserSize">
               <button
@@ -328,12 +335,19 @@ const MagicPencil = ({ videoElement, isVisible, onClose }) => {
             </div>
           )}
 
-          {/* 액션 버튼 */}
           <div className="mpActionGroup">
-            <button onClick={undo} title="실행 취소">
+            <button
+              onClick={undo}
+              title="실행 취소"
+              disabled={historyStep <= 0}
+            >
               <FaUndo />
             </button>
-            <button onClick={redo} title="다시 실행">
+            <button
+              onClick={redo}
+              title="다시 실행"
+              disabled={historyStep >= history.length - 1}
+            >
               <FaRedo />
             </button>
             <button onClick={clearCanvas} title="전체 지우기">
