@@ -1,4 +1,4 @@
-// src/hooks/useClipFiltering.js
+// src/hooks/useClipFilter.js
 import { useEffect, useMemo, useState } from "react";
 
 const DEFAULT_FILTERS = {
@@ -12,9 +12,13 @@ export function useClipFilter({
   persistKey = "clipFilters:default",
   rawClips = [],
   teamOptions = [],
-  opposites = {},         // ← 추가: 상반 라벨 배타 선택
+  opposites = {},      
+  initailFilters={},
 }) {
   const [filters, setFilters] = useState(() => {
+    if (initialFilters) {
+      return{ ...DEFAULT_FILTERS, ...initailFilters};
+    }
     try {
       const raw = localStorage.getItem(persistKey);
       if (raw) {

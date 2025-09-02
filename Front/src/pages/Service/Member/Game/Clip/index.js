@@ -392,17 +392,23 @@ const [statsError, setStatsError] = useState(null);
     setFilters((prev) => ({ ...prev, significantPlay: [] }));
 
   /* 리스트 클릭 → 비디오 플레이어로 이동 */
-  const onClickClip = (c) => {
-    const normalized = clips.map((p) => ({
-      ...p,
-      id: String(p.id ?? p.ClipKey),
-      videoUrl: p.videoUrl ?? p.clipUrl ?? p.ClipUrl ?? null,
-    }));
-
+ const onClickClip = (c) => {
+    // navigate 함수의 state 객체에 더 많은 정보를 담아서 전달합니다.
     navigate('/service/video', {
       state: {
-        filteredPlaysData: normalized,
+        // 1. 필터링에 필요한 원본 데이터 전달
+        rawClips: rawClips,
+        initialFilters: filters,
+        teamOptions: teamOptions,
+
+        // 2. 비디오 플레이어 UI 구성에 필요한 정보 전달
         initialPlayId: String(c.id ?? c.ClipKey),
+        teamMeta: {
+          homeName: homeMeta?.name,
+          awayName: awayMeta?.name,
+          homeLogo: homeMeta?.logo,
+          awayLogo: awayMeta?.logo,
+        },
       },
     });
   };
