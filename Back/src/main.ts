@@ -2,42 +2,28 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import helmet from 'helmet';
-import cors from 'cors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // CORS 설정 (프론트엔드 Vercel 도메인 허용)
-  app.use(
-    cors({
-      origin: [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'https://stech-1-0-iz4v.vercel.app',
-        'http://3.34.47.22:3000',
-        process.env.FRONTEND_URL,
-      ].filter(Boolean), // undefined 값 제거
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    }),
-  );
-
-  // 보안 미들웨어 (Swagger UI를 위한 설정 추가)
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'", 'https:'],
-          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-          imgSrc: ["'self'", 'data:', 'https:'],
-          fontSrc: ["'self'", 'https:', 'data:'],
-        },
-      },
-    }),
-  );
+  // CORS 설정
+  app.enableCors({
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'https://stech-1-0-iz4v.vercel.app',
+      'http://3.34.47.22:3000',
+      'http://www.stechpro.ai',
+      'https://www.stechpro.ai',
+      'http://stechpro.ai',
+      'https://stechpro.ai',
+      'http://stechpro-frontend.s3-website.ap-northeast-2.amazonaws.com',
+      process.env.FRONTEND_URL,
+    ].filter(Boolean),
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
 
   // 글로벌 파이프 설정
   app.useGlobalPipes(
@@ -54,31 +40,26 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('🏈 STECH Pro API')
     .setDescription(
-      `
-미식축구 전문 플랫폼의 종합 스탯 분석 API
-
-## 📋 주요 기능
-- **선수 관리**: 선수 생성, 조회, 업데이트
-- **포지션별 스탯 분석**: 10개 포지션 지원 (QB, RB, WR, TE, Kicker, Punter, OL, DL, LB, DB)
-- **클립 데이터 분석**: 자동 스탯 계산 및 저장
-- **랭킹 시스템**: 포지션별, 스탯별 랭킹 조회
-- **팀 관리**: 팀별 선수 관리
-
-## 🎯 지원 포지션
-1. **QB (쿼터백)** - 14개 스탯
-2. **RB (러닝백)** - 22개 스탯
-3. **WR (와이드 리시버)** - 22개 스탯 (리턴 포함)
-4. **TE (타이트 엔드)** - 15개 스탯 (리턴 제외)
-5. **Kicker** - 18개 스탯
-6. **Punter** - 7개 스탯
-7. **OL (오펜시브 라인맨)** - 4개 스탯
-8. **DL (디펜시브 라인맨)** - 10개 스탯
-9. **LB (라인백커)** - 10개 스탯
-10. **DB (디펜시브 백)** - 10개 스탯
-
-## 🔑 인증
-Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있습니다.
-`,
+      '미식축구 전문 플랫폼의 종합 스탯 분석 API\n\n' +
+        '## 📋 주요 기능\n' +
+        '- **선수 관리**: 선수 생성, 조회, 업데이트\n' +
+        '- **포지션별 스탯 분석**: 10개 포지션 지원\n' +
+        '- **클립 데이터 분석**: 자동 스탯 계산 및 저장\n' +
+        '- **랭킹 시스템**: 포지션별, 스탯별 랭킹 조회\n' +
+        '- **팀 관리**: 팀별 선수 관리\n\n' +
+        '## 🎯 지원 포지션\n' +
+        '1. **QB (쿼터백)** - 14개 스탯\n' +
+        '2. **RB (러닝백)** - 22개 스탯\n' +
+        '3. **WR (와이드 리시버)** - 22개 스탯 (리턴 포함)\n' +
+        '4. **TE (타이트 엔드)** - 15개 스탯 (리턴 제외)\n' +
+        '5. **Kicker** - 18개 스탯\n' +
+        '6. **Punter** - 7개 스탯\n' +
+        '7. **OL (오펜시브 라인맨)** - 4개 스탯\n' +
+        '8. **DL (디펜시브 라인맨)** - 10개 스탯\n' +
+        '9. **LB (라인백커)** - 10개 스탯\n' +
+        '10. **DB (디펜시브 백)** - 10개 스탯\n\n' +
+        '## 🔑 인증\n' +
+        'Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있습니다.',
     )
     .setVersion('1.0.0')
     .addBearerAuth(
@@ -97,12 +78,13 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
     .addTag('Team', '팀 관련 API')
     .addTag('Video', '비디오 관련 API')
     .addServer('http://localhost:4000', '개발 서버')
-    .addServer('https://api.stech.pro', '운영 서버')
+    .addServer('http://52.79.100.123:4000', 'EC2 서버')
+    .addServer('http://api.stechpro.ai:4000', 'API 도메인')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
 
-  // 두 경로 모두에서 Swagger 접근 가능하도록 설정
+  // Swagger UI 설정
   SwaggerModule.setup('api', app, document, {
     customSiteTitle: 'STECH Pro API 문서',
     customfavIcon: '🏈',
@@ -123,28 +105,11 @@ Bearer Token을 사용한 JWT 인증이 필요한 일부 엔드포인트가 있�
     },
   });
 
-  const port = process.env.PORT || 3001;
+  const port = process.env.PORT || 4000;
 
-  // Vercel 환경 감지
-  if (process.env.VERCEL) {
-    await app.init();
-    console.log('🚀 NestJS 서버가 Vercel에서 실행 준비 완료');
-    return app.getHttpAdapter().getInstance();
-  } else {
-    await app.listen(port);
-    console.log(`🚀 NestJS 서버가 http://localhost:${port}에서 실행 중입니다.`);
-    console.log(`📚 Swagger 문서: http://localhost:${port}/api`);
-    return app;
-  }
+  await app.listen(port);
+  console.log(`🚀 NestJS 서버가 http://localhost:${port}에서 실행 중입니다.`);
+  console.log(`📚 Swagger 문서: http://localhost:${port}/api`);
 }
 
-// Vercel handler 추가
-export default async function handler(req, res) {
-  const app = await bootstrap();
-  return app(req, res);
-}
-
-// 로컬 환경에서만 바로 실행
-if (!process.env.VERCEL) {
-  bootstrap();
-}
+bootstrap();
