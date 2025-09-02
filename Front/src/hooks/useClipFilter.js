@@ -13,11 +13,11 @@ export function useClipFilter({
   rawClips = [],
   teamOptions = [],
   opposites = {},      
-  initailFilters={},
+  initialFilters={},
 }) {
   const [filters, setFilters] = useState(() => {
     if (initialFilters) {
-      return{ ...DEFAULT_FILTERS, ...initailFilters};
+      return{ ...DEFAULT_FILTERS, ...initialFilters};
     }
     try {
       const raw = localStorage.getItem(persistKey);
