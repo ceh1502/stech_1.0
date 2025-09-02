@@ -1,762 +1,954 @@
-
 /* src/pages/Service/VideoPlayer/index.css */
 .videoPlayerPage {
-    width: 100%;
-    height: auto;
-    background-color: #0a0a0a;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+  width: 100%;
+  height: auto;
+  background-color: #0a0a0a;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .videoContainer {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 /* 뒤로가기 버튼 */
 .videoBackButton {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    background-color: rgba(0, 0, 0, 0.8);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    padding: 12px;
-    cursor: pointer;
-    z-index: 100;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  padding: 12px;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .videoBackButton:hover {
-    background-color: rgba(238, 123, 26, 0.8);
-    transform: scale(1.05);
+  background-color: rgba(238, 123, 26, 0.8);
+  transform: scale(1.05);
 }
 
 /* 모달 토글 버튼 */
 .videoModalToggleButton {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background-color: rgba(0, 0, 0, 0.8);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    padding: 12px;
-    cursor: pointer;
-    z-index: 100;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  padding: 12px;
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .videoModalToggleButton:hover {
-    background-color: rgba(238, 123, 26, 0.8);
-    transform: scale(1.05);
+  background-color: rgba(238, 123, 26, 0.8);
+  transform: scale(1.05);
 }
 
 /* 비디오 화면 */
 .videoScreen {
-    flex: 1;
-    width: 100%;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
+  flex: 1;
+  width: 100%;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .videoPlaceholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .videoContent {
-    width: 100%;
-    height: 100%;
-    display: fix;
-    align-items: center;
-    justify-content: center;
+  width: 100%;
+  height: 100%;
+  display: fix;
+  align-items: center;
+  justify-content: center;
 }
 
 .videoElement {
-    display: fix;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  display: fix;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 .videoElement.hidden {
-    display: none;
+  display: none;
 }
 
 .videoLoadingMessage {
-    color: #fff;
-    font-size: 18px;
-    font-family: 'Pretendard', sans-serif;
-    text-align: center;
-    font-weight: 500;
+  color: #fff;
+  font-size: 18px;
+  font-family: 'Pretendard', sans-serif;
+  text-align: center;
+  font-weight: 500;
 }
 
 .videoErrorMessage {
-    color: #ff6b6b;
-    font-size: 16px;
-    font-family: 'Pretendard', sans-serif;
-    text-align: center;
-    padding: 20px;
-    background: rgba(255, 107, 107, 0.1);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+  font-size: 16px;
+  font-family: 'Pretendard', sans-serif;
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
 }
 
 .videoErrorUrl {
-    color: #999;
-    font-size: 12px;
-    margin-top: 8px;
-    word-break: break-all;
-    font-family: 'Courier New', monospace;
+  color: #999;
+  font-size: 12px;
+  margin-top: 8px;
+  word-break: break-all;
+  font-family: 'Courier New', monospace;
 }
 
 /* 비디오가 없을 때 메시지 */
 .videoNoVideoMessage {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #a5a5a5;
-    text-align: center;
-    padding: 60px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 20px;
-    border: 2px dashed rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #a5a5a5;
+  text-align: center;
+  padding: 60px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 20px;
+  border: 2px dashed rgba(255, 255, 255, 0.1);
 }
 
 .videoNoVideoIcon {
-    font-size: 64px;
-    margin-bottom: 20px;
-    opacity: 0.6;
-    animation: pulse 2s infinite;
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.6;
+  animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-    0%,
-    100% {
-        opacity: 0.6;
-    }
-    50% {
-        opacity: 0.3;
-    }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 .videoNoVideoText {
-    font-size: 20px;
-    font-family: 'Pretendard', sans-serif;
-    font-weight: 600;
-    color: #fff;
-    margin-bottom: 12px;
+  font-size: 20px;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 12px;
 }
 
 .videoNoVideoSubtext {
-    font-size: 14px;
-    font-family: 'Pretendard', sans-serif;
-    color: #999;
-    line-height: 1.5;
+  font-size: 14px;
+  font-family: 'Pretendard', sans-serif;
+  color: #999;
+  line-height: 1.5;
 }
 
 /* 편집 스타일 컨트롤 */
 .videoEditorControls {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    /* background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%); */
-    border-top: 1px solid #333;
-    padding: 20px;
-    z-index: 40;
-    /* backdrop-filter: blur(10px); */
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  /* background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%); */
+  border-top: 1px solid #333;
+  padding: 20px;
+  z-index: 40;
+  /* backdrop-filter: blur(10px); */
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .videoControlsTop {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .videoPlayButton {
-    background: linear-gradient(135deg, #ee7b1a 0%, #ff9500 100%);
-    border: none;
-    border-radius: 50%;
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(238, 123, 26, 0.3);
+  background: linear-gradient(135deg, #ee7b1a 0%, #ff9500 100%);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(238, 123, 26, 0.3);
 }
 
 .videoPlayButton:hover:not(:disabled) {
-    transform: scale(1.1);
-    box-shadow: 0 6px 30px rgba(238, 123, 26, 0.5);
+  transform: scale(1.1);
+  box-shadow: 0 6px 30px rgba(238, 123, 26, 0.5);
 }
 
 .videoPlayButton:disabled {
-    background: #333;
-    color: #666;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 .videoTimeInfo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  font-size: 16px;
 }
 
 .videoCurrentTime {
-    color: #ee7b1a;
-    min-width: 80px;
-    text-align: right;
+  color: #ee7b1a;
+  min-width: 80px;
+  text-align: right;
 }
 
 .videoTimeDivider {
-    color: #666;
+  color: #666;
 }
 
 .videoDuration {
-    color: #a5a5a5;
-    min-width: 80px;
+  color: #a5a5a5;
+  min-width: 80px;
 }
 
 .videoFrameInfo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
 }
 
 .videoFrameLabel {
-    color: #a5a5a5;
-    font-weight: 500;
+  color: #a5a5a5;
+  font-weight: 500;
 }
 
 .videoCurrentFrame {
-    color: #1dac78;
-    min-width: 50px;
-    text-align: right;
-    font-weight: 600;
+  color: #1dac78;
+  min-width: 50px;
+  text-align: right;
+  font-weight: 600;
 }
 
 .videoFrameDivider {
-    color: #666;
+  color: #666;
 }
 
 .videoTotalFrames {
-    color: #a5a5a5;
-    min-width: 50px;
+  color: #a5a5a5;
+  min-width: 50px;
 }
 
 .videoFrameNavigation {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .videoFrameStepButton {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-    padding: 8px 12px;
-    transition: all 0.2s ease;
-    font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
+  font-weight: 600;
 }
 
 .videoFrameStepButton:hover:not(:disabled) {
-    background: rgba(238, 123, 26, 0.3);
-    border-color: #ee7b1a;
-    color: #ee7b1a;
-    transform: translateY(-1px);
+  background: rgba(238, 123, 26, 0.3);
+  border-color: #ee7b1a;
+  color: #ee7b1a;
+  transform: translateY(-1px);
 }
 
 .videoFrameStepButton:disabled {
-    background: rgba(255, 255, 255, 0.05);
-    color: #666;
-    cursor: not-allowed;
-    border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #666;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* 프레임 기반 타임라인 */
 .videoTimelineContainer {
-    position: relative;
-    margin-bottom: 15px;
+  position: relative;
+  margin-bottom: 15px;
 }
 
 .videoTimeline {
-    position: relative;
-    height: 60px;
-    background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
-    border-radius: 12px;
-    border: 1px solid #333;
-    cursor: pointer;
-    overflow: hidden;
-    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+  height: 60px;
+  background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 12px;
+  border: 1px solid #333;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .videoTimelineTrack {
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    right: 10px;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-    transform: translateY(-50%);
-    overflow: hidden;
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  right: 10px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  transform: translateY(-50%);
+  overflow: hidden;
 }
 
 .videoTimelineProgress {
-    height: 100%;
-    background: linear-gradient(90deg, #ee7b1a 0%, #ff9500 100%);
-    border-radius: 3px;
-    transition: width 0.1s ease;
-    box-shadow: 0 0 10px rgba(238, 123, 26, 0.5);
+  height: 100%;
+  background: linear-gradient(90deg, #ee7b1a 0%, #ff9500 100%);
+  border-radius: 3px;
+  transition: width 0.1s ease;
+  box-shadow: 0 0 10px rgba(238, 123, 26, 0.5);
 }
 
 .videoTimelineHandle {
-    position: absolute;
-    top: 50%;
-    width: 20px;
-    height: 20px;
-    background: linear-gradient(135deg, #ee7b1a 0%, #ff9500 100%);
-    border: 3px solid white;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 15px rgba(238, 123, 26, 0.4);
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #ee7b1a 0%, #ff9500 100%);
+  border: 3px solid white;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(238, 123, 26, 0.4);
 }
 
 .videoTimelineHandle:hover {
-    transform: translate(-50%, -50%) scale(1.2);
-    box-shadow: 0 6px 25px rgba(238, 123, 26, 0.6);
+  transform: translate(-50%, -50%) scale(1.2);
+  box-shadow: 0 6px 25px rgba(238, 123, 26, 0.6);
 }
 
 /* 프레임 마커 */
 .videoFrameMarkers {
-    position: absolute;
-    top: 0;
-    left: 10px;
-    right: 10px;
-    height: 100%;
-    pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 100%;
+  pointer-events: none;
 }
 
 .videoFrameMarker {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .videoFrameTick {
-    width: 2px;
-    height: 15px;
-    background: rgba(255, 255, 255, 0.3);
-    margin-top: 8px;
-    border-radius: 1px;
+  width: 2px;
+  height: 15px;
+  background: rgba(255, 255, 255, 0.3);
+  margin-top: 8px;
+  border-radius: 1px;
 }
 
 .videoFrameNumber {
-    position: absolute;
-    bottom: 5px;
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.6);
-    font-family: 'Courier New', monospace;
-    font-weight: 500;
-    white-space: nowrap;
-    transform: translateX(-50%);
+  position: absolute;
+  bottom: 5px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  white-space: nowrap;
+  transform: translateX(-50%);
 }
 
 /* 컨트롤 힌트 */
 .videoControlsHint {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
-    font-family: 'Pretendard', sans-serif;
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-family: 'Pretendard', sans-serif;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* 사이드 모달 */
 .videoSideModal {
-    position: fixed;
-    top: 0;
-    right: -420px;
-    width: 420px;
-    height: 100vh;
-    background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
-    border-left: 1px solid #333;
-    z-index: 200;
-    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow-y: auto;
-    backdrop-filter: blur(20px);
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  right: -320px;
+  width: 320px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+  border-left: 1px solid #333;
+  z-index: 200;
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  backdrop-filter: blur(20px);
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+
+  display:flex;
+  
 }
 
 .videoSideModal.open {
-    right: 0;
+  right: 0;
 }
 
-.videoModalHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 25px;
-    border-bottom: 1px solid #333;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
-}
 
-.videoModalHeader h3 {
-    color: white;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    margin: 0;
-    background: linear-gradient(135deg, #ee7b1a 0%, #ff9500 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.videoModalClose {
+  position: absolute;
+  left: -50px; /* 사이드바 바깥으로 */
+  top: 20px;
+  z-index: 210;
 }
-
 .videoCloseButton {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    color: #a5a5a5;
-    cursor: pointer;
-    padding: 8px;
-    transition: all 0.2s ease;
+ width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.videoCloseButton:hover {
+  background: rgba(238, 123, 26, 0.9);
+  border-color: #ee7b1a;
+  transform: scale(1.1);
+}.videoCloseButton:hover {
+  background: rgba(238, 123, 26, 0.9);
+  border-color: #ee7b1a;
+  transform: scale(1.1);
 }
 
 .videoCloseButton:hover {
-    background: rgba(238, 123, 26, 0.2);
-    border-color: #ee7b1a;
-    color: #ee7b1a;
+  background: rgba(238, 123, 26, 0.2);
+  border-color: #ee7b1a;
+  color: #ee7b1a;
 }
 
 .videoModalContent {
-    padding: 25px;
+  padding: 10px;
 }
 
 .videoMatchInfo {
-    margin-bottom: 25px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 25px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .videoMatchTeams {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 12px;
-    color: white;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: white;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .videoTeamLogos {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .videoMatchDate {
-    text-align: center;
-    color: #a5a5a5;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
+  text-align: center;
+  color: #a5a5a5;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 /* 플레이 리스트 */
 .videoPlaysList {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-height: 60vh;
-    overflow-y: auto;
-    padding-right: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 5px;
 }
 
 .videoPlaysList::-webkit-scrollbar {
-    width: 6px;
+  width: 6px;
 }
 
 .videoPlaysList::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
 }
 
 .videoPlaysList::-webkit-scrollbar-thumb {
-    background: rgba(238, 123, 26, 0.3);
-    border-radius: 3px;
+  background: rgba(238, 123, 26, 0.3);
+  border-radius: 3px;
 }
 
 .videoPlaysList::-webkit-scrollbar-thumb:hover {
-    background: rgba(238, 123, 26, 0.5);
+  background: rgba(238, 123, 26, 0.5);
 }
 
 .videoPlayCard {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 18px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 18px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
 
 .videoPlayCard:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-    border-color: rgba(238, 123, 26, 0.3);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  border-color: rgba(238, 123, 26, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
 }
 
 .videoPlayCard.selected {
-    background: linear-gradient(135deg, rgba(238, 123, 26, 0.15) 0%, rgba(255, 149, 0, 0.05) 100%);
-    border: 2px solid #ee7b1a;
-    box-shadow: 0 8px 30px rgba(238, 123, 26, 0.2);
+  background: linear-gradient(
+    135deg,
+    rgba(238, 123, 26, 0.15) 0%,
+    rgba(255, 149, 0, 0.05) 100%
+  );
+  border: 2px solid #ee7b1a;
+  box-shadow: 0 8px 30px rgba(238, 123, 26, 0.2);
 }
 
 .videoPlayInfo {
-    flex: 1;
+  flex: 1;
 }
 
 .videoPlayBasicInfo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    color: white;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: white;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .videoCheckbox {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 16px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
 }
 
 .videoQuarter,
 .videoDown,
 .videoPlayerNumber {
-    color: white;
-    font-size: 12px;
-    padding: 2px 8px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 6px;
-    font-weight: 600;
+  color: white;
+  font-size: 12px;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-weight: 600;
 }
 
 .videoPlayerNumber {
-    background: linear-gradient(135deg, #ee7b1a 0%, #ff9500 100%);
-    color: white;
+  background: linear-gradient(135deg, #ee7b1a 0%, #ff9500 100%);
+  color: white;
 }
 
 .videoPlayTags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .videoYardTag {
-    color: #ee7b1a;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 10px;
-    font-weight: 600;
-    background: rgba(238, 123, 26, 0.1);
-    padding: 3px 8px;
-    border-radius: 8px;
-    border: 1px solid rgba(238, 123, 26, 0.3);
+  color: #ee7b1a;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(238, 123, 26, 0.1);
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(238, 123, 26, 0.3);
 }
 
 .videoRunTag {
-    color: #1a58e0;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 10px;
-    font-weight: 600;
-    background: rgba(26, 88, 224, 0.1);
-    padding: 3px 8px;
-    border-radius: 8px;
-    border: 1px solid rgba(26, 88, 224, 0.3);
+  color: #1a58e0;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(26, 88, 224, 0.1);
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(26, 88, 224, 0.3);
 }
 
 .videoPassTag {
-    color: #1dac78;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 10px;
-    font-weight: 600;
-    background: rgba(29, 172, 120, 0.1);
-    padding: 3px 8px;
-    border-radius: 8px;
-    border: 1px solid rgba(29, 172, 120, 0.3);
+  color: #1dac78;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(29, 172, 120, 0.1);
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(29, 172, 120, 0.3);
 }
 
 .videoSignificantTag {
-    color: #ff6b6b;
-    font-family: 'Pretendard', sans-serif;
-    font-size: 10px;
-    font-weight: 600;
-    background: rgba(255, 107, 107, 0.1);
-    padding: 3px 8px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 107, 107, 0.3);
+  color: #ff6b6b;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 107, 107, 0.3);
 }
 
 .videoPlayIcon {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 20px;
-    margin-left: 15px;
-    transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 20px;
+  margin-left: 15px;
+  transition: all 0.2s ease;
 }
 
 .videoPlayIcon:hover {
-    color: #ee7b1a;
-    transform: scale(1.1);
+  color: #ee7b1a;
+  transform: scale(1.1);
 }
 
 /* 모달 오버레이 */
 .videoModalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 420px;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(5px);
-    z-index: 150;
-    transition: all 0.3s ease;
-}
-/* 점수판 스타일 */
-.videoScoreboard {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 20, 20, 0.95) 100%);
-    border-radius: 15px;
-    padding: 15px 25px;
-    display: flex;
-    align-items: center;
-    gap: 30px;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    z-index: 50;
-    font-family: 'Pretendard', sans-serif;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 420px;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
+  z-index: 150;
+  transition: all 0.3s ease;
 }
 
 .scoreTeam {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .scoreTeamLogo {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .scoreTeamInfo {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .eaglesTeam .scoreTeamInfo {
-    align-items: flex-end;
+  align-items: flex-end;
 }
 
 .scoreTeamName {
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 2px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .scoreTeamScore {
-    color: #ee7b1a;
-    font-size: 28px;
-    font-weight: 700;
-    font-family: 'Courier New', monospace;
-    text-shadow: 0 2px 8px rgba(238, 123, 26, 0.5);
+  color: #ee7b1a;
+  font-size: 28px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 2px 8px rgba(238, 123, 26, 0.5);
 }
 
 .scoreCenter {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    padding: 0 15px;
-    border-left: 1px solid rgba(255, 255, 255, 0.2);
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 0 15px;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .scoreQuarter {
-    background: linear-gradient(135deg, #ee7b1a 0%, #ff9500 100%);
-    color: white;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(238, 123, 26, 0.4);
+  background: linear-gradient(135deg, #ee7b1a 0%, #ff9500 100%);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(238, 123, 26, 0.4);
 }
 
 .scoreDown {
-    color: #a5a5a5;
-    font-size: 11px;
-    font-weight: 600;
-    font-family: 'Courier New', monospace;
+  color: #a5a5a5;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+/* 상단 헤더 영역 */
+.videoTopHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(0, 0, 0, 0.8);
+  position: relative;
+  z-index: 10;
+}
+
+/* 도구 버튼들 */
+.videoToolButtons {
+  display: flex;
+  gap: 12px;
+}
+
+.videoToolButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  position: relative;
+}
+
+.videoToolButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.videoToolButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.videoToolButton.magicPencilBtn {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: rgba(255, 107, 107, 0.4);
+}
+
+.videoToolButton.memoBtn {
+  background: rgba(255, 193, 7, 0.2);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+/* 메모 표시 인디케이터 */
+.memoIndicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: #ffc107;
+  border-radius: 50%;
+}
+
+/* 점수판 스타일 - 기존 유지 */
+.videoScoreboard {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(20, 20, 20, 0.95) 100%
+  );
+  border-radius: 15px;
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  font-family: 'Pretendard', sans-serif;
+}
+
+/* 플로팅 도구 버튼들 */
+.floatingToolButtons {
+  position: fixed;
+  top: 20px;
+  right: 100px;
+  display: flex;
+  gap: 15px;
+  z-index: 51;
+}
+
+.floatingToolBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* 메모 버튼 */
+.floatingToolBtn.memoBtn {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 193, 7, 0.9) 0%,
+    rgba(255, 152, 0, 0.9) 100%
+  );
+  color: white;
+}
+
+.floatingToolBtn.memoBtn:hover {
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 6px 25px rgba(255, 193, 7, 0.5);
+}
+
+/* 매직펜슬 버튼 */
+.floatingToolBtn.magicPencilBtn {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 123, 26, 0.9) 0%,
+    rgba(255, 87, 34, 0.9) 100%
+  );
+  color: white;
+}
+
+.floatingToolBtn.magicPencilBtn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 6px 25px rgba(238, 123, 26, 0.5);
+}
+
+.floatingToolBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 메모 인디케이터 */
+.floatingToolBtn .memoIndicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: #ff0000;
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+}
+
+.videoFilterControls{
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.filterRow{
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+  }
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .floatingToolButtons {
+    top: auto;
+    bottom: 100px;
+    right: 20px;
+    flex-direction: column;
+  }
+
+  .floatingToolBtn {
+    width: 45px;
+    height: 45px;
+  }
 }
