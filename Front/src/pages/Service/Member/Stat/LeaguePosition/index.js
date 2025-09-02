@@ -103,13 +103,14 @@ const LeaguePositionPage = () => {
                             return_td: player.stats?.returnTouchdowns || 0,
 
                             // 키커 스탯
+                                                        extra_points_attempted: player.stats?.extraPointsAttempted || 0,
+                            extra_points_made: player.stats?.extraPointsMade || 0,
+                            field_goal: `${player.stats?.fieldGoalsMade || 0}-${player.stats?.fieldGoalsAttempted || 0}`,
+                            field_goal_percentage: player.stats?.fieldGoalPercentage || 0,
+
                             field_goals_made: player.stats?.fieldGoalsMade || 0,
                             field_goals_attempted: player.stats?.fieldGoalsAttempted || 0,
-                            field_goal_percentage: player.stats?.fieldGoalPercentage || 0,
                             longest_field_goal: player.stats?.longestFieldGoal || 0,
-                            extra_points_made: player.stats?.extraPointsMade || 0,
-                            extra_points_attempted: player.stats?.extraPointsAttempted || 0,
-                            field_goal: `${player.stats?.fieldGoalsMade || 0}-${player.stats?.fieldGoalsAttempted || 0}`,
 
                             // 펀터 스탯
                             punt_count: player.stats?.puntCount || 0,

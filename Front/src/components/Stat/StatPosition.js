@@ -374,13 +374,16 @@ const statColumns = {
   K: {
     스페셜팀: [
       {key: "games", label: "경기 수"},
-      {key: "field_goals_made", label: "필드골 성공"},
-      {key: "field_goals_attempted", label: "필드골 시도"},
+      {key: "extra_points_attempted", label: "PAT 시도"},
+      {key: "extra_points_made", label: "PAT 성공"},
+      {key: "field_goal", label: "필드골 성공-시도"},
       {key: "field_goal_percentage", label: "필드골 성공률"},
+      {key: '1-19' ,label: '1-19'},
+      {key: '20-29' ,label: '20-29'},
+      {key: '30-39' ,label: '30-39'},
+      {key: '40-49' ,label: '40-49'},
+      {key: '50_plus', label: '50+'},
       {key: "longest_field_goal", label: "가장 긴 필드골"},
-      {key: "extra_points_made", label: "엑스트라 포인트 성공"},
-      {key: "extra_points_attempted", label: "엑스트라 포인트 시도"},
-      {key: "field_goal", label: "필드골 (성공-시도)"},
     ],
   },
   P: {
@@ -554,7 +557,7 @@ export default function StatPosition({data, teams = []}) {
   const fmt = (key, v) => {
     if (typeof v === "number") {
       const isPct = String(key).toLowerCase().includes("percentage");
-      return isPct ? `${v.toFixed(1)}%` : v % 1 !== 0 ? v.toFixed(1) : v;
+      return isPct ? `${v.toFixed(1)}` : v % 1 !== 0 ? v.toFixed(1) : v;
     }
     return v ?? "0";
   };
