@@ -386,9 +386,10 @@ export class ClipAnalyzerService {
   private async analyzeDBClips(clips: ClipData[], gameData: GameData): Promise<any> {
     console.log(`🚨 DB 클립 필터링 시작 - 전체 ${clips.length}개 클립`);
     
-    // DB 클립들만 필터링 (tkl/tkl2에 DB가 있는 클립)
+    // DB 클립들만 필터링 (tkl/tkl2/car/car2에 DB가 있는 클립)
     const dbClips = clips.filter(clip => 
-      clip.tkl?.pos === 'DB' || clip.tkl2?.pos === 'DB'
+      clip.tkl?.pos === 'DB' || clip.tkl2?.pos === 'DB' ||
+      clip.car?.pos === 'DB' || clip.car2?.pos === 'DB'
     );
 
     console.log(`🚨 DB 클립 필터링 완료 - ${dbClips.length}개 DB 클립 발견`);

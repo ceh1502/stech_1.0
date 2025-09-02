@@ -168,7 +168,7 @@ const SignupProfileForm = () => {
 
         console.log('Profile Data:', profileData);
         alert('프로필이 생성되었습니다.');
-        navigate('/main');
+        navigate('/service');
     };
 
     const getStatusClass = (status) => {

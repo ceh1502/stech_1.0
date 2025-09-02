@@ -1,7 +1,7 @@
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import { IoCloseCircleOutline } from "react-icons/io5";
-import Logo from "../assets/images/logos/stech2.png";
+import Logo from "../assets/images/logos/stech.png";
 import "./FAQModal.css";
 
 /** Customer Support / FAQ Modal */
