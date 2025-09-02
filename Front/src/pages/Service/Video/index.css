@@ -443,6 +443,8 @@
   top: 20px;
   z-index: 210;
 }
+
+
 .videoCloseButton {
  width: 40px;
   height: 40px;
@@ -477,7 +479,6 @@
 }
 
 .videoMatchInfo {
-  margin-bottom: 25px;
   padding: 20px;
   background: rgba(255, 255, 255, 0.02);
   border-radius: 12px;
@@ -486,16 +487,20 @@
 
 .videoMatchTeams {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
   color: white;
-  font-family: 'Pretendard', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
+  font-family: 'Noto Sans';
+  font-size: 12px;
+  font-weight: 500;
 }
-
+.videoMatchHome,
+.videoMatchAway {
+  display: flex;
+  align-items: center; /* 핵심: 로고와 텍스트를 세로 중앙 정렬 */
+  gap: 8px; /* 로고와 텍스트 사이의 간격 */
+}
 .videoTeamLogos {
   width: 24px;
   height: 24px;
@@ -518,7 +523,7 @@
   gap: 12px;
   max-height: 60vh;
   overflow-y: auto;
-  padding-right: 5px;
+  padding: 0 8px 12px 8px;   /* 좌우 패딩 + 아래쪽 패딩만 */
 }
 
 .videoPlaysList::-webkit-scrollbar {
@@ -680,7 +685,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 420px;
+  right: 320px;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(5px);
@@ -919,12 +924,33 @@
   display: flex;
   flex-direction: column;
   gap: .5rem;
+  padding-top: 20px;
+  padding-bottom:35px;
 }
 .filterRow{
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   gap: .5rem;
 }
+.videoFilterResetButton{
+  width:280px;
+  height: 40px;
+border-radius: 8px;
+background: #1A58E0;
+color:white;
+
+}
+
+.videoPlaysList {
+  color:white;
+}
+
+.vid-clip-row1, .vid-clip-row2{
+min-width: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: space-evenly;}
 
 @keyframes pulse {
   0% {
