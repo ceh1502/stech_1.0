@@ -7,6 +7,7 @@ import { PlayerService } from './player.service';
 import { ClipAnalyzerService } from './clip-analyzer.service';
 import { QbAnalyzerController } from './qb-analyzer.controller';
 import { QbAnalyzerService } from './qb-analyzer.service';
+import { QbAnalyzerService as NewQbAnalyzerService } from './analyzers/qb-analyzer.service';
 import { RbAnalyzerService } from './analyzers/rb-analyzer.service';
 import { WrAnalyzerService } from './analyzers/wr-analyzer.service';
 import { TeAnalyzerService } from './analyzers/te-analyzer.service';
@@ -47,6 +48,7 @@ import { TeamSeasonStats, TeamSeasonStatsSchema } from '../schemas/team-season-s
     // PlayerNewService,
     ClipAnalyzerService,
     QbAnalyzerService,
+    NewQbAnalyzerService,
     RbAnalyzerService,
     WrAnalyzerService,
     TeAnalyzerService,

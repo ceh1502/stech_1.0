@@ -175,7 +175,18 @@ export class QbAnalyzerService extends BaseAnalyzerService {
     }
 
     // significantPlays 처리 (터치다운, 인터셉션 등)
-    this.processSignificantPlays(clip, qbStats, playType);
+    // SACK playType일 경우 significantPlays의 SACK은 무시
+    if (playType === 'SACK' && clip.significantPlays) {
+      const filteredPlays = [...clip.significantPlays];
+      const sackIndex = filteredPlays.indexOf('SACK');
+      if (sackIndex !== -1) {
+        filteredPlays[sackIndex] = null;
+      }
+      const modifiedClip = { ...clip, significantPlays: filteredPlays };
+      this.processSignificantPlays(modifiedClip, qbStats, playType);
+    } else {
+      this.processSignificantPlays(clip, qbStats, playType);
+    }
   }
 
   /**

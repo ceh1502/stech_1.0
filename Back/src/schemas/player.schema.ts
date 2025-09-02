@@ -26,6 +26,15 @@ export class QBStats {
 
 @Schema()
 export class RBStats {
+  // 리시빙 스탯
+  @Prop({ default: 0 }) rbReceivingTargets?: number;
+  @Prop({ default: 0 }) rbReceptions?: number;
+  @Prop({ default: 0 }) rbReceivingYards?: number;
+  @Prop({ default: 0 }) rbYardsPerReception?: number;
+  @Prop({ default: 0 }) rbReceivingTouchdowns?: number;
+  @Prop({ default: 0 }) rbLongestReception?: number;
+  @Prop({ default: 0 }) rbReceivingFirstDowns?: number;
+  // 러싱 스탯
   @Prop({ default: 0 }) rbRushingYards?: number;
   @Prop({ default: 0 }) rbRushingTouchdowns?: number;
   @Prop({ default: 0 }) rbRushingAttempts?: number;
@@ -33,6 +42,10 @@ export class RBStats {
   @Prop({ default: 0 }) rbLongestRush?: number;
   @Prop({ default: 0 }) fumbles?: number;
   @Prop({ default: 0 }) fumblesLost?: number;
+  @Prop({ default: 0 }) passingFumbles?: number;
+  @Prop({ default: 0 }) rushingFumbles?: number;
+  @Prop({ default: 0 }) passingFumblesLost?: number;
+  @Prop({ default: 0 }) rushingFumblesLost?: number;
   @Prop({ default: 0 }) gamesPlayed?: number;
   // 스페셜팀
   @Prop({ default: 0 }) kickReturns?: number;
@@ -57,6 +70,10 @@ export class WRStats {
   @Prop({ default: 0 }) wrReceivingFirstDowns?: number;
   @Prop({ default: 0 }) fumbles?: number;
   @Prop({ default: 0 }) fumblesLost?: number;
+  @Prop({ default: 0 }) passingFumbles?: number;
+  @Prop({ default: 0 }) rushingFumbles?: number;
+  @Prop({ default: 0 }) passingFumblesLost?: number;
+  @Prop({ default: 0 }) rushingFumblesLost?: number;
   @Prop({ default: 0 }) gamesPlayed?: number;
   // 러싱도 할 수 있음
   @Prop({ default: 0 }) wrRushingAttempts?: number;

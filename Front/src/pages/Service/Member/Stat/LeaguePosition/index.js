@@ -74,18 +74,24 @@ const LeaguePositionPage = () => {
                             longest_rushing: player.stats?.rbLongestRush || player.stats?.wrLongestRush || player.stats?.teLongestRush || player.stats?.longestRush || 0,
 
                             // 리시빙 스탯 (포지션별 구분)
-                            targets: player.stats?.wrReceivingTargets || player.stats?.teReceivingTargets || player.stats?.receivingTargets || 0,
-                            receptions: player.stats?.wrReceptions || player.stats?.teReceptions || player.stats?.receptions || 0,
-                            receiving_yards: player.stats?.wrReceivingYards || player.stats?.teReceivingYards || player.stats?.receivingYards || 0,
-                            yards_per_catch: player.stats?.wrYardsPerReception || player.stats?.teYardsPerReception || player.stats?.yardsPerReception || 0,
-                            receiving_td: player.stats?.wrReceivingTouchdowns || player.stats?.teReceivingTouchdowns || player.stats?.receivingTouchdowns || 0,
-                            longest_reception: player.stats?.wrLongestReception || player.stats?.teLongestReception || player.stats?.longestReception || 0,
-                            receiving_first_downs: player.stats?.wrReceivingFirstDowns || player.stats?.teReceivingFirstDowns || player.stats?.receivingFirstDowns || 0,
+                            targets: player.stats?.rbReceivingTargets || player.stats?.wrReceivingTargets || player.stats?.teReceivingTargets || player.stats?.receivingTargets || 0,
+                            receptions: player.stats?.rbReceptions || player.stats?.wrReceptions || player.stats?.teReceptions || player.stats?.receptions || 0,
+                            receiving_yards: player.stats?.rbReceivingYards || player.stats?.wrReceivingYards || player.stats?.teReceivingYards || player.stats?.receivingYards || 0,
+                            yards_per_catch: player.stats?.rbYardsPerReception || player.stats?.wrYardsPerReception || player.stats?.teYardsPerReception || player.stats?.yardsPerReception || 0,
+                            receiving_td: player.stats?.rbReceivingTouchdowns || player.stats?.wrReceivingTouchdowns || player.stats?.teReceivingTouchdowns || player.stats?.receivingTouchdowns || 0,
+                            longest_reception: player.stats?.rbLongestReception || player.stats?.wrLongestReception || player.stats?.teLongestReception || player.stats?.longestReception || 0,
+                            receiving_first_downs: player.stats?.rbReceivingFirstDowns || player.stats?.wrReceivingFirstDowns || player.stats?.teReceivingFirstDowns || player.stats?.receivingFirstDowns || 0,
 
                             // 수비 스탯 (tackles와 sacks는 QB용과 수비용 통합)
                             tackles: player.stats?.tackles || 0,
                             fumbles: player.stats?.fumbles || 0,
                             fumbles_lost: player.stats?.fumblesLost || 0,
+
+                            // 패스/런별 펌블 스탯 (포지션별 구분)
+                            passingFumbles: player.stats?.passingFumbles || 0,
+                            rushingFumbles: player.stats?.rushingFumbles || 0,
+                            passingFumblesLost: player.stats?.passingFumblesLost || 0,
+                            rushingFumblesLost: player.stats?.rushingFumblesLost || 0,
 
                             // 스페셜 팀 스탯
                             kick_returns: player.stats?.kickReturns || 0,

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Player, PlayerDocument } from '../schemas/player.schema';
+import { QbAnalyzerService } from './analyzers/qb-analyzer.service';
 import { RbAnalyzerService } from './analyzers/rb-analyzer.service';
 import { WrAnalyzerService } from './analyzers/wr-analyzer.service';
 import { TeAnalyzerService } from './analyzers/te-analyzer.service';
@@ -72,6 +73,7 @@ export interface QBStats {
 export class ClipAnalyzerService {
   constructor(
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
+    private qbAnalyzer: QbAnalyzerService,
     private rbAnalyzer: RbAnalyzerService,
     private wrAnalyzer: WrAnalyzerService,
     private teAnalyzer: TeAnalyzerService,
@@ -95,17 +97,21 @@ export class ClipAnalyzerService {
 
     const results = [];
 
-    // QB 분석
-    const qbResult = await this.analyzeQBClips(gameData.Clips, gameData);
-    results.push(...qbResult.results);
+    // QB 분석 - 새로운 analyzer 사용
+    const qbResult = await this.qbAnalyzer.analyzeClips(gameData.Clips, gameData);
+    if (qbResult.results) {
+      results.push(...qbResult.results);
+    }
 
     // RB 분석
     const rbResult = await this.analyzeRBClips(gameData.Clips, gameData);
     results.push(...rbResult.results);
     
-    // WR 분석
-    const wrResult = await this.analyzeWRClips(gameData.Clips, gameData);
-    results.push(...wrResult.results);
+    // WR 분석 - 새로운 analyzer 사용
+    const wrResult = await this.wrAnalyzer.analyzeClips(gameData.Clips, gameData);
+    if (wrResult.results) {
+      results.push(...wrResult.results);
+    }
     
     // TE 분석
     const teResult = await this.analyzeTEClips(gameData.Clips, gameData);
@@ -135,7 +141,7 @@ export class ClipAnalyzerService {
     const dbResult = await this.analyzeDBClips(gameData.Clips, gameData);
     results.push(...dbResult.results);
     
-    console.log(`\n✅ 게임 분석 완료 - ${qbResult.qbCount}명의 QB, ${rbResult.rbCount}명의 RB, ${wrResult.wrCount}명의 WR, ${teResult.teCount}명의 TE, ${kResult.kCount}명의 K, ${pResult.pCount}명의 P, ${olResult.olCount}명의 OL, ${dlResult.dlCount}명의 DL, ${lbResult.lbCount}명의 LB, ${dbResult.dbCount}명의 DB 처리됨`);
+    console.log(`\n✅ 게임 분석 완료 - ${qbResult.qbCount || 0}명의 QB, ${rbResult.rbCount}명의 RB, ${wrResult.wrCount || 0}명의 WR, ${teResult.teCount}명의 TE, ${kResult.kCount}명의 K, ${pResult.pCount}명의 P, ${olResult.olCount}명의 OL, ${dlResult.dlCount}명의 DL, ${lbResult.lbCount}명의 LB, ${dbResult.dbCount}명의 DB 처리됨`);
     
     // 게임 분석 완료 후 팀 스탯 클립 분석
     console.log('\n🏆 팀 스탯 클립 분석 시작...');
