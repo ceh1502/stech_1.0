@@ -817,15 +817,12 @@
   border-radius: 50%;
 }
 
-/* 상단 헤더 영역 수정 - 스코어보드와 통합 */
-.videoTopHeader {
+/* 점수판 스타일 - 기존 유지 */
+.videoScoreboard {
   position: fixed;
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 20px;
   background: linear-gradient(
     135deg,
     rgba(0, 0, 0, 0.9) 0%,
@@ -833,6 +830,9 @@
   );
   border-radius: 15px;
   padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
   backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -840,98 +840,103 @@
   font-family: 'Pretendard', sans-serif;
 }
 
-/* videoScoreboard position 속성 제거 - videoTopHeader 안에 포함 */
-.videoTopHeader .videoScoreboard {
-  position: static;
-  transform: none;
-  background: none;
-  border: none;
-  padding: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-}
-
-/* 도구 버튼들 수정 */
-.videoToolButtons {
+/* 플로팅 도구 버튼들 */
+.floatingToolButtons {
+  position: fixed;
+  top: 20px;
+  right: 100px;
   display: flex;
-  gap: 12px;
-  margin-left: 20px;
-  padding-left: 20px;
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  gap: 15px;
+  z-index: 51;
 }
 
-.videoToolButton span {
-  font-size: 13px;
-  font-family: 'Pretendard', sans-serif;
-  font-weight: 600;
+.floatingToolBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-.videoToolButton:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+/* 메모 버튼 */
+.floatingToolBtn.memoBtn {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 193, 7, 0.9) 0%,
+    rgba(255, 152, 0, 0.9) 100%
+  );
+  color: white;
 }
 
-/* 메모 버튼 수정 */
-.videoToolButton.memoBtn {
-  background: rgba(255, 193, 7, 0.15);
-  border-color: rgba(255, 193, 7, 0.3);
+.floatingToolBtn.memoBtn:hover {
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 6px 25px rgba(255, 193, 7, 0.5);
 }
 
-.videoToolButton.memoBtn:hover:not(:disabled) {
-  background: rgba(255, 193, 7, 0.25);
-  border-color: rgba(255, 193, 7, 0.5);
-  box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+/* 매직펜슬 버튼 */
+.floatingToolBtn.magicPencilBtn {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 123, 26, 0.9) 0%,
+    rgba(255, 87, 34, 0.9) 100%
+  );
+  color: white;
 }
 
-/* 매직펜슬 버튼 수정 */
-.videoToolButton.magicPencilBtn {
-  background: rgba(238, 123, 26, 0.15);
-  border-color: rgba(238, 123, 26, 0.3);
+.floatingToolBtn.magicPencilBtn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 6px 25px rgba(238, 123, 26, 0.5);
 }
 
-.videoToolButton.magicPencilBtn:hover:not(:disabled) {
-  background: rgba(238, 123, 26, 0.25);
-  border-color: rgba(238, 123, 26, 0.5);
-  box-shadow: 0 4px 15px rgba(238, 123, 26, 0.3);
+.floatingToolBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
 }
 
-/* 메모 인디케이터 애니메이션 추가 */
-@keyframes memoGlow {
+/* 메모 인디케이터 */
+.floatingToolBtn .memoIndicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: #ff0000;
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
   }
   70% {
-    box-shadow: 0 0 0 8px rgba(255, 193, 7, 0);
+    box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
   }
 }
 
-.memoIndicator {
-  animation: memoGlow 2s infinite;
-}
-
-/* 반응형 추가 */
+/* 모바일 반응형 */
 @media (max-width: 768px) {
-  .videoTopHeader {
+  .floatingToolButtons {
+    top: auto;
+    bottom: 100px;
+    right: 20px;
     flex-direction: column;
-    gap: 10px;
-    width: 90%;
-    padding: 10px 15px;
   }
 
-  .videoTopHeader .videoScoreboard {
-    gap: 15px;
-  }
-
-  .videoToolButtons {
-    margin-left: 0;
-    padding-left: 0;
-    border-left: none;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    width: 100%;
-    justify-content: center;
+  .floatingToolBtn {
+    width: 45px;
+    height: 45px;
   }
 }

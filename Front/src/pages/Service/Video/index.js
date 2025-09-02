@@ -318,68 +318,63 @@ export default function VideoPlayer() {
           <HiOutlineMenuAlt3 size={24} />
         </button>
 
-        {/* 상단 헤더 영역 - 점수판과 도구 버튼 */}
-        <div className="videoTopHeader">
-          {/* 점수판 */}
-          <div className="videoScoreboard">
-            <div className="scoreTeam leftTeam">
-              {awayLogo ? (
-                <img src={awayLogo} alt={awayName} className="scoreTeamLogo" />
-              ) : (
-                <div className="scoreTeamLogo placeholder">{awayName[0]}</div>
-              )}
-              <div className="scoreTeamInfo">
-                <span className="scoreTeamName">{awayName}</span>
-                <span className="scoreTeamScore">{scoreAway}</span>
-              </div>
-            </div>
-
-            <div className="scoreCenter">
-              <div className="scoreQuarter">Q{quarter}</div>
-              <div className="scoreDown">
-                {typeof down === 'number'
-                  ? `${down}${getOrdinal(down)} & ${ytg ?? 0}`
-                  : '1st & 10'}
-              </div>
-            </div>
-
-            <div className="scoreTeam rightTeam">
-              <div className="scoreTeamInfo">
-                <span className="scoreTeamName">{homeName}</span>
-                <span className="scoreTeamScore">{scoreHome}</span>
-              </div>
-              {homeLogo ? (
-                <img src={homeLogo} alt={homeName} className="scoreTeamLogo" />
-              ) : (
-                <div className="scoreTeamLogo placeholder">{homeName[0]}</div>
-              )}
+        {/* 점수판 - 중앙 유지 */}
+        <div className="videoScoreboard">
+          <div className="scoreTeam leftTeam">
+            {awayLogo ? (
+              <img src={awayLogo} alt={awayName} className="scoreTeamLogo" />
+            ) : (
+              <div className="scoreTeamLogo placeholder">{awayName[0]}</div>
+            )}
+            <div className="scoreTeamInfo">
+              <span className="scoreTeamName">{awayName}</span>
+              <span className="scoreTeamScore">{scoreAway}</span>
             </div>
           </div>
 
-          {/* 도구 버튼들 - 메모가 먼저, 매직펜슬이 그 다음 */}
-          <div className="videoToolButtons">
-            {/* 메모 버튼 */}
-            <button
-              className="videoToolButton memoBtn"
-              onClick={() => setShowMemo(true)}
-              title="메모 작성"
-            >
-              <FaStickyNote size={20} />
-              <span>메모</span>
-              {memos[selectedId] && <span className="memoIndicator"></span>}
-            </button>
-
-            {/* 매직펜슬 버튼 */}
-            <button
-              className="videoToolButton magicPencilBtn"
-              onClick={() => setShowMagicPencil(true)}
-              disabled={isPlaying || hasError || !selected || hasNoVideo}
-              title="매직펜슬 (일시정지 상태에서만 사용 가능)"
-            >
-              <FaPencilAlt size={20} />
-              <span>매직펜슬</span>
-            </button>
+          <div className="scoreCenter">
+            <div className="scoreQuarter">Q{quarter}</div>
+            <div className="scoreDown">
+              {typeof down === 'number'
+                ? `${down}${getOrdinal(down)} & ${ytg ?? 0}`
+                : '1st & 10'}
+            </div>
           </div>
+
+          <div className="scoreTeam rightTeam">
+            <div className="scoreTeamInfo">
+              <span className="scoreTeamName">{homeName}</span>
+              <span className="scoreTeamScore">{scoreHome}</span>
+            </div>
+            {homeLogo ? (
+              <img src={homeLogo} alt={homeName} className="scoreTeamLogo" />
+            ) : (
+              <div className="scoreTeamLogo placeholder">{homeName[0]}</div>
+            )}
+          </div>
+        </div>
+
+        {/* 플로팅 도구 버튼들 - 스코어보드 외부 */}
+        <div className="floatingToolButtons">
+          {/* 메모 버튼 */}
+          <button
+            className="floatingToolBtn memoBtn"
+            onClick={() => setShowMemo(true)}
+            title="메모 작성"
+          >
+            <FaStickyNote size={24} />
+            {memos[selectedId] && <span className="memoIndicator"></span>}
+          </button>
+
+          {/* 매직펜슬 버튼 */}
+          <button
+            className="floatingToolBtn magicPencilBtn"
+            onClick={() => setShowMagicPencil(true)}
+            disabled={isPlaying || hasError || !selected || hasNoVideo}
+            title="매직펜슬 (일시정지 상태에서만 사용 가능)"
+          >
+            <FaPencilAlt size={24} />
+          </button>
         </div>
 
         {/* 비디오 영역 - 기존 코드 유지 */}
