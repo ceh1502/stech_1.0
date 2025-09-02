@@ -15,6 +15,10 @@ import Sogang from '../../assets/images/png/TeamLogosPng/Sogang-Albatross.png';
 import Soongsil from '../../assets/images/png/TeamLogosPng/soongsil-crusaders.png';
 import UOS from '../../assets/images/png/TeamLogosPng/UOS-City-Hawks.png';
 import Yonsei from '../../assets/images/png/TeamLogosPng/Yonsei-Eagles.png';
+
+const DAUM_POSTCODE_URL =
+  'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+
 const teamData = {
     'seoul-first': [
         { value: 'yonsei', label: 'YONSEI EAGLES', logo: Yonsei },
@@ -177,28 +181,38 @@ const SignupProfileForm = () => {
         return 'status-message';
     };
 
-    useEffect(() => {
-        const script = document.createElement('script');
-        script.src = '//t1.daumcdn.net/map_js_init/postcode.v2.js';
-        script.async = true;
-        script.onload = () => {
-            setScriptLoaded(true);
-        };
+  useEffect(() => {
+  // 이미 로드됐다면 재로딩 X
+  if (window.daum?.Postcode) {
+    setScriptLoaded(true);
+    return;
+  }
 
-        document.body.appendChild(script);
+  // 중복 삽입 방지
+  let s = document.querySelector('script[data-daum-postcode]');
+  if (!s) {
+    s = document.createElement('script');
+    s.src = DAUM_POSTCODE_URL;   // ✅ 새 경로 + HTTPS
+    s.async = true;
+    s.defer = true;
+    s.dataset.daumPostcode = 'true';
+    document.head.appendChild(s);
+  }
 
-        const handleClickOutside = (event) => {
-            if (teamDropdownRef.current && !teamDropdownRef.current.contains(event.target)) {
-                setIsTeamDropdownOpen(false);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.body.removeChild(script);
-        };
-    }, [teamDropdownRef]);
+  const onLoad = () => setScriptLoaded(true);
+  const onError = () => setScriptLoaded(false);
 
+  s.addEventListener('load', onLoad);
+  s.addEventListener('error', onError);
+
+  return () => {
+    s.removeEventListener('load', onLoad);
+    s.removeEventListener('error', onError);
+    // 보통은 스크립트를 유지하여 재방문 시 재사용합니다.
+    // 꼭 제거해야 한다면 아래 주석 해제:
+    // if (s && s.parentNode) s.parentNode.removeChild(s);
+  };
+}, []);
     const getSelectedTeam = () => {
         if (!profileData.team) {
             return { label: '팀 선택', logo: null };
