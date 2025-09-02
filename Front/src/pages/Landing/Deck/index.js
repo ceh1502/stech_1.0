@@ -74,19 +74,14 @@ const Deck = () => {
         ref={(el) => (pageRefs.current[pageNumber] = el)}
         data-page-number={pageNumber}
         className="pdf-page-container"
-        style={{ minHeight: '675px' }}
       >
         {isVisible ? (
           <Page
             pageNumber={pageNumber}
-            width={1060}
-            height={600}
+            width={1080} // 고정 width
             renderMode="canvas"
-            renderTextLayer={false} // 10MB PDF는 텍스트 레이어 비활성화 권장
+            renderTextLayer={false}
             renderAnnotationLayer={false}
-            loading={
-              <div className="page-loading">페이지 {pageNumber} 로딩 중...</div>
-            }
           />
         ) : (
           <div className="page-placeholder">
