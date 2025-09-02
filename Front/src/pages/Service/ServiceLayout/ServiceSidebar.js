@@ -77,7 +77,7 @@ const ServiceSidebar = () => {
   // 추가 메뉴 아이템 (member) - 하위 메뉴 포함
   const memberMenuItems = [
     {
-      path: '/service/member',
+      path: '/service',
       label: '홈',
       icon: <GoHome />,
       description: 'Dashboard overview',
