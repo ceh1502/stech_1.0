@@ -14,7 +14,6 @@ function Dropdown({
   isOpen,
   onToggle,
   onClose,
-  width = 220,
   children,
 }) {
   const ref = useRef(null);
