@@ -149,6 +149,37 @@ const getOrdinal = (n) => {
   if (n === 3) return 'rd';
   return 'th';
 };
+const SPECIAL_DOWN_MAP = {
+  TPT: '2PT',
+  KICKOFF: '킥오프',
+  PAT: 'PAT',
+};
+
+const getDownDisplay = (c) => {
+  const pt = String(c.playType || '').trim().toUpperCase();
+  const downRaw = c.raw.down; // 정규화된 데이터가 아닌 원본 raw 데이터의 down을 사용
+  const downStr = downRaw != null ? String(downRaw).trim().toUpperCase() : '';
+
+  // 1) down 값이 특수 문자열이면 그 라벨만 표시
+  if (SPECIAL_DOWN_MAP[downStr]) return SPECIAL_DOWN_MAP[downStr];
+  // 2) playType으로도 특수 플레이라면 라벨만 표시
+  if (SPECIAL_DOWN_MAP[pt]) return SPECIAL_DOWN_MAP[pt];
+
+  // 3) 일반 다운: "n & ytg"
+  const d =
+    typeof c.down === 'number'
+      ? c.down
+      : Number.isFinite(parseInt(downStr, 10))
+      ? parseInt(downStr, 10)
+      : null;
+
+  if (d != null) {
+    const ytg = c.yardsToGo ?? 0;
+    return `${d} & ${ytg}`;
+  }
+  
+  return ''; // 그 외는 비워둠
+};
 
 // 핵심 로직을 담당할 내부 컴포넌트
 function PlayerCore({ stateData }) {
@@ -753,46 +784,40 @@ function PlayerCore({ stateData }) {
               normalized.map((p) => (
                 <div
                   key={p.id}
-                  className={`videoPlayCard ${
+                  // clip-row 클래스를 사용하고, 선택된 항목에 'selected' 클래스를 추가합니다.
+                  className={`clip-row ${
                     isPlaySelected(p.id) ? 'selected' : ''
                   }`}
                   onClick={() => selectPlay(p.id)}
                 >
-                  <div className="videoPlayInfo">
-                    <div className="videoPlayBasicInfo">
-                      <span className="videoQuarter">{p.quarter}Q</span>
-                      <span className="videoDown">
-                        {typeof p.down === 'number'
-                          ? `${p.down}${getOrdinal(p.down)} & ${
-                              p.yardsToGo ?? 0
-                            }`
-                          : '—'}
-                      </span>
-                      <span className="videoPlayerNumber">
-                        {p.offensiveTeam || ''}
-                      </span>
+                  <div className="quarter-name">
+                    <div>{p.quarter}Q</div>
+                  </div>
+                  <div className="clip-rows">
+                    <div className="clip-row1">
+                      <div className="clip-down">{getDownDisplay(p)}</div>
+                      <div className="clip-type">
+                        #{PT_LABEL[p.playType] || p.playType}
+                      </div>
                     </div>
-                    <div className="videoPlayTags">
-                      {p.playType && (
-                        <span className="videoPT">
-                          #{prettyPlayType(p.playType)}
-                        </span>
-                      )}
+                    <div className="clip-row2">
+                      <div className="clip-oT">{p.offensiveTeam}</div>
                       {Array.isArray(p.significant) &&
-                        p.significant.map((t, i) => (
-                          <span
-                            key={`${p.id}-sig-${i}`}
-                            className="videoSignificantTag"
-                          >
-                            #{t}
-                          </span>
-                        ))}
+                      p.significant.length > 0 ? (
+                        <div className="clip-sig">
+                          {p.significant.map((t, idx) => (
+                            <span key={`${p.id}-sig-${idx}`}>#{t}</span>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="clip-sig" />
+                      )}
                     </div>
                   </div>
-                  <IoPlayCircleOutline className="videoPlayIcon" />
                 </div>
               ))
             ) : (
+              // 비어있을 때 표시될 메시지
               <div className="videoNoPlaysMessage">
                 일치하는 클립이 없습니다.
               </div>
