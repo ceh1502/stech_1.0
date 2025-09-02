@@ -71,6 +71,7 @@ export class RbAnalyzerService extends BaseAnalyzerService {
       this.calculateFinalStats(rbStats);
       
       console.log(`🏈 RB ${rbStats.jerseyNumber}번 (${rbStats.teamName}) 최종 스탯:`);
+      console.log(`   === 패스 유형 ===`);
       console.log(`   리시빙 타겟: ${rbStats.receivingTargets}`);
       console.log(`   리셉션: ${rbStats.receptions}`);
       console.log(`   리시빙야드: ${rbStats.receivingYards}`);
@@ -78,9 +79,13 @@ export class RbAnalyzerService extends BaseAnalyzerService {
       console.log(`   리시빙TD: ${rbStats.receivingTouchdowns}`);
       console.log(`   가장 긴 리셉션: ${rbStats.longestReception}`);
       console.log(`   1다운: ${rbStats.receivingFirstDowns}`);
+      console.log(`   패스 펌블: ${rbStats.passingFumbles}`);
+      console.log(`   패스 펌블 턴오버: ${rbStats.passingFumblesLost}`);
+      console.log(`   === 런 유형 ===`);
       console.log(`   러싱 시도: ${rbStats.rushingAttempts}, 야드: ${rbStats.rushingYards}`);
-      console.log(`   펌블: 총 ${rbStats.fumbles}개 (패스: ${rbStats.passingFumbles}, 런: ${rbStats.rushingFumbles})`);
-      console.log(`   펌블 턴오버: 총 ${rbStats.fumblesLost}개 (패스: ${rbStats.passingFumblesLost}, 런: ${rbStats.rushingFumblesLost})`);
+      console.log(`   런 펌블: ${rbStats.rushingFumbles}`);
+      console.log(`   런 펌블 턴오버: ${rbStats.rushingFumblesLost}`);
+      console.log(`   === 스페셜팀 ===`);
       console.log(`   킥오프 리턴: ${rbStats.kickoffReturn}, 야드: ${rbStats.kickoffReturnYard}`);
       console.log(`   펀트 리턴: ${rbStats.puntReturn}, 야드: ${rbStats.puntReturnYard}`);
 
@@ -152,6 +157,8 @@ export class RbAnalyzerService extends BaseAnalyzerService {
       rbPlayers.push({ number: clip.car2.num, role: 'car2' });
     }
 
+    console.log(`🔍 RB 클립 분석: playType=${clip.playType}, RB선수=${rbPlayers.length}명, significantPlays=${clip.significantPlays?.join(',')}`);
+
     for (const rbPlayer of rbPlayers) {
       const rbKey = this.getRBKey(rbPlayer.number, clip.offensiveTeam, gameData);
       
@@ -160,6 +167,7 @@ export class RbAnalyzerService extends BaseAnalyzerService {
       }
 
       const rbStats = rbStatsMap.get(rbKey);
+      console.log(`📈 RB ${rbPlayer.number}번 처리 중...`);
       this.processPlay(clip, rbStats, processedClipKeys);
     }
   }

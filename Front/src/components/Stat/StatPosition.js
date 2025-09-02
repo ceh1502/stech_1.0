@@ -224,8 +224,8 @@ const statColumns = {
       {key: "yards_per_carry", label: "볼 캐리 당 러싱 야드"},
       {key: "rushing_td", label: "러싱 터치다운"},
       {key: "longest_rushing", label: "가장 긴 러싱 야드"},
-      {key: "fumbles", label: "펌블 수"},
-      {key: "fumbles_lost", label: "펌블 턴오버 수"},
+      {key: "rushingFumbles", label: "펌블 수"},
+      {key: "rushingFumblesLost", label: "펌블 턴오버 수"},
     ],
     pass: [
       {key: "games", label: "경기 수"},
@@ -236,8 +236,8 @@ const statColumns = {
       {key: "receiving_td", label: "리시빙 터치다운 수"},
       {key: "longest_reception", label: "가장 긴 리시빙 야드"},
       {key: "receiving_first_downs", label: "리시브 후 퍼스트 다운 수"},
-      {key: "fumbles", label: "펌블 수"},
-      {key: "fumbles_lost", label: "펌블 턴오버 수"},
+      {key: "passingFumbles", label: "펌블 수"},
+      {key: "passingFumblesLost", label: "펌블 턴오버 수"},
     ],
     스페셜팀: [
       {key: "games", label: "경기 수"},
