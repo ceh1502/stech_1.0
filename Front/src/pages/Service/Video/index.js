@@ -741,7 +741,7 @@ function PlayerCore({ stateData }) {
             <div className="filterRow">
               <button
                 type="button"
-                className="resetButton"
+                className="videoFilterResetButton"
                 onClick={clearAllFilters}
               >
                 초기화

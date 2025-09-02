@@ -443,6 +443,8 @@
   top: 20px;
   z-index: 210;
 }
+
+
 .videoCloseButton {
  width: 40px;
   height: 40px;
@@ -518,7 +520,7 @@
   gap: 12px;
   max-height: 60vh;
   overflow-y: auto;
-  padding-right: 5px;
+  padding: 0 8px 12px 8px;   /* 좌우 패딩 + 아래쪽 패딩만 */
 }
 
 .videoPlaysList::-webkit-scrollbar {
@@ -680,7 +682,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 420px;
+  right: 320px;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(5px);
@@ -919,11 +921,20 @@
   display: flex;
   flex-direction: column;
   gap: .5rem;
+  padding-bottom:35px;
 }
 .filterRow{
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   gap: .5rem;
+}
+.videoFilterResetButton{
+  width:280px;
+  height: 40px;
+border-radius: 8px;
+background: #1A58E0;
+color:white;
+
 }
 
 @keyframes pulse {
