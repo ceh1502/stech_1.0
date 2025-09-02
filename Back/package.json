@@ -38,7 +38,6 @@
     "class-validator": "^0.14.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "fabric": "^6.7.1",
     "helmet": "^8.1.0",
     "mongoose": "^8.17.1",
     "multer": "^2.0.2",
