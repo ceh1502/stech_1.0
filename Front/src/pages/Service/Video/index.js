@@ -156,7 +156,9 @@ const SPECIAL_DOWN_MAP = {
 };
 
 const getDownDisplay = (c) => {
-  const pt = String(c.playType || '').trim().toUpperCase();
+  const pt = String(c.playType || '')
+    .trim()
+    .toUpperCase();
   const downRaw = c.raw.down; // 정규화된 데이터가 아닌 원본 raw 데이터의 down을 사용
   const downStr = downRaw != null ? String(downRaw).trim().toUpperCase() : '';
 
@@ -177,7 +179,7 @@ const getDownDisplay = (c) => {
     const ytg = c.yardsToGo ?? 0;
     return `${d} & ${ytg}`;
   }
-  
+
   return ''; // 그 외는 비워둠
 };
 
@@ -616,17 +618,35 @@ function PlayerCore({ stateData }) {
         <div className="videoModalContent">
           <div className="videoMatchInfo">
             <div className="videoMatchTeams">
-              {awayLogo ? (
-                <img src={awayLogo} alt={awayName} className="videoTeamLogos" />
-              ) : (
-                <div className="videoTeamLogos placeholder">{awayName[0]}</div>
-              )}
-              <span>{`${homeName} VS ${awayName}`}</span>
-              {homeLogo ? (
-                <img src={homeLogo} alt={homeName} className="videoTeamLogos" />
-              ) : (
-                <div className="videoTeamLogos placeholder">{homeName[0]}</div>
-              )}
+              <div className="videoMatchHome">
+                {homeLogo ? (
+                  <img
+                    src={homeLogo}
+                    alt={homeName}
+                    className="videoTeamLogos"
+                  />
+                ) : (
+                  <div className="videoTeamLogos placeholder">
+                    {homeName[0]}
+                  </div>
+                )}
+                <span>{homeName}</span>
+              </div>
+              <div>VS</div>
+              <div className="videoMatchAway">
+                {awayLogo ? (
+                  <img
+                    src={awayLogo}
+                    alt={awayName}
+                    className="videoTeamLogos"
+                  />
+                ) : (
+                  <div className="videoTeamLogos placeholder">
+                    {awayName[0]}
+                  </div>
+                )}
+                <span>{awayName}</span>
+              </div>
             </div>
           </div>
           <div

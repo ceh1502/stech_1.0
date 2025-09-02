@@ -479,7 +479,6 @@
 }
 
 .videoMatchInfo {
-  margin-bottom: 25px;
   padding: 20px;
   background: rgba(255, 255, 255, 0.02);
   border-radius: 12px;
@@ -488,16 +487,20 @@
 
 .videoMatchTeams {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
   color: white;
-  font-family: 'Pretendard', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
+  font-family: 'Noto Sans';
+  font-size: 12px;
+  font-weight: 500;
 }
-
+.videoMatchHome,
+.videoMatchAway {
+  display: flex;
+  align-items: center; /* 핵심: 로고와 텍스트를 세로 중앙 정렬 */
+  gap: 8px; /* 로고와 텍스트 사이의 간격 */
+}
 .videoTeamLogos {
   width: 24px;
   height: 24px;
@@ -921,6 +924,7 @@
   display: flex;
   flex-direction: column;
   gap: .5rem;
+  padding-top: 20px;
   padding-bottom:35px;
 }
 .filterRow{
