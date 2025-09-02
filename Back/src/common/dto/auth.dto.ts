@@ -1,42 +1,56 @@
-import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
+import { IsString, MinLength, IsOptional, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SignupDto {
-  @ApiProperty({ example: 'user@example.com' })
-  @IsEmail()
-  email: string;
+  @ApiProperty({ example: 'user123' })
+  @IsString()
+  @Matches(/^[a-zA-Z0-9]+$/, { message: '영어 및 숫자 조합만 입력해주세요.' })
+  username: string; // 아이디 (기존 email → username)
 
   @ApiProperty({ example: 'password123' })
   @IsString()
-  @MinLength(6)
+  @MinLength(8, { message: '비밀번호를 8글자 이상 입력해주세요.' })
   password: string;
 
-  @ApiProperty({ example: 'John Doe' })
+  @ApiProperty({ example: '1802' })
   @IsString()
-  name: string;
+  authCode: string; // 인증코드
 
-  @ApiProperty({ example: 'johnny', required: false })
+  @ApiProperty({ example: '건국대 레이징불스', required: false })
   @IsOptional()
   @IsString()
-  nickname?: string;
+  teamName?: string; // 팀명 (인증코드로 자동 설정)
+
+  @ApiProperty({ example: 'player', required: false })
+  @IsOptional()
+  @IsString()
+  role?: string; // 역할 (인증코드로 자동 설정)
+
+  @ApiProperty({ example: '서울권', required: false })
+  @IsOptional()
+  @IsString()
+  region?: string; // 지역 (인증코드로 자동 설정)
 }
 
 export class LoginDto {
-  @ApiProperty({ example: 'user@example.com' })
-  @IsEmail()
-  email: string;
+  @ApiProperty({ example: 'user123' })
+  @IsString()
+  username: string; // 아이디 (기존 email → username)
 
   @ApiProperty({ example: 'password123' })
   @IsString()
   password: string;
 }
 
-export class VerifyEmailDto {
-  @ApiProperty({ example: 'abc123def456' })
+export class CheckUsernameDto {
+  @ApiProperty({ example: 'user123' })
   @IsString()
-  token: string;
+  @Matches(/^[a-zA-Z0-9]+$/, { message: '영어 및 숫자 조합만 입력해주세요.' })
+  username: string;
+}
 
-  @ApiProperty({ example: 'user@example.com' })
-  @IsEmail()
-  email: string;
+export class VerifyTeamCodeDto {
+  @ApiProperty({ example: '1802' })
+  @IsString()
+  authCode: string;
 }

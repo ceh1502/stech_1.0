@@ -6,30 +6,34 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true, unique: true, lowercase: true })
-  email: string;
+  @Prop({ required: true, unique: true })
+  username: string; // 아이디 (기존 email → username으로 변경)
 
   @Prop({ required: true })
   password: string;
 
   @Prop({ required: true })
-  name: string;
+  teamName: string; // 인증코드로 검증된 팀명
 
-  @Prop({ default: false })
-  isEmailVerified: boolean;
+  @Prop({ required: true, enum: ['coach', 'player'] })
+  role: string; // 코치 또는 선수
 
-  @Prop({ type: String, default: null })
-  emailVerificationToken: string | null;
+  @Prop({ required: true })
+  region: string; // 지역 (서울권, 경기강원권 등)
 
-  @Prop({ type: Date, default: null })
-  emailVerificationExpires: Date | null;
+  @Prop({ required: true })
+  authCode: string; // 사용된 인증코드
+
+  @Prop({ default: true })
+  isActive: boolean; // 계정 활성화 상태
 
   @Prop({
     type: {
       avatar: String,
       bio: String,
-      position: String,
-      team: String,
+      nickname: String,
+      studentId: String,
+      email: String,
       joinDate: { type: Date, default: Date.now },
     },
     default: {},
@@ -37,8 +41,9 @@ export class User {
   profile: {
     avatar?: string;
     bio?: string;
-    position?: string;
-    team?: string;
+    nickname?: string;
+    studentId?: string;
+    email?: string;
     joinDate?: Date;
   };
 
@@ -68,3 +73,7 @@ UserSchema.methods.comparePassword = async function (
 ): Promise<boolean> {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// 인덱스 설정
+UserSchema.index({ username: 1 });
+UserSchema.index({ teamName: 1, role: 1 });
