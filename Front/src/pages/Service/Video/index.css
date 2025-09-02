@@ -417,8 +417,8 @@
 .videoSideModal {
   position: fixed;
   top: 0;
-  right: -420px;
-  width: 420px;
+  right: -320px;
+  width: 320px;
   height: 100vh;
   background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
   border-left: 1px solid #333;
@@ -427,42 +427,43 @@
   overflow-y: auto;
   backdrop-filter: blur(20px);
   box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+
+  display:flex;
+  
 }
 
 .videoSideModal.open {
   right: 0;
 }
 
-.videoModalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 25px;
-  border-bottom: 1px solid #333;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-}
 
-.videoModalHeader h3 {
-  color: white;
-  font-family: 'Pretendard', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(135deg, #ee7b1a 0%, #ff9500 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.videoModalClose {
+  position: absolute;
+  left: -50px; /* 사이드바 바깥으로 */
+  top: 20px;
+  z-index: 210;
 }
-
 .videoCloseButton {
-  background: rgba(255, 255, 255, 0.1);
+ width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  color: #a5a5a5;
+  color: #fff;
   cursor: pointer;
-  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s ease;
+}
+.videoCloseButton:hover {
+  background: rgba(238, 123, 26, 0.9);
+  border-color: #ee7b1a;
+  transform: scale(1.1);
+}.videoCloseButton:hover {
+  background: rgba(238, 123, 26, 0.9);
+  border-color: #ee7b1a;
+  transform: scale(1.1);
 }
 
 .videoCloseButton:hover {
@@ -472,7 +473,7 @@
 }
 
 .videoModalContent {
-  padding: 25px;
+  padding: 10px;
 }
 
 .videoMatchInfo {
@@ -912,6 +913,17 @@
   border-radius: 50%;
   border: 2px solid white;
   animation: pulse 2s infinite;
+}
+
+.videoFilterControls{
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.filterRow{
+  display: flex;
+  justify-content: space-between;
+  gap: .5rem;
 }
 
 @keyframes pulse {
