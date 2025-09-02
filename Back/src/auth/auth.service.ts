@@ -2,79 +2,85 @@ import {
   Injectable,
   BadRequestException,
   UnauthorizedException,
-  NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
-// import * as bcrypt from 'bcrypt'; // TODO: 사용할 때 주석 해제
-import * as crypto from 'crypto';
 import { User, UserDocument } from '../schemas/user.schema';
-import { SignupDto, LoginDto, VerifyEmailDto } from '../common/dto/auth.dto';
-import { EmailService } from '../utils/email.service';
+import { SignupDto, LoginDto } from '../common/dto/auth.dto';
+import { TEAM_CODES } from '../common/constants/team-codes';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
-    private emailService: EmailService,
   ) {}
 
   async signup(signupDto: SignupDto) {
-    const { email, password, name, nickname } = signupDto;
+    const { username, password, authCode } = signupDto;
 
-    const fullName = name || nickname;
-
-    // 이메일 중복 확인
-    const existingUser = await this.userModel.findOne({ email });
+    // 아이디 중복 확인
+    const existingUser = await this.userModel.findOne({ username });
     if (existingUser) {
-      throw new BadRequestException('이미 존재하는 이메일입니다.');
+      throw new ConflictException('이미 존재하는 아이디입니다.');
     }
 
-    // 이메일 인증 토큰 생성
-    const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24시간
+    // 인증코드 검증
+    const teamInfo = TEAM_CODES[authCode];
+    if (!teamInfo) {
+      throw new BadRequestException('유효하지 않은 인증코드입니다.');
+    }
 
-    // 새 유저 저장 (비밀번호는 스키마에서 자동 해싱)
+    // 새 유저 생성
     const newUser = new this.userModel({
-      email,
+      username,
       password,
-      name: fullName,
-      emailVerificationToken: token,
-      emailVerificationExpires: expires,
-      isEmailVerified: false,
+      teamName: teamInfo.team,
+      role: teamInfo.role,
+      region: teamInfo.region,
+      authCode,
+      isActive: true,
     });
 
     await newUser.save();
 
-    // 이메일 전송
-    await this.emailService.sendVerificationEmail(email, token, fullName);
+    // JWT 토큰 발급
+    const token = this.jwtService.sign({ 
+      id: newUser._id, 
+      username: newUser.username,
+      team: newUser.teamName,
+      role: newUser.role 
+    });
 
     return {
       success: true,
-      message: '회원가입 성공! 인증 메일을 확인하세요.',
+      message: '회원가입 성공!',
       data: {
+        token,
         user: {
           id: newUser._id,
-          email: newUser.email,
-          name: newUser.name,
+          username: newUser.username,
+          teamName: newUser.teamName,
+          role: newUser.role,
+          region: newUser.region,
         },
       },
     };
   }
 
   async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
+    const { username, password } = loginDto;
 
     console.log('=== 로그인 시도 ===');
-    console.log('받은 이메일:', email);
+    console.log('받은 아이디:', username);
 
-    // 이메일로 유저 찾기
-    const user = await this.userModel.findOne({ email });
+    // 아이디로 유저 찾기
+    const user = await this.userModel.findOne({ username });
     if (!user) {
-      console.log('❌ 이메일 불일치');
-      throw new BadRequestException('존재하지 않는 이메일입니다.');
+      console.log('❌ 아이디 불일치');
+      throw new BadRequestException('존재하지 않는 아이디입니다.');
     }
 
     // 비밀번호 확인
@@ -84,12 +90,17 @@ export class AuthService {
       throw new UnauthorizedException('비밀번호가 틀렸습니다.');
     }
 
-    if (!user.isEmailVerified) {
-      throw new UnauthorizedException('이메일 인증이 필요합니다.');
+    if (!user.isActive) {
+      throw new UnauthorizedException('비활성화된 계정입니다.');
     }
 
     // JWT 발급
-    const token = this.jwtService.sign({ id: user._id });
+    const token = this.jwtService.sign({ 
+      id: user._id, 
+      username: user.username,
+      team: user.teamName,
+      role: user.role 
+    });
 
     console.log('✅ 로그인 성공');
 
@@ -100,63 +111,60 @@ export class AuthService {
         token,
         user: {
           id: user._id,
-          email: user.email,
-          name: user.name,
-          isEmailVerified: user.isEmailVerified,
+          username: user.username,
+          teamName: user.teamName,
+          role: user.role,
+          region: user.region,
         },
       },
     };
   }
 
-  async verifyEmail(verifyEmailDto: VerifyEmailDto) {
-    const { token, email } = verifyEmailDto;
+  async checkUsername(username: string) {
+    console.log('=== 아이디 중복 확인 ===');
+    console.log('받은 아이디:', username);
 
-    console.log('=== 이메일 인증 시도 ===');
-    console.log('받은 이메일:', email);
-
-    const user = await this.userModel.findOne({ email });
-    if (!user) {
-      console.log('❌ 이메일에 해당하는 유저 없음');
-      throw new NotFoundException('해당 이메일의 사용자를 찾을 수 없습니다.');
+    const existingUser = await this.userModel.findOne({ username });
+    if (existingUser) {
+      console.log('❌ 중복된 아이디');
+      throw new ConflictException('중복된 아이디입니다.');
     }
 
-    if (user.isEmailVerified) {
-      console.log('❗ 이미 인증된 계정');
-      throw new BadRequestException('이미 인증된 계정입니다.');
-    }
-
-    if (
-      user.emailVerificationToken !== token ||
-      !user.emailVerificationExpires ||
-      user.emailVerificationExpires < new Date()
-    ) {
-      console.log('❌ 토큰 불일치 또는 만료');
-      throw new BadRequestException('유효하지 않거나 만료된 토큰입니다.');
-    }
-
-    // 인증 성공 처리
-    user.isEmailVerified = true;
-    user.emailVerificationToken = null;
-    user.emailVerificationExpires = null;
-    await user.save();
-
-    // 인증 후 JWT 발급
-    const jwtToken = this.jwtService.sign({ id: user._id });
-
-    console.log('✅ 이메일 인증 성공');
-
+    console.log('✅ 사용 가능한 아이디');
     return {
       success: true,
-      message: '이메일 인증 완료',
-      data: {
-        token: jwtToken,
-        user: {
-          id: user._id,
-          email: user.email,
-          name: user.name,
-          isEmailVerified: true,
-        },
-      },
+      message: '사용 가능한 아이디입니다.',
+      data: { available: true }
     };
+  }
+
+  async verifyTeamCode(authCode: string) {
+    console.log('=== 인증코드 검증 ===');
+    console.log('받은 인증코드:', authCode);
+
+    const teamInfo = TEAM_CODES[authCode];
+    if (!teamInfo) {
+      console.log('❌ 유효하지 않은 인증코드');
+      throw new BadRequestException('유효하지 않은 인증코드입니다.');
+    }
+
+    console.log('✅ 유효한 인증코드:', teamInfo);
+    return {
+      success: true,
+      message: '인증 완료',
+      data: {
+        team: teamInfo.team,
+        role: teamInfo.role,
+        region: teamInfo.region
+      }
+    };
+  }
+  
+  async findUserByUsername(username: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ username }).exec();
+  }
+
+  async findUserById(id: string): Promise<UserDocument | null> {
+    return this.userModel.findById(id).exec();
   }
 }
