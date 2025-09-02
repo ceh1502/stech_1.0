@@ -1,0 +1,179 @@
+.memoOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.memoContainer {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.memoHeader {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.memoHeader h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.memoCloseBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+}
+
+.memoCloseBtn:hover {
+  color: #000;
+}
+
+.memoClipInfo {
+  padding: 10px 20px;
+  background: #f5f5f5;
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+.memoTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.memoContent {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.memoInput textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.memoInput textarea:focus {
+  outline: none;
+  border-color: #0066ff;
+}
+
+.memoActions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.memoSaveBtn {
+  background: #0066ff;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.memoSaveBtn:hover:not(:disabled) {
+  background: #0052cc;
+}
+
+.memoSaveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.memoList {
+  margin-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 20px;
+}
+
+.memoListHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.memoListHeader h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.memoExportBtn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.memoItem {
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.memoItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.memoDate {
+  font-size: 12px;
+  color: #999;
+}
+
+.memoDeleteBtn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.memoDeleteBtn:hover {
+  color: #c82333;
+}
+
+.memoItemContent {
+  color: #333;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}

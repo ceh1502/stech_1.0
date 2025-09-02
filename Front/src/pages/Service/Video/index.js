@@ -1,11 +1,23 @@
 // src/components/VideoPlayer.js
 
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { IoPlayCircleOutline, IoPauseCircleOutline, IoClose } from 'react-icons/io5';
+import {
+  IoPlayCircleOutline,
+  IoPauseCircleOutline,
+  IoClose,
+} from 'react-icons/io5';
 import { HiOutlineMenuAlt3 } from 'react-icons/hi';
 import './index.css';
 import { useVideoSettings } from '../../../hooks/useVideoSetting'; // Adjust path as needed
+import MagicPencil from '../MagicPencil/MagicPencil';
+import { FaPencilAlt } from 'react-icons/fa';
 
 /**
  * VideoPlayer
@@ -14,6 +26,8 @@ import { useVideoSettings } from '../../../hooks/useVideoSetting'; // Adjust pat
  * - 좌측(또는 사이드) 목록에서 클릭 시 선택 클립 재생
  * - 타임라인 클릭/드래그, Space/←/→ 단축키, ±10초 스텝
  */
+
+const [showMagicPencil, setShowMagicPencil] = useState(false);
 
 // PlayType 표기 보정(원문 그대로 써도 되지만, UI 표기를 깔끔히 하려면 맵핑)
 const prettyPlayType = (raw) => {
@@ -34,15 +48,16 @@ const normalizeClips = (clips = []) =>
     const url = c?.videoUrl ?? c?.clipUrl ?? c?.ClipUrl ?? null;
     const quarter = Number(c?.quarter ?? c?.Quarter) || 1;
     const downRaw = c?.down ?? c?.Down;
-    const down = typeof downRaw === "number" ? downRaw : parseInt(downRaw, 10) || null;
+    const down =
+      typeof downRaw === 'number' ? downRaw : parseInt(downRaw, 10) || null;
     const yardsToGo = c?.yardsToGo ?? c?.RemainYard ?? c?.remainYard ?? null;
     const playType = c?.playType ?? c?.PlayType ?? null;
     const offensiveTeam = c?.offensiveTeam ?? c?.OffensiveTeam ?? null;
     const significant = Array.isArray(c?.significantPlay)
-        ? c.significantPlay
-        : Array.isArray(c?.SignificantPlays)
-        ? c.SignificantPlays.map((sp) => sp?.label || sp?.key).filter(Boolean)
-        : [];
+      ? c.significantPlay
+      : Array.isArray(c?.SignificantPlays)
+      ? c.SignificantPlays.map((sp) => sp?.label || sp?.key).filter(Boolean)
+      : [];
 
     return {
       id: String(id),
@@ -55,7 +70,11 @@ const normalizeClips = (clips = []) =>
       playType,
       startYard: c?.startYard ?? c?.StartYard ?? null,
       endYard: c?.endYard ?? c?.EndYard ?? null,
-      carriers: Array.isArray(c?.carriers) ? c.carriers : Array.isArray(c?.Carrier) ? c.Carrier : [],
+      carriers: Array.isArray(c?.carriers)
+        ? c.carriers
+        : Array.isArray(c?.Carrier)
+        ? c.Carrier
+        : [],
       significant,
       scoreHome: startScore?.Home ?? c?.scoreHome ?? 0,
       scoreAway: startScore?.Away ?? c?.scoreAway ?? 0,
@@ -76,12 +95,14 @@ export default function VideoPlayer() {
   const { settings } = useVideoSettings(); // Import settings from the hook
 
   // ---- nav state 수신 ----
-  const initialPlayId = location.state?.initialPlayId || location.state?.initialClipId || null;
+  const initialPlayId =
+    location.state?.initialPlayId || location.state?.initialClipId || null;
   const teamMeta = location.state?.teamMeta || null;
 
   // ---- 데이터 정규화 ----
   const normalized = useMemo(() => {
-    const navClips = location.state?.clips || location.state?.filteredPlaysData || [];
+    const navClips =
+      location.state?.clips || location.state?.filteredPlaysData || [];
     return normalizeClips(navClips);
   }, [location.state?.clips, location.state?.filteredPlaysData]);
 
@@ -100,7 +121,7 @@ export default function VideoPlayer() {
   // ---- 유틸 ----
   const selected = useMemo(
     () => normalized.find((p) => p.id === selectedId) || normalized[0] || null,
-    [normalized, selectedId]
+    [normalized, selectedId],
   );
   const videoUrl = selected?.videoUrl || null;
   const hasNoVideo = !!selected && !selected.videoUrl;
@@ -123,7 +144,7 @@ export default function VideoPlayer() {
 
   // Sync playback rate with settings
   useEffect(() => {
-        const video = videoRef.current;
+    const video = videoRef.current;
 
     if (videoRef.current) {
       video.playbackRate = settings.playbackRate;
@@ -181,7 +202,10 @@ export default function VideoPlayer() {
       video.pause();
       setIsPlaying(false);
     } else {
-      video.play().then(() => setIsPlaying(true)).catch(() => setHasError(true));
+      video
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setHasError(true));
     }
   }, [isPlaying, hasError, selected]);
 
@@ -189,13 +213,20 @@ export default function VideoPlayer() {
     (dir) => {
       const video = videoRef.current;
       if (!video || hasError || duration === 0) return;
-      
-      const newTime = Math.max(0, Math.min(duration, video.currentTime + (dir > 0 ? settings.skipTime : -settings.skipTime)));
+
+      const newTime = Math.max(
+        0,
+        Math.min(
+          duration,
+          video.currentTime +
+            (dir > 0 ? settings.skipTime : -settings.skipTime),
+        ),
+      );
       video.currentTime = newTime;
     },
-    [duration, hasError, settings.skipTime]
+    [duration, hasError, settings.skipTime],
   );
-  
+
   // ---- 타임라인 ----
   const handleTimelineClick = useCallback(
     (e) => {
@@ -210,7 +241,7 @@ export default function VideoPlayer() {
       const pct = rel / trackWidth;
       video.currentTime = pct * duration;
     },
-    [duration, hasError]
+    [duration, hasError],
   );
 
   const handleMouseDown = useCallback(
@@ -218,7 +249,7 @@ export default function VideoPlayer() {
       const video = videoRef.current;
       const tl = timelineRef.current;
       if (!video || !tl || hasError || duration === 0) return;
-      
+
       handleTimelineClick(e);
       const onMove = (me) => handleTimelineClick(me);
       const onUp = () => {
@@ -228,15 +259,15 @@ export default function VideoPlayer() {
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
     },
-    [duration, hasError, handleTimelineClick]
+    [duration, hasError, handleTimelineClick],
   );
 
   // ---- 키보드 ----
-   useEffect(() => {
+  useEffect(() => {
     const onKey = (e) => {
       const tag = e.target?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      
+
       const key = e.key.toUpperCase();
 
       // settings 객체와 hotkeys가 확실히 존재할 때만 단축키를 비교합니다.
@@ -256,7 +287,7 @@ export default function VideoPlayer() {
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [togglePlay, stepTime, settings]); 
+  }, [togglePlay, stepTime, settings]);
   // ---- 포맷터 ----
   const formatTime = (sec) => {
     if (isNaN(sec) || sec === null) return '0:00';
@@ -286,14 +317,21 @@ export default function VideoPlayer() {
         </button>
 
         {/* 모달 토글 */}
-        <button className="videoModalToggleButton" onClick={() => setIsModalOpen((o) => !o)}>
+        <button
+          className="videoModalToggleButton"
+          onClick={() => setIsModalOpen((o) => !o)}
+        >
           <HiOutlineMenuAlt3 size={24} />
         </button>
 
         {/* 점수판 */}
         <div className="videoScoreboard">
           <div className="scoreTeam leftTeam">
-            {awayLogo ? <img src={awayLogo} alt={awayName} className="scoreTeamLogo" /> : <div className="scoreTeamLogo placeholder">{awayName[0]}</div>}
+            {awayLogo ? (
+              <img src={awayLogo} alt={awayName} className="scoreTeamLogo" />
+            ) : (
+              <div className="scoreTeamLogo placeholder">{awayName[0]}</div>
+            )}
             <div className="scoreTeamInfo">
               <span className="scoreTeamName">{awayName}</span>
               <span className="scoreTeamScore">{scoreAway}</span>
@@ -303,7 +341,9 @@ export default function VideoPlayer() {
           <div className="scoreCenter">
             <div className="scoreQuarter">Q{quarter}</div>
             <div className="scoreDown">
-              {typeof down === 'number' ? `${down}${getOrdinal(down)} & ${ytg ?? 0}` : '1st & 10'}
+              {typeof down === 'number'
+                ? `${down}${getOrdinal(down)} & ${ytg ?? 0}`
+                : '1st & 10'}
             </div>
           </div>
 
@@ -312,9 +352,23 @@ export default function VideoPlayer() {
               <span className="scoreTeamName">{homeName}</span>
               <span className="scoreTeamScore">{scoreHome}</span>
             </div>
-            {homeLogo ? <img src={homeLogo} alt={homeName} className="scoreTeamLogo" /> : <div className="scoreTeamLogo placeholder">{homeName[0]}</div>}
+            {homeLogo ? (
+              <img src={homeLogo} alt={homeName} className="scoreTeamLogo" />
+            ) : (
+              <div className="scoreTeamLogo placeholder">{homeName[0]}</div>
+            )}
           </div>
         </div>
+        {/* 매직펜슬 버튼 - 일시정지 상태에서만 활성화 */}
+        <button
+          className="videoMagicPencilButton"
+          onClick={() => setShowMagicPencil(true)}
+          disabled={isPlaying || hasError || !selected || hasNoVideo}
+          title="매직펜슬 (일시정지 상태에서만 사용 가능)"
+        >
+          <FaPencilAlt size={24} />
+          매직펜슬
+        </button>
 
         {/* 비디오 영역 */}
         <div className="videoScreen">
@@ -324,15 +378,21 @@ export default function VideoPlayer() {
                 <div className="videoNoVideoMessage">
                   <div className="videoNoVideoIcon">🎬</div>
                   <div className="videoNoVideoText">비디오가 없습니다</div>
-                  <div className="videoNoVideoSubtext">이 플레이의 비디오는 아직 준비되지 않았습니다</div>
+                  <div className="videoNoVideoSubtext">
+                    이 플레이의 비디오는 아직 준비되지 않았습니다
+                  </div>
                 </div>
               )}
 
-              {!selected && <div className="videoErrorMessage">표시할 클립이 없습니다.</div>}
+              {!selected && (
+                <div className="videoErrorMessage">표시할 클립이 없습니다.</div>
+              )}
 
               {selected && videoUrl && (
                 <>
-                  {isLoading && <div className="videoLoadingMessage">Loading video...</div>}
+                  {isLoading && (
+                    <div className="videoLoadingMessage">Loading video...</div>
+                  )}
                   {hasError && (
                     <div className="videoErrorMessage">
                       <div>비디오를 로드할 수 없습니다</div>
@@ -341,7 +401,9 @@ export default function VideoPlayer() {
                   )}
                   <video
                     ref={videoRef}
-                    className={`videoElement ${isLoading || hasError ? 'hidden' : ''}`}
+                    className={`videoElement ${
+                      isLoading || hasError ? 'hidden' : ''
+                    }`}
                     src={videoUrl}
                     preload="metadata"
                     controls={false}
@@ -356,12 +418,22 @@ export default function VideoPlayer() {
         {/* 하단 컨트롤 */}
         <div className="videoEditorControls">
           <div className="videoControlsTop">
-            <button className="videoPlayButton" onClick={togglePlay} disabled={hasError || !selected || hasNoVideo}>
-              {isPlaying ? <IoPauseCircleOutline size={32} /> : <IoPlayCircleOutline size={32} />}
+            <button
+              className="videoPlayButton"
+              onClick={togglePlay}
+              disabled={hasError || !selected || hasNoVideo}
+            >
+              {isPlaying ? (
+                <IoPauseCircleOutline size={32} />
+              ) : (
+                <IoPlayCircleOutline size={32} />
+              )}
             </button>
 
             <div className="videoTimeInfo">
-              <span className="videoCurrentTime">{formatTime(currentTime)}</span>
+              <span className="videoCurrentTime">
+                {formatTime(currentTime)}
+              </span>
               <span className="videoTimeDivider">/</span>
               <span className="videoDuration">{formatTime(duration)}</span>
             </div>
@@ -372,15 +444,21 @@ export default function VideoPlayer() {
                 className="videoFrameStepButton"
                 onClick={() => stepTime(-1)}
                 disabled={hasError || currentTime < settings.skipTime}
-                title={`Previous ${settings.skipTime} Seconds (${settings.hotkeys.backward.toUpperCase()})`}
+                title={`Previous ${
+                  settings.skipTime
+                } Seconds (${settings.hotkeys.backward.toUpperCase()})`}
               >
                 ◀ -{settings.skipTime}초
               </button>
               <button
                 className="videoFrameStepButton"
                 onClick={() => stepTime(1)}
-                disabled={hasError || currentTime + settings.skipTime > duration}
-                title={`Next ${settings.skipTime} Seconds (${settings.hotkeys.forward.toUpperCase()})`}
+                disabled={
+                  hasError || currentTime + settings.skipTime > duration
+                }
+                title={`Next ${
+                  settings.skipTime
+                } Seconds (${settings.hotkeys.forward.toUpperCase()})`}
               >
                 +{settings.skipTime}초 ▶
               </button>
@@ -389,22 +467,40 @@ export default function VideoPlayer() {
 
           {/* 타임라인 */}
           <div className="videoTimelineContainer">
-            <div ref={timelineRef} className="videoTimeline" onMouseDown={handleMouseDown}>
+            <div
+              ref={timelineRef}
+              className="videoTimeline"
+              onMouseDown={handleMouseDown}
+            >
               <div className="videoTimelineTrack">
                 <div
                   className="videoTimelineProgress"
-                  style={{ width: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%' }}
+                  style={{
+                    width:
+                      duration > 0
+                        ? `${(currentTime / duration) * 100}%`
+                        : '0%',
+                  }}
                 />
                 <div
                   className="videoTimelineHandle"
-                  style={{ left: duration > 0 ? `${(currentTime / duration) * 100}%` : '0%' }}
+                  style={{
+                    left:
+                      duration > 0
+                        ? `${(currentTime / duration) * 100}%`
+                        : '0%',
+                  }}
                 />
               </div>
             </div>
           </div>
 
           <div className="videoControlsHint">
-            <span>Space: Play/Pause | {settings.hotkeys.backward.toUpperCase()} {settings.hotkeys.forward.toUpperCase()}: {settings.skipTime}초 Step</span>
+            <span>
+              Space: Play/Pause | {settings.hotkeys.backward.toUpperCase()}{' '}
+              {settings.hotkeys.forward.toUpperCase()}: {settings.skipTime}초
+              Step
+            </span>
           </div>
         </div>
       </div>
@@ -413,7 +509,10 @@ export default function VideoPlayer() {
       <div className={`videoSideModal ${isModalOpen ? 'open' : ''}`}>
         <div className="videoModalHeader">
           <h3>Clips</h3>
-          <button className="videoCloseButton" onClick={() => setIsModalOpen(false)}>
+          <button
+            className="videoCloseButton"
+            onClick={() => setIsModalOpen(false)}
+          >
             <IoClose size={20} />
           </button>
         </div>
@@ -421,9 +520,17 @@ export default function VideoPlayer() {
         <div className="videoModalContent">
           <div className="videoMatchInfo">
             <div className="videoMatchTeams">
-              {awayLogo ? <img src={awayLogo} alt={awayName} className="videoTeamLogos" /> : <div className="videoTeamLogos placeholder">{awayName[0]}</div>}
+              {awayLogo ? (
+                <img src={awayLogo} alt={awayName} className="videoTeamLogos" />
+              ) : (
+                <div className="videoTeamLogos placeholder">{awayName[0]}</div>
+              )}
               <span>{`${homeName} VS ${awayName}`}</span>
-              {homeLogo ? <img src={homeLogo} alt={homeName} className="videoTeamLogos" /> : <div className="videoTeamLogos placeholder">{homeName[0]}</div>}
+              {homeLogo ? (
+                <img src={homeLogo} alt={homeName} className="videoTeamLogos" />
+              ) : (
+                <div className="videoTeamLogos placeholder">{homeName[0]}</div>
+              )}
             </div>
           </div>
 
@@ -431,23 +538,36 @@ export default function VideoPlayer() {
             {normalized.map((p) => (
               <div
                 key={p.id}
-                className={`videoPlayCard ${isPlaySelected(p.id) ? 'selected' : ''}`}
+                className={`videoPlayCard ${
+                  isPlaySelected(p.id) ? 'selected' : ''
+                }`}
                 onClick={() => selectPlay(p.id)}
               >
                 <div className="videoPlayInfo">
                   <div className="videoPlayBasicInfo">
                     <span className="videoQuarter">{p.quarter}Q</span>
                     <span className="videoDown">
-                      {typeof p.down === 'number' ? `${p.down}${getOrdinal(p.down)} & ${p.yardsToGo ?? 0}` : '—'}
+                      {typeof p.down === 'number'
+                        ? `${p.down}${getOrdinal(p.down)} & ${p.yardsToGo ?? 0}`
+                        : '—'}
                     </span>
-                    <span className="videoPlayerNumber">{p.offensiveTeam || ''}</span>
+                    <span className="videoPlayerNumber">
+                      {p.offensiveTeam || ''}
+                    </span>
                   </div>
 
                   <div className="videoPlayTags">
-                    {p.playType && <span className="videoPT">#{prettyPlayType(p.playType)}</span>}
+                    {p.playType && (
+                      <span className="videoPT">
+                        #{prettyPlayType(p.playType)}
+                      </span>
+                    )}
                     {Array.isArray(p.significant) &&
                       p.significant.map((t, i) => (
-                        <span key={`${p.id}-sig-${i}`} className="videoSignificantTag">
+                        <span
+                          key={`${p.id}-sig-${i}`}
+                          className="videoSignificantTag"
+                        >
                           #{t}
                         </span>
                       ))}
@@ -462,7 +582,21 @@ export default function VideoPlayer() {
       </div>
 
       {/* 오버레이 */}
-      {isModalOpen && <div className="videoModalOverlay" onClick={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <div
+          className="videoModalOverlay"
+          onClick={() => setIsModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
+
+{
+  /* 매직펜슬 컴포넌트 */
+}
+<MagicPencil
+  videoElement={videoRef.current}
+  isVisible={showMagicPencil && !isPlaying}
+  onClose={() => setShowMagicPencil(false)}
+/>;

@@ -26,8 +26,8 @@
   "devDependencies": {
     "ajv": "^6.12.6",
     "ajv-keywords": "^3.5.2",
-    "typescript": "4.9.5",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "typescript": "4.9.5"
   },
   "overrides": {
     "on-headers": "1.1.0",
