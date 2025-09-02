@@ -207,7 +207,7 @@ export class PlayerService {
         }
         
         // 각 포지션별로 별도의 선수 객체 생성
-        expandedPlayers.push({
+        const playerObject = {
           _id: `${player._id}_${position}`,
           playerId: player.playerId,
           name: player.name,
@@ -222,7 +222,24 @@ export class PlayerService {
           stats: positionStats,
           createdAt: (player as any).createdAt,
           updatedAt: (player as any).updatedAt,
-        });
+        };
+
+        // WR 포지션일 경우 패스/런별 펌블 데이터를 최상위 레벨에 추가
+        if (position === 'WR' && positionStats) {
+          (playerObject as any).passingFumbles = (positionStats as any).passingFumbles || 0;
+          (playerObject as any).rushingFumbles = (positionStats as any).rushingFumbles || 0;
+          (playerObject as any).passingFumblesLost = (positionStats as any).passingFumblesLost || 0;
+          (playerObject as any).rushingFumblesLost = (positionStats as any).rushingFumblesLost || 0;
+          
+          console.log(`🐛 WR ${player.jerseyNumber}번 펌블 데이터:`, {
+            passingFumbles: (playerObject as any).passingFumbles,
+            rushingFumbles: (playerObject as any).rushingFumbles,
+            passingFumblesLost: (playerObject as any).passingFumblesLost,
+            rushingFumblesLost: (playerObject as any).rushingFumblesLost
+          });
+        }
+
+        expandedPlayers.push(playerObject);
       }
     }
 

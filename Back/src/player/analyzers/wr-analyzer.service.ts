@@ -24,6 +24,10 @@ export interface WRStats {
   longestRush: number;
   fumbles: number;
   fumblesLost: number;
+  passingFumbles: number;
+  rushingFumbles: number;
+  passingFumblesLost: number;
+  rushingFumblesLost: number;
   // 스페셜팀 스탯
   kickoffReturn: number;
   kickoffReturnYard: number;
@@ -52,9 +56,10 @@ export class WrAnalyzerService extends BaseAnalyzerService {
 
     // WR 선수별로 스탯 수집
     const wrStatsMap = new Map<string, WRStats>();
+    const processedClipKeys = new Set<string>();
 
     for (const clip of clips) {
-      this.processClipForWR(clip, wrStatsMap, gameData);
+      this.processClipForWR(clip, wrStatsMap, gameData, processedClipKeys);
     }
 
     // 각 WR의 최종 스탯 계산 및 저장
@@ -74,6 +79,8 @@ export class WrAnalyzerService extends BaseAnalyzerService {
       console.log(`   가장 긴 리셉션: ${wrStats.longestReception}`);
       console.log(`   1다운: ${wrStats.receivingFirstDowns}`);
       console.log(`   러싱 시도: ${wrStats.rushingAttempts}, 야드: ${wrStats.rushingYards}`);
+      console.log(`   펌블: 총 ${wrStats.fumbles}개 (패스: ${wrStats.passingFumbles}, 런: ${wrStats.rushingFumbles})`);
+      console.log(`   펌블 턴오버: 총 ${wrStats.fumblesLost}개 (패스: ${wrStats.passingFumblesLost}, 런: ${wrStats.rushingFumblesLost})`);
       console.log(`   킥오프 리턴: ${wrStats.kickoffReturn}, 야드: ${wrStats.kickoffReturnYard}`);
       console.log(`   펀트 리턴: ${wrStats.puntReturn}, 야드: ${wrStats.puntReturnYard}`);
 
@@ -100,6 +107,10 @@ export class WrAnalyzerService extends BaseAnalyzerService {
           wrLongestRush: wrStats.longestRush,
           fumbles: wrStats.fumbles,
           fumblesLost: wrStats.fumblesLost,
+          passingFumbles: wrStats.passingFumbles,
+          rushingFumbles: wrStats.rushingFumbles,
+          passingFumblesLost: wrStats.passingFumblesLost,
+          rushingFumblesLost: wrStats.rushingFumblesLost,
           // 스페셜팀 스탯
           kickReturns: wrStats.kickoffReturn,
           kickReturnYards: wrStats.kickoffReturnYard,
@@ -129,7 +140,7 @@ export class WrAnalyzerService extends BaseAnalyzerService {
   /**
    * 개별 클립을 WR 관점에서 처리
    */
-  private processClipForWR(clip: ClipData, wrStatsMap: Map<string, WRStats>, gameData: GameData): void {
+  private processClipForWR(clip: ClipData, wrStatsMap: Map<string, WRStats>, gameData: GameData, processedClipKeys: Set<string>): void {
     // WR는 car나 car2에서 pos가 'WR'인 경우
     const wrPlayers = [];
     
@@ -148,60 +159,82 @@ export class WrAnalyzerService extends BaseAnalyzerService {
       }
 
       const wrStats = wrStatsMap.get(wrKey);
-      this.processPlay(clip, wrStats);
+      this.processPlay(clip, wrStats, processedClipKeys);
     }
   }
 
   /**
    * 개별 플레이 처리
    */
-  private processPlay(clip: ClipData, wrStats: WRStats): void {
+  private processPlay(clip: ClipData, wrStats: WRStats, processedClipKeys: Set<string>): void {
     const playType = clip.playType?.toUpperCase();
     const gainYard = clip.gainYard || 0;
     const significantPlays = clip.significantPlays || [];
 
     // PASS 플레이 처리 (리시빙)
     if (playType === 'PASS') {
-      wrStats.receivingTargets++;
-
-      // 패스 성공 여부 체크 (INCOMP가 없으면 성공으로 간주)
-      const isIncomplete = significantPlays.includes('INCOMP');
+      // FUMBLERECOFF는 패스 플레이 아님 (리커버리 상황)
+      // FUMBLERECDEF + TURNOVER는 패스 플레이 아님 (턴오버 상황)
+      const hasFumbleRecOff = significantPlays.includes('FUMBLERECOFF');
+      const hasTurnover = significantPlays.includes('FUMBLERECDEF') && significantPlays.includes('TURNOVER');
       
-      if (!isIncomplete) {
-        // 패스 성공
-        wrStats.receptions++;
-        wrStats.receivingYards += gainYard;
+      if (!hasFumbleRecOff && !hasTurnover) {
+        wrStats.receivingTargets++;
 
-        // 가장 긴 리셉션 업데이트
-        if (gainYard > wrStats.longestReception) {
-          wrStats.longestReception = gainYard;
-        }
+        // 패스 성공 여부 체크 (INCOMP가 없으면 캐치 성공)
+        const isIncomplete = significantPlays.includes('INCOMP');
+        
+        if (!isIncomplete) {
+          // 패스 캐치 성공 (FUMBLE+FUMBLERECDEF도 캐치는 성공)
+          wrStats.receptions++;
+          wrStats.receivingYards += gainYard;
 
-        // 1다운 체크
-        if (significantPlays.includes('1STDOWN')) {
-          wrStats.receivingFirstDowns++;
+          // 가장 긴 리셉션 업데이트
+          if (gainYard > wrStats.longestReception) {
+            wrStats.longestReception = gainYard;
+          }
+
+          // 1다운 체크 (gainYard가 toGoYard 이상이면 1다운)
+          if (clip.toGoYard && gainYard >= clip.toGoYard) {
+            wrStats.receivingFirstDowns++;
+          }
         }
       }
     }
 
+    // NOPASS 플레이 처리 (패스 시도했지만 캐치 못함)
+    if (playType === 'NOPASS') {
+      wrStats.receivingTargets++;
+      // NOPASS는 리셉션 카운트 안 함
+    }
+
     // RUN 플레이 처리
     if (playType === 'RUN') {
-      wrStats.rushingAttempts++;
+      // FUMBLERECOFF는 러싱 시도 아님 (리커버리 상황)
+      // FUMBLERECDEF + TURNOVER는 러싱 시도 아님 (턴오버 상황)
+      const hasFumbleRecOff = significantPlays.includes('FUMBLERECOFF');
+      const hasTurnover = significantPlays.includes('FUMBLERECDEF') && significantPlays.includes('TURNOVER');
+      
+      if (!hasFumbleRecOff && !hasTurnover) {
+        wrStats.rushingAttempts++;
 
-      // TFL(Tackle For Loss)나 SAFETY 체크
-      const hasTFL = significantPlays.some(play => play === 'TFL');
-      const hasSAFETY = significantPlays.some(play => play === 'SAFETY');
+        // TFL(Tackle For Loss)나 SAFETY 체크
+        const hasTFL = significantPlays.some(play => play === 'TFL');
+        const hasSAFETY = significantPlays.some(play => play === 'SAFETY');
 
-      if (hasTFL || hasSAFETY) {
-        wrStats.backRushYard += gainYard;
-      } else {
-        wrStats.frontRushYard += gainYard;
+        if (hasTFL || hasSAFETY) {
+          wrStats.backRushYard += gainYard;
+        } else {
+          wrStats.frontRushYard += gainYard;
+        }
+
+        // 가장 긴 러싱 업데이트
+        if (gainYard > wrStats.longestRush) {
+          wrStats.longestRush = gainYard;
+        }
       }
-
-      // 가장 긴 러싱 업데이트
-      if (gainYard > wrStats.longestRush) {
-        wrStats.longestRush = gainYard;
-      }
+      
+      // 러싱 펌블 처리는 공통 processSignificantPlays에서 처리
     }
 
     // 스페셜팀 리턴 처리 (playType이 RETURN이고 significantPlays에 KICKOFF/PUNT가 있을 때)
@@ -234,13 +267,46 @@ export class WrAnalyzerService extends BaseAnalyzerService {
       }
     }
 
-    // FUMBLERECDEF 처리 (펌블을 잃었을 때)
-    if (significantPlays.includes('FUMBLERECDEF')) {
-      wrStats.fumblesLost++;
+    // 공통 변수 정의
+    const fumbleKey = `${clip.clipKey}_FUMBLE`;
+    const hasFumble = significantPlays.some(play => play?.trim() === 'FUMBLE');
+    const hasFumbleRecOff = significantPlays.some(play => play?.trim() === 'FUMBLERECOFF');
+    const hasFumbleRecDef = significantPlays.some(play => play?.trim() === 'FUMBLERECDEF');
+
+    // 펌블 직접 처리 (clipKey별로 한 번만 카운트, 패스/런 유형별로 분류)
+    if (hasFumble && !hasFumbleRecOff && !processedClipKeys.has(fumbleKey)) {
+      processedClipKeys.add(fumbleKey);
+      wrStats.fumbles++;
+      
+      console.log(`   🔥 펌블 카운트: clipKey=${clip.clipKey}, playType=${playType}`);
+      
+      if (playType === 'PASS') {
+        wrStats.passingFumbles++;
+        console.log(`   📡 패스 펌블 +1 (총: ${wrStats.passingFumbles})`);
+      } else if (playType === 'RUN') {
+        wrStats.rushingFumbles++;
+        console.log(`   🏃 런 펌블 +1 (총: ${wrStats.rushingFumbles})`);
+      }
     }
 
-    // 공통 significantPlays 처리 (터치다운, 펌블 등)
-    this.processSignificantPlays(clip, wrStats, playType);
+    // 패싱 펌블 턴오버 별도 처리 (PASS + FUMBLE + FUMBLERECDEF)
+    if (playType === 'PASS' && hasFumble && hasFumbleRecDef) {
+      wrStats.fumblesLost++;
+      wrStats.passingFumblesLost++;
+      console.log(`   💔 패스 펌블 턴오버 +1`);
+    }
+
+    // 러싱 펌블 턴오버 별도 처리 (RUN + FUMBLE + FUMBLERECDEF)
+    if (playType === 'RUN' && hasFumble && hasFumbleRecDef) {
+      wrStats.fumblesLost++;
+      wrStats.rushingFumblesLost++;
+      console.log(`   💔 런 펌블 턴오버 +1`);
+    }
+
+    // 터치다운만 공통 처리 (펌블은 위에서 직접 처리했으므로 제외)
+    if (significantPlays.includes('TOUCHDOWN')) {
+      this.processTouchdown(wrStats, playType);
+    }
   }
 
   /**
@@ -316,6 +382,10 @@ export class WrAnalyzerService extends BaseAnalyzerService {
       longestRush: 0,
       fumbles: 0,
       fumblesLost: 0,
+      passingFumbles: 0,
+      rushingFumbles: 0,
+      passingFumblesLost: 0,
+      rushingFumblesLost: 0,
       // 스페셜팀 스탯
       kickoffReturn: 0,
       kickoffReturnYard: 0,

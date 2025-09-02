@@ -232,6 +232,10 @@ export class DbAnalyzerService extends BaseAnalyzerService {
         // SACK일 때 자동으로 TFL 추가
         dbStats.tfl++;
         console.log(`   ⚡ DB SACK-TFL 자동 추가!`);
+        
+        // SACK일 때도 태클 수 추가
+        dbStats.tackles++;
+        console.log(`   🏈 DB 태클! (SACK)`);
       }
 
       // 인터셉션 처리 (NOPASS이고 significantPlay에 INTERCEPT가 있을 때)

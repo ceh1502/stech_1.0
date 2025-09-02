@@ -183,6 +183,10 @@ export class DlAnalyzerService extends BaseAnalyzerService {
       // SACK일 때 자동으로 TFL 추가
       dlStats.tfl++;
       console.log(`   ⚡ DL SACK-TFL 자동 추가!`);
+      
+      // SACK일 때도 태클 수 추가
+      dlStats.tackles++;
+      console.log(`   🏈 DL 태클! (SACK)`);
     }
 
     // 인터셉션 처리 (NOPASS이고 significantPlay에 INTERCEPT가 있을 때)

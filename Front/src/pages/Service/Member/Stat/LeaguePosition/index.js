@@ -87,6 +87,12 @@ const LeaguePositionPage = () => {
                             fumbles: player.stats?.fumbles || 0,
                             fumbles_lost: player.stats?.fumblesLost || 0,
 
+                            // WR 패스/런별 펌블 스탯
+                            passingFumbles: player.passingFumbles || 0,
+                            rushingFumbles: player.rushingFumbles || 0,
+                            passingFumblesLost: player.passingFumblesLost || 0,
+                            rushingFumblesLost: player.rushingFumblesLost || 0,
+
                             // 스페셜 팀 스탯
                             kick_returns: player.stats?.kickReturns || 0,
                             kick_return_yards: player.stats?.kickReturnYards || 0,

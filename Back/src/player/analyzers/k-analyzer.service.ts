@@ -13,12 +13,18 @@ export interface KStats {
   longestFieldGoal: number;
   totalFieldGoalYard: number;
   averageFieldGoalYard: number;
-  // 거리별 필드골
+  // 거리별 필드골 성공
   fieldGoals1To19: number;
   fieldGoals20To29: number;
   fieldGoals30To39: number;
   fieldGoals40To49: number;
   fieldGoals50Plus: number;
+  // 거리별 필드골 시도
+  fieldGoalsAttempted1To19: number;
+  fieldGoalsAttempted20To29: number;
+  fieldGoalsAttempted30To39: number;
+  fieldGoalsAttempted40To49: number;
+  fieldGoalsAttempted50Plus: number;
   // PAT 스탯  
   extraPointsAttempted: number;
   extraPointsMade: number;
@@ -58,7 +64,12 @@ export class KAnalyzerService extends BaseAnalyzerService {
       console.log(`   가장 긴 필드골: ${kStats.longestFieldGoal}야드`);
       console.log(`   평균 필드골: ${kStats.averageFieldGoalYard}야드`);
       console.log(`   PAT: ${kStats.extraPointsMade}/${kStats.extraPointsAttempted}`);
-      console.log(`   거리별: 1-19(${kStats.fieldGoals1To19}) 20-29(${kStats.fieldGoals20To29}) 30-39(${kStats.fieldGoals30To39}) 40-49(${kStats.fieldGoals40To49}) 50+(${kStats.fieldGoals50Plus})`);
+      console.log(`   거리별 필드골 (성공-시도):`);
+      console.log(`     1-19야드: ${kStats.fieldGoals1To19}-${kStats.fieldGoalsAttempted1To19}`);
+      console.log(`     20-29야드: ${kStats.fieldGoals20To29}-${kStats.fieldGoalsAttempted20To29}`);
+      console.log(`     30-39야드: ${kStats.fieldGoals30To39}-${kStats.fieldGoalsAttempted30To39}`);
+      console.log(`     40-49야드: ${kStats.fieldGoals40To49}-${kStats.fieldGoalsAttempted40To49}`);
+      console.log(`     50+야드: ${kStats.fieldGoals50Plus}-${kStats.fieldGoalsAttempted50Plus}`);
 
       // 데이터베이스에 저장
       try {
@@ -146,8 +157,11 @@ export class KAnalyzerService extends BaseAnalyzerService {
       // 실제 필드골 거리 = gainYard + 17 (엔드존 10야드 + 홀더 위치 7야드)
       const actualFieldGoalDistance = gainYard + 17;
       
+      // 거리별 시도 횟수 증가
+      this.categorizeFieldGoalAttempt(actualFieldGoalDistance, kStats);
+      
       // 필드골 성공 여부 체크
-      if (significantPlays.includes('FIELDGOAL_GOOD')) {
+      if (significantPlays.includes('FIELDGOALGOOD')) {
         kStats.fieldGoalsMade++;
         kStats.totalFieldGoalYard += actualFieldGoalDistance;
         
@@ -156,8 +170,8 @@ export class KAnalyzerService extends BaseAnalyzerService {
           kStats.longestFieldGoal = actualFieldGoalDistance;
         }
 
-        // 거리별 필드골 카운트
-        this.categorizeFieldGoal(actualFieldGoalDistance, kStats);
+        // 거리별 필드골 성공 카운트
+        this.categorizeFieldGoalMade(actualFieldGoalDistance, kStats);
         
         console.log(`   🎯 필드골 성공: ${actualFieldGoalDistance}야드 (라인: ${gainYard}야드)`);
       } else {
@@ -170,10 +184,10 @@ export class KAnalyzerService extends BaseAnalyzerService {
       kStats.extraPointsAttempted++;
       
       // PAT 성공 여부 체크
-      if (significantPlays.includes('PAT_GOOD')) {
+      if (significantPlays.includes('PATGOOD')) {
         kStats.extraPointsMade++;
         console.log(`   ✅ PAT 성공`);
-      } else if (significantPlays.includes('PAT_NOGOOD')) {
+      } else if (significantPlays.includes('PATNOGOOD')) {
         console.log(`   ❌ PAT 실패`);
       }
     }
@@ -183,9 +197,26 @@ export class KAnalyzerService extends BaseAnalyzerService {
   }
 
   /**
-   * 거리별 필드골 분류
+   * 거리별 필드골 시도 분류
    */
-  private categorizeFieldGoal(distance: number, kStats: KStats): void {
+  private categorizeFieldGoalAttempt(distance: number, kStats: KStats): void {
+    if (distance >= 1 && distance <= 19) {
+      kStats.fieldGoalsAttempted1To19++;
+    } else if (distance >= 20 && distance <= 29) {
+      kStats.fieldGoalsAttempted20To29++;
+    } else if (distance >= 30 && distance <= 39) {
+      kStats.fieldGoalsAttempted30To39++;
+    } else if (distance >= 40 && distance <= 49) {
+      kStats.fieldGoalsAttempted40To49++;
+    } else if (distance >= 50) {
+      kStats.fieldGoalsAttempted50Plus++;
+    }
+  }
+
+  /**
+   * 거리별 필드골 성공 분류
+   */
+  private categorizeFieldGoalMade(distance: number, kStats: KStats): void {
     if (distance >= 1 && distance <= 19) {
       kStats.fieldGoals1To19++;
     } else if (distance >= 20 && distance <= 29) {
@@ -241,12 +272,18 @@ export class KAnalyzerService extends BaseAnalyzerService {
       longestFieldGoal: 0,
       totalFieldGoalYard: 0,
       averageFieldGoalYard: 0,
-      // 거리별 필드골
+      // 거리별 필드골 성공
       fieldGoals1To19: 0,
       fieldGoals20To29: 0,
       fieldGoals30To39: 0,
       fieldGoals40To49: 0,
       fieldGoals50Plus: 0,
+      // 거리별 필드골 시도
+      fieldGoalsAttempted1To19: 0,
+      fieldGoalsAttempted20To29: 0,
+      fieldGoalsAttempted30To39: 0,
+      fieldGoalsAttempted40To49: 0,
+      fieldGoalsAttempted50Plus: 0,
       // PAT 스탯
       extraPointsAttempted: 0,
       extraPointsMade: 0,
