@@ -1,303 +1,167 @@
 // src/context/AuthContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import * as authAPI from '../api/authAPI';
-import { 
-  getToken, 
-  getUserData, 
-  clearTokens, 
-  isTokenExpired, 
-  isAuthenticated,
-  isEmailVerificationRequired,
-  handleLoginResponse,
-  handleVerificationResponse,
-  handleUserInfoResponse
+import {
+  login as apiLogin,
+  signup as apiSignup,
+  verifyTeamCode as apiVerifyTeamCode,
+  checkUsername as apiCheckUsername,
+  logout as apiLogout,
+  // (주의) getUserInfo, verifyEmail 등 다른 엔드포인트는 더 이상 사용하지 않습니다.
+} from '../api/authAPI';
+
+import {
+  getToken,
+  getUserData,
+  clearTokens,
+  isTokenExpired,
+  isAuthenticated as isAuthedByStorage,
+  // 이메일 인증/유저정보 재조회 관련 유틸은 더 이상 사용하지 않음
+  handleLoginResponse, // 서버 응답 -> 토큰/유저 저장 처리
 } from '../utils/tokenUtils';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);      // 로그인한 사용자 (로컬 저장된 값)
+  const [loading, setLoading] = useState(true); // 전역 로딩
+  const [error, setError] = useState(null);     // 전역 에러 메시지
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // 앱 시작시 인증 상태 복원
+  // ---- 앱 시작 시: 로컬에 토큰/유저 있으면 복원만 수행 ----
   useEffect(() => {
-    const initializeAuth = async () => {
+    const bootstrap = () => {
       try {
-        // 로컬스토리지에서 사용자 정보 복원
-        const storedUser = getUserData();
         const token = getToken();
-        
         if (!token || isTokenExpired(token)) {
-          // 토큰이 없거나 만료된 경우
           clearAuthData();
-          return;
+        } else {
+          const stored = getUserData();
+          if (stored) setUser(stored);
         }
-
-        if (storedUser) {
-          setUser(storedUser);
-          
-          // 서버에서 최신 사용자 정보 조회 (선택적)
-          try {
-            const userInfo = await authAPI.getUserInfo();
-            const result = handleUserInfoResponse(userInfo);
-            if (result.success) {
-              setUser(getUserData()); // 업데이트된 사용자 정보 설정
-            }
-          } catch (error) {
-            console.warn('사용자 정보 업데이트 실패:', error);
-            // 기존 저장된 정보 유지
-          }
-        }
-      } catch (error) {
-        console.error('인증 초기화 실패:', error);
+      } catch (e) {
         clearAuthData();
       } finally {
         setLoading(false);
         setIsInitialized(true);
       }
     };
-
-    initializeAuth();
+    bootstrap();
   }, []);
 
-  // 로그인 함수 (백엔드 응답 구조에 맞춤)
-  const login = async (credentials) => {
+  // ---- 로그인 (username/password) ----
+  const login = async (credentials = {}) => {
     try {
-      setError(null);
       setLoading(true);
-      
-      const { email, password } = credentials;
-      
-      // 백엔드 응답: {token, user}
-      const loginData = await authAPI.login(email, password);
-      console.log('Login response:', loginData);
+      setError(null);
 
-      // 토큰과 사용자 정보 저장
-      const result = handleLoginResponse(loginData);
-      
-      if (!result.success) {
-        throw new Error(result.error);
+      // 콜러가 email/id로 넘겨도 username으로 정규화
+      const username =
+        credentials.username || credentials.email || credentials.id;
+      const password = credentials.password;
+
+      if (!username || !password) {
+        throw new Error('아이디와 비밀번호를 입력해주세요.');
       }
 
-      // 저장된 사용자 정보 설정
-      const userData = getUserData();
-      setUser(userData);
+      // 서버 로그인 (200 OK → data 반환)
+      const data = await apiLogin(username, password);
 
-      // 로그인 성공 이벤트 추적 (옵션)
-      if (window.gtag) {
-        window.gtag('event', 'login', {
-          method: 'email'
-        });
+      // 서버 응답을 로컬 저장소에 반영 (토큰/유저 저장)
+      const result = handleLoginResponse(data);
+      if (!result?.success) {
+        throw new Error(result?.error || '로그인 처리에 실패했습니다.');
       }
 
-      return { success: true, user: userData };
-    } catch (error) {
-      console.error('Login error:', error);
-      const errorMessage = getErrorMessage(error);
-      setError(errorMessage);
-      
-      // 이메일 인증 필요한 경우 특별 처리
-      if (error.data && error.data.emailVerificationRequired) {
-        return { 
-          success: false, 
-          error: errorMessage,
-          needsEmailVerification: true,
-          email: credentials.email
-        };
-      }
-      
-      return { success: false, error: errorMessage };
+      const saved = getUserData();
+      setUser(saved);
+      return { success: true, user: saved };
+    } catch (e) {
+      const msg = parseError(e);
+      setError(msg);
+      return { success: false, error: msg };
     } finally {
       setLoading(false);
     }
   };
 
-  // 회원가입 함수 (백엔드 응답 구조에 맞춤)
-  const signup = async (userData) => {
+  // ---- 회원가입 (백엔드 스키마 그대로 전달) ----
+  // 예: { username, password, authCode, teamName, role, region }
+  const signup = async (payload) => {
     try {
-      setError(null);
       setLoading(true);
-      
-      // 백엔드 응답: {email, name, emailVerificationRequired}
-      const signupResult = await authAPI.signup(userData);
-      console.log('Signup response:', signupResult);
+      setError(null);
 
-      // 회원가입 성공 이벤트 추적 (옵션)
-      if (window.gtag) {
-        window.gtag('event', 'sign_up', {
-          method: 'email'
-        });
+      if (!payload?.username || !payload?.password || !payload?.authCode) {
+        throw new Error('필수 항목(아이디/비밀번호/인증코드)을 입력해주세요.');
       }
 
-      return { 
+      const res = await apiSignup(payload);
+      // 서버가 단순 성공만 주면 그대로 전달
+      return {
         success: true,
-        needsEmailVerification: signupResult.emailVerificationRequired || true,
-        email: signupResult.email,
-        message: '회원가입이 완료되었습니다. 이메일을 확인해주세요.'
+        data: res,
+        message: '회원가입이 완료되었습니다.',
       };
-    } catch (error) {
-      console.error('Signup error:', error);
-      const errorMessage = getErrorMessage(error);
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+    } catch (e) {
+      const msg = parseError(e);
+      setError(msg);
+      return { success: false, error: msg };
     } finally {
       setLoading(false);
     }
   };
 
-  // 이메일 인증 함수
-  const verifyEmail = async (token, email) => {
-    try {
-      setError(null);
-      setLoading(true);
-      
-      // 백엔드 응답: {token, user}
-      const verificationData = await authAPI.verifyEmail(token, email);
-      console.log('Email verification response:', verificationData);
-
-      // 토큰과 사용자 정보 저장
-      const result = handleVerificationResponse(verificationData);
-      
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      // 저장된 사용자 정보 설정
-      const userData = getUserData();
-      setUser(userData);
-
-      return { success: true, user: userData };
-    } catch (error) {
-      console.error('Email verification error:', error);
-      const errorMessage = getErrorMessage(error);
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 이메일 재발송 함수
-  const resendVerification = async (email) => {
-    try {
-      setError(null);
-      await authAPI.resendVerification(email);
-      return { success: true, message: '인증 이메일이 재발송되었습니다.' };
-    } catch (error) {
-      console.error('Resend verification error:', error);
-      const errorMessage = getErrorMessage(error);
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    }
-  };
-
-  // 로그아웃 함수
+  // ---- 로그아웃 (서버 알림은 선택적) ----
   const logout = async () => {
     try {
       setLoading(true);
-      
-      // 서버에 로그아웃 알림 (백엔드에 로그아웃 API가 없으므로 스킵)
+      setError(null);
+      // 서버에 알림이 필요 없는 경우라도 호출해도 무방
       try {
-        await authAPI.logout();
-      } catch (error) {
-        console.warn('Server logout failed:', error);
+        await apiLogout();
+      } catch {
+        // 서버 로그아웃 실패는 무시 (클라이언트 정리 우선)
       }
-      
-      // 로그아웃 이벤트 추적 (옵션)
-      if (window.gtag) {
-        window.gtag('event', 'logout');
-      }
-    } catch (error) {
-      console.error('로그아웃 처리 실패:', error);
     } finally {
       clearAuthData();
       setLoading(false);
     }
   };
 
-  // 사용자 정보 새로고침
-  const refreshUserInfo = async () => {
+  // ---- 아이디 중복 확인 ----
+  const checkUsername = async (username) => {
     try {
-      if (!isAuthenticated()) {
-        throw new Error('로그인이 필요합니다.');
-      }
-
-      const userInfo = await authAPI.getUserInfo();
-      const result = handleUserInfoResponse(userInfo);
-      
-      if (result.success) {
-        const userData = getUserData();
-        setUser(userData);
-        return { success: true, user: userData };
-      } else {
-        throw new Error(result.error);
-      }
-    } catch (error) {
-      console.error('User info refresh error:', error);
-      
-      // 401 에러인 경우 로그아웃 처리
-      if (error.status === 401) {
-        clearAuthData();
-      }
-      
-      const errorMessage = getErrorMessage(error);
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
+      if (!username) return { available: false, error: '아이디를 입력하세요.' };
+      const r = await apiCheckUsername(username);
+      return { available: !!r.available };
+    } catch (e) {
+      return { available: false, error: parseError(e) };
     }
   };
 
-  // 인증된 API 요청 래퍼
-  const authenticatedFetch = async (url, options = {}) => {
+  // ---- 인증코드 검증 ----
+  const verifyTeamCode = async (authCode) => {
     try {
-      const token = getToken();
-      
-      if (!token || isTokenExpired(token)) {
-        clearAuthData();
-        throw new Error('인증이 필요합니다.');
-      }
-
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          ...options.headers,
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      // 401 에러시 로그아웃 처리
-      if (response.status === 401) {
-        clearAuthData();
-        throw new Error('인증이 만료되었습니다.');
-      }
-
-      return response;
-    } catch (error) {
-      throw error;
+      if (!authCode) return { valid: false, error: '인증코드를 입력하세요.' };
+      const r = await apiVerifyTeamCode(authCode);
+      return { valid: !!r.valid };
+    } catch (e) {
+      return { valid: false, error: parseError(e) };
     }
   };
 
-  // 인증 데이터 정리
+  // ---- 공통 유틸 ----
   const clearAuthData = () => {
     clearTokens();
     setUser(null);
     setError(null);
   };
 
-  // 에러 메시지 파싱
-  const getErrorMessage = (error) => {
-    if (typeof error === 'string') return error;
-    if (error.message) return error.message;
+  const parseError = (err) => {
+    if (!err) return '알 수 없는 오류가 발생했습니다.';
+    if (typeof err === 'string') return err;
+    if (err.message) return err.message;
     return '알 수 없는 오류가 발생했습니다.';
-  };
-
-  // 사용자 권한 확인 (필요시 확장)
-  const hasPermission = (permission) => {
-    if (!user) return false;
-    // 백엔드에서 권한 시스템을 추가하면 여기서 처리
-    return true;
   };
 
   const value = {
@@ -305,47 +169,27 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     error,
-    isAuthenticated: isAuthenticated() && !!user,
     isInitialized,
-    isEmailVerificationRequired: isEmailVerificationRequired(),
-    
-    // 인증 함수
+    isAuthenticated: isAuthedByStorage() && !!user,
+
+    // 액션
     login,
     signup,
     logout,
-    verifyEmail,
-    resendVerification,
-    
-    // 사용자 정보
-    refreshUserInfo,
-    
-    // 유틸리티
-    authenticatedFetch,
-    hasPermission,
+
+    // 검증 유틸
+    checkUsername,
+    verifyTeamCode,
+
+    // 기타
     clearError: () => setError(null),
-    
-    // 디버그 정보 (개발환경에서만)
-    ...(process.env.NODE_ENV === 'development' && {
-      debug: {
-        token: getToken(),
-        userData: getUserData(),
-        isTokenExpired: isTokenExpired(),
-        isAuthenticated: isAuthenticated()
-      }
-    })
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth는 AuthProvider 내에서 사용해야 합니다.');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth는 AuthProvider 내부에서만 사용 가능합니다.');
+  return ctx;
 };
