@@ -9,7 +9,7 @@ export const API_CONFIG = {
     VERIFY_TEAM_CODE: '/auth/verify-team-code',
 
 
-    UPLOAD_VIDEO: '/video/upload', //<-- 건아 임마를 조져
+    UPLOAD_VIDEO: '/video/upload',
     JSON_EX: '/player/analyze-game-data',
 
   }
