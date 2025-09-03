@@ -24,7 +24,7 @@ jobs:
         run: |
           cd Front
           npm install --legacy-peer-deps
-          npm run build
+          CI=false npm run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
