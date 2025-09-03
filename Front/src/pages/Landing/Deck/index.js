@@ -14,10 +14,8 @@ const Deck = () => {
   const [numPages, setNumPages] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [visiblePages, setVisiblePages] = useState(new Set([1])); // 보이는 페이지만 렌더링
   const [loadProgress, setLoadProgress] = useState(0);
   const containerRef = useRef(null);
-  const pageRefs = useRef({});
 
   // 문서 로드 성공
   const onDocumentLoadSuccess = ({ numPages }) => {
@@ -37,59 +35,17 @@ const Deck = () => {
     setLoadProgress(Math.round((loaded / total) * 100));
   };
 
-  // Intersection Observer로 보이는 페이지만 렌더링
-  useEffect(() => {
-    if (!numPages) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const pageNumber = parseInt(entry.target.dataset.pageNumber);
-          if (entry.isIntersecting) {
-            setVisiblePages((prev) => new Set([...prev, pageNumber]));
-          }
-        });
-      },
-      {
-        root: containerRef.current,
-        rootMargin: '100px', // 미리 로드
-        threshold: 0.01,
-      },
-    );
-
-    // 모든 페이지 placeholder 관찰
-    Object.values(pageRefs.current).forEach((ref) => {
-      if (ref) observer.observe(ref);
-    });
-
-    return () => observer.disconnect();
-  }, [numPages]);
-
-  // 페이지 컴포넌트
+  // 페이지 컴포넌트 - 모든 페이지를 항상 렌더링
   const PDFPage = ({ pageNumber }) => {
-    const isVisible = visiblePages.has(pageNumber);
-
     return (
-      <div
-        ref={(el) => (pageRefs.current[pageNumber] = el)}
-        data-page-number={pageNumber}
-        className="pdf-page-container"
-      >
-        {isVisible ? (
-          <Page
-            pageNumber={pageNumber}
-            width={1080} // 고정 width
-            renderMode="canvas"
-            renderTextLayer={false}
-            renderAnnotationLayer={false}
-          />
-        ) : (
-          <div className="page-placeholder">
-            <div className="page-number">
-              페이지 {pageNumber}/{numPages}
-            </div>
-          </div>
-        )}
+      <div className="pdf-page-container">
+        <Page
+          pageNumber={pageNumber}
+          width={1080} // 고정 width
+          renderMode="canvas"
+          renderTextLayer={false}
+          renderAnnotationLayer={false}
+        />
       </div>
     );
   };

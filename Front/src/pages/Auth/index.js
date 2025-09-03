@@ -6,4 +6,3 @@ export { default as FindCodePage } from './Find/FindCode';
 export { default as ChangePasswordPage } from './Find/ChangePassword';
 export { default as FindSuccessPage } from './Find/FindSuccess';
 export { default as AuthLayout } from './AuthLayout';
-export { default as VerifyEmailPage } from './VerifyEmail';
