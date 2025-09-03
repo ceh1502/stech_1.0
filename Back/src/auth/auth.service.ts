@@ -8,7 +8,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { User, UserDocument } from '../schemas/user.schema';
-import { SignupDto, LoginDto } from '../common/dto/auth.dto';
+import { SignupDto, LoginDto, VerifyTokenDto, RefreshTokenDto } from '../common/dto/auth.dto';
 import { TEAM_CODES } from '../common/constants/team-codes';
 
 @Injectable()
@@ -240,6 +240,94 @@ export class AuthService {
       data: {
         profile: updatedUser.profile
       }
+    };
+  }
+
+  async verifyToken(verifyTokenDto: VerifyTokenDto) {
+    console.log('=== 토큰 검증 ===');
+    
+    try {
+      const decoded = this.jwtService.verify(verifyTokenDto.token);
+      
+      // 사용자 존재 확인
+      const user = await this.userModel.findById(decoded.id);
+      if (!user || !user.isActive) {
+        throw new UnauthorizedException('유효하지 않은 사용자입니다.');
+      }
+
+      console.log('✅ 토큰 검증 성공:', decoded);
+      return {
+        success: true,
+        message: '유효한 토큰입니다.',
+        data: {
+          user: {
+            id: user._id,
+            username: user.username,
+            teamName: user.teamName,
+            role: user.role,
+            region: user.region,
+            playerId: user.playerId || null,
+          }
+        }
+      };
+    } catch (error) {
+      console.log('❌ 토큰 검증 실패:', error.message);
+      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+    }
+  }
+
+  async refreshToken(refreshTokenDto: RefreshTokenDto) {
+    console.log('=== 토큰 갱신 ===');
+    
+    try {
+      const decoded = this.jwtService.verify(refreshTokenDto.token);
+      
+      // 사용자 존재 확인
+      const user = await this.userModel.findById(decoded.id);
+      if (!user || !user.isActive) {
+        throw new UnauthorizedException('유효하지 않은 사용자입니다.');
+      }
+
+      // 새로운 토큰 발급
+      const newToken = this.jwtService.sign({
+        id: user._id,
+        username: user.username,
+        team: user.teamName,
+        role: user.role,
+        playerId: user.playerId || null
+      });
+
+      console.log('✅ 토큰 갱신 성공');
+      return {
+        success: true,
+        message: '토큰이 갱신되었습니다.',
+        data: {
+          token: newToken,
+          user: {
+            id: user._id,
+            username: user.username,
+            teamName: user.teamName,
+            role: user.role,
+            region: user.region,
+            playerId: user.playerId || null,
+          }
+        }
+      };
+    } catch (error) {
+      console.log('❌ 토큰 갱신 실패:', error.message);
+      throw new UnauthorizedException('토큰 갱신에 실패했습니다.');
+    }
+  }
+
+  async logout() {
+    console.log('=== 로그아웃 ===');
+    // JWT는 stateless이므로 클라이언트에서 토큰 삭제
+    // 서버에서는 응답만 반환
+    
+    console.log('✅ 로그아웃 처리 완료');
+    return {
+      success: true,
+      message: '로그아웃되었습니다.',
     };
   }
 }

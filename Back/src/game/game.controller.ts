@@ -213,6 +213,7 @@ export class GameController {
       await this.teamStatsService.saveTeamStats(
         gameData.gameKey,
         teamStatsResult,
+        gameData,
       );
 
       console.log('✅ 게임 데이터 및 팀 스탯 처리 완료');

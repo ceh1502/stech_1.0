@@ -54,3 +54,21 @@ export class VerifyTeamCodeDto {
   @IsString()
   authCode: string;
 }
+
+export class VerifyTokenDto {
+  @ApiProperty({ 
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    description: '검증할 JWT 토큰'
+  })
+  @IsString()
+  token: string;
+}
+
+export class RefreshTokenDto {
+  @ApiProperty({ 
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+    description: '갱신할 JWT 토큰'
+  })
+  @IsString()
+  token: string;
+}

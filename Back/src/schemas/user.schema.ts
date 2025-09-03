@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 
 export type UserDocument = User & Document;
 
-@Schema({ timestamps: true })
+@Schema({ collection: 'users', timestamps: true })
 export class User {
   @Prop({ required: true, unique: true })
   username: string; // 아이디 (기존 email → username으로 변경)

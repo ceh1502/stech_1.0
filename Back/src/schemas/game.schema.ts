@@ -3,7 +3,7 @@ import { Document, Types } from 'mongoose';
 
 export type GameDocument = Game & Document;
 
-@Schema({ timestamps: true })
+@Schema({ collection: 'games', timestamps: true })
 export class Game {
   @Prop({ required: true, unique: true })
   gameId: string;
