@@ -3,149 +3,150 @@ import Kakao from '../../assets/images/png/AuthPng/Kakao.png';
 import Google from '../../assets/images/png/AuthPng/Google.png';
 import Eye from '../../assets/images/png/AuthPng/Eye.png';
 import EyeActive from '../../assets/images/png/AuthPng/EyeActive.png';
-
+import { login } from '../../api/authAPI';
+import {useAuth} from '../../context/AuthContext';
+// import { APIError } from '../../api/errors'; // 프로젝트에 있으면 사용
 
 const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => {
-    const [formData, setFormData] = useState({
-        id: '',
-        password: '',
-    });
-    const [showPassword, setShowPassword] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({ username: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-        if (error) setError(null);
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError(null);
+  };
 
-    const validateForm = () => {
-        if (!formData.id || !formData.password) {
-            setError('아이디와 비밀번호 모두 입력해주세요.');
-            return false;
-        }
-        const idRegex = /^[a-zA-Z0-9]+$/;
-        if (!idRegex.test(formData.id)) {
-            setError('존재하지 않는 아이디입니다.');
-            return false;
-        }
-        return true;
-    };
+  const validateForm = () => {
+    const username = formData.username?.trim();
+    const password = formData.password;
+    if (!username || !password) {
+      setError('아이디와 비밀번호 모두 입력해주세요.');
+      return false;
+    }
+    const idRegex = /^[a-zA-Z0-9]+$/;
+    if (!idRegex.test(username)) {
+      setError('존재하지 않는 아이디입니다.');
+      return false;
+    }
+    return true;
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!validateForm()) return;
-        setIsSubmitting(true);
-        setError(null);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-        try {
-            console.log('로그인 시도:', formData);
-            const success = true;
-            if (success) {
-                console.log('Login Successful!');
-                if (onSuccess) {
-                    onSuccess();
-                }
-            } else {
-                setError('Login failed. Please check your credentials.');
-            }
-        } catch (err) {
-            console.error('Login Error:', err);
-            setError('An unexpected error occurred. Please try again later.');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    setIsSubmitting(true);
+    setError(null);
 
-    const isFormLoading = isSubmitting;
+    try {
+      const data = await login(formData.username, formData.password);
 
-    return (
-        <form onSubmit={handleSubmit} className={`loginForm ${className}`}>
-            <div className="tab-container">
-                <button type="button" className="loginTitle">로그인</button>
-                <a href="/auth/signup" type="button" className="loginTitleTosignup">회원가입</a>
-            </div>
+      // 필요 시 토큰/유저 저장
+      if (data?.token) localStorage.setItem('token', data.token);
+      // if (data?.user) setUser?.(data.user);
 
-            <div className="formGroup">
-                <label className="LoginformLabel ID" htmlFor="id">아이디</label>
-                <input
-                    type="text"
-                    name="id"
-                    value={formData.id}
-                    onChange={handleChange}
-                    className="LoginformInput"
-                    required
-                    autoComplete="id"
-                    disabled={isFormLoading}
-                />
-            </div>
+      console.log('Login Successful!');
+      onSuccess?.(data);
+    } catch (err) {
+      console.error('Login Error:', err);
+      // if (err instanceof APIError) setError(err.message);
+      // APIError 타입이 없다면 아래처럼 최소 메시지 노출
+      setError(err?.message || '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-            <div className="formGroup">
-                <label className="LoginformLabel PW" htmlFor="password">
-                    비밀번호
-                    {showForgotPassword && (
-                        <a href="auth/find" onClick={() => console.log('Forgot password clicked')} className="forgotPasswordLink">비밀번호 찾기</a>
-                    )}
-                </label>
-                <div className="passwordInputContainer">
-                    <input
-                        type={showPassword ? 'text' : 'password'}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="LoginformInput"
-                        required
-                        autoComplete="current-password"
-                        disabled={isFormLoading}
-                    />
-                    <button
-                        type="button"
-                        className="LoginpasswordToggleButton"
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={isFormLoading}
-                    >
-                        {showPassword ? (
-                            <img src={EyeActive} alt="showPassword" className="showPassword" />
-                        ) : (
-                            <img src={Eye} alt="showPassword" className="showPasswordActive" />
-                        )}
-                    </button>
-                </div>
-            </div>
+  const isFormLoading = isSubmitting;
 
+  return (
+    <form onSubmit={handleSubmit} className={`loginForm ${className}`}>
+      <div className="tab-container">
+        <button type="button" className="loginTitle">로그인</button>
+        <a href="/auth/signup" className="loginTitleTosignup">회원가입</a>
+      </div>
 
-            {error && <div className="errorMessage">⚠️ {error}</div>}
+      <div className="formGroup">
+        <label className="LoginformLabel ID" htmlFor="username">아이디</label>
+        <input
+          id="username"
+          type="text"
+          name="username"
+          value={formData.username}
+          onChange={handleChange}
+          className="LoginformInput"
+          required
+          autoComplete="username"
+          disabled={isFormLoading}
+        />
+      </div>
 
-            <button
-                type="submit"
-                disabled={isFormLoading}
-                className={`LoginsubmitButton ${isFormLoading ? 'loading' : ''}`}
-            >
-                {isFormLoading ? 'Loading...' : '로그인'}
-            </button>
+      <div className="formGroup">
+        <label className="LoginformLabel PW" htmlFor="password">
+          비밀번호
+          {showForgotPassword && (
+            <a href="/auth/find" className="forgotPasswordLink">비밀번호 찾기</a>
+          )}
+        </label>
+        <div className="passwordInputContainer">
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="LoginformInput"
+            required
+            autoComplete="current-password"
+            disabled={isFormLoading}
+          />
+          <button
+            type="button"
+            className="LoginpasswordToggleButton"
+            onClick={() => setShowPassword((v) => !v)}
+            disabled={isFormLoading}
+            aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
+          >
+            {showPassword ? (
+              <img src={EyeActive} alt="" className="showPassword" />
+            ) : (
+              <img src={Eye} alt="" className="showPasswordActive" />
+            )}
+          </button>
+        </div>
+      </div>
 
-            <div className="divider-container">
-                <div className="divider"></div>
-                <span className="divider-text">or</span>
-                <div className="divider"></div>
-            </div>
+      {error && <div className="errorMessage">⚠️ {error}</div>}
 
-            <div className="social-buttons-container">
-                <button type="button" className="socialButton google-button">
-                    <img src={Google} alt="google" className="socialicon" />
-                    구글로 로그인
-                </button>
-                <button type="button" className="socialButton kakao-button">
-                    <img src={Kakao} alt="kakao" className="socialicon" />
-                    카카오로 로그인
-                </button>
-            </div>
-        </form>
-    );
+      <button
+        type="submit"
+        disabled={isFormLoading}
+        className={`LoginsubmitButton ${isFormLoading ? 'loading' : ''}`}
+      >
+        {isFormLoading ? 'Loading...' : '로그인'}
+      </button>
+
+      <div className="divider-container">
+        <div className="divider" />
+        <span className="divider-text">or</span>
+        <div className="divider" />
+      </div>
+
+      <div className="social-buttons-container">
+        <button type="button" className="socialButton google-button" disabled={isFormLoading}>
+          <img src={Google} alt="google" className="socialicon" />
+          구글로 로그인
+        </button>
+        <button type="button" className="socialButton kakao-button" disabled={isFormLoading}>
+          <img src={Kakao} alt="kakao" className="socialicon" />
+          카카오로 로그인
+        </button>
+      </div>
+    </form>
+  );
 };
 
 export default LoginForm;
