@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.c1d5eb5e.css",
-    "main.js": "/static/js/main.1124d0cc.js",
+    "main.css": "/static/css/main.a0b2a6a6.css",
+    "main.js": "/static/js/main.3e4781de.js",
     "static/media/headimg.png": "/static/media/headimg.08a64629290141cfd3f2.png",
     "static/media/screen.png": "/static/media/screen.be2fc7903e70af964c72.png",
     "static/media/TP3.png": "/static/media/TP3.230dbd55813f9fa2ac68.png",
@@ -30,18 +30,18 @@
     "static/media/HUFS-Black-Knights.png": "/static/media/HUFS-Black-Knights.6e3c7722b8087ac0005f.png",
     "static/media/detail.png": "/static/media/detail.e04927d03313fa93c765.png",
     "static/media/mobilescreen.png": "/static/media/mobilescreen.c9ccad0c4d3b506d41fd.png",
-    "static/media/stech.png": "/static/media/stech.c7bf98878b18e95cfe1d.png",
+    "static/media/stech.png": "/static/media/stech.2a8ec34a60cb99b15cce.png",
     "static/media/404Error.png": "/static/media/404Error.78ba7011f5629b39b096.png",
     "static/media/trophy.png": "/static/media/trophy.9fa8becf798b665f93b7.png",
     "static/media/kafa_intro.jpg": "/static/media/kafa_intro.27f7a39239c4122a4d57.jpg",
     "static/media/Stechlogo.svg": "/static/media/Stechlogo.2515ff7fa7a75b8f8e85a718db911acc.svg",
     "static/media/teamLogo.png": "/static/media/teamLogo.1cbc0faa7edd66f0a77c.png",
     "index.html": "/index.html",
-    "main.c1d5eb5e.css.map": "/static/css/main.c1d5eb5e.css.map",
-    "main.1124d0cc.js.map": "/static/js/main.1124d0cc.js.map"
+    "main.a0b2a6a6.css.map": "/static/css/main.a0b2a6a6.css.map",
+    "main.3e4781de.js.map": "/static/js/main.3e4781de.js.map"
   },
   "entrypoints": [
-    "static/css/main.c1d5eb5e.css",
-    "static/js/main.1124d0cc.js"
+    "static/css/main.a0b2a6a6.css",
+    "static/js/main.3e4781de.js"
   ]
 }
