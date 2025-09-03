@@ -41,6 +41,8 @@ export class TeamGameStats {
     touchdowns?: number;
     fieldGoals?: number;
     turnovers?: number;
+    fumbles?: number;
+    fumblesLost?: number;
     
     // 디펜스 스탯
     yardsAllowed?: number;
@@ -49,6 +51,7 @@ export class TeamGameStats {
     fumblesRecovered?: number;
     
     // 스페셜팀 스탯
+    puntAttempts?: number;
     puntingYards?: number;
     puntReturns?: number;
     kickReturns?: number;

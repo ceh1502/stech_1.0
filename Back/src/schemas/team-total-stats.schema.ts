@@ -23,6 +23,8 @@ export class TeamTotalStats {
     touchdowns?: number;
     fieldGoals?: number;
     turnovers?: number;
+    fumbles?: number;
+    fumblesLost?: number;
     
     // 평균
     avgYardsPerGame?: number;
@@ -38,7 +40,9 @@ export class TeamTotalStats {
     fumblesRecovered?: number;
     
     // 스페셜팀 스탯 (누적)
+    puntAttempts?: number;
     puntingYards?: number;
+    avgPuntYards?: number;
     puntReturns?: number;
     kickReturns?: number;
     returnYards?: number;

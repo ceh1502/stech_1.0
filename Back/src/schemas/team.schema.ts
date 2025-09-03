@@ -76,7 +76,7 @@ export class Championships {
   @Prop({ default: 0 }) challengeBowl?: number; // 챌린지볼
 }
 
-@Schema({ timestamps: true })
+@Schema({ collection: 'teams', timestamps: true })
 export class Team {
   @Prop({ required: true, unique: true })
   teamKey: string; // 팀Key값

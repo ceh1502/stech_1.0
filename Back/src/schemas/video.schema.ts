@@ -48,7 +48,7 @@ export class SignificantPlay {
   timestamp: number;
 }
 
-@Schema({ timestamps: true })
+@Schema({ collection: 'videos', timestamps: true })
 export class Video {
   @Prop({ required: true, unique: true })
   videoId: string;

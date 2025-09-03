@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { TeamStats, TeamStatsDocument } from '../schemas/team-stats.schema';
+import { TeamGameStats, TeamGameStatsDocument } from '../schemas/team-game-stats.schema';
+import { TeamTotalStats, TeamTotalStatsDocument } from '../schemas/team-total-stats.schema';
 import {
   PLAY_TYPE,
   SIGNIFICANT_PLAY,
@@ -24,13 +25,19 @@ export interface TeamStatsData {
   turnovers: number;
   penaltyYards: number;
   sackYards: number;
+  puntAttempts: number;
+  puntYards: number;
+  fumbles: number;
+  fumblesLost: number;
 }
 
 @Injectable()
 export class TeamStatsAnalyzerService {
   constructor(
-    @InjectModel(TeamStats.name)
-    private teamStatsModel: Model<TeamStatsDocument>,
+    @InjectModel(TeamGameStats.name)
+    private teamGameStatsModel: Model<TeamGameStatsDocument>,
+    @InjectModel(TeamTotalStats.name)
+    private teamTotalStatsModel: Model<TeamTotalStatsDocument>,
   ) {}
 
   /**
@@ -50,6 +57,10 @@ export class TeamStatsAnalyzerService {
       turnovers: 0,
       penaltyYards: 0,
       sackYards: 0,
+      puntAttempts: 0,
+      puntYards: 0,
+      fumbles: 0,
+      fumblesLost: 0,
     };
 
     const awayTeamStats: TeamStatsData = {
@@ -63,6 +74,10 @@ export class TeamStatsAnalyzerService {
       turnovers: 0,
       penaltyYards: 0,
       sackYards: 0,
+      puntAttempts: 0,
+      puntYards: 0,
+      fumbles: 0,
+      fumblesLost: 0,
     };
 
     // 각 클립 분석
@@ -162,12 +177,29 @@ export class TeamStatsAnalyzerService {
       }
     }
 
-    // 5. 펀트 리턴 야드
+    // 5. 펀트 관련 처리
     if (playType === 'PUNT' || playType === 'Punt') {
-      // 펀트 리턴이 있는 경우 (리턴팀은 수비팀)
-      if (gainYard > 0) {
-        defenseStats.puntReturnYards += gainYard;
-        console.log(`  ✅ 펀트리턴야드 추가: ${gainYard}야드`);
+      // 펀트 시도는 항상 +1
+      offenseStats.puntAttempts += 1;
+      
+      // tkl이 있으면 블록당한 것 → 펀트 야드 +0
+      const isBlocked = clip.tkl || clip.tkl2;
+      
+      if (isBlocked) {
+        console.log(`  🚫 펀트 블록당함: 펀터 스탯 변동없음, 팀 펀트시도 +1, 야드 +0`);
+        // 펀트 야드는 0 추가 (블록당했으므로)
+        offenseStats.puntYards += 0;
+      } else {
+        // 정상 펀트
+        const puntYards = Math.abs(gainYard); // 펀트는 항상 양수로 계산
+        offenseStats.puntYards += puntYards;
+        console.log(`  ✅ 정상 펀트: ${puntYards}야드`);
+        
+        // 펀트 리턴이 있는 경우 (리턴팀은 수비팀)
+        if (gainYard > 0) {
+          defenseStats.puntReturnYards += gainYard;
+          console.log(`  ✅ 펀트리턴야드 추가: ${gainYard}야드`);
+        }
       }
     }
 
@@ -190,13 +222,18 @@ export class TeamStatsAnalyzerService {
       offenseStats.turnovers += 1;
     }
 
-    // 펌블, 인터셉트도 턴오버로 계산
+    // 펌블 처리 (모든 포지션에서 팀 스탯에 반영)
     if (
       PlayAnalysisHelper.hasSignificantPlay(
         significantPlays,
         SIGNIFICANT_PLAY.FUMBLE,
       )
     ) {
+      // 펌블 발생은 항상 팀 스탯에 +1
+      offenseStats.fumbles += 1;
+      console.log(`  🏈 펌블 발생: ${offensiveTeam} 팀`);
+      
+      // 펌블을 잃었으면 턴오버 추가
       if (
         PlayAnalysisHelper.hasSignificantPlay(
           significantPlays,
@@ -204,6 +241,8 @@ export class TeamStatsAnalyzerService {
         )
       ) {
         offenseStats.turnovers += 1;
+        offenseStats.fumblesLost += 1;
+        console.log(`  💔 펌블 턴오버: ${offensiveTeam} 팀`);
       }
     }
 
@@ -221,60 +260,128 @@ export class TeamStatsAnalyzerService {
   }
 
   /**
-   * 데이터베이스에 팀 스탯 저장
+   * 데이터베이스에 팀 스탯 저장 (경기별 + 누적)
    */
   async saveTeamStats(
     gameKey: string,
     teamStatsResult: TeamStatsResult,
+    gameData: any,
   ): Promise<void> {
     // 홈팀 스탯 저장
-    await this.saveTeamStatsToDb(
+    await this.saveTeamGameStats(
       gameKey,
-      'home',
       teamStatsResult.homeTeamStats,
+      teamStatsResult.awayTeamStats.teamName,
+      true,
+      gameData,
     );
+    await this.updateTeamTotalStats(teamStatsResult.homeTeamStats);
 
     // 어웨이팀 스탯 저장
-    await this.saveTeamStatsToDb(
+    await this.saveTeamGameStats(
       gameKey,
-      'away',
       teamStatsResult.awayTeamStats,
+      teamStatsResult.homeTeamStats.teamName,
+      false,
+      gameData,
     );
+    await this.updateTeamTotalStats(teamStatsResult.awayTeamStats);
   }
 
   /**
-   * 개별 팀 스탯을 데이터베이스에 저장
+   * 경기별 팀 스탯 저장
    */
-  private async saveTeamStatsToDb(
+  private async saveTeamGameStats(
     gameKey: string,
-    homeAway: string,
     teamStats: TeamStatsData,
+    opponent: string,
+    isHomeGame: boolean,
+    gameData: any,
   ): Promise<void> {
-    const existingStats = await this.teamStatsModel.findOne({
+    const gameStats = {
+      teamName: teamStats.teamName,
       gameKey,
-      homeAway,
+      date: gameData.date || new Date().toISOString(),
+      season: gameData.date ? gameData.date.substring(0, 4) : new Date().getFullYear().toString(),
+      opponent,
+      isHomeGame,
+      gameResult: null, // 추후 점수 계산 로직 추가
+      stats: {
+        totalYards: teamStats.totalYards,
+        passingYards: teamStats.passingYards,
+        rushingYards: teamStats.rushingYards,
+        turnovers: teamStats.turnovers,
+        puntAttempts: teamStats.puntAttempts,
+        puntYards: teamStats.puntYards,
+        fumbles: teamStats.fumbles,
+        fumblesLost: teamStats.fumblesLost,
+      },
+      finalScore: gameData.finalScore || { own: 0, opponent: 0 },
+    };
+
+    await this.teamGameStatsModel.findOneAndUpdate(
+      { teamName: teamStats.teamName, gameKey },
+      gameStats,
+      { upsert: true, new: true }
+    );
+    
+    console.log(`✅ ${teamStats.teamName} 경기별 스탯 저장 완료`);
+  }
+
+  /**
+   * 누적 팀 스탯 업데이트
+   */
+  private async updateTeamTotalStats(teamStats: TeamStatsData): Promise<void> {
+    const totalStats = await this.teamTotalStatsModel.findOne({
+      teamName: teamStats.teamName,
     });
 
-    if (existingStats) {
-      // 기존 기록 업데이트
-      await this.teamStatsModel.updateOne(
-        { gameKey, homeAway },
-        {
-          ...teamStats,
-          updatedAt: new Date(),
-        },
-      );
+    if (totalStats) {
+      // 기존 누적 스탯 업데이트
+      totalStats.stats.totalYards = (totalStats.stats.totalYards || 0) + teamStats.totalYards;
+      totalStats.stats.passingYards = (totalStats.stats.passingYards || 0) + teamStats.passingYards;
+      totalStats.stats.rushingYards = (totalStats.stats.rushingYards || 0) + teamStats.rushingYards;
+      totalStats.stats.turnovers = (totalStats.stats.turnovers || 0) + teamStats.turnovers;
+      totalStats.stats.fumbles = (totalStats.stats.fumbles || 0) + teamStats.fumbles;
+      totalStats.stats.fumblesLost = (totalStats.stats.fumblesLost || 0) + teamStats.fumblesLost;
+      
+      // 펀트 관련
+      const newPuntAttempts = (totalStats.stats.puntAttempts || 0) + teamStats.puntAttempts;
+      const newPuntYards = (totalStats.stats.puntYards || 0) + teamStats.puntYards;
+      totalStats.stats.puntAttempts = newPuntAttempts;
+      totalStats.stats.puntYards = newPuntYards;
+      totalStats.stats.avgPuntYards = newPuntAttempts > 0 ? newPuntYards / newPuntAttempts : 0;
+      
+      totalStats.gamesPlayed += 1;
+      totalStats.lastUpdated = new Date();
+      
+      await totalStats.save();
     } else {
-      // 새 기록 생성
-      await this.teamStatsModel.create({
-        gameKey,
+      // 새로운 팀 누적 스탯 생성
+      await this.teamTotalStatsModel.create({
         teamName: teamStats.teamName,
-        homeAway,
-        ...teamStats,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        stats: {
+          totalYards: teamStats.totalYards,
+          passingYards: teamStats.passingYards,
+          rushingYards: teamStats.rushingYards,
+          turnovers: teamStats.turnovers,
+          fumbles: teamStats.fumbles,
+          fumblesLost: teamStats.fumblesLost,
+          puntAttempts: teamStats.puntAttempts,
+          puntYards: teamStats.puntYards,
+          avgPuntYards: teamStats.puntAttempts > 0 ? teamStats.puntYards / teamStats.puntAttempts : 0,
+        },
+        gamesPlayed: 1,
+        wins: 0,
+        losses: 0,
+        ties: 0,
+        seasons: [teamStats.teamName.includes('2024') ? '2024' : new Date().getFullYear().toString()],
+        gameKeys: [],
+        lastUpdated: new Date(),
       });
     }
+    
+    console.log(`✅ ${teamStats.teamName} 누적 스탯 업데이트 완료`);
   }
 
   /**
@@ -282,15 +389,14 @@ export class TeamStatsAnalyzerService {
    */
   async getTeamStatsByGame(gameKey: string): Promise<TeamStatsResult | null> {
     console.log('🔍 팀 스탯 조회 시작:', gameKey);
-    const homeStats = await this.teamStatsModel.findOne({
-      gameKey,
-      homeAway: 'home',
-    });
+    const gameStats = await this.teamGameStatsModel.find({ gameKey });
 
-    const awayStats = await this.teamStatsModel.findOne({
-      gameKey,
-      homeAway: 'away',
-    });
+    if (gameStats.length !== 2) {
+      return null;
+    }
+
+    const homeStats = gameStats.find(stat => stat.isHomeGame);
+    const awayStats = gameStats.find(stat => !stat.isHomeGame);
 
     if (!homeStats || !awayStats) {
       return null;
@@ -303,20 +409,31 @@ export class TeamStatsAnalyzerService {
   }
 
   /**
+   * 팀 누적 스탯 조회
+   */
+  async getTeamTotalStats(teamName: string) {
+    return this.teamTotalStatsModel.findOne({ teamName });
+  }
+
+  /**
    * 데이터베이스 문서를 TeamStatsData로 변환
    */
-  private convertToTeamStatsData(stats: TeamStatsDocument): TeamStatsData {
+  private convertToTeamStatsData(stats: TeamGameStatsDocument): TeamStatsData {
     return {
       teamName: stats.teamName,
-      totalYards: stats.totalYards,
-      passingYards: stats.passingYards,
-      rushingYards: stats.rushingYards,
-      interceptionReturnYards: stats.interceptionReturnYards,
-      puntReturnYards: stats.puntReturnYards,
-      kickoffReturnYards: stats.kickoffReturnYards,
-      turnovers: stats.turnovers,
-      penaltyYards: stats.penaltyYards,
-      sackYards: stats.sackYards,
+      totalYards: stats.stats.totalYards || 0,
+      passingYards: stats.stats.passingYards || 0,
+      rushingYards: stats.stats.rushingYards || 0,
+      interceptionReturnYards: 0, // team-game-stats 스키마에 추가 필요시
+      puntReturnYards: 0, // team-game-stats 스키마에 추가 필요시
+      kickoffReturnYards: 0, // team-game-stats 스키마에 추가 필요시
+      turnovers: stats.stats.turnovers || 0,
+      penaltyYards: 0, // team-game-stats 스키마에 추가 필요시
+      sackYards: 0, // team-game-stats 스키마에 추가 필요시
+      puntAttempts: stats.stats.puntAttempts || 0,
+      puntYards: stats.stats.puntYards || 0,
+      fumbles: stats.stats.fumbles || 0,
+      fumblesLost: stats.stats.fumblesLost || 0,
     };
   }
 }
