@@ -20,7 +20,7 @@ const TEAM_TO_LEAGUE = {
   '한양대 라이온스': '서울',
   '국민대 레이저백스': '서울',
   '서울시립대 시티혹스': '서울',
-  '한국외국어대 블랙나이츠': '서울',
+  '한국외대 블랙나이츠': '서울',
   '건국대 레이징불스': '서울',
   '홍익대 카우보이스': '서울',
   '동국대 터스커스': '서울',
@@ -73,7 +73,7 @@ const mockGames = [
   {
     gameKey: '2024-09-08-DGT-KMR',
     date: '2024-09-08',
-    home: '한국외국어대 블랙나이츠',
+    home: '한국외대 블랙나이츠',
     away: '고려대 타이거스',
     type: 'Season',
     location: '서울대',
@@ -102,7 +102,6 @@ export default function GamePage() {
   /* ===== 내 팀 (고정 표기) ===== */
   const MY_TEAM_NAME = '한양대 라이온스'; // 필요 시 전역 상태/API로 대체
 
-  
   const selfTeam = useMemo(
     () => TEAMS.find((t) => t.name === MY_TEAM_NAME) || TEAMS[0] || null,
     [],
