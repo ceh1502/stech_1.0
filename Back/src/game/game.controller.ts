@@ -362,6 +362,7 @@ export class GameController {
             playerNum,
             playerClips,
             playerTeamName,
+            gameData,
           );
 
         results.push({

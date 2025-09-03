@@ -554,4 +554,93 @@ export class PlayerController {
       };
     }
   }
+
+  @Get('my-stats')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '🏈 내 선수 스탯 조회',
+    description: `
+    ## 🏈 선수 전용 API
+
+    로그인한 선수의 개인 스탯을 조회합니다.
+    
+    ### 🎯 사용 목적
+    - 마이페이지에서 개인 스탯 표시
+    - 경기별/시즌별/통합 스탯 조회
+    - 하이라이트 영상 연결을 위한 기본 정보
+
+    ### 📋 반환 정보
+    - 경기별 스탯 (최근 경기부터)
+    - 시즌별 스탯
+    - 통합 스탯 (커리어 전체)
+    - 선수 기본 정보
+
+    ### ⚠️ 주의사항
+    - JWT 토큰 필요
+    - playerId가 배정된 선수만 조회 가능
+    - 관리자가 playerId를 배정해야 사용 가능
+    `,
+  })
+  @ApiResponse({
+    status: 200,
+    description: '✅ 내 스탯 조회 성공',
+    schema: {
+      example: {
+        success: true,
+        message: '2024_HY_7 선수의 스탯을 조회했습니다.',
+        data: {
+          playerInfo: {
+            playerId: '2024_HY_7',
+            username: 'kim_chulsu',
+            teamName: '한양대 라이온스',
+            position: 'QB'
+          },
+          gameStats: [
+            {
+              gameKey: 'HYKU241115',
+              date: '2024-11-15',
+              opponent: '고려대 타이거스',
+              stats: { passingYards: 245, passingTouchdowns: 2 }
+            }
+          ],
+          seasonStats: {
+            '2024': {
+              gamesPlayed: 8,
+              stats: { passingYards: 1856, passingTouchdowns: 12 }
+            }
+          },
+          totalStats: {
+            totalGamesPlayed: 8,
+            stats: { passingYards: 1856, passingTouchdowns: 12 }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: '❌ 인증 실패',
+    schema: {
+      example: {
+        success: false,
+        message: '로그인이 필요합니다.',
+        code: 'UNAUTHORIZED'
+      }
+    }
+  })
+  @ApiResponse({
+    status: 403,
+    description: '❌ PlayerId 미배정',
+    schema: {
+      example: {
+        success: false,
+        message: 'playerId가 배정되지 않았습니다. 관리자에게 문의하세요.',
+        code: 'PLAYER_ID_NOT_ASSIGNED'
+      }
+    }
+  })
+  async getMyStats(@User() user: any) {
+    return await this.playerService.getPlayerStats(user);
+  }
 }

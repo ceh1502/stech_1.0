@@ -27,6 +27,9 @@ export class User {
   @Prop({ default: true })
   isActive: boolean; // 계정 활성화 상태
 
+  @Prop({ default: null })
+  playerId: string | null; // 관리자가 배정하는 선수 ID (예: "2025_KK_10")
+
   @Prop({
     type: {
       avatar: String,
@@ -35,8 +38,55 @@ export class User {
       studentId: String,
       email: String,
       joinDate: { type: Date, default: Date.now },
+      // 새로운 선수 프로필 필드들
+      playerKey: String,
+      realName: String,
+      status: { type: String, enum: ['은퇴', '휴학', '재학', '진학'] },
+      positions: {
+        type: {
+          PS1: String,
+          PS2: String,
+          PS3: String,
+          PS4: String,
+          PS5: String,
+          PS6: String,
+          PS7: String,
+          PS8: String,
+          PS9: String,
+          PS10: String,
+        },
+        default: {},
+        _id: false,
+      },
+      physicalInfo: {
+        type: {
+          height: Number, // cm
+          weight: Number, // kg
+          age: Number,
+          grade: String, // 학년
+          nationality: String,
+        },
+        default: {},
+        _id: false,
+      },
+      contactInfo: {
+        type: {
+          postalCode: String,
+          address: String,
+          phone: String,
+          email: String,
+        },
+        default: {},
+        _id: false,
+      },
+      career: String,
+      // 스탯 참조
+      totalStats: String, // PlayerTotalStats 참조
+      seasonStats: [String], // PlayerSeasonStats 배열 참조
+      gameStats: [String], // PlayerGameStats 배열 참조
     },
     default: {},
+    _id: false,
   })
   profile: {
     avatar?: string;
@@ -45,6 +95,40 @@ export class User {
     studentId?: string;
     email?: string;
     joinDate?: Date;
+    // 새로운 선수 프로필 필드들
+    playerKey?: string;
+    realName?: string;
+    status?: '은퇴' | '휴학' | '재학' | '진학';
+    positions?: {
+      PS1?: string;
+      PS2?: string;
+      PS3?: string;
+      PS4?: string;
+      PS5?: string;
+      PS6?: string;
+      PS7?: string;
+      PS8?: string;
+      PS9?: string;
+      PS10?: string;
+    };
+    physicalInfo?: {
+      height?: number; // cm
+      weight?: number; // kg
+      age?: number;
+      grade?: string; // 학년
+      nationality?: string;
+    };
+    contactInfo?: {
+      postalCode?: string;
+      address?: string;
+      phone?: string;
+      email?: string;
+    };
+    career?: string;
+    // 스탯 참조
+    totalStats?: string; // PlayerTotalStats 참조
+    seasonStats?: string[]; // PlayerSeasonStats 배열 참조
+    gameStats?: string[]; // PlayerGameStats 배열 참조
   };
 
   async comparePassword(candidatePassword: string): Promise<boolean> {

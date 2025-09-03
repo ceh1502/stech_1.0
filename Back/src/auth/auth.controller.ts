@@ -1,7 +1,8 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Post, Put, Body, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignupDto, LoginDto, CheckUsernameDto, VerifyTeamCodeDto } from '../common/dto/auth.dto';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -46,5 +47,30 @@ export class AuthController {
   @ApiResponse({ status: 400, description: '유효하지 않은 인증코드' })
   async verifyTeamCode(@Body() verifyTeamCodeDto: VerifyTeamCodeDto) {
     return this.authService.verifyTeamCode(verifyTeamCodeDto.authCode);
+  }
+
+  @Put('profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ 
+    summary: '프로필 업데이트', 
+    description: '로그인한 사용자의 프로필 정보를 업데이트합니다.' 
+  })
+  @ApiBody({
+    description: '업데이트할 프로필 정보',
+    schema: {
+      example: {
+        avatar: 'https://example.com/avatar.jpg',
+        bio: '소개글',
+        nickname: '별명',
+        email: 'email@example.com'
+      }
+    }
+  })
+  @ApiResponse({ status: 200, description: '프로필 업데이트 성공' })
+  @ApiResponse({ status: 401, description: '인증 필요' })
+  async updateProfile(@Request() req, @Body() profileData: any) {
+    return this.authService.updateProfile(req.user.id, profileData);
   }
 }
