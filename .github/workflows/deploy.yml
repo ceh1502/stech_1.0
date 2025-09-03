@@ -1,4 +1,5 @@
-name: Deploy to AWS
+name: Deploy to GitHub Pages
+
 on:
   push:
     branches: [main]
@@ -6,6 +7,11 @@ on:
 jobs:
   deploy-frontend:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
     steps:
       - uses: actions/checkout@v3
 
@@ -18,13 +24,11 @@ jobs:
         run: |
           cd Front
           npm install --legacy-peer-deps
-          npm run build
+          CI=false npm run build
 
-      - name: Deploy to S3
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ap-northeast-2
-        run: |
-          cd Front
-          aws s3 sync build/ s3://stechpro-frontend --delete
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./Front/build
+          publish_branch: gh-pages
