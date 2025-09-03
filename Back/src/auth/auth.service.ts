@@ -20,6 +20,9 @@ export class AuthService {
 
   async signup(signupDto: SignupDto) {
     const { username, password, authCode } = signupDto;
+    
+    console.log('=== 회원가입 시도 ===');
+    console.log('받은 데이터:', { username, authCode });
 
     // 아이디 중복 확인
     const existingUser = await this.userModel.findOne({ username });
@@ -42,16 +45,54 @@ export class AuthService {
       region: teamInfo.region,
       authCode,
       isActive: true,
+      profile: {
+        // 선수 프로필 필드들을 null로 초기화
+        playerKey: null,
+        realName: null,
+        status: null,
+        positions: {
+          PS1: null,
+          PS2: null,
+          PS3: null,
+          PS4: null,
+          PS5: null,
+          PS6: null,
+          PS7: null,
+          PS8: null,
+          PS9: null,
+          PS10: null,
+        },
+        physicalInfo: {
+          height: null,
+          weight: null,
+          age: null,
+          grade: null,
+          nationality: null,
+        },
+        contactInfo: {
+          postalCode: null,
+          address: null,
+          phone: null,
+          email: null,
+        },
+        career: null,
+        totalStats: null,
+        seasonStats: [],
+        gameStats: [],
+      },
     });
 
+    console.log('유저 저장 전:', newUser);
     await newUser.save();
+    console.log('✅ 유저 저장 완료:', newUser._id);
 
     // JWT 토큰 발급
     const token = this.jwtService.sign({ 
       id: newUser._id, 
       username: newUser.username,
       team: newUser.teamName,
-      role: newUser.role 
+      role: newUser.role,
+      playerId: newUser.playerId || null
     });
 
     return {
@@ -99,7 +140,8 @@ export class AuthService {
       id: user._id, 
       username: user.username,
       team: user.teamName,
-      role: user.role 
+      role: user.role,
+      playerId: user.playerId || null
     });
 
     console.log('✅ 로그인 성공');
@@ -166,5 +208,38 @@ export class AuthService {
 
   async findUserById(id: string): Promise<UserDocument | null> {
     return this.userModel.findById(id).exec();
+  }
+
+  async updateProfile(userId: string, profileData: any) {
+    console.log('=== 프로필 업데이트 ===');
+    console.log('userId:', userId);
+    console.log('profileData:', profileData);
+
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      userId,
+      { 
+        $set: { 
+          'profile.avatar': profileData.avatar,
+          'profile.bio': profileData.bio, 
+          'profile.nickname': profileData.nickname,
+          'profile.email': profileData.email
+        }
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      throw new BadRequestException('사용자를 찾을 수 없습니다.');
+    }
+
+    console.log('✅ 프로필 업데이트 완료');
+    
+    return {
+      success: true,
+      message: '프로필이 업데이트되었습니다.',
+      data: {
+        profile: updatedUser.profile
+      }
+    };
   }
 }
