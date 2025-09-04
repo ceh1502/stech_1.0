@@ -1,0 +1,153 @@
+.gameDataEditOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 10000;
+}
+
+.gameDataEditModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #2a2a2a;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  z-index: 10001;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.gameDataEditHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #444;
+}
+
+.gameDataEditHeader h3 {
+  color: #fff;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.gameDataEditCloseBtn {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+
+.gameDataEditCloseBtn:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.gameDataEditContent {
+  padding: 20px 24px;
+}
+
+.gameDataEditRow {
+  margin-bottom: 20px;
+}
+
+.gameDataEditRow:last-child {
+  margin-bottom: 0;
+}
+
+.gameDataEditLabel {
+  display: block;
+  color: #ccc;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.gameDataEditInput,
+.gameDataEditTextarea {
+  width: 100%;
+  background: #3a3a3a;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 12px;
+  color: #fff;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.gameDataEditInput:focus,
+.gameDataEditTextarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.gameDataEditInput:read-only {
+  background: #2a2a2a;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.gameDataEditTextarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.gameDataEditTextarea::placeholder {
+  color: #888;
+}
+
+.gameDataEditActions {
+  padding: 16px 24px 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.gameDataEditSubmitBtn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 120px;
+}
+
+.gameDataEditSubmitBtn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.gameDataEditSubmitBtn:disabled {
+  background: #555;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 600px) {
+  .gameDataEditModal {
+    width: 95%;
+    margin: 0;
+  }
+
+  .gameDataEditHeader,
+  .gameDataEditContent,
+  .gameDataEditActions {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
