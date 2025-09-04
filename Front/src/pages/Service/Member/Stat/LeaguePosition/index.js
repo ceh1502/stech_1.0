@@ -233,7 +233,7 @@ const LeaguePositionPage = () => {
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+      <StatPosition data={[]} teams={TEAMS} />
   }
 
   return (
