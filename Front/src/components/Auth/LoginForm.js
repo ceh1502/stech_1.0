@@ -3,32 +3,35 @@ import Kakao from '../../assets/images/png/AuthPng/Kakao.png';
 import Google from '../../assets/images/png/AuthPng/Google.png';
 import Eye from '../../assets/images/png/AuthPng/Eye.png';
 import EyeActive from '../../assets/images/png/AuthPng/EyeActive.png';
-import { login } from '../../api/authAPI';
-import {useAuth} from '../../context/AuthContext';
-// import { APIError } from '../../api/errors'; // 프로젝트에 있으면 사용
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => {
+  // 컨텍스트 메서드/상태는 별칭으로
+  const { login: authLogin, logout: authLogout, error: authError, loading } = useAuth();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const [formError, setFormError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) setError(null);
+    if (formError) setFormError(null);
   };
 
   const validateForm = () => {
     const username = formData.username?.trim();
     const password = formData.password;
     if (!username || !password) {
-      setError('아이디와 비밀번호 모두 입력해주세요.');
+      setFormError('아이디와 비밀번호 모두 입력해주세요.');
       return false;
     }
     const idRegex = /^[a-zA-Z0-9]+$/;
     if (!idRegex.test(username)) {
-      setError('존재하지 않는 아이디입니다.');
+      setFormError('존재하지 않는 아이디입니다.');
       return false;
     }
     return true;
@@ -39,28 +42,26 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    setError(null);
+    setFormError(null);
 
     try {
-      const data = await login(formData.username, formData.password);
-
-      // 필요 시 토큰/유저 저장
-      if (data?.token) localStorage.setItem('token', data.token);
-      // if (data?.user) setUser?.(data.user);
-
-      console.log('Login Successful!');
-      onSuccess?.(data);
+      const ok = await authLogin({ username: formData.username, password: formData.password });
+      if (ok) {
+        console.log('Login Successful!');
+        onSuccess?.();
+        navigate('/service');
+      }
     } catch (err) {
+      // 보통 AuthContext가 에러 메시지를 관리하므로 여기선 최소 처리
       console.error('Login Error:', err);
-      // if (err instanceof APIError) setError(err.message);
-      // APIError 타입이 없다면 아래처럼 최소 메시지 노출
-      setError(err?.message || '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      setFormError(err?.message || '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const isFormLoading = isSubmitting;
+  const isFormLoading = isSubmitting || !!loading;
+  const displayError = formError || authError;
 
   return (
     <form onSubmit={handleSubmit} className={`loginForm ${className}`}>
@@ -119,7 +120,7 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
         </div>
       </div>
 
-      {error && <div className="errorMessage">⚠️ {error}</div>}
+      {displayError && <div className="errorMessage">⚠️ {displayError}</div>}
 
       <button
         type="submit"
