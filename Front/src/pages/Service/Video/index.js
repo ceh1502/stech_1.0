@@ -20,6 +20,7 @@ import { useVideoSettings } from '../../../hooks/useVideoSetting';
 import { useClipFilter } from '../../../hooks/useClipFilter';
 import MagicPencil from '../../../components/MagicPencil/MagicPencil';
 import VideoMemo from '../../../components/VideoMemo/VideoMemo';
+import GameDataEditModal from '../../../components/GameDataEditModal/GameDataEditModal';
 
 // Dropdown 컴포넌트 (공용으로 분리 권장)
 function Dropdown({ label, summary, isOpen, onToggle, onClose, children }) {
@@ -228,6 +229,57 @@ function PlayerCore({ stateData }) {
   const [showMagicPencil, setShowMagicPencil] = useState(false);
   const [showMemo, setShowMemo] = useState(false);
   const [memos, setMemos] = useState({});
+  const [contextMenu, setContextMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+  });
+  const [showGameDataModal, setShowGameDataModal] = useState(false);
+
+  // 컨텍스트 메뉴 관련 함수
+  const handleVideoContextMenu = useCallback((e) => {
+    console.log('우클릭 감지됨!', e); // 디버깅용 로그 추가
+    e.preventDefault(); // 기본 컨텍스트 메뉴 차단
+    e.stopPropagation(); // 이벤트 전파 중단
+
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  }, []);
+
+  const closeContextMenu = useCallback(() => {
+    setContextMenu({ visible: false, x: 0, y: 0 });
+  }, []);
+
+  const handleSystemSettings = useCallback(() => {
+    navigate('../Member/Settings');
+    closeContextMenu();
+  }, [closeContextMenu, navigate]);
+
+  const handleEditGameData = useCallback(() => {
+    setShowGameDataModal(true);
+    closeContextMenu();
+  }, [closeContextMenu]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (contextMenu.visible) {
+        closeContextMenu();
+      }
+    };
+
+    if (contextMenu.visible) {
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('contextmenu', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('contextmenu', handleClickOutside);
+    };
+  }, [contextMenu.visible, closeContextMenu]);
 
   // Callbacks & Memos
   const closeAllMenus = useCallback(() => setOpenMenu(null), []);
@@ -333,11 +385,8 @@ function PlayerCore({ stateData }) {
 
   const stepTime = useCallback(
     (seconds) => {
-      // dir 대신 seconds로 파라미터명 변경
       const video = videoRef.current;
       if (!video || hasError || duration === 0) return;
-
-      // 전달받은 seconds 값을 직접 사용
       const newTime = Math.max(
         0,
         Math.min(duration, video.currentTime + seconds),
@@ -393,10 +442,10 @@ function PlayerCore({ stateData }) {
         togglePlay();
       } else if (backwardKey && key === backwardKey) {
         e.preventDefault();
-        stepTime(-settings.skipTime); // settings.skipTime 사용
+        stepTime(-settings.skipTime);
       } else if (forwardKey && key === forwardKey) {
         e.preventDefault();
-        stepTime(settings.skipTime); // settings.skipTime 사용
+        stepTime(settings.skipTime);
       }
     };
     document.addEventListener('keydown', onKey);
@@ -529,6 +578,7 @@ function PlayerCore({ stateData }) {
                     preload="metadata"
                     controls={false}
                     crossOrigin="anonymous"
+                    onContextMenu={handleVideoContextMenu}
                   />
                 </>
               )}
@@ -558,7 +608,7 @@ function PlayerCore({ stateData }) {
             <div className="videoFrameNavigation">
               <button
                 className="videoFrameStepButton"
-                onClick={() => stepTime(-0.5)} // 뒤로 0.5초
+                onClick={() => stepTime(-0.5)}
                 disabled={hasError || !selected}
                 title="Previous 0.5s"
               >
@@ -566,7 +616,7 @@ function PlayerCore({ stateData }) {
               </button>
               <button
                 className="videoFrameStepButton"
-                onClick={() => stepTime(0.5)} // 앞으로 0.5초
+                onClick={() => stepTime(0.5)}
                 disabled={hasError || !selected}
                 title="Next 0.5s"
               >
@@ -849,6 +899,31 @@ function PlayerCore({ stateData }) {
           onClick={() => setIsModalOpen(false)}
         />
       )}
+      {contextMenu.visible && (
+        <div
+          className="customContextMenu"
+          style={{
+            position: 'fixed',
+            left: `${contextMenu.x}px`,
+            top: `${contextMenu.y}px`,
+            zIndex: 9999,
+          }}
+        >
+          <div className="contextMenuItem" onClick={handleSystemSettings}>
+            ⚙️ 시스템 설정
+          </div>
+          <div className="contextMenuItem" onClick={handleEditGameData}>
+            📝 경기데이터 수정
+          </div>
+        </div>
+      )}
+
+      <GameDataEditModal
+        isVisible={showGameDataModal}
+        onClose={() => setShowGameDataModal(false)}
+        clipId={selectedId}
+        gameId={teamMeta?.gameId}
+      />
 
       <MagicPencil
         videoElement={videoRef.current}
