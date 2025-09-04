@@ -3,32 +3,34 @@ import Kakao from '../../assets/images/png/AuthPng/Kakao.png';
 import Google from '../../assets/images/png/AuthPng/Google.png';
 import Eye from '../../assets/images/png/AuthPng/Eye.png';
 import EyeActive from '../../assets/images/png/AuthPng/EyeActive.png';
-import { login } from '../../api/authAPI';
-import {useAuth} from '../../context/AuthContext';
-// import { APIError } from '../../api/errors'; // 프로젝트에 있으면 사용
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => {
+  const { login: authLogin, error: authError, loading } = useAuth();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const [formError, setFormError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) setError(null);
+    if (formError) setFormError(null);
   };
 
   const validateForm = () => {
     const username = formData.username?.trim();
     const password = formData.password;
     if (!username || !password) {
-      setError('아이디와 비밀번호 모두 입력해주세요.');
+      setFormError('아이디와 비밀번호 모두 입력해주세요.');
       return false;
     }
     const idRegex = /^[a-zA-Z0-9]+$/;
     if (!idRegex.test(username)) {
-      setError('존재하지 않는 아이디입니다.');
+      setFormError('존재하지 않는 아이디입니다.');
       return false;
     }
     return true;
@@ -39,31 +41,27 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    setError(null);
+    setFormError(null);
 
     try {
-      const data = await login(formData.username, formData.password);
-
-      // 필요 시 토큰/유저 저장
-      if (data?.token) localStorage.setItem('token', data.token);
-      // if (data?.user) setUser?.(data.user);
-
-      console.log('Login Successful!');
-      onSuccess?.(data);
+      const ok = await authLogin({ username: formData.username, password: formData.password });
+      if (ok) {
+        onSuccess?.();
+        navigate('/service');
+      }
     } catch (err) {
-      console.error('Login Error:', err);
-      // if (err instanceof APIError) setError(err.message);
-      // APIError 타입이 없다면 아래처럼 최소 메시지 노출
-      setError(err?.message || '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      setFormError(err?.message || '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const isFormLoading = isSubmitting;
+  const isFormLoading = isSubmitting || !!loading;
+  const displayError = formError || authError;
 
   return (
-    <form onSubmit={handleSubmit} className={`loginForm ${className}`}>
+    // 크롬 자동완성/자동저장 활성화
+    <form onSubmit={handleSubmit} className={`loginForm ${className}`} autoComplete="on">
       <div className="tab-container">
         <button type="button" className="loginTitle">로그인</button>
         <a href="/auth/signup" className="loginTitleTosignup">회원가입</a>
@@ -80,7 +78,11 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
           className="LoginformInput"
           required
           autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           disabled={isFormLoading}
+          inputMode="text"
         />
       </div>
 
@@ -91,6 +93,7 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
             <a href="/auth/find" className="forgotPasswordLink">비밀번호 찾기</a>
           )}
         </label>
+
         <div className="passwordInputContainer">
           <input
             id="password"
@@ -103,12 +106,16 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
             autoComplete="current-password"
             disabled={isFormLoading}
           />
+
+          {/* 탭으로 건너뛰고, 클릭 시 포커스 훔치지 않기 */}
           <button
             type="button"
             className="LoginpasswordToggleButton"
             onClick={() => setShowPassword((v) => !v)}
+            onMouseDown={(e) => e.preventDefault()}
+            tabIndex={-1}
+            aria-hidden="true"
             disabled={isFormLoading}
-            aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
           >
             {showPassword ? (
               <img src={EyeActive} alt="" className="showPassword" />
@@ -119,7 +126,7 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
         </div>
       </div>
 
-      {error && <div className="errorMessage">⚠️ {error}</div>}
+      {displayError && <div className="errorMessage">⚠️ {displayError}</div>}
 
       <button
         type="submit"

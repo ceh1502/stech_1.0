@@ -6,6 +6,7 @@ import { TEAMS } from '../../../../../data/TEAMS';
 import { useClipFilter } from '../../../../../hooks/useClipFilter';
 import UploadVideoModal from '../../../../../components/UploadVideoModal';
 import defaultLogo from '../../../../../assets/images/logos/Stechlogo.svg';
+import { useAuth } from '../../../../../context/AuthContext';
 
 /* ========== 공용 드롭다운 (이 페이지 내부 구현) ========== */
 function Dropdown({ label, summary, isOpen, onToggle, onClose, children }) {
@@ -147,32 +148,39 @@ const normalizeTeamStats = (s) => {
 
 /* TEAMS에서 이름/영문/코드로 팀 찾기(느슨 매칭) */
 const findTeamMeta = (raw) => {
-  if (!raw) return null;
+  if (!raw) return { name: '', logo: null };
   const norm = String(raw).toLowerCase();
   return (
     TEAMS.find(
       (t) =>
         String(t.name).toLowerCase() === norm ||
         String(t.enName || '').toLowerCase() === norm ||
-        String(t.code || '').toLowerCase() === norm,
-    ) || { name: raw }
+        String(t.code || '').toLowerCase() === norm
+    ) || { name: String(raw), logo: null }
   );
 };
+const TEAM_BY_ID = TEAMS.reduce((m, t) => { m[t.id] = t; return m; }, {});
+
+
 
 export default function ClipPage() {
   const { gameKey } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const {user } = useAuth();
 
   const [teamStats, setTeamStats] = useState(null); // {home, away}
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState(null);
 
-  /* ===== 내 팀 (고정 표기) — GamePage와 동일한 방식 ===== */
-  const MY_TEAM_NAME = '한양대학교 라이온스';
+
+
+  const MY_TEAM_ID =
+    user?.teamName || user?.team;
+
   const selfTeam = useMemo(
-    () => TEAMS.find((t) => t.name === MY_TEAM_NAME) || TEAMS[0] || null,
-    [],
+    () => (MY_TEAM_ID ? TEAM_BY_ID[MY_TEAM_ID] : null) || TEAMS[0] || null,
+    [MY_TEAM_ID]
   );
   const logoSrc = selfTeam?.logo || defaultLogo;
   const label = selfTeam?.name || 'Choose Team';

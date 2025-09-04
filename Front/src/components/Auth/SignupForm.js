@@ -1,11 +1,9 @@
 // src/components/Auth/SignupForm.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { teamCodes } from '../../data/teamCodes';
 import { checkUsername, verifyTeamCode, signup, handleAuthError } from '../../api/authAPI';
 
-
-// --- image assets ---
 import Kakao from '../../assets/images/png/AuthPng/Kakao.png';
 import Google from '../../assets/images/png/AuthPng/Google.png';
 import Eye from '../../assets/images/png/AuthPng/Eye.png';
@@ -31,19 +29,17 @@ const SignupForm = ({ onSuccess, className = '' }) => {
   const [error, setError] = useState(null);
 
   const [isIdChecking, setIsIdChecking] = useState(false);
-  const [idStatus, setIdStatus] = useState(null); // 'available' | 'unavailable' | 'invalid' | 'checking' | 'idle'
+  const [idStatus, setIdStatus] = useState(null);
   const [idMessage, setIdMessage] = useState('');
 
   const [isAuthCodeVerifying, setIsAuthCodeVerifying] = useState(false);
-  const [authCodeStatus, setAuthCodeStatus] = useState(null); // 'valid' | 'invalid' | 'verifying' | 'idle'
+  const [authCodeStatus, setAuthCodeStatus] = useState(null);
   const [authCodeMessage, setAuthCodeMessage] = useState('');
 
   const [validatedTeamInfo, setValidatedTeamInfo] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    // 혹시 name="id"로 온 경우를 대비한 안전장치
     const key = name === 'id' ? 'username' : name;
 
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -69,7 +65,6 @@ const SignupForm = ({ onSuccess, className = '' }) => {
       return;
     }
 
-    // 영문/숫자만 허용 (필요하면 길이 제한 추가)
     const usernameRegex = /^[a-zA-Z0-9]+$/;
     if (!usernameRegex.test(username)) {
       setIdStatus('invalid');
@@ -82,7 +77,7 @@ const SignupForm = ({ onSuccess, className = '' }) => {
     setIdMessage('');
 
     try {
-      const res = await checkUsername(username); // { available: boolean }
+      const res = await checkUsername(username);
       if (res.available) {
         setIdStatus('available');
         setIdMessage('사용 가능한 아이디입니다.');
@@ -111,18 +106,16 @@ const SignupForm = ({ onSuccess, className = '' }) => {
     setValidatedTeamInfo(null);
 
     try {
-      const res = await verifyTeamCode(formData.authCode); // { valid: boolean }
+      const res = await verifyTeamCode(formData.authCode);
       if (res.valid) {
-        // 팀 정보는 로컬 매핑에서 찾아 자동 세팅(없으면 수동입력 필요)
         const info = teamCodes[formData.authCode] || null;
         setValidatedTeamInfo(info);
 
+        setAuthCodeStatus('valid');
         if (info) {
-          setAuthCodeStatus('valid');
           const roleText = info.role === 'coach' ? 'coach' : 'player';
           setAuthCodeMessage(`인증 완료: ${info.team} (${roleText})`);
         } else {
-          setAuthCodeStatus('valid');
           setAuthCodeMessage('인증코드 확인 완료');
         }
       } else {
@@ -163,7 +156,6 @@ const SignupForm = ({ onSuccess, className = '' }) => {
       return false;
     }
 
-    // 팀 정보 필수(백엔드 요구사항)
     const teamName = validatedTeamInfo?.team || formData.teamName;
     const role = validatedTeamInfo?.role || formData.role;
     const region = validatedTeamInfo?.region || formData.region;
@@ -193,7 +185,7 @@ const SignupForm = ({ onSuccess, className = '' }) => {
 
     try {
       await signup(payload);
-      if (onSuccess) onSuccess();
+      onSuccess?.();
       navigate('../signupprofile');
     } catch (err) {
       setError(handleAuthError(err));
@@ -209,17 +201,17 @@ const SignupForm = ({ onSuccess, className = '' }) => {
     !agreedToTerms;
 
   const getStatusClass = (status) => {
-    if (status === 'available' || status === 'valid')
-      return 'status-message status-success';
-    if (status === 'unavailable' || status === 'invalid')
-      return 'status-message status-error';
+    if (status === 'available' || status === 'valid') return 'status-message status-success';
+    if (status === 'unavailable' || status === 'invalid') return 'status-message status-error';
     return 'status-message';
   };
 
   return (
-    <form onSubmit={handleSubmit} className={`signupForm ${className}`}>
+    // 자동완성/자동저장 활성화
+    <form onSubmit={handleSubmit} className={`signupForm ${className}`} autoComplete="on">
       <div className="tab-container">
-        <a href="/auth" className="signupTitle">로그인</a>
+        {/* a대신 Link 권장 (페이지 리로드 방지) */}
+        <Link to="/auth" className="signupTitle">로그인</Link>
         <button type="button" className="signupTitleTosignup">회원가입</button>
       </div>
 
@@ -228,6 +220,7 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         <label className="SignupformLabel ID" htmlFor="username">아이디</label>
         <div className="input-with-button-group">
           <input
+            id="username"
             type="text"
             name="username"
             value={formData.username}
@@ -236,6 +229,9 @@ const SignupForm = ({ onSuccess, className = '' }) => {
             placeholder=""
             required
             autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             disabled={isSubmitting || isIdChecking || isAuthCodeVerifying}
           />
           <button
@@ -255,6 +251,7 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         <label className="SignupformLabel PW" htmlFor="password">비밀번호</label>
         <div className="passwordInputContainer">
           <input
+            id="password"
             type={showPassword ? 'text' : 'password'}
             name="password"
             value={formData.password}
@@ -269,6 +266,9 @@ const SignupForm = ({ onSuccess, className = '' }) => {
             type="button"
             className="SignuppasswordToggleButton"
             onClick={() => setShowPassword(!showPassword)}
+            onMouseDown={(e) => e.preventDefault()}
+            tabIndex={-1}
+            aria-hidden="true"
             disabled={isSubmitting || isIdChecking || isAuthCodeVerifying}
           >
             {showPassword ? <img src={EyeActive} alt="hide Password" /> : <img src={Eye} alt="show Password" />}
@@ -281,6 +281,7 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         <label className="SignupformLabel PW" htmlFor="passwordConfirm">비밀번호 확인</label>
         <div className="passwordInputContainer">
           <input
+            id="passwordConfirm"
             type={showPasswordConfirm ? 'text' : 'password'}
             name="passwordConfirm"
             value={formData.passwordConfirm}
@@ -295,6 +296,9 @@ const SignupForm = ({ onSuccess, className = '' }) => {
             type="button"
             className="SignuppasswordToggleButton"
             onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+            onMouseDown={(e) => e.preventDefault()}
+            tabIndex={-1}
+            aria-hidden="true"
             disabled={isSubmitting || isIdChecking || isAuthCodeVerifying}
           >
             {showPasswordConfirm ? <img src={EyeActive} alt="hide Password" /> : <img src={Eye} alt="show Password" />}
@@ -307,6 +311,7 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         <label className="SignupformLabel ID" htmlFor="authCode">인증코드</label>
         <div className="input-with-button-group">
           <input
+            id="authCode"
             type="text"
             name="authCode"
             value={formData.authCode}
@@ -314,6 +319,8 @@ const SignupForm = ({ onSuccess, className = '' }) => {
             className="SignupformInput"
             placeholder="인증코드 입력"
             required
+            autoComplete="one-time-code"
+            inputMode="text"
             disabled={isSubmitting || isIdChecking || isAuthCodeVerifying}
           />
           <button
@@ -365,11 +372,11 @@ const SignupForm = ({ onSuccess, className = '' }) => {
       </div>
 
       <div className="social-buttons-container">
-        <button type="button" className="socialButton google-button">
+        <button type="button" className="socialButton google-button" disabled={isSubmitting}>
           <img src={Google} alt="google" className="socialicon" />
           구글로 회원가입
         </button>
-        <button type="button" className="socialButton kakao-button">
+        <button type="button" className="socialButton kakao-button" disabled={isSubmitting}>
           <img src={Kakao} alt="kakao" className="socialicon" />
           카카오로 회원가입
         </button>

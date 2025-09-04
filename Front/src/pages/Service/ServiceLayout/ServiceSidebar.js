@@ -7,8 +7,6 @@ import { CiLogin, CiLogout } from 'react-icons/ci';
 import {
   GoHome,
   GoLightBulb,
-  GoChevronDown,
-  GoChevronRight,
 } from 'react-icons/go';
 import { BsPlayBtn } from 'react-icons/bs';
 import { BiSolidBarChartAlt2 } from 'react-icons/bi';
@@ -23,6 +21,7 @@ const ServiceSidebar = () => {
   const [hoveredItem, setHoveredItem] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState({}); // 펼쳐진 메뉴 상태 관리
+
 
   // Menu Items (Guest)
   //Description 수정
@@ -168,16 +167,16 @@ const ServiceSidebar = () => {
   ];
 
   // 로그아웃 핸들러 (로딩 효과 추가)
-  const handleLogout = async () => {
+ const handleLogout = async () => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      logout();
+      await logout();                
+      navigate('/service');    
     } finally {
       setIsLoading(false);
-      navigate('/service');
     }
   };
+
 
   // 로그인 핸들러
   const handleLogin = () => {
@@ -340,7 +339,7 @@ const ServiceSidebar = () => {
               <div className="loginIcon">
                 <CiLogin />
               </div>
-              <span className="loginText">로그아웃</span>
+              <span className="loginText">로그인</span>
             </button>
           )}
         </div>
@@ -350,7 +349,7 @@ const ServiceSidebar = () => {
       <nav className="sidebarNav">
         <div className="menuSection">
           <div className="sectionTitle">Main Menu</div>
-          {!isAuthenticated ? (
+          {isAuthenticated ? (
             <ul className="navMenu">
               {memberMenuItems.map((item) => renderMenuItem(item))}
             </ul>
