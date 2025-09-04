@@ -9,7 +9,6 @@ import { TeamModule } from './team/team.module';
 import { VideoModule } from './video/video.module';
 import { PlayerModule } from './player/player.module';
 import { GameModule } from './game/game.module';
-import { NewPlayerModule } from './player/new-player.module';
 import { AdminModule } from './admin/admin.module';
 
 @Module({
@@ -32,7 +31,6 @@ import { AdminModule } from './admin/admin.module';
     VideoModule,
     PlayerModule,
     GameModule,
-    NewPlayerModule,
     AdminModule,
   ],
   controllers: [AppController],

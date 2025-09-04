@@ -1,27 +1,27 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { GameStats, GameStatsDocument } from '../../schemas/game-stats.schema';
+import { PlayerGameStats, PlayerGameStatsDocument } from '../../schemas/player-game-stats.schema';
 import {
-  SeasonStats,
-  SeasonStatsDocument,
-} from '../../schemas/season-stats.schema';
+  PlayerSeasonStats,
+  PlayerSeasonStatsDocument,
+} from '../../schemas/player-season-stats.schema';
 import {
-  CareerStats,
-  CareerStatsDocument,
-} from '../../schemas/career-stats.schema';
+  PlayerTotalStats,
+  PlayerTotalStatsDocument,
+} from '../../schemas/player-total-stats.schema';
 import { Player, PlayerDocument } from '../../schemas/player.schema';
 import { NewClipDto } from '../dto/new-clip.dto';
 
 @Injectable()
 export class StatsManagementService {
   constructor(
-    @InjectModel(GameStats.name)
-    private gameStatsModel: Model<GameStatsDocument>,
-    @InjectModel(SeasonStats.name)
-    private seasonStatsModel: Model<SeasonStatsDocument>,
-    @InjectModel(CareerStats.name)
-    private careerStatsModel: Model<CareerStatsDocument>,
+    @InjectModel(PlayerGameStats.name)
+    private playerGameStatsModel: Model<PlayerGameStatsDocument>,
+    @InjectModel(PlayerSeasonStats.name)
+    private playerSeasonStatsModel: Model<PlayerSeasonStatsDocument>,
+    @InjectModel(PlayerTotalStats.name)
+    private playerTotalStatsModel: Model<PlayerTotalStatsDocument>,
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
   ) {}
 
@@ -44,7 +44,7 @@ export class StatsManagementService {
     }
 
     // 게임 스탯 업데이트 또는 생성
-    const gameStats = await this.gameStatsModel.findOneAndUpdate(
+    const gameStats = await this.playerGameStatsModel.findOneAndUpdate(
       {
         playerId: player._id,
         gameKey: gameKey,
@@ -98,14 +98,14 @@ export class StatsManagementService {
     newStats: any,
     gameKey: string,
   ) {
-    const seasonStats = await this.seasonStatsModel.findOne({
+    const seasonStats = await this.playerSeasonStatsModel.findOne({
       playerId: playerId,
       season: season,
     });
 
     if (!seasonStats) {
       // 새로운 시즌 스탯 생성
-      const newSeasonStats = new this.seasonStatsModel({
+      const newSeasonStats = new this.playerSeasonStatsModel({
         playerId: playerId,
         playerNumber: await this.getPlayerNumber(playerId),
         season: season,
@@ -129,7 +129,7 @@ export class StatsManagementService {
       // 누적 스탯 업데이트
       this.accumulateStats(updateData, seasonStats, newStats);
 
-      await this.seasonStatsModel.findByIdAndUpdate(seasonStats._id, {
+      await this.playerSeasonStatsModel.findByIdAndUpdate(seasonStats._id, {
         $set: updateData,
       });
     }
@@ -144,13 +144,13 @@ export class StatsManagementService {
     season: string,
     newStats: any,
   ) {
-    const careerStats = await this.careerStatsModel.findOne({
+    const careerStats = await this.playerTotalStatsModel.findOne({
       playerId: playerId,
     });
 
     if (!careerStats) {
       // 새로운 커리어 스탯 생성
-      const newCareerStats = new this.careerStatsModel({
+      const newCareerStats = new this.playerTotalStatsModel({
         playerId: playerId,
         playerNumber: await this.getPlayerNumber(playerId),
         position: position,
@@ -178,7 +178,7 @@ export class StatsManagementService {
       // 최고 기록 업데이트
       this.updateCareerRecords(updateData, careerStats, newStats, season);
 
-      await this.careerStatsModel.findByIdAndUpdate(careerStats._id, {
+      await this.playerTotalStatsModel.findByIdAndUpdate(careerStats._id, {
         $set: updateData,
       });
     }
@@ -373,7 +373,7 @@ export class StatsManagementService {
       query.gameKey = { $regex: season };
     }
 
-    return await this.gameStatsModel.find(query).sort({ gameDate: -1 });
+    return await this.playerGameStatsModel.find(query).sort({ gameDate: -1 });
   }
 
   /**
@@ -392,7 +392,7 @@ export class StatsManagementService {
       query.season = season;
     }
 
-    return await this.seasonStatsModel.find(query).sort({ season: -1 });
+    return await this.playerSeasonStatsModel.find(query).sort({ season: -1 });
   }
 
   /**
@@ -406,7 +406,7 @@ export class StatsManagementService {
       throw new Error(`등번호 ${playerNumber}번 선수를 찾을 수 없습니다.`);
     }
 
-    return await this.careerStatsModel.findOne({ playerId: player._id });
+    return await this.playerTotalStatsModel.findOne({ playerId: player._id });
   }
 
   /**
@@ -426,7 +426,7 @@ export class StatsManagementService {
     const sort: any = {};
     sort[sortBy] = -1; // 내림차순
 
-    return await this.seasonStatsModel
+    return await this.playerSeasonStatsModel
       .find(query)
       .sort(sort)
       .limit(50)
@@ -445,7 +445,7 @@ export class StatsManagementService {
     const sort: any = {};
     sort[sortBy] = -1;
 
-    return await this.careerStatsModel
+    return await this.playerTotalStatsModel
       .find(query)
       .sort(sort)
       .limit(50)

@@ -12,8 +12,6 @@ import { OlAnalyzerService } from './analyzers/ol-analyzer.service';
 import { DlAnalyzerService } from './analyzers/dl-analyzer.service';
 import { LbAnalyzerService } from './analyzers/lb-analyzer.service';
 import { DbAnalyzerService } from './analyzers/db-analyzer.service';
-import { TeamStatsAggregatorService } from '../team/team-stats-aggregator.service';
-import { TeamClipAnalyzerService } from '../team/team-clip-analyzer.service';
 
 // 클립 데이터 인터페이스
 export interface ClipData {
@@ -83,8 +81,6 @@ export class ClipAnalyzerService {
     private dlAnalyzer: DlAnalyzerService,
     private lbAnalyzer: LbAnalyzerService,
     private dbAnalyzer: DbAnalyzerService,
-    private teamStatsAggregator: TeamStatsAggregatorService,
-    private teamClipAnalyzer: TeamClipAnalyzerService,
   ) {}
 
   /**
@@ -143,7 +139,8 @@ export class ClipAnalyzerService {
     
     console.log(`\n✅ 게임 분석 완료 - ${qbResult.qbCount || 0}명의 QB, ${rbResult.rbCount}명의 RB, ${wrResult.wrCount || 0}명의 WR, ${teResult.teCount}명의 TE, ${kResult.kCount}명의 K, ${pResult.pCount}명의 P, ${olResult.olCount}명의 OL, ${dlResult.dlCount}명의 DL, ${lbResult.lbCount}명의 LB, ${dbResult.dbCount}명의 DB 처리됨`);
     
-    // 게임 분석 완료 후 팀 스탯 클립 분석
+    // 팀 스탯 클립 분석 - 시즌별 스탯 제거로 임시 비활성화
+    /*
     console.log('\n🏆 팀 스탯 클립 분석 시작...');
     try {
       const teamResult = await this.teamClipAnalyzer.analyzeTeamStats(gameData);
@@ -151,6 +148,7 @@ export class ClipAnalyzerService {
     } catch (error) {
       console.error('❌ 팀 스탯 클립 분석 실패:', error);
     }
+    */
 
     return {
       success: true,
