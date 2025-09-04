@@ -76,8 +76,13 @@ export async function login(username, password) {
 }
 
 export async function logout() {
-  // 나중에 서버 로그아웃 엔드포인트가 생기면 여기서 호출하도록 확장하면 됩니다.
-  // 예: await fetch(`${API_CONFIG.BASE_URL}/auth/logout`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }});
+  const res = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.LOGOUT}`,{
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    
+  })
+  const data = await jsonOrText(res);
+  
   return { success: true };
 }
 
