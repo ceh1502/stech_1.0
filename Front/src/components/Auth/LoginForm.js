@@ -7,8 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => {
-  // 컨텍스트 메서드/상태는 별칭으로
-  const { login: authLogin, logout: authLogout, error: authError, loading } = useAuth();
+  const { login: authLogin, error: authError, loading } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -47,13 +46,10 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
     try {
       const ok = await authLogin({ username: formData.username, password: formData.password });
       if (ok) {
-        console.log('Login Successful!');
         onSuccess?.();
         navigate('/service');
       }
     } catch (err) {
-      // 보통 AuthContext가 에러 메시지를 관리하므로 여기선 최소 처리
-      console.error('Login Error:', err);
       setFormError(err?.message || '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       setIsSubmitting(false);
@@ -64,7 +60,8 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
   const displayError = formError || authError;
 
   return (
-    <form onSubmit={handleSubmit} className={`loginForm ${className}`}>
+    // 크롬 자동완성/자동저장 활성화
+    <form onSubmit={handleSubmit} className={`loginForm ${className}`} autoComplete="on">
       <div className="tab-container">
         <button type="button" className="loginTitle">로그인</button>
         <a href="/auth/signup" className="loginTitleTosignup">회원가입</a>
@@ -81,7 +78,11 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
           className="LoginformInput"
           required
           autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           disabled={isFormLoading}
+          inputMode="text"
         />
       </div>
 
@@ -92,6 +93,7 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
             <a href="/auth/find" className="forgotPasswordLink">비밀번호 찾기</a>
           )}
         </label>
+
         <div className="passwordInputContainer">
           <input
             id="password"
@@ -104,12 +106,16 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
             autoComplete="current-password"
             disabled={isFormLoading}
           />
+
+          {/* 탭으로 건너뛰고, 클릭 시 포커스 훔치지 않기 */}
           <button
             type="button"
             className="LoginpasswordToggleButton"
             onClick={() => setShowPassword((v) => !v)}
+            onMouseDown={(e) => e.preventDefault()}
+            tabIndex={-1}
+            aria-hidden="true"
             disabled={isFormLoading}
-            aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
           >
             {showPassword ? (
               <img src={EyeActive} alt="" className="showPassword" />
