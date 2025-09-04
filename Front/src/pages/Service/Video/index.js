@@ -332,20 +332,19 @@ function PlayerCore({ stateData }) {
   }, [isPlaying, hasError, selected]);
 
   const stepTime = useCallback(
-    (dir) => {
+    (seconds) => {
+      // dir 대신 seconds로 파라미터명 변경
       const video = videoRef.current;
       if (!video || hasError || duration === 0) return;
+
+      // 전달받은 seconds 값을 직접 사용
       const newTime = Math.max(
         0,
-        Math.min(
-          duration,
-          video.currentTime +
-            (dir > 0 ? settings.skipTime : -settings.skipTime),
-        ),
+        Math.min(duration, video.currentTime + seconds),
       );
       video.currentTime = newTime;
     },
-    [duration, hasError, settings.skipTime],
+    [duration, hasError],
   );
 
   const handleTimelineClick = useCallback(
@@ -383,7 +382,7 @@ function PlayerCore({ stateData }) {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (showMagicPencil || showMemo) return; // 매직펜슬, 메모 활성 시 단축키 비활성화
+      if (showMagicPencil || showMemo) return;
       if (e.target?.tagName === 'INPUT' || e.target?.tagName === 'TEXTAREA')
         return;
       const key = e.key.toUpperCase();
@@ -394,10 +393,10 @@ function PlayerCore({ stateData }) {
         togglePlay();
       } else if (backwardKey && key === backwardKey) {
         e.preventDefault();
-        stepTime(-1);
+        stepTime(-settings.skipTime); // settings.skipTime 사용
       } else if (forwardKey && key === forwardKey) {
         e.preventDefault();
-        stepTime(1);
+        stepTime(settings.skipTime); // settings.skipTime 사용
       }
     };
     document.addEventListener('keydown', onKey);
@@ -559,20 +558,19 @@ function PlayerCore({ stateData }) {
             <div className="videoFrameNavigation">
               <button
                 className="videoFrameStepButton"
-                onClick={() => stepTime(-1)}
+                onClick={() => stepTime(-0.5)} // 뒤로 0.5초
                 disabled={hasError || !selected}
-                title={`Previous ${settings.skipTime}s`}
+                title="Previous 0.5s"
               >
-                ◀ {settings.skipTime}s
+                ◀ 0.5s
               </button>
               <button
                 className="videoFrameStepButton"
-                onClick={() => stepTime(1)}
+                onClick={() => stepTime(0.5)} // 앞으로 0.5초
                 disabled={hasError || !selected}
-                title={`Next ${settings.skipTime}s`}
+                title="Next 0.5s"
               >
-                {' '}
-                {settings.skipTime}s ▶
+                0.5s ▶
               </button>
             </div>
           </div>
