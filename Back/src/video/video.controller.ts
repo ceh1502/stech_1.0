@@ -18,11 +18,15 @@ import {
   ApiConsumes,
 } from '@nestjs/swagger';
 import { VideoService } from './video.service';
+import { S3UploadService } from '../utils/s3-upload.service';
 
 @ApiTags('Video')
 @Controller('video')
 export class VideoController {
-  constructor(private readonly videoService: VideoService) {}
+  constructor(
+    private readonly videoService: VideoService,
+    private readonly s3UploadService: S3UploadService,
+  ) {}
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('video'))
@@ -33,11 +37,16 @@ export class VideoController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: { title?: string; description?: string },
   ) {
-    // S3 업로드 로직은 나중에 구현
-    const uploadResult = {
-      success: true,
-      url: `http://localhost:4000/uploads/${file.filename}`,
-    };
+    // S3에 비디오 업로드
+    const uploadResult = await this.s3UploadService.uploadToS3(file, 'videos');
+    
+    if (!uploadResult.success) {
+      return {
+        success: false,
+        message: '비디오 업로드에 실패했습니다.',
+        error: uploadResult.error,
+      };
+    }
 
     return this.videoService.uploadVideo(
       file,

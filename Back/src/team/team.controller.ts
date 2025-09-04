@@ -51,6 +51,44 @@ export class TeamController {
     return this.teamService.getMyTeams(user._id);
   }
 
+  @Get('total-stats')
+  @ApiOperation({
+    summary: '🏆 팀 누적 스탯 순위 조회',
+    description: '모든 팀의 누적 스탯을 totalYards 기준으로 정렬하여 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '✅ 팀 누적 스탯 조회 성공',
+  })
+  async getAllTeamTotalStats() {
+    try {
+      const teamStats = await this.teamStatsService.getAllTeamTotalStats();
+
+      if (!teamStats || teamStats.length === 0) {
+        return {
+          success: false,
+          message: '팀 누적 스탯을 찾을 수 없습니다',
+          data: [],
+          timestamp: new Date().toISOString(),
+        };
+      }
+
+      return {
+        success: true,
+        message: '팀 누적 스탯 조회가 완료되었습니다',
+        data: teamStats,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '팀 누적 스탯 조회 중 오류가 발생했습니다',
+        data: [],
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
   @Get(':teamId')
   @ApiOperation({ summary: '팀 조회' })
   @ApiResponse({ status: 200, description: '팀 조회 성공' })
@@ -356,32 +394,4 @@ export class TeamController {
   }
   */
 
-  /* 시즌별 스탯 제거로 임시 비활성화
-  @Post('season-stats/reset/:season')
-  @ApiOperation({
-    summary: '🔄 팀 시즌 스탯 초기화',
-    description: '특정 시즌의 모든 팀 스탯을 초기화합니다. (개발/테스트용)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '✅ 팀 시즌 스탯 초기화 성공',
-  })
-  async resetTeamSeasonStats(@Param('season') season: string) {
-    try {
-      const result =
-        await this.teamSeasonStatsService.resetTeamSeasonStats(season);
-
-      return {
-        ...result,
-        timestamp: new Date().toISOString(),
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: '팀 시즌 스탯 초기화 중 오류가 발생했습니다',
-        timestamp: new Date().toISOString(),
-      };
-    }
-  }
-  */
 }

@@ -6,6 +6,7 @@ import { Video, VideoDocument } from '../schemas/video.schema';
 import { Game, GameDocument } from '../schemas/game.schema';
 import { Team, TeamDocument } from '../schemas/team.schema';
 import { Player, PlayerDocument } from '../schemas/player.schema';
+import { S3UploadService } from '../utils/s3-upload.service';
 
 @Injectable()
 export class VideoService {
@@ -14,6 +15,7 @@ export class VideoService {
     @InjectModel(Game.name) private gameModel: Model<GameDocument>,
     @InjectModel(Team.name) private teamModel: Model<TeamDocument>,
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
+    private readonly s3UploadService: S3UploadService,
   ) {}
 
   async uploadVideo(
@@ -95,6 +97,13 @@ export class VideoService {
     const video = await this.videoModel.findOne({ videoId });
     if (!video) {
       throw new NotFoundException('영상을 찾을 수 없습니다.');
+    }
+
+    // S3에서 파일 삭제 (URL에서 키 추출)
+    if (video.url.includes('amazonaws.com')) {
+      const urlParts = video.url.split('/');
+      const key = urlParts.slice(-2).join('/'); // videos/filename.mp4 형태로 추출
+      await this.s3UploadService.deleteFromS3(key);
     }
 
     // 데이터베이스에서 비디오 삭제

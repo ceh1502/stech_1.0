@@ -46,6 +46,8 @@ export class TeamTotalStats {
     puntReturns?: number;
     kickReturns?: number;
     returnYards?: number;
+    fieldGoalAttempts?: number;
+    touchbacks?: number;
     
     // 팀 전체
     penalties?: number;

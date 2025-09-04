@@ -29,7 +29,7 @@ import {
 } from './dto/game-sample.dto';
 
 @ApiTags('🏈 Game Data Upload')
-@Controller('api/game')
+@Controller('game')
 export class GameController {
   constructor(
     @Inject(forwardRef(() => PlayerService))
@@ -208,13 +208,16 @@ export class GameController {
       console.log('📊 팀 스탯 계산 시작...');
       const teamStatsResult =
         await this.teamStatsService.analyzeTeamStats(gameData);
+      console.log('🏈 팀 스탯 계산 결과:', teamStatsResult);
 
       // 6. 팀 스탯 데이터베이스 저장
+      console.log('💾 팀 스탯 데이터베이스 저장 시작...');
       await this.teamStatsService.saveTeamStats(
         gameData.gameKey,
         teamStatsResult,
         gameData,
       );
+      console.log('✅ 팀 스탯 데이터베이스 저장 완료');
 
       console.log('✅ 게임 데이터 및 팀 스탯 처리 완료');
 
