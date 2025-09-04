@@ -52,7 +52,7 @@ export class TeamGameStats {
     
     // 스페셜팀 스탯
     puntAttempts?: number;
-    puntingYards?: number;
+    puntYards?: number;
     puntReturns?: number;
     kickReturns?: number;
     returnYards?: number;

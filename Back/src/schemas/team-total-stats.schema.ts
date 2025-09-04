@@ -41,7 +41,7 @@ export class TeamTotalStats {
     
     // 스페셜팀 스탯 (누적)
     puntAttempts?: number;
-    puntingYards?: number;
+    puntYards?: number;
     avgPuntYards?: number;
     puntReturns?: number;
     kickReturns?: number;

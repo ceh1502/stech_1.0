@@ -34,6 +34,12 @@ export class PlayerTotalStats {
 
   @Prop()
   lastGameDate?: string;
+
+  @Prop({ type: [String], default: [] })
+  seasonsPlayed?: string[];
+
+  @Prop({ default: 0 })
+  totalSeasons?: number;
 }
 
 export const PlayerTotalStatsSchema = SchemaFactory.createForClass(PlayerTotalStats);

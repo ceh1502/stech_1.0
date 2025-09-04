@@ -18,8 +18,6 @@ import {
 } from '@nestjs/swagger';
 import { TeamService } from './team.service';
 import { TeamStatsAnalyzerService } from './team-stats-analyzer.service';
-import { TeamSeasonStatsAnalyzerService } from './team-season-stats-analyzer.service';
-import { TeamStatsAggregatorService } from './team-stats-aggregator.service';
 import { CreateTeamDto, UpdateTeamDto } from '../common/dto/team.dto';
 import { TeamStatsSuccessDto, TeamStatsErrorDto } from './dto/team-stats.dto';
 import { TeamRankingResponseDto } from './dto/team-season-stats.dto';
@@ -32,8 +30,6 @@ export class TeamController {
   constructor(
     private readonly teamService: TeamService,
     private readonly teamStatsService: TeamStatsAnalyzerService,
-    private readonly teamSeasonStatsService: TeamSeasonStatsAnalyzerService,
-    private readonly teamStatsAggregatorService: TeamStatsAggregatorService,
   ) {}
 
   @Post()
@@ -190,6 +186,7 @@ export class TeamController {
     }
   }
 
+  /* 시즌별 스탯 제거로 임시 비활성화
   @Get('season-stats/:season')
   @ApiOperation({
     summary: '🏆 팀 시즌 스탯 순위 조회',
@@ -279,7 +276,9 @@ export class TeamController {
       };
     }
   }
+  */
 
+  /* 시즌별 스탯 제거로 임시 비활성화 
   @Get('season-stats/:teamName/:season')
   @ApiOperation({
     summary: '🎯 특정 팀 시즌 스탯 조회',
@@ -327,7 +326,9 @@ export class TeamController {
       };
     }
   }
+  */
 
+  /* 시즌별 스탯 제거로 임시 비활성화
   @Post('season-stats/aggregate/:season')
   @ApiOperation({
     summary: '🏆 팀 시즌 스탯 집계',
@@ -353,7 +354,9 @@ export class TeamController {
       };
     }
   }
+  */
 
+  /* 시즌별 스탯 제거로 임시 비활성화
   @Post('season-stats/reset/:season')
   @ApiOperation({
     summary: '🔄 팀 시즌 스탯 초기화',
@@ -380,4 +383,5 @@ export class TeamController {
       };
     }
   }
+  */
 }

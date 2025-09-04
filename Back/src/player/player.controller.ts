@@ -27,7 +27,6 @@ import {
 import { AnalyzeNewClipsDto } from '../common/dto/new-clip.dto';
 import { GameDataDto } from '../common/dto/game-data.dto';
 import { StatsManagementService } from '../common/services/stats-management.service';
-import { TeamSeasonStatsAnalyzerService } from '../team/team-season-stats-analyzer.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { User } from '../common/decorators/user.decorator';
 
@@ -37,7 +36,6 @@ export class PlayerController {
   constructor(
     private readonly playerService: PlayerService,
     private readonly statsManagementService: StatsManagementService,
-    private readonly teamSeasonStatsService: TeamSeasonStatsAnalyzerService,
   ) {}
 
   @Post('reset-all')
@@ -206,6 +204,8 @@ export class PlayerController {
           awayTeam = 'HYLions'; // 한양대 라이온즈
         }
 
+        // 팀 시즌 스탯 업데이트 - 시즌별 스탯 제거로 임시 비활성화
+        /*
         await this.teamSeasonStatsService.analyzeAndUpdateTeamStats(
           analyzeNewClipsDto.clips,
           gameKey,
@@ -213,6 +213,7 @@ export class PlayerController {
           awayTeam,
           season,
         );
+        */
       }
     } catch (error) {
       console.log('팀 스탯 업데이트 중 오류 발생:', error);
@@ -531,6 +532,7 @@ export class PlayerController {
     return this.playerService.resetProcessedGames();
   }
 
+  /* 시즌별 스탯 제거로 임시 비활성화
   @Post('reset-team-stats/:season')
   @ApiOperation({
     summary: '🔄 팀 시즌 스탯 초기화',
@@ -554,6 +556,7 @@ export class PlayerController {
       };
     }
   }
+  */
 
   @Get('my-stats')
   @UseGuards(JwtAuthGuard)
