@@ -11,7 +11,7 @@ const LeagueTeamPage = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          'http://localhost:4000/api/team/season-stats/2024',
+          'http://localhost:4000/api/team/total-stats',
         );
 
         if (response.ok) {
@@ -43,58 +43,68 @@ const LeagueTeamPage = () => {
               team: BACKEND_TO_FRONTEND_TEAM[item.teamName] || item.teamName,
               division: '1부',
 
-              // 득점/경기 관련
-              points_per_game:
-                item.gamesPlayed > 0
-                  ? (item.totalPoints / item.gamesPlayed).toFixed(1)
-                  : 0,
-              total_points: item.totalPoints || 0,
-              total_touchdowns: item.totalTouchdowns || 0,
-              total_yards: item.totalYards || 0,
+              // 득점/경기 관련 (DB 구조에 맞게 수정)
+              points_per_game: item.gamesPlayed > 0 
+                ? (((item.stats?.touchdowns || 0) * 6 + (item.stats?.fieldGoals || 0) * 3) / item.gamesPlayed).toFixed(1)
+                : 0,
+              total_points: (item.stats?.touchdowns || 0) * 6 + (item.stats?.fieldGoals || 0) * 3,
+              total_touchdowns: item.stats?.touchdowns || 0,
+              total_yards: item.stats?.totalYards || 0,
               yards_per_game:
                 item.gamesPlayed > 0
-                  ? (item.totalYards / item.gamesPlayed).toFixed(1)
+                  ? (item.stats?.totalYards / item.gamesPlayed).toFixed(1)
                   : 0,
 
-              // 러시 관련
-              rushing_attempts: item.rushingAttempts || 0,
-              rushing_yards: item.rushingYards || 0,
+              // 러시 관련 (DB 구조에 맞게 수정)
+              rushing_attempts: item.stats?.rushingAttempts || 0,
+              rushing_yards: item.stats?.rushingYards || 0,
               yards_per_carry:
-                item.rushingAttempts > 0
-                  ? (item.rushingYards / item.rushingAttempts).toFixed(1)
+                item.stats?.rushingAttempts > 0
+                  ? (item.stats?.rushingYards / item.stats?.rushingAttempts).toFixed(1)
                   : 0,
               rushing_yards_per_game:
                 item.gamesPlayed > 0
-                  ? (item.rushingYards / item.gamesPlayed).toFixed(1)
+                  ? (item.stats?.rushingYards / item.gamesPlayed).toFixed(1)
                   : 0,
-              rushing_td: item.rushingTouchdowns || 0,
+              rushing_td: item.stats?.touchdowns || 0, // 전체 TD (러싱+패싱)
 
-              // 패스 관련
-              'pass_completions-attempts': item.passCompletionAttempts || '0-0',
-              passing_yards: item.passingYards || 0,
-              passing_yards_per_passing_attempts: item.yardsPerPassAttempt || 0,
+              // 패스 관련 (DB 구조에 맞게 수정)
+              'pass_completions-attempts': `${item.stats?.passingCompletions || 0}-${item.stats?.passingAttempts || 0}`,
+              passing_yards: item.stats?.passingYards || 0,
+              passing_yards_per_passing_attempts: 
+                item.stats?.passingAttempts > 0
+                  ? (item.stats?.passingYards / item.stats?.passingAttempts).toFixed(1)
+                  : 0,
               passing_yards_per_game:
                 item.gamesPlayed > 0
-                  ? (item.passingYards / item.gamesPlayed).toFixed(1)
+                  ? (item.stats?.passingYards / item.gamesPlayed).toFixed(1)
                   : 0,
-              passing_td: item.passingTouchdowns || 0,
-              interceptions: item.interceptions || 0,
+              passing_td: item.stats?.touchdowns || 0, // 전체 TD
+              interceptions: item.stats?.interceptions || 0,
 
-              // 스페셜팀 관련
-              total_punt_yards: item.totalPuntYards || 0,
-              average_punt_yards: item.averagePuntYards || 0,
-              touchback_percentage: item.puntTouchbackPercentage || 0,
-              'field_goal_completions-attempts': item.fieldGoalStats || '0-0',
-              yards_per_kick_return: item.averageKickReturnYards || 0,
-              yards_per_punt_return: item.averagePuntReturnYards || 0,
-              total_return_yards: item.totalReturnYards || 0,
+              // 스페셜팀 관련 (DB 구조에 맞게 수정)
+              total_punt_yards: item.stats?.puntYards || 0,
+              average_punt_yards: item.stats?.avgPuntYards || 0,
+              touchback_percentage: item.stats?.puntAttempts > 0 
+                ? ((item.stats?.touchbacks || 0) / item.stats.puntAttempts * 100).toFixed(1) 
+                : 0,
+              'field_goal_completions-attempts': `${item.stats?.fieldGoals || 0}-${item.stats?.fieldGoalAttempts || 0}`,
+              yards_per_kick_return: item.stats?.kickReturns > 0 
+                ? (item.stats?.kickoffReturnYards / item.stats.kickReturns).toFixed(1) 
+                : 0,
+              yards_per_punt_return: item.stats?.puntReturns > 0 
+                ? (item.stats?.puntReturnYards / item.stats.puntReturns).toFixed(1) 
+                : 0,
+              total_return_yards: item.stats?.returnYards || 0,
 
-              // 기타
-              'fumble-turnover': item.fumbleStats || '0-0',
-              turnover_per_game: item.turnoversPerGame || 0,
-              turnover_rate: item.turnoverRate || 0,
-              'penalty-pen_yards': item.penaltyStats || '0-0',
-              pen_yards_per_game: item.penaltyYardsPerGame || 0,
+              // 기타 (DB 구조에 맞게 수정)
+              'fumble-turnover': `${item.stats?.fumbles || 0}-${item.stats?.fumblesLost || 0}`,
+              turnover_per_game: item.gamesPlayed > 0 ? (item.stats?.turnovers / item.gamesPlayed).toFixed(1) : 0,
+              turnover_rate: (item.stats?.passingAttempts + item.stats?.rushingAttempts) > 0 
+                ? ((item.stats?.turnovers || 0) / (item.stats.passingAttempts + item.stats.rushingAttempts) * 100).toFixed(1) 
+                : 0,
+              'penalty-pen_yards': `${item.stats?.penalties || 0}-${item.stats?.penaltyYards || 0}`,
+              pen_yards_per_game: item.gamesPlayed > 0 ? ((item.stats?.penaltyYards || 0) / item.gamesPlayed).toFixed(1) : 0,
 
               // 원본 데이터 유지
               season: item.season,

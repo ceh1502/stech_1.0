@@ -146,7 +146,7 @@ export default function JsonEx() {
         // "분석 중" 시뮬
         startSimulateProcessing(uniquePlayers);
 
-        // 3) 백엔드 호출 준비 (백엔드가 기대하는 형식에 맞춤)
+        // 3) JSON 데이터 준비 
         const payload = {
           gameKey: gameData.gameKey,
           date: gameData.date,
@@ -157,16 +157,16 @@ export default function JsonEx() {
           Clips: Array.isArray(gameData.Clips) ? gameData.Clips : [],
         };
 
-        // 4) axios 호출 (업로드 진행률 콜백은 FormData일 때 유효. 여기선 전체 JSON POST이므로 서버 처리시간 기준)
+        // 4) axios 호출 
         abortRef.current = new AbortController();
         const response = await axios.post(
-   `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.JSON_EX}`,
-  payload,
-  {
-    timeout: API_CONFIG.TIMEOUT,
-    signal: abortRef.current.signal,
-   }
-);
+          `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.JSON_EX}`,
+          payload,
+          {
+            timeout: API_CONFIG.TIMEOUT,
+            signal: abortRef.current.signal,
+          }
+        );
 
         // 5) 성공 처리
         stopSimulateProcessing();
@@ -205,9 +205,9 @@ export default function JsonEx() {
         { timeout: API_CONFIG.TIMEOUT }
       );
 
-      // 2. 팀 스탯 초기화 (2024 시즌)
+      // 2. 팀 스탯 초기화 (모든 팀)
       await axios.post(
-        `${API_CONFIG.BASE_URL}/player/reset-team-stats/2024`,
+        `${API_CONFIG.BASE_URL}/player/reset-team-stats/all`,
         {},
         { timeout: API_CONFIG.TIMEOUT }
       );

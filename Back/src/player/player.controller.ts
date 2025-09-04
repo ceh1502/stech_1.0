@@ -27,6 +27,7 @@ import {
 import { AnalyzeNewClipsDto } from '../common/dto/new-clip.dto';
 import { GameDataDto } from '../common/dto/game-data.dto';
 import { StatsManagementService } from '../common/services/stats-management.service';
+import { TeamStatsAnalyzerService } from '../team/team-stats-analyzer.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { User } from '../common/decorators/user.decorator';
 
@@ -36,6 +37,7 @@ export class PlayerController {
   constructor(
     private readonly playerService: PlayerService,
     private readonly statsManagementService: StatsManagementService,
+    private readonly teamStatsService: TeamStatsAnalyzerService,
   ) {}
 
   @Post('reset-all')
@@ -223,7 +225,7 @@ export class PlayerController {
     return result;
   }
 
-  @Post('/analyze-game-data')
+  @Post('analyze-game-data')
   @ApiOperation({
     summary: '전체 게임 데이터 분석 및 팀/선수 스탯 업데이트',
     description:
@@ -349,8 +351,13 @@ export class PlayerController {
         }
       } */
 
-      // 팀 스탯은 ClipAnalyzer에서 처리됨
-      console.log('팀 스탯 업데이트 완료');
+      // 팀 스탯 처리 추가
+      console.log('📊 팀 스탯 계산 및 저장 시작...');
+      
+      const teamStatsResult = await this.teamStatsService.analyzeTeamStats(gameData);
+      await this.teamStatsService.saveTeamStats(gameData.gameKey, teamStatsResult, gameData);
+      
+      console.log('✅ 팀 스탯 업데이트 완료');
     } catch (error) {
       console.error('게임 데이터 분석 중 전체 오류:', error);
       results.errors.push(`전체 분석: ${error.message}`);
@@ -532,31 +539,40 @@ export class PlayerController {
     return this.playerService.resetProcessedGames();
   }
 
-  /* 시즌별 스탯 제거로 임시 비활성화
-  @Post('reset-team-stats/:season')
+  @Post('reset-team-stats/all')
   @ApiOperation({
-    summary: '🔄 팀 시즌 스탯 초기화',
-    description: '특정 시즌의 모든 팀 스탯을 초기화합니다. (개발/테스트용)',
+    summary: '🔄 모든 팀 누적 스탯 초기화',
+    description: '시즌 관계없이 모든 팀의 누적 스탯을 초기화합니다. (개발/테스트용)',
   })
-  @ApiResponse({ status: 200, description: '팀 시즌 스탯 초기화 성공' })
-  async resetTeamStats(@Param('season') season: string = '2024') {
+  @ApiResponse({ status: 200, description: '팀 누적 스탯 초기화 성공' })
+  async resetTeamStats() {
+    return this.resetTeamTotalStats();
+  }
+
+  @Post('reset-team-total-stats')
+  @ApiOperation({
+    summary: '🔄 팀 누적 스탯 초기화',
+    description: '모든 팀의 누적 스탯을 초기화합니다. (개발/테스트용)',
+  })
+  @ApiResponse({ status: 200, description: '팀 누적 스탯 초기화 성공' })
+  async resetTeamTotalStats() {
     try {
-      const result =
-        await this.teamSeasonStatsService.resetTeamSeasonStats(season);
+      const result = await this.statsManagementService.resetTeamTotalStats();
 
       return {
-        ...result,
+        success: true,
+        message: '팀 누적 스탯 초기화가 완료되었습니다',
+        data: result,
         timestamp: new Date().toISOString(),
       };
     } catch (error) {
       return {
         success: false,
-        message: '팀 시즌 스탯 초기화 중 오류가 발생했습니다',
+        message: '팀 누적 스탯 초기화 중 오류가 발생했습니다',
         timestamp: new Date().toISOString(),
       };
     }
   }
-  */
 
   @Get('my-stats')
   @UseGuards(JwtAuthGuard)

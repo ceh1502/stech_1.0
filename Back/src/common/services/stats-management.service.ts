@@ -11,6 +11,7 @@ import {
   PlayerTotalStatsDocument,
 } from '../../schemas/player-total-stats.schema';
 import { Player, PlayerDocument } from '../../schemas/player.schema';
+import { TeamTotalStats, TeamTotalStatsDocument } from '../../schemas/team-total-stats.schema';
 import { NewClipDto } from '../dto/new-clip.dto';
 
 @Injectable()
@@ -23,6 +24,8 @@ export class StatsManagementService {
     @InjectModel(PlayerTotalStats.name)
     private playerTotalStatsModel: Model<PlayerTotalStatsDocument>,
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
+    @InjectModel(TeamTotalStats.name)
+    private teamTotalStatsModel: Model<TeamTotalStatsDocument>,
   ) {}
 
   /**
@@ -502,5 +505,14 @@ export class StatsManagementService {
     }
 
     return results;
+  }
+
+  /**
+   * 팀 누적 스탯 초기화
+   */
+  async resetTeamTotalStats() {
+    const result = await this.teamTotalStatsModel.deleteMany({});
+    console.log(`🗑️ ${result.deletedCount}개 팀의 누적 스탯이 삭제되었습니다`);
+    return { deletedCount: result.deletedCount };
   }
 }
