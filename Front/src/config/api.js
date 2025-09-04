@@ -5,9 +5,12 @@ export const API_CONFIG = {
     //Auth
     CHECK_USERNAME: '/auth/check-username',
     LOGIN: '/auth/login',
+    LOGOUT: '/auth/logout',
+    PROFILE:'/auth/profile',
     SIGNUP: '/auth/signup',
     VERIFY_TEAM_CODE: '/auth/verify-team-code',
-
+    REFRESH_TOKEN:'/auth/refresh-token',
+    VERIFY_TOKEN:'/auth/verify-token',
 
     UPLOAD_VIDEO: '/video/upload',
     JSON_EX: '/player/analyze-game-data',

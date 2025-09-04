@@ -147,18 +147,10 @@ const LeagueTeamPage = () => {
     );
   }
 
-  // 데이터가 없는 경우 처리
   if (!teamStatsData || teamStatsData.length === 0) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '200px',
-        }}
-      >
-        팀 스탯 데이터가 없습니다.
+      <div>
+       <StatTeam data={[]} teams={TEAMS} />
       </div>
     );
   }
