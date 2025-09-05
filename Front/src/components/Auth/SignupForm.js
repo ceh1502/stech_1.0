@@ -349,8 +349,8 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         />
         <label htmlFor="agreedToTerms" className="agreewithterms">
           Stech
-          <a href="https://calico-mass-cad.notion.site/Stech-Pro-24d7c5431d5d80eab2dfe595b3fac4eb" className="terms-link"> 이용 약관</a> 및
-          <a href="https://calico-mass-cad.notion.site/Stech-Pro-24d7c5431d5d8022936be7a2894849f0" className="terms-link"> 개인정보 보호정책</a>
+          <a href="https://calico-mass-cad.notion.site/Stech-Pro-24d7c5431d5d80eab2dfe595b3fac4eb" className="terms-link"target="_blank"> 이용 약관</a> 및
+          <a href="https://calico-mass-cad.notion.site/Stech-Pro-24d7c5431d5d8022936be7a2894849f0" className="terms-link"target="_blank"> 개인정보 보호정책</a>
           에 동의합니다.
         </label>
       </div>
