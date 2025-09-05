@@ -30,6 +30,15 @@ export class User {
   @Prop({ default: null })
   playerId: string | null; // 관리자가 배정하는 선수 ID (예: "2025_KK_10")
 
+  @Prop({ default: null })
+  passwordResetCode: string | null; // 패스워드 리셋 인증코드
+
+  @Prop({ default: null })
+  passwordResetExpires: Date | null; // 인증코드 만료시간
+
+  @Prop({ default: 0 })
+  passwordResetAttempts: number; // 재시도 횟수 (보안)
+
   @Prop({
     type: {
       avatar: String,

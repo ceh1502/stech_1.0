@@ -22,6 +22,11 @@ export class EmailService {
     return crypto.randomBytes(32).toString('hex');
   }
 
+  // 6자리 인증코드 생성
+  generateResetCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
   // 인증 이메일 발송
   async sendVerificationEmail(
     email: string,
@@ -72,6 +77,61 @@ export class EmailService {
       return true;
     } catch (error) {
       console.error('이메일 발송 실패:', error);
+      return false;
+    }
+  }
+
+  // 패스워드 리셋 이메일 발송
+  async sendPasswordResetEmail(
+    email: string,
+    resetCode: string,
+    username?: string,
+  ): Promise<boolean> {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'STECH Pro 비밀번호 재설정',
+      html: `
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+          <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px;">
+            <h1>🔐 STECH Pro</h1>
+            <p>비밀번호 재설정 요청</p>
+          </div>
+          
+          <div style="padding: 30px; background: #f8f9fa; border-radius: 10px; margin-top: 20px;">
+            <h2>안녕하세요, ${username || '사용자'}님!</h2>
+            <p>비밀번호 재설정을 위한 인증코드입니다.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <div style="background: #667eea; color: white; padding: 20px; 
+                          text-decoration: none; border-radius: 10px; font-weight: bold;
+                          font-size: 24px; letter-spacing: 3px; display: inline-block;">
+                ${resetCode}
+              </div>
+            </div>
+            
+            <p style="color: #666; font-size: 14px;">
+              이 인증코드를 비밀번호 재설정 페이지에 입력해주세요.
+            </p>
+            
+            <p style="color: #666; font-size: 14px; margin-top: 20px;">
+              이 코드는 10분 후에 만료됩니다.
+            </p>
+            
+            <p style="color: #ff6b6b; font-size: 14px; margin-top: 20px;">
+              ⚠️ 본인이 요청하지 않으셨다면 이 이메일을 무시해주세요.
+            </p>
+          </div>
+        </div>
+      `,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      console.log(`패스워드 리셋 이메일 발송 성공: ${email}`);
+      return true;
+    } catch (error) {
+      console.error('패스워드 리셋 이메일 발송 실패:', error);
       return false;
     }
   }

@@ -1,4 +1,4 @@
-import { IsString, MinLength, IsOptional, Matches } from 'class-validator';
+import { IsString, MinLength, IsOptional, Matches, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SignupDto {
@@ -71,4 +71,44 @@ export class RefreshTokenDto {
   })
   @IsString()
   token: string;
+}
+
+export class FindUserByEmailDto {
+  @ApiProperty({ example: 'user@example.com' })
+  @IsEmail({}, { message: '올바른 이메일 형식을 입력해주세요.' })
+  email: string;
+}
+
+export class SendResetCodeDto {
+  @ApiProperty({ example: 'user@example.com' })
+  @IsEmail({}, { message: '올바른 이메일 형식을 입력해주세요.' })
+  email: string;
+}
+
+export class ResetPasswordDto {
+  @ApiProperty({ example: 'user@example.com' })
+  @IsEmail({}, { message: '올바른 이메일 형식을 입력해주세요.' })
+  email: string;
+
+  @ApiProperty({ example: '123456' })
+  @IsString()
+  @Matches(/^\d{6}$/, { message: '6자리 숫자 코드를 입력해주세요.' })
+  resetCode: string;
+
+  @ApiProperty({ example: 'newpassword123' })
+  @IsString()
+  @MinLength(8, { message: '비밀번호를 8글자 이상 입력해주세요.' })
+  newPassword: string;
+}
+
+export class VerifyPasswordDto {
+  @ApiProperty({ example: 'currentpassword123' })
+  @IsString()
+  password: string;
+}
+
+export class CheckUserExistsDto {
+  @ApiProperty({ example: 'user123' })
+  @IsString()
+  username: string;
 }

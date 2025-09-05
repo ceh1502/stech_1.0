@@ -13,7 +13,7 @@ import { EmailService } from '../utils/email.service';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'your-secret-key',
+      secret: 'stech-super-secret-key-2025',
       signOptions: { expiresIn: '7d' },
     }),
   ],

@@ -31,6 +31,10 @@ export interface TeamStatsData {
   fumblesLost: number;
   touchdowns: number;
   fieldGoals: number;
+  patGood: number;
+  twoPtGood: number;
+  safeties: number;
+  totalPoints: number;
   passingAttempts: number;
   passingCompletions: number;
   rushingAttempts: number;
@@ -57,8 +61,11 @@ export class TeamStatsAnalyzerService {
    * 게임 클립 데이터에서 양팀 스탯 자동 계산
    */
   async analyzeTeamStats(gameData: any): Promise<TeamStatsResult> {
-    console.log('🏈 팀 스탯 분석 시작:', gameData.gameKey);
+    console.log('\n=== 🏈 팀 스탯 분석 시작 ===');
+    console.log('🎮 게임키:', gameData.gameKey);
     console.log('📊 총 클립 수:', gameData.Clips?.length || 0);
+    console.log('🏠 홈팀:', gameData.homeTeam);
+    console.log('✈️ 어웨이팀:', gameData.awayTeam);
     const homeTeamStats: TeamStatsData = {
       teamName: gameData.homeTeam || 'Home',
       totalYards: 0,
@@ -76,6 +83,10 @@ export class TeamStatsAnalyzerService {
       fumblesLost: 0,
       touchdowns: 0,
       fieldGoals: 0,
+      patGood: 0,
+      twoPtGood: 0,
+      safeties: 0,
+      totalPoints: 0,
       passingAttempts: 0,
       passingCompletions: 0,
       rushingAttempts: 0,
@@ -106,6 +117,10 @@ export class TeamStatsAnalyzerService {
       fumblesLost: 0,
       touchdowns: 0,
       fieldGoals: 0,
+      patGood: 0,
+      twoPtGood: 0,
+      safeties: 0,
+      totalPoints: 0,
       passingAttempts: 0,
       passingCompletions: 0,
       rushingAttempts: 0,
@@ -126,6 +141,7 @@ export class TeamStatsAnalyzerService {
       console.log(
         `📎 클립 ${clipIndex}/${gameData.Clips.length}: ${clip.playType}, 야드: ${clip.gainYard}, 공격팀: ${clip.offensiveTeam}`,
       );
+      console.log(`  🔍 significantPlays:`, clip.significantPlays);
       await this.analyzeClip(clip, homeTeamStats, awayTeamStats);
     }
 
@@ -155,6 +171,44 @@ export class TeamStatsAnalyzerService {
     // 러싱야드에서 sack 야드 차감
     homeTeamStats.rushingYards -= homeTeamStats.sackYards;
     awayTeamStats.rushingYards -= awayTeamStats.sackYards;
+    
+    // 총 점수 계산
+    console.log('🧮 점수 계산 전 홈팀 스탯:', {
+      touchdowns: homeTeamStats.touchdowns,
+      fieldGoals: homeTeamStats.fieldGoals,
+      patGood: homeTeamStats.patGood,
+      twoPtGood: homeTeamStats.twoPtGood,
+      safeties: homeTeamStats.safeties
+    });
+    
+    homeTeamStats.totalPoints = 
+      (homeTeamStats.touchdowns * 6) +
+      (homeTeamStats.fieldGoals * 3) + 
+      (homeTeamStats.patGood * 1) +
+      (homeTeamStats.twoPtGood * 2) +
+      (homeTeamStats.safeties * 2);
+      
+    console.log('🧮 점수 계산 전 어웨이팀 스탯:', {
+      touchdowns: awayTeamStats.touchdowns,
+      fieldGoals: awayTeamStats.fieldGoals,
+      patGood: awayTeamStats.patGood,
+      twoPtGood: awayTeamStats.twoPtGood,
+      safeties: awayTeamStats.safeties
+    });
+      
+    awayTeamStats.totalPoints = 
+      (awayTeamStats.touchdowns * 6) +
+      (awayTeamStats.fieldGoals * 3) + 
+      (awayTeamStats.patGood * 1) +
+      (awayTeamStats.twoPtGood * 2) +
+      (awayTeamStats.safeties * 2);
+
+    console.log('🏁 최종 점수: 홈팀', homeTeamStats.totalPoints, '점, 어웨이팀', awayTeamStats.totalPoints, '점');
+
+    console.log('=== 🏁 팀 스탯 분석 완료 ===');
+    console.log('홈팀 최종 결과:', JSON.stringify(homeTeamStats, null, 2));
+    console.log('어웨이팀 최종 결과:', JSON.stringify(awayTeamStats, null, 2));
+    console.log('=== 분석 완료 ===\n');
 
     return {
       homeTeamStats,
@@ -174,6 +228,9 @@ export class TeamStatsAnalyzerService {
     const playType = clip.playType;
     const significantPlays = clip.significantPlays || [];
     const offensiveTeam = clip.offensiveTeam;
+
+    console.log(`\n🔍 클립 분석 중: playType=${playType}, offensiveTeam=${offensiveTeam}, significantPlays=[${significantPlays.join(', ')}]`);
+    console.log(`🔍 significantPlays 타입 체크:`, significantPlays.map(p => typeof p));
 
     // 공격팀과 수비팀 결정
     const isHomeOffense = offensiveTeam === 'Home';
@@ -232,12 +289,21 @@ export class TeamStatsAnalyzerService {
 
     // 5. 펀트 관련 처리
     if (playType === 'PUNT' || playType === 'Punt') {
-      // 펀트 시도는 항상 +1
       offenseStats.puntAttempts += 1;
       
-      // tkl이 있으면 블록당한 것 → 펀트 야드 +0
-      const isBlocked = clip.tkl || clip.tkl2;
+      // 펀트 야드는 항상 추가 (gainYard를 절댓값으로)
+      const puntYards = Math.abs(gainYard);
+      offenseStats.puntYards += puntYards;
+      console.log(`  ✅ 펀트: ${puntYards}야드`);
       
+      // 터치백 체크
+      const hasTouchback = significantPlays.some(play =>
+        play && (play.toUpperCase().includes('TOUCHBACK') || play.toUpperCase().includes('TB'))
+      );
+      if (hasTouchback) {
+        offenseStats.touchbacks += 1;
+        console.log(`  💤 터치백: 펀트팀`);
+
       if (isBlocked) {
         console.log(`  🚫 펀트 블록당함: 펀터 스탯 변동없음, 팀 펀트시도 +1, 야드 +0`);
         // 펀트 야드는 0 추가 (블록당했으므로)
@@ -264,9 +330,104 @@ export class TeamStatsAnalyzerService {
         }
       }
     }
+    
+    // 펀트 리턴 처리 (RETURN playType + PUNT significantPlay)
+    if (playType === 'RETURN' && significantPlays.some(play => 
+      play && play.toUpperCase().includes('PUNT')
+    )) {
+      const returnYards = Math.abs(gainYard);
+      const returningTeam = isHomeOffense ? awayTeamStats : homeTeamStats; // 리턴팀은 현재 공격팀
+      returningTeam.puntReturns += 1;
+      returningTeam.puntReturnYards += returnYards;
+      console.log(`  ✅ 펀트리턴: ${returnYards}야드 (${offensiveTeam})`);
+    }
 
-    // 6. 킥오프 리턴 야드
+    // 6. 킥오프 처리
     if (playType === 'KICKOFF' || playType === 'Kickoff') {
+
+      // 터치백 체크
+      const hasTouchback = significantPlays.some(play =>
+        play && (play.toUpperCase().includes('TOUCHBACK') || play.toUpperCase().includes('TB'))
+      );
+      if (hasTouchback) {
+        offenseStats.touchbacks += 1;
+        console.log(`  💤 터치백: 킥오프팀`);
+      }
+    }
+    
+    // 킥오프 리턴 처리 (RETURN playType + KICKOFF significantPlay)
+    if (playType === 'RETURN' && significantPlays.some(play => 
+      play && play.toUpperCase().includes('KICKOFF')
+    )) {
+      const returnYards = Math.abs(gainYard);
+      const returningTeam = isHomeOffense ? homeTeamStats : awayTeamStats; // 리턴팀은 현재 공격팀
+      returningTeam.kickReturns += 1;
+      returningTeam.kickoffReturnYards += returnYards;
+      console.log(`  ✅ 킥오프리턴: ${returnYards}야드 (${offensiveTeam})`);
+    }
+
+    // 7. 터치다운 계산 (더 포괄적인 체크)
+    console.log(`🔍 터치다운 체크: significantPlays = [${significantPlays.join(', ')}]`);
+    const hasTouchdown = significantPlays.some(play => 
+      play && (
+        play.toUpperCase().includes('TOUCHDOWN') ||
+        play.toUpperCase().includes('TD')
+      )
+    );
+    const hasTurnover = significantPlays.some(play =>
+      play && play.toUpperCase().includes('TURNOVER')
+    );
+    
+    console.log(`🔍 터치다운 검사 결과: ${hasTouchdown}, 턴오버 검사 결과: ${hasTurnover}`);
+    
+    // 터치다운과 턴오버가 동시에 발생한 경우 = 수비팀이 터치다운
+    if (hasTouchdown && hasTurnover) {
+      defenseStats.touchdowns += 1;
+      console.log(`  🏆 수비 터치다운 감지됨: ${isHomeOffense ? 'Away' : 'Home'} 팀 (수비팀), 현재 터치다운 수: ${defenseStats.touchdowns}`);
+    } else if (hasTouchdown) {
+      offenseStats.touchdowns += 1;
+      console.log(`  🏆 터치다운 감지됨: ${offensiveTeam} 팀, 현재 터치다운 수: ${offenseStats.touchdowns}`);
+    } else {
+      console.log(`  ❌ 터치다운 감지 안됨: ${offensiveTeam} 팀`);
+    }
+
+    // 8. 필드골 계산 (playType 체크)
+    console.log(`🔍 필드골 체크: playType = ${playType}, significantPlays = [${significantPlays.join(', ')}]`);
+    if (playType === 'FieldGoal' || playType === 'FG') {
+      offenseStats.fieldGoalAttempts += 1;
+      console.log(`  🎯 필드골 시도: ${offensiveTeam} 팀`);
+    }
+    
+    // 필드골 성공/실패는 significantPlays로만 판단
+    const hasFieldGoalGood = significantPlays.some(play =>
+      play && play.toUpperCase().includes('FIELDGOALGOOD')
+    ) || PlayAnalysisHelper.hasSignificantPlay(
+          significantPlays,
+          SIGNIFICANT_PLAY.FIELDGOAL.GOOD,
+        );
+    
+    if (hasFieldGoalGood) {
+      offenseStats.fieldGoals += 1;
+      console.log(`  ⚽ 필드골 성공 감지됨: ${offensiveTeam} 팀, 현재 필드골 수: ${offenseStats.fieldGoals}`);
+    } else if (significantPlays.some(play => play && play.toUpperCase().includes('FIELDGOALNOGOOD')) ||
+               PlayAnalysisHelper.hasSignificantPlay(
+                 significantPlays,
+                 SIGNIFICANT_PLAY.FIELDGOAL.NOGOOD,
+               )) {
+      console.log(`  ❌ 필드골 실패: ${offensiveTeam} 팀`);
+    } else {
+      console.log(`  ❌ 필드골 성공/실패 감지 안됨: ${offensiveTeam} 팀`);
+    }
+
+    // PAT 처리
+    if (playType === 'PAT') {
+      console.log(`🔍 PAT 플레이 발견: ${offensiveTeam} 팀, significantPlays=[${significantPlays.join(', ')}]`);
+      if (significantPlays.includes('PATGOOD')) {
+        offenseStats.patGood += 1;
+        console.log(`  ✅ PAT 성공: ${offensiveTeam} 팀, 현재 PAT 수: ${offenseStats.patGood}`);
+      } else {
+        console.log(`  ❌ PAT 실패 또는 PATGOOD 없음: ${offensiveTeam} 팀`);
+
       // 킥오프 리턴 (리턴팀은 수비팀)
       defenseStats.kickReturns += 1;
       if (gainYard > 0) {
@@ -315,6 +476,30 @@ export class TeamStatsAnalyzerService {
       }
     }
 
+    // 2점 변환 처리
+    if (playType === '2pt' || playType === 'TPT') {
+      if (
+        PlayAnalysisHelper.hasSignificantPlay(
+          significantPlays,
+          SIGNIFICANT_PLAY.TWOPTCONV.GOOD,
+        )
+      ) {
+        offenseStats.twoPtGood += 1;
+        console.log(`  💪 2점 변환 성공: ${offensiveTeam} 팀`);
+      }
+    }
+
+    // Safety 처리 (수비팀이 득점)
+    if (
+      PlayAnalysisHelper.hasSignificantPlay(
+        significantPlays,
+        SIGNIFICANT_PLAY.SAFETY,
+      )
+    ) {
+      defenseStats.safeties += 1;
+      console.log(`  🛡️ Safety 득점: 수비팀 2점`);
+    }
+
     // 9. 턴오버 계산
     if (
       PlayAnalysisHelper.hasSignificantPlay(
@@ -349,13 +534,24 @@ export class TeamStatsAnalyzerService {
       }
     }
 
+    // 인터셉트 처리
+    const hasIntercept = significantPlays.some(play =>
+      play && (play.toUpperCase() === 'INTERCEPT' || play === SIGNIFICANT_PLAY.INTERCEPT)
+    );
+    if (hasIntercept) {
+      offenseStats.turnovers += 1;
+      offenseStats.interceptions += 1;  // 공격팀의 인터셉트 당한 횟수
+      console.log(`  🎯 인터셉트: ${offensiveTeam} 턴오버, 인터셉트 당한 횟수+1`);
+    }
+
     // 인터셉트 (수비팀 관점에서)
     if (
       PlayAnalysisHelper.hasSignificantPlay(
         significantPlays,
-        SIGNIFICANT_PLAY.INTERCEPT,
+        SIGNIFICANT_PLAY.SACK,
       )
     ) {
+
       offenseStats.turnovers += 1;
       defenseStats.interceptions += 1;
       console.log(`  🎯 인터셉트: ${offensiveTeam} 턴오버, 수비팀 인터셉트+1`);
@@ -450,6 +646,24 @@ export class TeamStatsAnalyzerService {
         puntYards: teamStats.puntYards,
         fumbles: teamStats.fumbles,
         fumblesLost: teamStats.fumblesLost,
+        touchdowns: teamStats.touchdowns,
+        fieldGoals: teamStats.fieldGoals,
+        patGood: teamStats.patGood,
+        twoPtGood: teamStats.twoPtGood,
+        safeties: teamStats.safeties,
+        totalPoints: teamStats.totalPoints,
+        passingAttempts: teamStats.passingAttempts,
+        passingCompletions: teamStats.passingCompletions,
+        rushingAttempts: teamStats.rushingAttempts,
+        interceptions: teamStats.interceptions,
+        sacks: teamStats.sacks,
+        kickReturns: teamStats.kickReturns,
+        puntReturns: teamStats.puntReturns,
+        returnYards: teamStats.totalReturnYards,
+        penalties: teamStats.penalties,
+        penaltyYards: teamStats.penaltyYards,
+        fieldGoalAttempts: teamStats.fieldGoalAttempts,
+        touchbacks: teamStats.touchbacks,
       },
       finalScore: gameData.finalScore || { own: 0, opponent: 0 },
     };
@@ -486,6 +700,10 @@ export class TeamStatsAnalyzerService {
       totalStats.stats.fumblesLost = (totalStats.stats.fumblesLost || 0) + teamStats.fumblesLost;
       totalStats.stats.touchdowns = (totalStats.stats.touchdowns || 0) + teamStats.touchdowns;
       totalStats.stats.fieldGoals = (totalStats.stats.fieldGoals || 0) + teamStats.fieldGoals;
+      totalStats.stats.patGood = (totalStats.stats.patGood || 0) + teamStats.patGood;
+      totalStats.stats.twoPtGood = (totalStats.stats.twoPtGood || 0) + teamStats.twoPtGood;
+      totalStats.stats.safeties = (totalStats.stats.safeties || 0) + teamStats.safeties;
+      totalStats.stats.totalPoints = (totalStats.stats.totalPoints || 0) + teamStats.totalPoints;
       totalStats.stats.passingAttempts = (totalStats.stats.passingAttempts || 0) + teamStats.passingAttempts;
       totalStats.stats.passingCompletions = (totalStats.stats.passingCompletions || 0) + teamStats.passingCompletions;
       totalStats.stats.rushingAttempts = (totalStats.stats.rushingAttempts || 0) + teamStats.rushingAttempts;
@@ -529,6 +747,10 @@ export class TeamStatsAnalyzerService {
           avgPuntYards: teamStats.puntAttempts > 0 ? teamStats.puntYards / teamStats.puntAttempts : 0,
           touchdowns: teamStats.touchdowns,
           fieldGoals: teamStats.fieldGoals,
+          patGood: teamStats.patGood,
+          twoPtGood: teamStats.twoPtGood,
+          safeties: teamStats.safeties,
+          totalPoints: teamStats.totalPoints,
           passingAttempts: teamStats.passingAttempts,
           passingCompletions: teamStats.passingCompletions,
           rushingAttempts: teamStats.rushingAttempts,
@@ -614,6 +836,10 @@ export class TeamStatsAnalyzerService {
       fumblesLost: stats.stats.fumblesLost || 0,
       touchdowns: stats.stats.touchdowns || 0,
       fieldGoals: stats.stats.fieldGoals || 0,
+      patGood: 0,
+      twoPtGood: 0,
+      safeties: 0,
+      totalPoints: 0,
       passingAttempts: stats.stats.passingAttempts || 0,
       passingCompletions: stats.stats.passingCompletions || 0,
       rushingAttempts: stats.stats.rushingAttempts || 0,

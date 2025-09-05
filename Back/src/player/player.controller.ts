@@ -353,13 +353,18 @@ export class PlayerController {
 
       // 팀 스탯 처리 추가
       console.log('📊 팀 스탯 계산 및 저장 시작...');
+
+      require('fs').appendFileSync('/tmp/team-stats-debug.log', `팀 스탯 분석 시작: gameKey=${gameData.gameKey}\n`);
       
       const teamStatsResult = await this.teamStatsService.analyzeTeamStats(gameData);
+      require('fs').appendFileSync('/tmp/team-stats-debug.log', `팀 스탯 분석 결과: ${JSON.stringify(teamStatsResult)}\n`);
+      
       await this.teamStatsService.saveTeamStats(gameData.gameKey, teamStatsResult, gameData);
       
       console.log('✅ 팀 스탯 업데이트 완료');
     } catch (error) {
       console.error('게임 데이터 분석 중 전체 오류:', error);
+      require('fs').appendFileSync('/tmp/team-stats-debug.log', `오류 발생: ${error.message}\n`);
       results.errors.push(`전체 분석: ${error.message}`);
     }
 
