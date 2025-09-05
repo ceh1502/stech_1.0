@@ -1,10 +1,14 @@
+// src/components/Auth/LoginForm.jsx
+
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+// ... 기존 import ...
 import Kakao from '../../assets/images/png/AuthPng/Kakao.png';
 import Google from '../../assets/images/png/AuthPng/Google.png';
 import Eye from '../../assets/images/png/AuthPng/Eye.png';
 import EyeActive from '../../assets/images/png/AuthPng/EyeActive.png';
-import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+
 
 const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => {
   const { login: authLogin, error: authError, loading } = useAuth();
@@ -22,6 +26,7 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
   };
 
   const validateForm = () => {
+    // ... 기존 유효성 검사 로직은 동일 ...
     const username = formData.username?.trim();
     const password = formData.password;
     if (!username || !password) {
@@ -44,11 +49,21 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
     setFormError(null);
 
     try {
-      const ok = await authLogin({ username: formData.username, password: formData.password });
-      if (ok) {
+      // ✨ 수정된 부분: authLogin의 반환 값을 객체로 받음
+      const result = await authLogin({ username: formData.username, password: formData.password });
+
+      // ✨ 수정된 부분: 반환된 객체를 기반으로 분기 처리
+      if (result.success) {
         onSuccess?.();
-        navigate('/service');
+        if (result.profileComplete) {
+          // 프로필이 완성된 경우 -> 서비스 페이지로 이동
+          navigate('/service');
+        } else {
+          // 프로필이 미완성된 경우 -> 프로필 생성 페이지로 이동
+          navigate('/auth/signupprofile');
+        }
       }
+      // 로그인 실패 시에는 authError가 자동으로 설정되므로 별도 처리가 필요 없습니다.
     } catch (err) {
       setFormError(err?.message || '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
@@ -60,7 +75,7 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
   const displayError = formError || authError;
 
   return (
-    // 크롬 자동완성/자동저장 활성화
+    // ... 나머지 JSX는 동일 ...
     <form onSubmit={handleSubmit} className={`loginForm ${className}`} autoComplete="on">
       <div className="tab-container">
         <button type="button" className="loginTitle">로그인</button>
@@ -107,7 +122,6 @@ const LoginForm = ({ onSuccess, showForgotPassword = true, className = '' }) => 
             disabled={isFormLoading}
           />
 
-          {/* 탭으로 건너뛰고, 클릭 시 포커스 훔치지 않기 */}
           <button
             type="button"
             className="LoginpasswordToggleButton"

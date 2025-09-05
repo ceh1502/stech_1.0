@@ -253,8 +253,15 @@ function LeagueTeamSelect({
   );
 }
 
-/** Q1~Q4 업로드 라인 */
-function QuarterRow({ q, file, onPick, onPreview }) {
+/**
+ * [수정됨] Q1~Q4 업로드 라인 컴포넌트
+ * @param {object} props
+ * @param {string} props.q - 쿼터 이름 (e.g., 'Q1')
+ * @param {File[]} props.files - 현재 선택된 파일 배열
+ * @param {(newFiles: File[]) => void} props.onPick - 파일이 선택됐을 때 호출될 함수
+ * @param {() => void} props.onClear - 파일 목록을 비울 때 호출될 함수
+ */
+function QuarterRow({ q, files, onPick, onClear }) {
   const inputRef = useRef(null);
   return (
     <div className="quarterRow">
@@ -263,26 +270,35 @@ function QuarterRow({ q, file, onPick, onPreview }) {
         type="file"
         accept="video/*"
         className="hiddenFile"
-        onChange={(e) => onPick(e.target.files?.[0] || null)}
+        multiple // ✨ 여러 파일 선택 가능하도록 속성 추가
+        onChange={(e) => {
+          if (e.target.files) {
+            // FileList를 배열로 변환하여 onPick에 전달
+            onPick(Array.from(e.target.files));
+          }
+        }}
       />
       <button
         className="btn primary"
         type="button"
         onClick={() => inputRef.current?.click()}
       >
-        {q} 경기 영상 업로드
+        {q} 영상 추가
       </button>
       <button
         className="btn ghost"
         type="button"
-        disabled={!file}
-        onClick={onPreview}
-        title={file ? '영상 확인' : '영상 파일을 먼저 선택하세요'}
+        disabled={files.length === 0} // ✨ 파일이 없을 때 비활성화
+        onClick={onClear}
+        title={files.length > 0 ? '선택한 파일 모두 제거' : '파일 없음'}
       >
-        영상 확인
+        초기화
       </button>
       <span className="quarterFilename">
-        {file ? file.name : '선택된 파일 없음'}
+        {/* ✨ 파일 개수에 따라 다른 텍스트 표시 */}
+        {files.length > 0
+          ? `${files.length}개 파일 선택됨`
+          : '선택된 파일 없음'}
       </span>
     </div>
   );
@@ -316,27 +332,30 @@ const UploadVideoModal = ({
   const [week, setWeek] = useState('Week1');
   const [stadium, setStadium] = useState('서울대학교 경기장');
 
-  const [q1, setQ1] = useState(null);
-  const [q2, setQ2] = useState(null);
-  const [q3, setQ3] = useState(null);
-  const [q4, setQ4] = useState(null);
+  // ✨ 각 쿼터의 파일 상태를 배열로 관리 (useState([]) 사용)
+  const [q1, setQ1] = useState([]);
+  const [q2, setQ2] = useState([]);
+  const [q3, setQ3] = useState([]);
+  const [q4, setQ4] = useState([]);
 
-  const [preview, setPreview] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState('');
+  // ✨ 비디오 미리보기 관련 로직은 여러 파일을 다루기 복잡하므로 제거
+  // const [preview, setPreview] = useState(null);
+  // const [previewUrl, setPreviewUrl] = useState('');
 
-  useEffect(() => {
-    if (!isOpen || !preview) return;
-    const url = URL.createObjectURL(preview);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [isOpen, preview]);
+  // useEffect(() => {
+  //   if (!isOpen || !preview) return;
+  //   const url = URL.createObjectURL(preview);
+  //   setPreviewUrl(url);
+  //   return () => URL.revokeObjectURL(url);
+  // }, [isOpen, preview]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleClose = () => {
     if (loading) return;
-    setPreview(null);
+    // ✨ 미리보기 상태 제거
+    // setPreview(null);
     onClose?.();
   };
 
@@ -345,8 +364,11 @@ const UploadVideoModal = ({
     setError('');
     if (!home || !away) return setError('홈/원정 팀을 선택해 주세요.');
     if (!matchDate) return setError('경기 날짜를 선택해 주세요.');
-    if (!q1 && !q2 && !q3 && !q4)
+    
+    // ✨ 업로드할 파일이 하나라도 있는지 확인 (배열 길이 체크)
+    if (q1.length === 0 && q2.length === 0 && q3.length === 0 && q4.length === 0) {
       return setError('최소 1개 분기 영상을 업로드해 주세요.');
+    }
 
     try {
       setLoading(true);
@@ -360,10 +382,13 @@ const UploadVideoModal = ({
       fd.append('league_name', leagueName);
       fd.append('week', week);
       fd.append('stadium', stadium);
-      if (q1) fd.append('q1', q1);
-      if (q2) fd.append('q2', q2);
-      if (q3) fd.append('q3', q3);
-      if (q4) fd.append('q4', q4);
+
+      // ✨ 각 쿼터별 파일 배열을 순회하며 FormData에 추가
+      // 서버에서 `q1`, `q2`와 같이 동일한 키로 여러 파일을 받을 수 있어야 합니다.
+      q1.forEach((file) => fd.append('q1', file));
+      q2.forEach((file) => fd.append('q2', file));
+      q3.forEach((file) => fd.append('q3', file));
+      q4.forEach((file) => fd.append('q4', file));
 
       const token = getToken?.();
       const resp = await fetch(
@@ -498,29 +523,30 @@ const UploadVideoModal = ({
           <section className="uvm-col right">
             <h3 className="uvm-section-title">경기 영상 업로드</h3>
 
+            {/* ✨ QuarterRow에 수정된 props 전달 */}
             <QuarterRow
               q="Q1"
-              file={q1}
-              onPick={setQ1}
-              onPreview={() => setPreview(q1)}
+              files={q1}
+              onPick={(newFiles) => setQ1((prev) => [...prev, ...newFiles])}
+              onClear={() => setQ1([])}
             />
             <QuarterRow
               q="Q2"
-              file={q2}
-              onPick={setQ2}
-              onPreview={() => setPreview(q2)}
+              files={q2}
+              onPick={(newFiles) => setQ2((prev) => [...prev, ...newFiles])}
+              onClear={() => setQ2([])}
             />
             <QuarterRow
               q="Q3"
-              file={q3}
-              onPick={setQ3}
-              onPreview={() => setPreview(q3)}
+              files={q3}
+              onPick={(newFiles) => setQ3((prev) => [...prev, ...newFiles])}
+              onClear={() => setQ3([])}
             />
             <QuarterRow
               q="Q4"
-              file={q4}
-              onPick={setQ4}
-              onPreview={() => setPreview(q4)}
+              files={q4}
+              onPick={(newFiles) => setQ4((prev) => [...prev, ...newFiles])}
+              onClear={() => setQ4([])}
             />
 
             {error && <p className="uvm-error">{error}</p>}
@@ -541,16 +567,7 @@ const UploadVideoModal = ({
           </section>
         </form>
 
-        {/* 간단 미리보기 */}
-        {preview && previewUrl && (
-          <div className="uvm-preview" onClick={() => setPreview(null)}>
-            <video
-              src={previewUrl}
-              controls
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        )}
+        {/* ✨ 단일 파일 미리보기 UI 제거 */}
       </div>
     </div>
   );

@@ -81,15 +81,22 @@ export const AuthProvider = ({ children }) => {
         } catch {}
       }
       setUser(u);
-      return { success: true, user: u };
+
+      // ✨ 1. 프로필 완성 여부 판단: user 객체에 nickname이 있는지 확인합니다.
+      //    (SignupProfileForm에서 '성명(표시명)'을 nickname으로 저장하기 때문)
+     const isProfileComplete = !!u?.profile?.realName;
+
+      return { success: true, user: u, profileComplete: isProfileComplete };
+
     } catch (e) {
       const msg = parseError(e);
       setError(msg);
-      return { success: false, error: msg };
+      return { success: false, error: msg, profileComplete: false };
     } finally {
       setLoading(false);
     }
   };
+
 
   const signup = async (payload) => {
     try {

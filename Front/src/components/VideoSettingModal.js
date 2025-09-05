@@ -1,6 +1,5 @@
 import { createPortal } from "react-dom";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { IoPlayCircleOutline, IoCloseCircleOutline } from "react-icons/io5";
 import { MdOutlineHandyman } from "react-icons/md";
 import { useVideoSettings } from "../hooks/useVideoSetting"; // 경로 확인
