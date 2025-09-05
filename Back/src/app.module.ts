@@ -10,6 +10,7 @@ import { VideoModule } from './video/video.module';
 import { PlayerModule } from './player/player.module';
 import { GameModule } from './game/game.module';
 import { AdminModule } from './admin/admin.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AdminModule } from './admin/admin.module';
     PlayerModule,
     GameModule,
     AdminModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],
