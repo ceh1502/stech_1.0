@@ -1,3 +1,4 @@
+// contact.dto.ts
 export class ContactDto {
   fullName: string;
   email: string;

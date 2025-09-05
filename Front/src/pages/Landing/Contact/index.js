@@ -68,6 +68,7 @@ const Contact = () => {
   // 폼 데이터 변경 핸들러
   const handleInputChange = (e) => {
     const { id, value } = e.target;
+    console.log('입력 변경:', id, value); // 디버깅용 로그 추가
     setFormData((prev) => ({
       ...prev,
       [id]: value,
@@ -77,6 +78,8 @@ const Contact = () => {
   // 폼 제출 핸들러
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    console.log('제출할 폼 데이터:', formData);
 
     // 기본 유효성 검사
     if (
@@ -93,7 +96,12 @@ const Contact = () => {
     setSubmitStatus('');
 
     try {
-      const response = await fetch('/api/contact', {
+      console.log('전송할 데이터:', {
+        ...formData,
+        timestamp: new Date().toISOString(),
+      });
+
+      const response = await fetch('http://localhost:4000/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
