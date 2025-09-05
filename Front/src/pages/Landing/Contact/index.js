@@ -1,3 +1,4 @@
+// Contact.js 수정된 코드
 import React, { useState } from 'react';
 import Header from '../LandingHome/Header';
 import Footer from '../LandingHome/Footer';
@@ -9,6 +10,14 @@ import location from '../../../assets/images/png/ContactPng/location-icon.png';
 
 const Contact = () => {
   const [expanded, setExpanded] = useState(null);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    reason: '',
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(''); // 'success', 'error', ''
 
   const faqData = [
     {
@@ -56,6 +65,66 @@ const Contact = () => {
     setExpanded(expanded === index ? null : index);
   };
 
+  // 폼 데이터 변경 핸들러
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  // 폼 제출 핸들러
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // 기본 유효성 검사
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.reason ||
+      !formData.message
+    ) {
+      alert('모든 필드를 입력해주세요.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFormData({
+          fullName: '',
+          email: '',
+          reason: '',
+          message: '',
+        });
+        alert('문의가 성공적으로 전송되었습니다!');
+      } else {
+        throw new Error('전송에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      setSubmitStatus('error');
+      alert('문의 전송 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div>
       <div className="contactContainer">
@@ -68,38 +137,76 @@ const Contact = () => {
           </div>
           <div className="contactLinks">
             <a href="mailto:ethos614@stechpro.ai" className="contactLink">
-              <img src={email} alt="Email" className="contacticon" /> ethos614@stechpro.ai
+              <img src={email} alt="Email" className="contacticon" />{' '}
+              ethos614@stechpro.ai
             </a>
             <a href="tel:+821023887500" className="contactLink">
-              <img src={phone} alt="phone" className="contacticon" /> +82 10 2388 7500
+              <img src={phone} alt="phone" className="contacticon" /> +82 10
+              2388 7500
             </a>
-            <a href="https://maps.app.goo.gl/9kVkpUNULNxzgyHS6" className="contactLink">
-              <img src={location} alt="location" className="contacticon" /> 서울특별시 송파구 송파대로
+            <a
+              href="https://maps.app.goo.gl/9kVkpUNULNxzgyHS6"
+              className="contactLink"
+            >
+              <img src={location} alt="location" className="contacticon" />{' '}
+              서울특별시 송파구 송파대로
             </a>
           </div>
 
-          <form className="contactForm">
+          <form className="contactForm" onSubmit={handleSubmit}>
             <div className="ContactformGroup">
               <div className="inputRow">
                 <div className="inputWrapper">
                   <label htmlFor="fullName">이름</label>
-                  <input type="text" id="fullName" placeholder="Type here" />
+                  <input
+                    type="text"
+                    id="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                    placeholder="Type here"
+                    required
+                  />
                 </div>
                 <div className="inputWrapper">
                   <label htmlFor="email">이메일</label>
-                  <input type="email" id="email" placeholder="Type here" />
+                  <input
+                    type="email"
+                    id="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Type here"
+                    required
+                  />
                 </div>
               </div>
               <div className="inputWrapper">
                 <label htmlFor="reason">문의하시는 이유가 무엇입니까?</label>
-                <textarea id="reason" placeholder="Type here"></textarea>
+                <textarea
+                  id="reason"
+                  value={formData.reason}
+                  onChange={handleInputChange}
+                  placeholder="Type here"
+                  required
+                ></textarea>
               </div>
               <div className="inputWrapper">
                 <label htmlFor="message">내용</label>
-                <textarea id="message" placeholder="Type here"></textarea>
+                <textarea
+                  id="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  placeholder="Type here"
+                  required
+                ></textarea>
               </div>
             </div>
-            <button type="submit" className="contactsubmitButton">제출하기</button>
+            <button
+              type="submit"
+              className="contactsubmitButton"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? '전송 중...' : '제출하기'}
+            </button>
           </form>
         </section>
 
@@ -117,16 +224,29 @@ const Contact = () => {
               {faqData.slice(0, 4).map((item, index) => {
                 const lines = item.answer.split('\n');
                 return (
-                  <div key={index} className={`faqItem ${expanded === index ? 'expanded' : ''}`}>
+                  <div
+                    key={index}
+                    className={`faqItem ${
+                      expanded === index ? 'expanded' : ''
+                    }`}
+                  >
                     <div
-                      className={`faqHeader ${expanded === index ? 'expanded' : ''}`}
+                      className={`faqHeader ${
+                        expanded === index ? 'expanded' : ''
+                      }`}
                       onClick={() => toggleFAQ(index)}
                     >
                       <span className="faqNumber">0{index + 1}</span>
                       <h4>{item.question}</h4>
-                      <span className="toggleIcon">{expanded === index ? '—' : '+'}</span>
+                      <span className="toggleIcon">
+                        {expanded === index ? '—' : '+'}
+                      </span>
                     </div>
-                    <div className={`faqBody ${expanded === index ? 'expanded' : ''}`}>
+                    <div
+                      className={`faqBody ${
+                        expanded === index ? 'expanded' : ''
+                      }`}
+                    >
                       <p>
                         {lines.map((line, lineIndex) => (
                           <React.Fragment key={lineIndex}>
@@ -145,16 +265,27 @@ const Contact = () => {
                 const idx = index + 4;
                 const lines = item.answer.split('\n');
                 return (
-                  <div key={idx} className={`faqItem ${expanded === idx ? 'expanded' : ''}`}>
+                  <div
+                    key={idx}
+                    className={`faqItem ${expanded === idx ? 'expanded' : ''}`}
+                  >
                     <div
-                      className={`faqHeader ${expanded === idx ? 'expanded' : ''}`}
+                      className={`faqHeader ${
+                        expanded === idx ? 'expanded' : ''
+                      }`}
                       onClick={() => toggleFAQ(idx)}
                     >
                       <span className="faqNumber">0{index + 5}</span>
                       <h4>{item.question}</h4>
-                      <span className="toggleIcon">{expanded === idx ? '—' : '+'}</span>
+                      <span className="toggleIcon">
+                        {expanded === idx ? '—' : '+'}
+                      </span>
                     </div>
-                    <div className={`faqBody ${expanded === idx ? 'expanded' : ''}`}>
+                    <div
+                      className={`faqBody ${
+                        expanded === idx ? 'expanded' : ''
+                      }`}
+                    >
                       <p>
                         {lines.map((line, lineIndex) => (
                           <React.Fragment key={lineIndex}>
