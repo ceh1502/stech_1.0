@@ -3,7 +3,7 @@ import { NavLink, Link } from 'react-router-dom';
 import './MainHeader.css'; // Assuming you have a separate CSS file for Header styles
 import Logo from './images/stech.png';
 
-const Header = () => {
+const MainHeader = () => {
   return (
     <div className="headerBox">
       <div className="logoBox">
@@ -72,4 +72,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default MainHeader;

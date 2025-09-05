@@ -1,12 +1,12 @@
 // src/context/AuthContext.js
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   login as apiLogin,
   signup as apiSignup,
   verifyTeamCode as apiVerifyTeamCode,
   checkUsername as apiCheckUsername,
   logout as apiLogout,
-  // (주의) getUserInfo, verifyEmail 등 다른 엔드포인트는 더 이상 사용하지 않습니다.
+  verifyToken as apiVerifyToken,
 } from '../api/authAPI';
 
 import {
@@ -14,67 +14,74 @@ import {
   getUserData,
   clearTokens,
   isTokenExpired,
-  isAuthenticated as isAuthedByStorage,
-  // 이메일 인증/유저정보 재조회 관련 유틸은 더 이상 사용하지 않음
-  handleLoginResponse, // 서버 응답 -> 토큰/유저 저장 처리
+  handleLoginResponse,
+  setUserData,
 } from '../utils/tokenUtils';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);      // 로그인한 사용자 (로컬 저장된 값)
-  const [loading, setLoading] = useState(true); // 전역 로딩
-  const [error, setError] = useState(null);     // 전역 에러 메시지
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // ---- 앱 시작 시: 로컬에 토큰/유저 있으면 복원만 수행 ----
+  // 앱 시작 시 복원 + 토큰 검증으로 user 보강
   useEffect(() => {
-    const bootstrap = () => {
+    (async () => {
       try {
         const token = getToken();
         if (!token || isTokenExpired(token)) {
           clearAuthData();
         } else {
+          // 로컬 user 있으면 우선 반영
           const stored = getUserData();
           if (stored) setUser(stored);
+          // 서버로 user 최신화
+          try {
+            const v = await apiVerifyToken(token); // { user }
+            if (v?.user) {
+              setUser(v.user);
+              setUserData(v.user);
+            }
+          } catch {
+            // 검증 실패하면 세션 정리
+            clearAuthData();
+          }
         }
-      } catch (e) {
+      } catch {
         clearAuthData();
       } finally {
         setLoading(false);
         setIsInitialized(true);
       }
-    };
-    bootstrap();
+    })();
   }, []);
 
-  // ---- 로그인 (username/password) ----
   const login = async (credentials = {}) => {
     try {
       setLoading(true);
       setError(null);
 
-      // 콜러가 email/id로 넘겨도 username으로 정규화
-      const username =
-        credentials.username || credentials.email || credentials.id;
+      const username = credentials.username || credentials.email || credentials.id;
       const password = credentials.password;
+      if (!username || !password) throw new Error('아이디와 비밀번호를 입력해주세요.');
 
-      if (!username || !password) {
-        throw new Error('아이디와 비밀번호를 입력해주세요.');
+      const data = await apiLogin(username, password);     // { token, user? }
+      const result = handleLoginResponse(data);            // token 저장 + user 저장(있다면)
+      if (!result?.success) throw new Error(result?.error || '로그인 처리 실패');
+
+      // user가 응답에 없으면 verify로 받아오기
+      let u = data.user || null;
+      if (!u) {
+        try {
+          const v = await apiVerifyToken(getToken());
+          u = v?.user ?? null;
+          if (u) setUserData(u);
+        } catch {}
       }
-
-      // 서버 로그인 (200 OK → data 반환)
-      const data = await apiLogin(username, password);
-
-      // 서버 응답을 로컬 저장소에 반영 (토큰/유저 저장)
-      const result = handleLoginResponse(data);
-      if (!result?.success) {
-        throw new Error(result?.error || '로그인 처리에 실패했습니다.');
-      }
-
-      const saved = getUserData();
-      setUser(saved);
-      return { success: true, user: saved };
+      setUser(u);
+      return { success: true, user: u };
     } catch (e) {
       const msg = parseError(e);
       setError(msg);
@@ -84,24 +91,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ---- 회원가입 (백엔드 스키마 그대로 전달) ----
-  // 예: { username, password, authCode, teamName, role, region }
   const signup = async (payload) => {
     try {
       setLoading(true);
       setError(null);
-
       if (!payload?.username || !payload?.password || !payload?.authCode) {
         throw new Error('필수 항목(아이디/비밀번호/인증코드)을 입력해주세요.');
       }
-
       const res = await apiSignup(payload);
-      // 서버가 단순 성공만 주면 그대로 전달
-      return {
-        success: true,
-        data: res,
-        message: '회원가입이 완료되었습니다.',
-      };
+      return { success: true, data: res, message: '회원가입이 완료되었습니다.' };
     } catch (e) {
       const msg = parseError(e);
       setError(msg);
@@ -111,24 +109,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ---- 로그아웃 (서버 알림은 선택적) ----
   const logout = async () => {
     try {
       setLoading(true);
       setError(null);
-      // 서버에 알림이 필요 없는 경우라도 호출해도 무방
-      try {
-        await apiLogout();
-      } catch {
-        // 서버 로그아웃 실패는 무시 (클라이언트 정리 우선)
-      }
+      try { await apiLogout(); } catch { /* 서버 실패 무시 */ }
     } finally {
       clearAuthData();
       setLoading(false);
     }
   };
 
-  // ---- 아이디 중복 확인 ----
   const checkUsername = async (username) => {
     try {
       if (!username) return { available: false, error: '아이디를 입력하세요.' };
@@ -139,7 +130,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ---- 인증코드 검증 ----
   const verifyTeamCode = async (authCode) => {
     try {
       if (!authCode) return { valid: false, error: '인증코드를 입력하세요.' };
@@ -150,7 +140,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ---- 공통 유틸 ----
   const clearAuthData = () => {
     clearTokens();
     setUser(null);
@@ -165,23 +154,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = {
-    // 상태
     user,
     loading,
     error,
     isInitialized,
-    isAuthenticated: isAuthedByStorage() && !!user,
+    isAuthenticated: !!user,
 
-    // 액션
     login,
     signup,
     logout,
 
-    // 검증 유틸
     checkUsername,
     verifyTeamCode,
 
-    // 기타
     clearError: () => setError(null),
   };
 

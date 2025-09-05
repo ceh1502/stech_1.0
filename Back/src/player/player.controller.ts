@@ -353,6 +353,7 @@ export class PlayerController {
 
       // 팀 스탯 처리 추가
       console.log('📊 팀 스탯 계산 및 저장 시작...');
+
       require('fs').appendFileSync('/tmp/team-stats-debug.log', `팀 스탯 분석 시작: gameKey=${gameData.gameKey}\n`);
       
       const teamStatsResult = await this.teamStatsService.analyzeTeamStats(gameData);

@@ -303,6 +303,31 @@ export class TeamStatsAnalyzerService {
       if (hasTouchback) {
         offenseStats.touchbacks += 1;
         console.log(`  💤 터치백: 펀트팀`);
+
+      if (isBlocked) {
+        console.log(`  🚫 펀트 블록당함: 펀터 스탯 변동없음, 팀 펀트시도 +1, 야드 +0`);
+        // 펀트 야드는 0 추가 (블록당했으므로)
+        offenseStats.puntYards += 0;
+      } else {
+        // 정상 펀트
+        const puntYards = Math.abs(gainYard); // 펀트는 항상 양수로 계산
+        offenseStats.puntYards += puntYards;
+        console.log(`  ✅ 정상 펀트: ${puntYards}야드`);
+        
+        // 펀트 리턴이 있는 경우 (리턴팀은 수비팀)
+        defenseStats.puntReturns += 1;
+        if (gainYard > 0) {
+          defenseStats.puntReturnYards += gainYard;
+          console.log(`  ✅ 펀트리턴야드 추가: ${gainYard}야드`);
+        }
+        // 펀트 터치백 체크
+        if (PlayAnalysisHelper.hasSignificantPlay(
+          significantPlays,
+          'Touchback'
+        )) {
+          offenseStats.touchbacks += 1;
+          console.log(`  💤 터치백: 펀트팀`);
+        }
       }
     }
     
@@ -319,6 +344,7 @@ export class TeamStatsAnalyzerService {
 
     // 6. 킥오프 처리
     if (playType === 'KICKOFF' || playType === 'Kickoff') {
+
       // 터치백 체크
       const hasTouchback = significantPlays.some(play =>
         play && (play.toUpperCase().includes('TOUCHBACK') || play.toUpperCase().includes('TB'))
@@ -401,6 +427,52 @@ export class TeamStatsAnalyzerService {
         console.log(`  ✅ PAT 성공: ${offensiveTeam} 팀, 현재 PAT 수: ${offenseStats.patGood}`);
       } else {
         console.log(`  ❌ PAT 실패 또는 PATGOOD 없음: ${offensiveTeam} 팀`);
+
+      // 킥오프 리턴 (리턴팀은 수비팀)
+      defenseStats.kickReturns += 1;
+      if (gainYard > 0) {
+        defenseStats.kickoffReturnYards += gainYard;
+        console.log(`  ✅ 킥오프리턴야드 추가: ${gainYard}야드`);
+      }
+      // 터치백 체크
+      if (PlayAnalysisHelper.hasSignificantPlay(
+        significantPlays,
+        'Touchback'
+      )) {
+        offenseStats.touchbacks += 1;
+        console.log(`  💤 터치백: 킥오프팀`);
+      }
+    }
+
+    // 7. 터치다운 계산
+    if (
+      PlayAnalysisHelper.hasSignificantPlay(
+        significantPlays,
+        SIGNIFICANT_PLAY.TOUCHDOWN,
+      )
+    ) {
+      offenseStats.touchdowns += 1;
+      console.log(`  🏆 터치다운: ${offensiveTeam} 팀`);
+    }
+
+    // 8. 필드골 계산
+    if (playType === 'FG' || playType === 'FieldGoal') {
+      offenseStats.fieldGoalAttempts += 1;
+      if (
+        PlayAnalysisHelper.hasSignificantPlay(
+          significantPlays,
+          SIGNIFICANT_PLAY.FIELDGOAL.GOOD,
+        )
+      ) {
+        offenseStats.fieldGoals += 1;
+        console.log(`  ⚽ 필드골 성공: ${offensiveTeam} 팀`);
+      } else if (
+        PlayAnalysisHelper.hasSignificantPlay(
+          significantPlays,
+          SIGNIFICANT_PLAY.FIELDGOAL.NOGOOD,
+        )
+      ) {
+        console.log(`  ❌ 필드골 실패: ${offensiveTeam} 팀`);
       }
     }
 
@@ -470,6 +542,19 @@ export class TeamStatsAnalyzerService {
       offenseStats.turnovers += 1;
       offenseStats.interceptions += 1;  // 공격팀의 인터셉트 당한 횟수
       console.log(`  🎯 인터셉트: ${offensiveTeam} 턴오버, 인터셉트 당한 횟수+1`);
+    }
+
+    // 인터셉트 (수비팀 관점에서)
+    if (
+      PlayAnalysisHelper.hasSignificantPlay(
+        significantPlays,
+        SIGNIFICANT_PLAY.SACK,
+      )
+    ) {
+
+      offenseStats.turnovers += 1;
+      defenseStats.interceptions += 1;
+      console.log(`  🎯 인터셉트: ${offensiveTeam} 턴오버, 수비팀 인터셉트+1`);
     }
 
     // Sack (수비팀 관점에서)
