@@ -1,12 +1,21 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { MulterModule } from '@nestjs/platform-express';
 import { GameController } from './game.controller';
 import { GameDocsController } from './game-docs.controller';
+import { GameService } from './game.service';
 import { PlayerModule } from '../player/player.module';
 import { TeamModule } from '../team/team.module';
+import { GameInfo, GameInfoSchema } from '../schemas/game-info.schema';
+import { GameClips, GameClipsSchema } from '../schemas/game-clips.schema';
 
 @Module({
   imports: [
+    // Mongoose 스키마 등록
+    MongooseModule.forFeature([
+      { name: GameInfo.name, schema: GameInfoSchema },
+      { name: GameClips.name, schema: GameClipsSchema },
+    ]),
     // Multer 설정 - 파일 업로드 처리
     MulterModule.register({
       limits: {
@@ -31,7 +40,7 @@ import { TeamModule } from '../team/team.module';
     forwardRef(() => TeamModule),
   ],
   controllers: [GameController, GameDocsController],
-  providers: [],
-  exports: [],
+  providers: [GameService],
+  exports: [GameService],
 })
 export class GameModule {}

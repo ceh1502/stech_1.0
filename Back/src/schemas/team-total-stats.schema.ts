@@ -22,6 +22,10 @@ export class TeamTotalStats {
     rushingAttempts?: number;
     touchdowns?: number;
     fieldGoals?: number;
+    patGood?: number;
+    twoPtGood?: number;
+    safeties?: number;
+    totalPoints?: number;
     turnovers?: number;
     fumbles?: number;
     fumblesLost?: number;

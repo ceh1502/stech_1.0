@@ -1,12 +1,15 @@
 import {
   Controller,
   Post,
+  Get,
+  Param,
   UseInterceptors,
   UploadedFile,
   HttpException,
   HttpStatus,
   Inject,
   forwardRef,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -15,9 +18,14 @@ import {
   ApiBody,
   ApiOperation,
   ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { PlayerService } from '../player/player.service';
 import { TeamStatsAnalyzerService } from '../team/team-stats-analyzer.service';
+import { GameService } from './game.service';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import {
   GameUploadSuccessDto,
   GameUploadErrorDto,
@@ -36,6 +44,7 @@ export class GameController {
     private readonly playerService: PlayerService,
     @Inject(forwardRef(() => TeamStatsAnalyzerService))
     private readonly teamStatsService: TeamStatsAnalyzerService,
+    private readonly gameService: GameService,
   ) {}
 
   @Post('upload-json')
@@ -204,13 +213,23 @@ export class GameController {
       // 4. 선수 데이터 처리
       const playerResults = await this.processGameData(gameData);
 
-      // 5. 팀 스탯 자동 계산
+      // 5. 경기 정보 저장
+      console.log('💾 경기 정보 저장 시작...');
+      await this.gameService.createGameInfo(gameData);
+      console.log('✅ 경기 정보 저장 완료');
+
+      // 5-1. 전체 경기 클립 데이터 저장 (하이라이트용)
+      console.log('💾 경기 클립 데이터 저장 시작...');
+      await this.gameService.saveGameClips(gameData);
+      console.log('✅ 경기 클립 데이터 저장 완료');
+
+      // 6. 팀 스탯 자동 계산
       console.log('📊 팀 스탯 계산 시작...');
       const teamStatsResult =
         await this.teamStatsService.analyzeTeamStats(gameData);
       console.log('🏈 팀 스탯 계산 결과:', teamStatsResult);
 
-      // 6. 팀 스탯 데이터베이스 저장
+      // 7. 팀 스탯 데이터베이스 저장
       console.log('💾 팀 스탯 데이터베이스 저장 시작...');
       await this.teamStatsService.saveTeamStats(
         gameData.gameKey,
@@ -473,5 +492,237 @@ export class GameController {
     return Object.keys(positionCounts).reduce((a, b) =>
       positionCounts[a] > positionCounts[b] ? a : b,
     );
+  }
+
+  @Get('team/:teamName')
+  @ApiOperation({
+    summary: '🏈 팀별 경기 정보 조회',
+    description: '특정 팀이 홈팀 또는 어웨이팀으로 참여한 모든 경기 정보를 조회합니다.',
+  })
+  @ApiParam({
+    name: 'teamName',
+    description: '조회할 팀 이름',
+    example: 'HYLions',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '✅ 팀 경기 정보 조회 성공',
+    schema: {
+      example: [
+        {
+          gameKey: 'SNUS20240907',
+          date: '2024-09-07(토) 10:00',
+          type: 'League',
+          score: { home: 38, away: 7 },
+          region: 'Seoul',
+          location: '서울대 운동장',
+          homeTeam: 'SNGreenTerrors',
+          awayTeam: 'USCityhawks',
+        },
+      ],
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: '❌ 해당 팀의 경기를 찾을 수 없음',
+  })
+  async getGamesByTeam(@Param('teamName') teamName: string) {
+    const games = await this.gameService.findGamesByTeam(teamName);
+    
+    if (!games || games.length === 0) {
+      throw new HttpException(
+        {
+          success: false,
+          message: `${teamName} 팀의 경기를 찾을 수 없습니다`,
+          code: 'TEAM_GAMES_NOT_FOUND',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return {
+      success: true,
+      message: `${teamName} 팀의 경기 정보 조회 성공`,
+      data: games,
+      totalGames: games.length,
+    };
+  }
+
+  @Get('all')
+  @ApiOperation({
+    summary: '📋 모든 경기 정보 조회',
+    description: '저장된 모든 경기 정보를 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '✅ 모든 경기 정보 조회 성공',
+  })
+  async getAllGames() {
+    const games = await this.gameService.findAllGames();
+    return {
+      success: true,
+      message: '모든 경기 정보 조회 성공',
+      data: games,
+      totalGames: games.length,
+    };
+  }
+
+  @Get('highlights/coach')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '🎥 코치용 하이라이트 클립 조회',
+    description: 'significantPlays가 있거나 gainYard가 10야드 이상인 중요한 플레이를 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '✅ 코치용 하이라이트 조회 성공',
+    schema: {
+      example: {
+        success: true,
+        message: '하이라이트 클립 조회 성공',
+        data: [
+          {
+            gameKey: 'SNUS20240907',
+            date: '2024-09-07(토) 10:00',
+            homeTeam: 'SNGreenTerrors',
+            awayTeam: 'USCityhawks',
+            location: '서울대 운동장',
+            clip: {
+              clipKey: '1',
+              playType: 'PASSING',
+              gainYard: 25,
+              significantPlays: ['TOUCHDOWN', null, null, null],
+            },
+          },
+        ],
+        totalClips: 15,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: '❌ 인증 실패',
+  })
+  async getCoachHighlights(@Req() req: any) {
+    console.log('전체 request.user:', req.user);
+    const { team: teamName } = req.user;
+    console.log('🎥 코치용 하이라이트 조회:', teamName);
+
+    const highlights = await this.gameService.getCoachHighlights(teamName);
+
+    return {
+      success: true,
+      message: '하이라이트 클립 조회 성공',
+      data: highlights,
+      totalClips: highlights.length,
+    };
+  }
+
+  @Get('highlights/player')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: '🏃 선수용 개인 하이라이트 조회',
+    description: '로그인한 선수가 참여한 모든 클립을 조회합니다.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '✅ 선수 하이라이트 조회 성공',
+    schema: {
+      example: {
+        success: true,
+        message: '선수 하이라이트 클립 조회 성공',
+        data: [
+          {
+            gameKey: 'SNUS20240907',
+            date: '2024-09-07(토) 10:00',
+            homeTeam: 'SNGreenTerrors',
+            awayTeam: 'USCityhawks',
+            location: '서울대 운동장',
+            clip: {
+              clipKey: '5',
+              playType: 'RUSHING',
+              gainYard: 15,
+              car: { num: 23, pos: 'RB' },
+            },
+          },
+        ],
+        playerNumber: 23,
+        totalClips: 8,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: '❌ 인증 실패',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '❌ 선수 번호가 등록되지 않음',
+  })
+  async getPlayerHighlights(@Req() req: any) {
+    const { playerId, team: teamName } = req.user;
+    console.log('🏃 선수용 하이라이트 조회:', { playerId, teamName });
+
+    if (!playerId) {
+      throw new HttpException(
+        {
+          success: false,
+          message: '선수 번호가 등록되지 않았습니다.',
+          code: 'PLAYER_NUMBER_NOT_REGISTERED',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const highlights = await this.gameService.getPlayerHighlights(playerId, teamName);
+
+    return {
+      success: true,
+      message: '선수 하이라이트 클립 조회 성공',
+      data: highlights,
+      playerNumber: playerId,
+      totalClips: highlights.length,
+    };
+  }
+
+  @Get(':gameKey')
+  @ApiOperation({
+    summary: '🎮 특정 경기 정보 조회',
+    description: '게임 키로 특정 경기 정보를 조회합니다.',
+  })
+  @ApiParam({
+    name: 'gameKey',
+    description: '조회할 게임 키',
+    example: 'SNUS20240907',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '✅ 경기 정보 조회 성공',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '❌ 경기를 찾을 수 없음',
+  })
+  async getGameByKey(@Param('gameKey') gameKey: string) {
+    const game = await this.gameService.findGameByKey(gameKey);
+    
+    if (!game) {
+      throw new HttpException(
+        {
+          success: false,
+          message: `${gameKey} 경기를 찾을 수 없습니다`,
+          code: 'GAME_NOT_FOUND',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return {
+      success: true,
+      message: '경기 정보 조회 성공',
+      data: game,
+    };
   }
 }

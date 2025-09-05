@@ -43,11 +43,11 @@ const LeagueTeamPage = () => {
               team: BACKEND_TO_FRONTEND_TEAM[item.teamName] || item.teamName,
               division: '1부',
 
-              // 득점/경기 관련 (DB 구조에 맞게 수정)
+              // 득점/경기 관련 (DB에서 계산된 totalPoints 사용)
               points_per_game: item.gamesPlayed > 0 
-                ? (((item.stats?.touchdowns || 0) * 6 + (item.stats?.fieldGoals || 0) * 3) / item.gamesPlayed).toFixed(1)
+                ? ((item.stats?.totalPoints || 0) / item.gamesPlayed).toFixed(1)
                 : 0,
-              total_points: (item.stats?.touchdowns || 0) * 6 + (item.stats?.fieldGoals || 0) * 3,
+              total_points: item.stats?.totalPoints || 0,
               total_touchdowns: item.stats?.touchdowns || 0,
               total_yards: item.stats?.totalYards || 0,
               yards_per_game:
