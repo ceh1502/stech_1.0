@@ -10,7 +10,7 @@ import { VideoModule } from './video/video.module';
 import { PlayerModule } from './player/player.module';
 import { GameModule } from './game/game.module';
 import { AdminModule } from './admin/admin.module';
-import { AwsModule } from './aws/aws.module';
+import { ContactModule } from './contact/contact.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -32,7 +32,7 @@ import { AwsModule } from './aws/aws.module';
     PlayerModule,
     GameModule,
     AdminModule,
-    AwsModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],
