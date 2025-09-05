@@ -1,132 +1,150 @@
+// src/pages/Auth/PasswordFind.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  checkUserExists,   // /auth/check-user-exists
+  findEmail,         // /auth/find-email
+  sendResetCode,     // /auth/send-reset-code
+  handleAuthError,
+} from '../../api/authAPI';
+
+const GENERIC_CREDENTIAL_ERROR = '아이디 또는 이메일이 올바르지 않습니다.';
 
 const PasswordFind = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [formData, setFormData] = useState({
-        id: '',
-        contact: '',
-    });
+  const [formData, setFormData] = useState({ id: '', email: '' });
+  const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-    const [errors, setErrors] = useState({});
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+    if (errors[id]) setErrors((p) => ({ ...p, [id]: null }));
+    if (apiError) setApiError('');
+  };
 
-    const handleChange = (e) => {
-        const { id, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [id]: value,
-        }));
+  const validateForm = () => {
+    const newErrors = {};
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (errors[id]) {
-            setErrors((prev) => ({ ...prev, [id]: null }));
-        }
-    };
+    if (!formData.id.trim()) {
+      newErrors.id = '아이디를 입력해주세요.';
+    } else if (!/^[a-zA-Z0-9_.-]+$/.test(formData.id.trim())) {
+      newErrors.id = '아이디는 영문/숫자/._- 만 사용할 수 있습니다.';
+    }
 
-    const handlePhoneFormat = (e) => {
-        let value = e.target.value;
-        value = value.replace(/[^0-9]/g, '');
+    if (!formData.email.trim()) {
+      newErrors.email = '이메일을 입력해주세요.';
+    } else if (!emailRe.test(formData.email.trim())) {
+      newErrors.email = '유효한 이메일 형식이 아닙니다.';
+    }
 
-        if (value.length > 11) {
-            value = value.substring(0, 11);
-        }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-        let formattedValue = '';
-        if (value.length > 3 && value.length <= 7) {
-            formattedValue = `${value.substring(0, 3)}-${value.substring(3)}`;
-        } else if (value.length > 7) {
-            formattedValue = `${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7)}`;
-        } else {
-            formattedValue = value;
-        }
+  const handleCodeRequest = async () => {
+    if (!validateForm()) return;
 
-        setFormData((prev) => ({
-            ...prev,
-            contact: formattedValue,
-        }));
-    };
+    const username = formData.id.trim();
+    const email = formData.email.trim();
 
-    const validateForm = () => {
-        const newErrors = {};
-        const idRegex = /^[a-zA-Z0-9]+$/;
-        const phoneRegex = /^010-\d{4}-\d{4}$/;
+    setSubmitting(true);
+    setApiError('');
 
-        if (!formData.id) {
-            newErrors.id = '아이디를 입력해주세요.';
-        } else if (!idRegex.test(formData.id)) {
-            newErrors.id = '유효한 이메일 형식으로 입력해주세요.';
-        }
-        
-        if (!formData.contact) {
-            newErrors.contact = '연락처를 입력해주세요.';
-        } else if (!phoneRegex.test(formData.contact)) {
-            newErrors.contact = '유효한 연락처 형식(010-1234-5678)을 입력해주세요.';
-        }
+    // 1) 아이디 존재 확인 (실패 시 어떤 이유든 동일 메시지)
+    try {
+      await checkUserExists(username);
+    } catch {
+      setApiError(GENERIC_CREDENTIAL_ERROR);
+      setSubmitting(false);
+      return;
+    }
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-    
-    const handleCodeRequest = () => {
-        if (validateForm()) {
-            console.log('Valid form submitted:', formData);
-            alert('코드를 요청했습니다!');
-            navigate('../findcode');
-        } else {
-            console.log('Form has errors:', errors);
-        }
-    };
+    // 2) 이메일로 아이디 조회하여 서로 매칭되는지 확인 (실패/불일치 시 동일 메시지)
+    try {
+      const res = await findEmail(email); // { success, data: { username } }
+      const apiUsername = (res?.data?.username || '').toLowerCase();
+      if (apiUsername !== username.toLowerCase()) {
+        setApiError(GENERIC_CREDENTIAL_ERROR);
+        setSubmitting(false);
+        return;
+      }
+    } catch {
+      setApiError(GENERIC_CREDENTIAL_ERROR);
+      setSubmitting(false);
+      return;
+    }
 
-    return (
-        <div className="find-page-container">
-            <div className="find-page-card">
-                <h2 className="find-title">비밀번호 찾기</h2>
-                <p className="find-description">Stech 계정과 연결된 아이디와 연락처를 입력하세요.</p>
+    // 3) 전부 통과 시 코드 전송
+    try {
+      await sendResetCode(email);
+      alert('인증코드를 이메일로 전송했습니다. (유효시간 10분)');
+      navigate('../findcode', { state: { email } });
+    } catch (err) {
+      // 이 단계의 실패(네트워크/쿨다운 등)는 원인 그대로 안내
+      setApiError(handleAuthError(err));
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-                <div className="find-input-group">
-                    <label htmlFor="id">아이디</label>
-                    <input
-                        type="text"
-                        id="id"
-                        value={formData.id}
-                        onChange={handleChange}
-                        placeholder=""
-                    />
-                    {errors.id && <p className="errorMessage">⚠️ {errors.id}</p>}
-                </div>
+  return (
+    <div className="find-page-container">
+      <div className="find-page-card">
+        <h2 className="find-title">비밀번호 찾기</h2>
+        <p className="find-description">아이디와 이메일을 확인한 뒤, 인증코드를 전송합니다.</p>
 
-                <div className="find-input-group">
-                    <label htmlFor="contact">연락처</label>
-                    <input
-                        type="text"
-                        id="contact"
-                        value={formData.contact}
-                        onChange={handlePhoneFormat}
-                        placeholder=""
-                    />
-                    {errors.contact && <p className="errorMessage">⚠️ {errors.contact}</p>}
-                </div>
+        {apiError && <p className="errorMessage">⚠️ {apiError}</p>}
 
-                <button
-                    className="find-code-button"
-                    onClick={handleCodeRequest}
-                >
-                    코드 받기 →
-                </button>
-
-                <div className="find-links-group">
-                    <p>이미 계정이 있습니다. <a href="/auth" className="find-link">로그인하기</a></p>
-                    <p>계정이 없다면? <a href="/auth/signup" className="find-link">회원가입</a></p>
-                </div>
-
-                <hr className="find-divider" />
-
-                <div className="find-help-section">
-                    <p>정상적으로 코드를 받지 못하였다면, <a href="/contact" className="link">고객 서비스</a>에 문의하여<br />계정 접근 권한을 복구하는 데 도움을 받으세요.</p>
-                </div>
-            </div>
+        <div className="find-input-group">
+          <label htmlFor="id">아이디</label>
+          <input
+            id="id"
+            type="text"
+            value={formData.id}
+            onChange={handleChange}
+            disabled={submitting}
+          />
+          {errors.id && <p className="errorMessage">⚠️ {errors.id}</p>}
         </div>
-    );
+
+        <div className="find-input-group">
+          <label htmlFor="email">이메일</label>
+          <input
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="user@example.com"
+            autoComplete="email"
+            disabled={submitting}
+          />
+          {errors.email && <p className="errorMessage">⚠️ {errors.email}</p>}
+        </div>
+
+        <button
+          className="find-code-button"
+          onClick={handleCodeRequest}
+          disabled={submitting}
+        >
+          {submitting ? '요청 중…' : '코드 받기 →'}
+        </button>
+
+        <div className="find-links-group">
+          <p>이미 계정이 있습니다. <a href="/auth" className="find-link">로그인하기</a></p>
+          <p>계정이 없다면? <a href="/auth/signup" className="find-link">회원가입</a></p>
+        </div>
+
+        <hr className="find-divider" />
+        <div className="find-help-section">
+          <p>메일이 오지 않으면 스팸함을 확인하거나, <a href="/contact" className="link">고객 서비스</a>에 문의해 주세요.</p>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default PasswordFind;
