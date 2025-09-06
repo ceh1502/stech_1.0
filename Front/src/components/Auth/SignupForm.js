@@ -123,7 +123,7 @@ const SignupForm = ({ onSuccess, className = '' }) => {
             case 'coach':
               roleText = 'coach';
               break;
-            case 'Admin':
+            case 'admin':
               roleText = 'admin';
               break;
             default:
