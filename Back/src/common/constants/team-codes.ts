@@ -43,11 +43,23 @@ export const TEAM_CODES = {
   '2111': { team: 'HLPhoenix', region: 'Gyeonggi-Gangwon', role: 'coach' },
   '2762': { team: 'HLPhoenix', region: 'Gyeonggi-Gangwon', role: 'player' },
   '2521': { team: 'HSKillerWhales', region: 'Gyeonggi-Gangwon', role: 'coach' },
-  '2952': { team: 'HSKillerWhales', region: 'Gyeonggi-Gangwon', role: 'player' },
+  '2952': {
+    team: 'HSKillerWhales',
+    region: 'Gyeonggi-Gangwon',
+    role: 'player',
+  },
 
   // Daegu-Gyeongbuk Region Teams (Region: 3)
-  '3761': { team: 'KBOrangeFighters', region: 'Daegu-Gyeongbuk', role: 'coach' },
-  '3092': { team: 'KBOrangeFighters', region: 'Daegu-Gyeongbuk', role: 'player' },
+  '3761': {
+    team: 'KBOrangeFighters',
+    region: 'Daegu-Gyeongbuk',
+    role: 'coach',
+  },
+  '3092': {
+    team: 'KBOrangeFighters',
+    region: 'Daegu-Gyeongbuk',
+    role: 'player',
+  },
   '3011': { team: 'KIBlackBears', region: 'Daegu-Gyeongbuk', role: 'coach' },
   '3882': { team: 'KIBlackBears', region: 'Daegu-Gyeongbuk', role: 'player' },
   '3911': { team: 'KMSuperLions', region: 'Daegu-Gyeongbuk', role: 'coach' },
@@ -60,8 +72,16 @@ export const TEAM_CODES = {
   '3042': { team: 'DUFlyingTigers', region: 'Daegu-Gyeongbuk', role: 'player' },
   '3271': { team: 'DHURhinos', region: 'Daegu-Gyeongbuk', role: 'coach' },
   '3822': { team: 'DHURhinos', region: 'Daegu-Gyeongbuk', role: 'player' },
-  '3671': { team: 'DGWhiteElephants', region: 'Daegu-Gyeongbuk', role: 'coach' },
-  '3592': { team: 'DGWhiteElephants', region: 'Daegu-Gyeongbuk', role: 'player' },
+  '3671': {
+    team: 'DGWhiteElephants',
+    region: 'Daegu-Gyeongbuk',
+    role: 'coach',
+  },
+  '3592': {
+    team: 'DGWhiteElephants',
+    region: 'Daegu-Gyeongbuk',
+    role: 'player',
+  },
   '3991': { team: 'YNPegasus', region: 'Daegu-Gyeongbuk', role: 'coach' },
   '3612': { team: 'YNPegasus', region: 'Daegu-Gyeongbuk', role: 'player' },
   '3871': { team: 'HDHolyRams', region: 'Daegu-Gyeongbuk', role: 'coach' },
@@ -74,8 +94,16 @@ export const TEAM_CODES = {
   '4542': { team: 'DSBlueDolphins', region: 'Busan-Gyeongnam', role: 'player' },
   '4041': { team: 'DALeopards', region: 'Busan-Gyeongnam', role: 'coach' },
   '4482': { team: 'DALeopards', region: 'Busan-Gyeongnam', role: 'player' },
-  '4121': { team: 'DEUTurtleFighters', region: 'Busan-Gyeongnam', role: 'coach' },
-  '4782': { team: 'DEUTurtleFighters', region: 'Busan-Gyeongnam', role: 'player' },
+  '4121': {
+    team: 'DEUTurtleFighters',
+    region: 'Busan-Gyeongnam',
+    role: 'coach',
+  },
+  '4782': {
+    team: 'DEUTurtleFighters',
+    region: 'Busan-Gyeongnam',
+    role: 'player',
+  },
   '4781': { team: 'PNUEagles', region: 'Busan-Gyeongnam', role: 'coach' },
   '4222': { team: 'PNUEagles', region: 'Busan-Gyeongnam', role: 'player' },
   '4221': { team: 'BUFSTornados', region: 'Busan-Gyeongnam', role: 'coach' },
@@ -102,7 +130,7 @@ export const TEAM_CODES = {
   '5662': { team: 'SeoulVikings', region: 'Amateur', role: 'player' },
   '5871': { team: 'IncheonRhinos', region: 'Amateur', role: 'coach' },
   '5422': { team: 'IncheonRhinos', region: 'Amateur', role: 'player' },
-  
+
   // Admin access
   '0224': { team: 'ADMIN', region: 'ALL', role: 'admin' },
 };
