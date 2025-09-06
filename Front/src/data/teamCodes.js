@@ -66,7 +66,11 @@ export const teamCodes = {
   },
   2111: { team: '한림대 피닉스', region: 'Gyeonggi-Gangwon', role: 'coach' },
   2762: { team: '한림대 피닉스', region: 'Gyeonggi-Gangwon', role: 'player' },
-  2521: { team: '한신대 킬러웨일스', region: 'Gyeonggi-Gangwon', role: 'coach' },
+  2521: {
+    team: '한신대 킬러웨일스',
+    region: 'Gyeonggi-Gangwon',
+    role: 'coach',
+  },
   2952: {
     team: '한신대 킬러웨일스',
     region: 'Gyeonggi-Gangwon',
@@ -85,7 +89,11 @@ export const teamCodes = {
     role: 'player',
   },
   3011: { team: '경일대 블랙베어스', region: 'Daegu-Gyeongbuk', role: 'coach' },
-  3882: { team: '경일대 블랙베어스', region: 'Daegu-Gyeongbuk', role: 'player' },
+  3882: {
+    team: '경일대 블랙베어스',
+    region: 'Daegu-Gyeongbuk',
+    role: 'player',
+  },
   3911: {
     team: '계명대 슈퍼라이온스',
     region: 'Daegu-Gyeongbuk',
@@ -155,7 +163,11 @@ export const teamCodes = {
   4711: { team: '경성대 드래곤스', region: 'Busan-Gyeongnam', role: 'coach' },
   4972: { team: '경성대 드래곤스', region: 'Busan-Gyeongnam', role: 'player' },
   4891: { team: '동서대 블루돌핀스', region: 'Busan-Gyeongnam', role: 'coach' },
-  4542: { team: '동서대 블루돌핀스', region: 'Busan-Gyeongnam', role: 'player' },
+  4542: {
+    team: '동서대 블루돌핀스',
+    region: 'Busan-Gyeongnam',
+    role: 'player',
+  },
   4041: { team: '동아대 레오파즈', region: 'Busan-Gyeongnam', role: 'coach' },
   4482: { team: '동아대 레오파즈', region: 'Busan-Gyeongnam', role: 'player' },
   4121: {
@@ -210,4 +222,6 @@ export const teamCodes = {
   5662: { team: '서울 바이킹스', region: 'Amateur', role: 'player' },
   5871: { team: '인천 라이노스', region: 'Amateur', role: 'coach' },
   5422: { team: '인천 라이노스', region: 'Amateur', role: 'player' },
+
+  0224: { team: 'ADMIN', region: 'ALL', role: 'admin' },
 };
