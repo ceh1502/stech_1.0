@@ -549,22 +549,40 @@ export class GameController {
   }
 
   @Get('all')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({
     summary: '📋 모든 경기 정보 조회',
-    description: '저장된 모든 경기 정보를 조회합니다.',
+    description: '저장된 모든 경기 정보를 조회합니다. Admin은 모든 경기, 일반 사용자는 자기 팀 경기만 조회 가능합니다.',
   })
   @ApiResponse({
     status: 200,
     description: '✅ 모든 경기 정보 조회 성공',
   })
-  async getAllGames() {
-    const games = await this.gameService.findAllGames();
-    return {
-      success: true,
-      message: '모든 경기 정보 조회 성공',
-      data: games,
-      totalGames: games.length,
-    };
+  async getAllGames(@Req() req: any) {
+    const { role, team: userTeam } = req.user;
+    
+    if (role === 'admin') {
+      // Admin은 모든 경기 조회
+      const games = await this.gameService.findAllGames();
+      return {
+        success: true,
+        message: '모든 경기 정보 조회 성공 (Admin)',
+        data: games,
+        totalGames: games.length,
+        accessLevel: 'admin',
+      };
+    } else {
+      // 일반 사용자는 자기 팀 경기만 조회
+      const games = await this.gameService.findGamesByTeam(userTeam);
+      return {
+        success: true,
+        message: `${userTeam} 팀의 경기 정보 조회 성공`,
+        data: games,
+        totalGames: games.length,
+        accessLevel: 'team',
+      };
+    }
   }
 
   @Get('highlights/coach')
@@ -606,17 +624,40 @@ export class GameController {
   })
   async getCoachHighlights(@Req() req: any) {
     console.log('전체 request.user:', req.user);
-    const { team: teamName } = req.user;
-    console.log('🎥 코치용 하이라이트 조회:', teamName);
+    const { team: teamName, role } = req.user;
+    
+    if (role === 'admin') {
+      console.log('🎥 Admin - 모든 팀 하이라이트 조회');
+      // Admin은 모든 팀의 하이라이트를 조회
+      const allTeams = await this.gameService.findAllGames();
+      const uniqueTeams = [...new Set(allTeams.flatMap(game => [game.homeTeam, game.awayTeam]))];
+      
+      const allHighlights = [];
+      for (const team of uniqueTeams) {
+        const teamHighlights = await this.gameService.getCoachHighlights(team);
+        allHighlights.push(...teamHighlights);
+      }
+      
+      return {
+        success: true,
+        message: '모든 팀 하이라이트 클립 조회 성공 (Admin)',
+        data: allHighlights,
+        totalClips: allHighlights.length,
+        accessLevel: 'admin',
+        teamsIncluded: uniqueTeams,
+      };
+    } else {
+      console.log('🎥 코치용 하이라이트 조회:', teamName);
+      const highlights = await this.gameService.getCoachHighlights(teamName);
 
-    const highlights = await this.gameService.getCoachHighlights(teamName);
-
-    return {
-      success: true,
-      message: '하이라이트 클립 조회 성공',
-      data: highlights,
-      totalClips: highlights.length,
-    };
+      return {
+        success: true,
+        message: '하이라이트 클립 조회 성공',
+        data: highlights,
+        totalClips: highlights.length,
+        accessLevel: 'team',
+      };
+    }
   }
 
   @Get('highlights/player')
@@ -662,29 +703,59 @@ export class GameController {
     description: '❌ 선수 번호가 등록되지 않음',
   })
   async getPlayerHighlights(@Req() req: any) {
-    const { playerId, team: teamName } = req.user;
-    console.log('🏃 선수용 하이라이트 조회:', { playerId, teamName });
+    const { playerId, team: teamName, role } = req.user;
+    
+    if (role === 'admin') {
+      console.log('🏃 Admin - 모든 선수 하이라이트 조회');
+      // Admin은 모든 선수의 하이라이트를 조회할 수 있음
+      // 쿼리 파라미터로 특정 선수를 지정할 수 있음
+      const targetPlayerId = req.query.playerId || playerId;
+      const targetTeam = req.query.team;
+      
+      if (targetPlayerId && targetTeam) {
+        const highlights = await this.gameService.getPlayerHighlights(targetPlayerId, targetTeam);
+        return {
+          success: true,
+          message: `${targetTeam} 팀 ${targetPlayerId} 선수 하이라이트 조회 성공 (Admin)`,
+          data: highlights,
+          playerNumber: targetPlayerId,
+          team: targetTeam,
+          totalClips: highlights.length,
+          accessLevel: 'admin',
+        };
+      } else {
+        return {
+          success: true,
+          message: 'Admin 권한: 쿼리 파라미터로 ?playerId=선수ID&team=팀명을 지정하세요',
+          accessLevel: 'admin',
+          example: '/api/game/highlights/player?playerId=2025_KK_10&team=HYLions',
+        };
+      }
+    } else {
+      console.log('🏃 선수용 하이라이트 조회:', { playerId, teamName });
+      
+      if (!playerId) {
+        throw new HttpException(
+          {
+            success: false,
+            message: '선수 번호가 등록되지 않았습니다.',
+            code: 'PLAYER_NUMBER_NOT_REGISTERED',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
 
-    if (!playerId) {
-      throw new HttpException(
-        {
-          success: false,
-          message: '선수 번호가 등록되지 않았습니다.',
-          code: 'PLAYER_NUMBER_NOT_REGISTERED',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      const highlights = await this.gameService.getPlayerHighlights(playerId, teamName);
+
+      return {
+        success: true,
+        message: '선수 하이라이트 클립 조회 성공',
+        data: highlights,
+        playerNumber: playerId,
+        totalClips: highlights.length,
+        accessLevel: 'player',
+      };
     }
-
-    const highlights = await this.gameService.getPlayerHighlights(playerId, teamName);
-
-    return {
-      success: true,
-      message: '선수 하이라이트 클립 조회 성공',
-      data: highlights,
-      playerNumber: playerId,
-      totalClips: highlights.length,
-    };
   }
 
   @Get(':gameKey')

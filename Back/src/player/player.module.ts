@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PlayerController } from './player.controller';
 import { PlayerService } from './player.service';
@@ -40,7 +40,7 @@ import { TeamTotalStats, TeamTotalStatsSchema } from '../schemas/team-total-stat
       { name: TeamGameStats.name, schema: TeamGameStatsSchema },
       { name: TeamTotalStats.name, schema: TeamTotalStatsSchema },
     ]),
-    TeamModule,
+    forwardRef(() => TeamModule),
   ],
   controllers: [PlayerController, /* PlayerNewController, */ QbAnalyzerController],
   providers: [
