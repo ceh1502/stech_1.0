@@ -2,14 +2,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { updateProfile, handleAuthError } from '../../api/authAPI';
-import {useAuth} from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const DAUM_POSTCODE_URL =
   'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
 
 const SignupProfileForm = () => {
   const navigate = useNavigate();
-  const {token} = useAuth();
+  const { token } = useAuth();
 
   const [profileData, setProfileData] = useState({
     profileImage: null, // 파일은 서버 스펙상 직접 전송 불가(avatar는 URL만)
@@ -43,19 +43,27 @@ const SignupProfileForm = () => {
 
   const handleAddressSearch = () => {
     if (!scriptLoaded) {
-      alert('주소 검색 스크립트가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.');
+      alert(
+        '주소 검색 스크립트가 아직 로드되지 않았습니다. 잠시 후 다시 시도해주세요.',
+      );
       return;
     }
     new window.daum.Postcode({
       oncomplete: function (data) {
         let fullAddress = data.roadAddress;
         let extraAddress = '';
-        if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) extraAddress += data.bname;
+        if (data.bname !== '' && /[동|로|가]$/g.test(data.bname))
+          extraAddress += data.bname;
         if (data.buildingName !== '' && data.apartment === 'Y') {
-          extraAddress += (extraAddress !== '' ? ', ' + data.buildingName : data.buildingName);
+          extraAddress +=
+            extraAddress !== '' ? ', ' + data.buildingName : data.buildingName;
         }
         if (extraAddress !== '') fullAddress += ' (' + extraAddress + ')';
-        setProfileData((prev) => ({ ...prev, address1: fullAddress, address2: '' }));
+        setProfileData((prev) => ({
+          ...prev,
+          address1: fullAddress,
+          address2: '',
+        }));
       },
     }).open();
   };
@@ -118,6 +126,13 @@ const SignupProfileForm = () => {
       return alert(emailMessage || '이메일을 확인해주세요.');
     }
 
+    // 토큰 확인 추가
+    if (!token) {
+      alert('로그인이 필요합니다. 다시 로그인해주세요.');
+      navigate('/auth');
+      return;
+    }
+
     // 서버 스펙에 맞춰 필드 구성
     const bioParts = [
       profileData.position && `포지션:${profileData.position}`,
@@ -132,10 +147,12 @@ const SignupProfileForm = () => {
 
     const payload = {
       // avatar는 URL만 허용. 파일만 있고 업로드 URL이 없으면 생략.
-      ...(profileData.avatarUrl?.trim() ? { avatar: profileData.avatarUrl.trim() } : {}),
+      ...(profileData.avatarUrl?.trim()
+        ? { avatar: profileData.avatarUrl.trim() }
+        : {}),
       nickname: profileData.realName.trim(), // 서버는 nickname 필드를 요구
       email: profileData.email.trim(),
-      bio: bioParts.join(' | ') || '',       // 선택
+      bio: bioParts.join(' | ') || '', // 선택
     };
 
     try {
@@ -152,7 +169,9 @@ const SignupProfileForm = () => {
   return (
     <form onSubmit={handleSubmit} className="profileForm">
       <div className="profileformtab-container">
-        <button type="button" className="profileformTitle">프로필 생성</button>
+        <button type="button" className="profileformTitle">
+          프로필 생성
+        </button>
       </div>
 
       {/* 프로필 이미지(파일 선택은 미리보기만, 서버 전송 X) */}
@@ -169,7 +188,9 @@ const SignupProfileForm = () => {
           )}
         </div>
         <div className="profileimageButtons">
-          <label htmlFor="profileformImage" className="profileformuploadButton">사진 업로드</label>
+          <label htmlFor="profileformImage" className="profileformuploadButton">
+            사진 업로드
+          </label>
           <input
             type="file"
             id="profileformImage"
@@ -181,7 +202,9 @@ const SignupProfileForm = () => {
           <button
             type="button"
             className="profileformremoveButton"
-            onClick={() => setProfileData((prev) => ({ ...prev, profileImage: null }))}
+            onClick={() =>
+              setProfileData((prev) => ({ ...prev, profileImage: null }))
+            }
           >
             삭제
           </button>
@@ -219,11 +242,14 @@ const SignupProfileForm = () => {
             className={emailStatus === 'checking' ? 'checking' : ''}
           />
           {emailMessage && (
-            <div className={emailStatus === 'available'
-              ? 'status-message status-success'
-              : emailStatus === 'unavailable'
-              ? 'status-message status-error'
-              : 'status-message'}
+            <div
+              className={
+                emailStatus === 'available'
+                  ? 'status-message status-success'
+                  : emailStatus === 'unavailable'
+                  ? 'status-message status-error'
+                  : 'status-message'
+              }
             >
               {emailMessage}
             </div>
@@ -240,7 +266,9 @@ const SignupProfileForm = () => {
               onChange={handleChange}
               readOnly
             />
-            <button type="button" onClick={handleAddressSearch}>찾기</button>
+            <button type="button" onClick={handleAddressSearch}>
+              찾기
+            </button>
           </div>
         </div>
         <div className="profileformGroup full-width">
@@ -306,7 +334,11 @@ const SignupProfileForm = () => {
 
         <div className="profileformGroup">
           <label>포지션 (주포지션)</label>
-          <select name="position" value={profileData.position} onChange={handleChange}>
+          <select
+            name="position"
+            value={profileData.position}
+            onChange={handleChange}
+          >
             <option value="">포지션 선택</option>
             <option value="QB">QB</option>
             <option value="RB">RB</option>
@@ -322,7 +354,9 @@ const SignupProfileForm = () => {
         </div>
       </div>
 
-      <button type="submit" className="profileformsubmitButton">프로필 생성</button>
+      <button type="submit" className="profileformsubmitButton">
+        프로필 생성
+      </button>
     </form>
   );
 };
