@@ -664,7 +664,20 @@ export class PlayerController {
       }
     }
   })
-  async getMyStats(@User() user: any) {
+  async getMyStats(@User() user: any, @Query('playerId') queryPlayerId?: string) {
+    // Admin은 쿼리 파라미터로 특정 선수 조회 가능
+    if (user.role === 'admin' && queryPlayerId) {
+      console.log(`Admin이 ${queryPlayerId} 선수 스탯 조회`);
+      const adminUser = { ...user, playerId: queryPlayerId };
+      const stats = await this.playerService.getPlayerStats(adminUser);
+      return {
+        ...stats,
+        accessLevel: 'admin',
+        queriedPlayerId: queryPlayerId,
+      };
+    }
+    
+    // 일반 사용자는 자기 스탯만 조회
     return await this.playerService.getPlayerStats(user);
   }
 }

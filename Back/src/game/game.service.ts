@@ -87,6 +87,11 @@ export class GameService {
     return createdGameClips.save();
   }
 
+  // gameKey로 경기 클립 데이터 조회
+  async getGameClipsByKey(gameKey: string): Promise<GameClips> {
+    return this.gameClipsModel.findOne({ gameKey }).exec();
+  }
+
   // 코치용 하이라이트 조회
   async getCoachHighlights(teamName: string): Promise<any[]> {
     // 해당 팀이 참여한 모든 경기 찾기

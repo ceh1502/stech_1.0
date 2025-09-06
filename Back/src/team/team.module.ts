@@ -7,6 +7,7 @@ import { Team, TeamSchema } from '../schemas/team.schema';
 import { Player, PlayerSchema } from '../schemas/player.schema';
 import { TeamGameStats, TeamGameStatsSchema } from '../schemas/team-game-stats.schema';
 import { TeamTotalStats, TeamTotalStatsSchema } from '../schemas/team-total-stats.schema';
+import { GameModule } from '../game/game.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { TeamTotalStats, TeamTotalStatsSchema } from '../schemas/team-total-stat
       { name: TeamGameStats.name, schema: TeamGameStatsSchema },
       { name: TeamTotalStats.name, schema: TeamTotalStatsSchema },
     ]),
+    GameModule,
   ],
   controllers: [TeamController],
   providers: [

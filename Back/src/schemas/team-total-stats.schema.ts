@@ -11,52 +11,89 @@ export class TeamTotalStats {
   @Prop({ required: true, unique: true })
   teamName: string; // 예: "건국대 레이징불스"
 
-  @Prop({ type: Object })
-  stats: {
-    // 오펜스 스탯 (누적)
-    totalYards?: number;
-    passingYards?: number;
-    rushingYards?: number;
-    passingAttempts?: number;
-    passingCompletions?: number;
-    rushingAttempts?: number;
-    touchdowns?: number;
-    fieldGoals?: number;
-    patGood?: number;
-    twoPtGood?: number;
-    safeties?: number;
-    totalPoints?: number;
-    turnovers?: number;
-    fumbles?: number;
-    fumblesLost?: number;
-    
-    // 평균
-    avgYardsPerGame?: number;
-    avgPassingYards?: number;
-    avgRushingYards?: number;
-    avgPointsScored?: number;
-    avgPointsAllowed?: number;
-    
-    // 디펜스 스탯 (누적)
-    yardsAllowed?: number;
-    sacks?: number;
-    interceptions?: number;
-    fumblesRecovered?: number;
-    
-    // 스페셜팀 스탯 (누적)
-    puntAttempts?: number;
-    puntYards?: number;
-    avgPuntYards?: number;
-    puntReturns?: number;
-    kickReturns?: number;
-    returnYards?: number;
-    fieldGoalAttempts?: number;
-    touchbacks?: number;
-    
-    // 팀 전체
-    penalties?: number;
-    penaltyYards?: number;
-  };
+  @Prop({ default: 0 })
+  totalPoints: number;
+
+  @Prop({ default: 0 })
+  totalTouchdowns: number;
+
+  @Prop({ default: 0 })
+  totalYards: number;
+
+  @Prop({ default: 0 })
+  rushingAttempts: number;
+
+  @Prop({ default: 0 })
+  rushingYards: number;
+
+  @Prop({ default: 0 })
+  rushingTouchdowns: number;
+
+  @Prop({ default: 0 })
+  passAttempts: number;
+
+  @Prop({ default: 0 })
+  passCompletions: number;
+
+  @Prop({ default: 0 })
+  passingYards: number;
+
+  @Prop({ default: 0 })
+  passingTouchdowns: number;
+
+  @Prop({ default: 0 })
+  interceptions: number;
+
+  @Prop({ default: 0 })
+  totalPuntYards: number;
+
+  @Prop({ default: 0 })
+  totalPunts: number;
+
+  @Prop({ default: 0 })
+  puntTouchbacks: number;
+
+  @Prop({ default: 0 })
+  fieldGoalAttempts: number;
+
+  @Prop({ default: 0 })
+  fieldGoalMakes: number;
+
+  @Prop({ default: 0 })
+  kickReturnYards: number;
+
+  @Prop({ default: 0 })
+  kickReturns: number;
+
+  @Prop({ default: 0 })
+  puntReturnYards: number;
+
+  @Prop({ default: 0 })
+  puntReturns: number;
+
+  @Prop({ default: 0 })
+  fumbles: number;
+
+  @Prop({ default: 0 })
+  fumblesLost: number;
+
+  @Prop({ default: 0 })
+  totalTurnovers: number;
+
+  @Prop({ default: 0 })
+  opponentTurnovers: number;
+
+  @Prop({ default: 0 })
+  penalties: number;
+
+  @Prop({ default: 0 })
+  penaltyYards: number;
+
+  @Prop()
+  season: string;
+
+  @Prop({ type: [String], default: [] })
+  processedGames: string[];
 
   @Prop({ default: 0 })
   gamesPlayed: number;
@@ -71,16 +108,11 @@ export class TeamTotalStats {
   ties: number;
 
   @Prop()
-  winRate?: number; // 승률
-
-  @Prop({ type: [String], default: [] })
-  seasons: string[]; // 활동한 시즌 목록
-
-  @Prop({ type: [String], default: [] })
-  gameKeys: string[]; // 모든 경기 목록
+  updatedAt: Date;
 
   @Prop()
-  lastUpdated?: Date;
+  createdAt: Date;
+
 }
 
 export const TeamTotalStatsSchema = SchemaFactory.createForClass(TeamTotalStats);
