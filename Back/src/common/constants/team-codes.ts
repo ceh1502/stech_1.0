@@ -132,5 +132,5 @@ export const TEAM_CODES = {
   '5422': { team: 'IncheonRhinos', region: 'Amateur', role: 'player' },
 
   // Admin access
-  '0224': { team: 'ADMIN', region: 'ALL', role: 'admin' },
+  '2025': { team: 'ADMIN', region: 'ALL', role: 'admin' },
 };

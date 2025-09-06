@@ -223,5 +223,5 @@ export const teamCodes = {
   5871: { team: '인천 라이노스', region: 'Amateur', role: 'coach' },
   5422: { team: '인천 라이노스', region: 'Amateur', role: 'player' },
 
-  0224: { team: 'ADMIN', region: 'ALL', role: 'admin' },
+  2025: { team: 'ADMIN', region: 'ALL', role: 'admin' },
 };
