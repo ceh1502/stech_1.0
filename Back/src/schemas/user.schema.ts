@@ -15,8 +15,8 @@ export class User {
   @Prop({ required: true })
   teamName: string; // 인증코드로 검증된 팀명
 
-  @Prop({ required: true, enum: ['coach', 'player'] })
-  role: string; // 코치 또는 선수
+  @Prop({ required: true, enum: ['coach', 'player', 'admin'] })
+  role: string; // 코치 또는 선수 또는 관리자
 
   @Prop({ required: true })
   region: string; // 지역 (서울권, 경기강원권 등)
