@@ -113,13 +113,18 @@ const SignupForm = ({ onSuccess, className = '' }) => {
     try {
       const res = await verifyTeamCode(formData.authCode);
       if (res.valid) {
-        const info = teamCodes[formData.authCode] || null;
-        setValidatedTeamInfo(info);
-
-        setAuthCodeStatus('valid');
-        if (info) {
-          const roleText = info.role === 'coach' ? 'coach' : 'player';
-          setAuthCodeMessage(`인증 완료: ${info.team} (${roleText})`);
+        let roleText;
+        switch (info.role) {
+          case 'coach':
+            roleText = 'coach';
+            break;
+          case 'admin':
+            roleText = 'admin';
+            break;
+          default:
+            roleText = 'player';
+      }
+      setAuthCodeMessage(`인증 완료: ${info.team} (${roleText})`);
         } else {
           setAuthCodeMessage('인증코드 확인 완료');
         }
