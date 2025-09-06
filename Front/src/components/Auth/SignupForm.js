@@ -2,7 +2,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { teamCodes } from '../../data/teamCodes';
-import { checkUsername, verifyTeamCode, signup, handleAuthError } from '../../api/authAPI';
+import {
+  checkUsername,
+  verifyTeamCode,
+  signup,
+  handleAuthError,
+} from '../../api/authAPI';
 
 import Kakao from '../../assets/images/png/AuthPng/Kakao.png';
 import Google from '../../assets/images/png/AuthPng/Google.png';
@@ -201,23 +206,35 @@ const SignupForm = ({ onSuccess, className = '' }) => {
     !agreedToTerms;
 
   const getStatusClass = (status) => {
-    if (status === 'available' || status === 'valid') return 'status-message status-success';
-    if (status === 'unavailable' || status === 'invalid') return 'status-message status-error';
+    if (status === 'available' || status === 'valid')
+      return 'status-message status-success';
+    if (status === 'unavailable' || status === 'invalid')
+      return 'status-message status-error';
     return 'status-message';
   };
 
   return (
     // 자동완성/자동저장 활성화
-    <form onSubmit={handleSubmit} className={`signupForm ${className}`} autoComplete="on">
+    <form
+      onSubmit={handleSubmit}
+      className={`signupForm ${className}`}
+      autoComplete="on"
+    >
       <div className="tab-container">
         {/* a대신 Link 권장 (페이지 리로드 방지) */}
-        <Link to="/auth" className="signupTitle">로그인</Link>
-        <button type="button" className="signupTitleTosignup">회원가입</button>
+        <Link to="/auth" className="signupTitle">
+          로그인
+        </Link>
+        <button type="button" className="signupTitleTosignup">
+          회원가입
+        </button>
       </div>
 
       {/* 아이디 */}
       <div className="formGroup">
-        <label className="SignupformLabel ID" htmlFor="username">아이디</label>
+        <label className="SignupformLabel ID" htmlFor="username">
+          아이디
+        </label>
         <div className="input-with-button-group">
           <input
             id="username"
@@ -243,12 +260,16 @@ const SignupForm = ({ onSuccess, className = '' }) => {
             {isIdChecking ? '확인 중...' : '중복 확인'}
           </button>
         </div>
-        {idMessage && <div className={getStatusClass(idStatus)}>{idMessage}</div>}
+        {idMessage && (
+          <div className={getStatusClass(idStatus)}>{idMessage}</div>
+        )}
       </div>
 
       {/* 비밀번호 */}
       <div className="formGroup">
-        <label className="SignupformLabel PW" htmlFor="password">비밀번호</label>
+        <label className="SignupformLabel PW" htmlFor="password">
+          비밀번호
+        </label>
         <div className="passwordInputContainer">
           <input
             id="password"
@@ -271,14 +292,20 @@ const SignupForm = ({ onSuccess, className = '' }) => {
             aria-hidden="true"
             disabled={isSubmitting || isIdChecking || isAuthCodeVerifying}
           >
-            {showPassword ? <img src={EyeActive} alt="hide Password" /> : <img src={Eye} alt="show Password" />}
+            {showPassword ? (
+              <img src={EyeActive} alt="hide Password" />
+            ) : (
+              <img src={Eye} alt="show Password" />
+            )}
           </button>
         </div>
       </div>
 
       {/* 비밀번호 확인 */}
       <div className="formGroup">
-        <label className="SignupformLabel PW" htmlFor="passwordConfirm">비밀번호 확인</label>
+        <label className="SignupformLabel PW" htmlFor="passwordConfirm">
+          비밀번호 확인
+        </label>
         <div className="passwordInputContainer">
           <input
             id="passwordConfirm"
@@ -301,14 +328,20 @@ const SignupForm = ({ onSuccess, className = '' }) => {
             aria-hidden="true"
             disabled={isSubmitting || isIdChecking || isAuthCodeVerifying}
           >
-            {showPasswordConfirm ? <img src={EyeActive} alt="hide Password" /> : <img src={Eye} alt="show Password" />}
+            {showPasswordConfirm ? (
+              <img src={EyeActive} alt="hide Password" />
+            ) : (
+              <img src={Eye} alt="show Password" />
+            )}
           </button>
         </div>
       </div>
 
       {/* 인증코드 */}
       <div className="formGroup">
-        <label className="SignupformLabel ID" htmlFor="authCode">인증코드</label>
+        <label className="SignupformLabel ID" htmlFor="authCode">
+          인증코드
+        </label>
         <div className="input-with-button-group">
           <input
             id="authCode"
@@ -333,7 +366,9 @@ const SignupForm = ({ onSuccess, className = '' }) => {
           </button>
         </div>
         {authCodeMessage && (
-          <div className={getStatusClass(authCodeStatus)}>{authCodeMessage}</div>
+          <div className={getStatusClass(authCodeStatus)}>
+            {authCodeMessage}
+          </div>
         )}
       </div>
 
@@ -349,8 +384,23 @@ const SignupForm = ({ onSuccess, className = '' }) => {
         />
         <label htmlFor="agreedToTerms" className="agreewithterms">
           Stech
-          <a href="https://calico-mass-cad.notion.site/Stech-Pro-24d7c5431d5d80eab2dfe595b3fac4eb" className="terms-link"target="_blank"> 이용 약관</a> 및
-          <a href="https://calico-mass-cad.notion.site/Stech-Pro-24d7c5431d5d8022936be7a2894849f0" className="terms-link"target="_blank"> 개인정보 보호정책</a>
+          <a
+            href="https://calico-mass-cad.notion.site/Stech-Pro-24d7c5431d5d80eab2dfe595b3fac4eb"
+            className="terms-link"
+            target="_blank"
+          >
+            {' '}
+            이용 약관
+          </a>{' '}
+          및
+          <a
+            href="https://calico-mass-cad.notion.site/Stech-Pro-24d7c5431d5d8022936be7a2894849f0"
+            className="terms-link"
+            target="_blank"
+          >
+            {' '}
+            개인정보 보호정책
+          </a>
           에 동의합니다.
         </label>
       </div>
@@ -372,11 +422,19 @@ const SignupForm = ({ onSuccess, className = '' }) => {
       </div>
 
       <div className="social-buttons-container">
-        <button type="button" className="socialButton google-button" disabled={isSubmitting}>
+        <button
+          type="button"
+          className="socialButton google-button"
+          disabled={isSubmitting}
+        >
           <img src={Google} alt="google" className="socialicon" />
           구글로 회원가입
         </button>
-        <button type="button" className="socialButton kakao-button" disabled={isSubmitting}>
+        <button
+          type="button"
+          className="socialButton kakao-button"
+          disabled={isSubmitting}
+        >
           <img src={Kakao} alt="kakao" className="socialicon" />
           카카오로 회원가입
         </button>

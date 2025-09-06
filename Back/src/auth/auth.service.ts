@@ -8,7 +8,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { User, UserDocument } from '../schemas/user.schema';
-import { SignupDto, LoginDto, VerifyTokenDto, RefreshTokenDto } from '../common/dto/auth.dto';
+import {
+  SignupDto,
+  LoginDto,
+  VerifyTokenDto,
+  RefreshTokenDto,
+} from '../common/dto/auth.dto';
 import { TEAM_CODES } from '../common/constants/team-codes';
 import { EmailService } from '../utils/email.service';
 
@@ -22,7 +27,7 @@ export class AuthService {
 
   async signup(signupDto: SignupDto) {
     const { username, password, authCode } = signupDto;
-    
+
     console.log('=== 회원가입 시도 ===');
     console.log('받은 데이터:', { username, authCode });
 
@@ -90,12 +95,12 @@ export class AuthService {
 
     // JWT 토큰 발급
     console.log('회원가입시 JWT_SECRET:', process.env.JWT_SECRET);
-    const token = this.jwtService.sign({ 
-      id: newUser._id, 
+    const token = this.jwtService.sign({
+      id: newUser._id,
       username: newUser.username,
       team: newUser.teamName,
       role: newUser.role,
-      playerId: newUser.playerId || null
+      playerId: newUser.playerId || null,
     });
 
     return {
@@ -139,12 +144,12 @@ export class AuthService {
     }
 
     // JWT 발급
-    const token = this.jwtService.sign({ 
-      id: user._id, 
+    const token = this.jwtService.sign({
+      id: user._id,
       username: user.username,
       team: user.teamName,
       role: user.role,
-      playerId: user.playerId || null
+      playerId: user.playerId || null,
     });
 
     console.log('✅ 로그인 성공');
@@ -179,7 +184,7 @@ export class AuthService {
     return {
       success: true,
       message: '사용 가능한 아이디입니다.',
-      data: { available: true }
+      data: { available: true },
     };
   }
 
@@ -200,11 +205,11 @@ export class AuthService {
       data: {
         team: teamInfo.team,
         role: teamInfo.role,
-        region: teamInfo.region
-      }
+        region: teamInfo.region,
+      },
     };
   }
-  
+
   async findUserByUsername(username: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ username }).exec();
   }
@@ -220,15 +225,15 @@ export class AuthService {
 
     const updatedUser = await this.userModel.findByIdAndUpdate(
       userId,
-      { 
-        $set: { 
+      {
+        $set: {
           'profile.avatar': profileData.avatar,
-          'profile.bio': profileData.bio, 
+          'profile.bio': profileData.bio,
           'profile.nickname': profileData.nickname,
-          'profile.email': profileData.email
-        }
+          'profile.email': profileData.email,
+        },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedUser) {
@@ -236,22 +241,22 @@ export class AuthService {
     }
 
     console.log('✅ 프로필 업데이트 완료');
-    
+
     return {
       success: true,
       message: '프로필이 업데이트되었습니다.',
       data: {
-        profile: updatedUser.profile
-      }
+        profile: updatedUser.profile,
+      },
     };
   }
 
   async verifyToken(verifyTokenDto: VerifyTokenDto) {
     console.log('=== 토큰 검증 ===');
-    
+
     try {
       const decoded = this.jwtService.verify(verifyTokenDto.token);
-      
+
       // 사용자 존재 확인
       const user = await this.userModel.findById(decoded.id);
       if (!user || !user.isActive) {
@@ -270,8 +275,8 @@ export class AuthService {
             role: user.role,
             region: user.region,
             playerId: user.playerId || null,
-          }
-        }
+          },
+        },
       };
     } catch (error) {
       console.log('❌ 토큰 검증 실패:', error.message);
@@ -281,10 +286,10 @@ export class AuthService {
 
   async refreshToken(refreshTokenDto: RefreshTokenDto) {
     console.log('=== 토큰 갱신 ===');
-    
+
     try {
       const decoded = this.jwtService.verify(refreshTokenDto.token);
-      
+
       // 사용자 존재 확인
       const user = await this.userModel.findById(decoded.id);
       if (!user || !user.isActive) {
@@ -297,7 +302,7 @@ export class AuthService {
         username: user.username,
         team: user.teamName,
         role: user.role,
-        playerId: user.playerId || null
+        playerId: user.playerId || null,
       });
 
       console.log('✅ 토큰 갱신 성공');
@@ -313,8 +318,8 @@ export class AuthService {
             role: user.role,
             region: user.region,
             playerId: user.playerId || null,
-          }
-        }
+          },
+        },
       };
     } catch (error) {
       console.log('❌ 토큰 갱신 실패:', error.message);
@@ -326,7 +331,7 @@ export class AuthService {
     console.log('=== 로그아웃 ===');
     // JWT는 stateless이므로 클라이언트에서 토큰 삭제
     // 서버에서는 응답만 반환
-    
+
     console.log('✅ 로그아웃 처리 완료');
     return {
       success: true,
@@ -357,7 +362,7 @@ export class AuthService {
       data: {
         hasEmail: !!user.profile.contactInfo.email,
         teamName: user.teamName,
-      }
+      },
     };
   }
 
@@ -366,12 +371,14 @@ export class AuthService {
     console.log('=== 이메일로 아이디 찾기 ===');
     console.log('받은 이메일:', email);
 
-    const user = await this.userModel.findOne({ 
-      'profile.contactInfo.email': email 
+    const user = await this.userModel.findOne({
+      'profile.contactInfo.email': email,
     });
 
     if (!user) {
-      throw new BadRequestException('해당 이메일로 등록된 계정을 찾을 수 없습니다.');
+      throw new BadRequestException(
+        '해당 이메일로 등록된 계정을 찾을 수 없습니다.',
+      );
     }
 
     console.log('✅ 계정 찾기 성공:', user.username);
@@ -381,7 +388,7 @@ export class AuthService {
       data: {
         username: user.username,
         teamName: user.teamName,
-      }
+      },
     };
   }
 
@@ -390,17 +397,21 @@ export class AuthService {
     console.log('=== 패스워드 리셋 코드 전송 ===');
     console.log('받은 이메일:', email);
 
-    const user = await this.userModel.findOne({ 
-      'profile.contactInfo.email': email 
+    const user = await this.userModel.findOne({
+      'profile.contactInfo.email': email,
     });
 
     if (!user) {
-      throw new BadRequestException('해당 이메일로 등록된 계정을 찾을 수 없습니다.');
+      throw new BadRequestException(
+        '해당 이메일로 등록된 계정을 찾을 수 없습니다.',
+      );
     }
 
     // 재시도 횟수 체크 (5회 제한)
     if (user.passwordResetAttempts >= 5) {
-      throw new BadRequestException('재시도 횟수를 초과했습니다. 1시간 후 다시 시도해주세요.');
+      throw new BadRequestException(
+        '재시도 횟수를 초과했습니다. 1시간 후 다시 시도해주세요.',
+      );
     }
 
     // 6자리 인증코드 생성
@@ -411,14 +422,14 @@ export class AuthService {
     await this.userModel.findByIdAndUpdate(user._id, {
       passwordResetCode: resetCode,
       passwordResetExpires: expiresAt,
-      $inc: { passwordResetAttempts: 1 }
+      $inc: { passwordResetAttempts: 1 },
     });
 
     // 이메일 발송
     const emailSent = await this.emailService.sendPasswordResetEmail(
-      email, 
-      resetCode, 
-      user.username
+      email,
+      resetCode,
+      user.username,
     );
 
     if (!emailSent) {
@@ -431,7 +442,7 @@ export class AuthService {
       message: '인증코드가 이메일로 전송되었습니다.',
       data: {
         expiresAt: expiresAt.toISOString(),
-      }
+      },
     };
   }
 
@@ -440,12 +451,14 @@ export class AuthService {
     console.log('=== 패스워드 리셋 ===');
     console.log('받은 이메일:', email);
 
-    const user = await this.userModel.findOne({ 
-      'profile.contactInfo.email': email 
+    const user = await this.userModel.findOne({
+      'profile.contactInfo.email': email,
     });
 
     if (!user) {
-      throw new BadRequestException('해당 이메일로 등록된 계정을 찾을 수 없습니다.');
+      throw new BadRequestException(
+        '해당 이메일로 등록된 계정을 찾을 수 없습니다.',
+      );
     }
 
     // 인증코드 확인
